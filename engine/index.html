@@ -1,0 +1,61 @@
+<!-- Copyright (C) 2012-2014 Carlos Pais
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name = "viewport" content = "user-scalable=no, initial-scale=1.0, maximum-scale=1.0, width=device-width" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Belle Engine</title>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <link rel="stylesheet" type="text/css" href="fontfaces.css"/>
+  </head>
+  <body>
+    <div id="belle">
+        <noscript><p id="noscript">Please, enable JavaScript on your browser.</p></noscript>
+        <div id="game" class="container active"></div>
+        <div id="pauseScreen" class="container"></div>
+        <div id="fps">FPS: </div>
+        <div id="dummy">dummy</div>
+        <div id="loader">
+            <div id="progress">
+            </div>
+            <p id="text"></p>
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="init.js"></script>
+    <script type="text/javascript" src="consolelog.js"></script>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="jstorage.js"></script>
+    <script type="text/javascript" src="buzz.js"> </script>
+    <script type="text/javascript" src="utils.js"> </script>
+    <script type="text/javascript" src="objects.js"> </script>
+    <script type="text/javascript" src="scene.js"> </script>
+    <script type="text/javascript" src="actions.js"> </script>
+    <script type="text/javascript" src="display.js"> </script>
+    <script type="text/javascript" src="sound_manager.js"></script>
+    <script type="text/javascript" src="game.js"></script>
+    <script type="text/javascript" src="main.js"> </script>
+    <script type="text/javascript" src="events.js"> </script>
+    <script type="text/javascript" src="game_data.js"></script>
+    <script>
+            belle.load();
+    </script>
+  </body>
+
+</html>

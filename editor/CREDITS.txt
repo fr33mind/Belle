@@ -1,0 +1,6 @@
+Main Developer:
+    Carlos Pais <freemind@live.com.pt>
+    
+Thanks To:
+    Qt4 Libraries <http://qt-project.org/>
+    Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt <https://github.com/ereilin/qt-json>

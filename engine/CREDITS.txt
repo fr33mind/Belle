@@ -1,0 +1,7 @@
+Main Developer:
+    Carlos Pais <freemind@live.com.pt>
+    
+Thanks To:
+    jQuery <http://jquery.com>
+    Buzz <http://buzz.jaysalvat.com/>
+    jStorage <http://www.jstorage.info/>
