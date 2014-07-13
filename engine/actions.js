@@ -24,7 +24,7 @@ belle.actions = {};
 var Color = belle.objects.Color;
 var Point = belle.objects.Point;
  
-function Action(data)
+function Action(data, parent)
 {
     this.finished = false;
     this._finished = false;
@@ -36,20 +36,21 @@ function Action(data)
     this.valid = true;
     this.elapsedTime = 0;
     this.eventListeners = {};
-    var scene = data["__scene"];
+    this.parent = parent;
     
     if (data) {
         if ("object" in data) {
-            if (scene && typeof data["object"] == "string")
-                this.object = scene.getObject(data["object"]);
-            else if (typeof data["object"] == "object") {
-                if (scene && data["object"].name)
-                    this.object = scene.getObject(data["object"].name);
+          var scene = this.getScene();
+          if (scene && typeof data["object"] == "string")
+              this.object = scene.getObject(data["object"]);
+          else if (typeof data["object"] == "object") {
+              if (scene && data["object"].name)
+                  this.object = scene.getObject(data["object"].name);
 
-                if (! this.object && belle.objects[data["object"].type])  {
-		    this.object = belle.createObject(data["object"]);
-                }
-            }
+              if (! this.object && belle.objects[data["object"].type])  {
+                  this.object = belle.createObject(data["object"], this);
+              }
+          }
         }
             
         if ("skippable" in data)
@@ -64,6 +65,15 @@ function Action(data)
         if ("type" in data)
             this.type = data["type"];
     }
+}
+
+Action.prototype.getScene = function() 
+{
+    if (this.parent && this.parent instanceof belle.Scene)
+      return this.parent;
+    if (this.parent && typeof this.parent.getScene == "function")
+      return this.parent.getScene();
+    return null;
 }
 
 Action.prototype.getInterval = function() {
@@ -155,9 +165,9 @@ Action.prototype.addEventListener = function(ev, listener)
 
 /*********** FADE ACTION ***********/
 
-function Fade(data) 
+function Fade(data, parent) 
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     if ("fadeType" in data)
         this.fadeType = data["fadeType"];
@@ -252,9 +262,9 @@ Fade.prototype.reset = function () {
 
 /*********** SLIDE ACTION ***********/
 
-function Slide(data)
+function Slide(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.startPoint = new Point(data["startX"], data["startY"]);
     this.endPoint = new Point(data["endX"], data["endY"]);
     this.duration = 0;
@@ -368,10 +378,10 @@ Slide.prototype.scale = function(widthFactor, heightFactor)
 
 /*********** DIALOGUE ACTION ***********/
 
-function Dialogue(data)
+function Dialogue(data, parent)
 {
-    Action.call(this, data);
-    
+    Action.call(this, data, parent);
+
     this.character = null;
     this.speakerName = "";
     this.text = "";
@@ -458,9 +468,9 @@ Dialogue.prototype.reset = function ()
 
 /*********** WAIT ACTION ***********/
 
-function Wait(data)
+function Wait(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     if ( "time" in data)
         this.time = data["time"] * 1000;
@@ -490,9 +500,9 @@ Wait.prototype.execute = function ()
 
 /*********** CHANGE VISIBILITY Action ***********/
 
-function ChangeVisibility(data)
+function ChangeVisibility(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.transitions = [];
     this.duration = 0;
     this.show = null;
@@ -617,10 +627,10 @@ ChangeVisibility.prototype.setFinished = function(finished) {
 
 /*********** Show Action ***********/
 
-function Show(data)
+function Show(data, parent)
 {
     data.show = true;
-    ChangeVisibility.call(this, data);
+    ChangeVisibility.call(this, data, parent);
     this.characterState = "";
 }
 
@@ -628,10 +638,10 @@ belle.utils.extend(ChangeVisibility, Show);
 
 /*********** HIDE CHARACTER ACTION ***********/
 
-function Hide(data)
+function Hide(data, parent)
 {
     data.show = false;
-    ChangeVisibility.call(this, data);
+    ChangeVisibility.call(this, data, parent);
 }
 
 belle.utils.extend(ChangeVisibility, Hide);
@@ -639,9 +649,9 @@ belle.utils.extend(ChangeVisibility, Hide);
 
 /************* Change Background *****************/
 
-function ChangeBackground(data)
+function ChangeBackground(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.backgroundImage = null;
     this.backgroundColor = null;
@@ -673,9 +683,9 @@ ChangeBackground.prototype.execute = function ()
 
 /************* LABEL *****************/
 
-function Label (data)
+function Label (data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.needsRedraw = false;
     //since this action is just a checkpoint, we can mark it as finished already
     this.finished = true;
@@ -691,9 +701,9 @@ Label.prototype.reset = function()
 
 /************* Go TO LABEL *****************/
 
-function GoToLabel(data)
+function GoToLabel(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     if ("label" in data)
         this.label = data["label"];
     this.needsRedraw = false;
@@ -733,9 +743,9 @@ GoToLabel.prototype.resetActions = function(from, to)
 
 /************* Go To Scene *****************/
 
-function GoToScene(data)
+function GoToScene(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.TargetType = {
       "Name" : 0,
@@ -783,9 +793,9 @@ GoToScene.prototype.execute = function()
 
 /************* Branch *****************/
 
-function Branch(data)
+function Branch(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.condition = "";
     this.trueActions = [];
     this.falseActions = [];
@@ -798,8 +808,8 @@ function Branch(data)
         actions = data["trueActions"];
         for(var i=0; i < actions.length; i++) {
           _Action = belle.getActionPrototype([actions[i].type]);
-          if (Action)
-            this.trueActions.push(new _Action(actions[i]));
+          if (_Action)
+            this.trueActions.push(new _Action(actions[i], this));
         }
     }
     
@@ -807,8 +817,8 @@ function Branch(data)
         actions = data["falseActions"];
         for(var i=0; i < actions.length; i++) {
           _Action = belle.getActionPrototype([actions[i].type]);
-          if (Action)
-            this.falseActions.push(new _Action(actions[i]));
+          if (_Action)
+            this.falseActions.push(new _Action(actions[i], this));
         }
     }
     
@@ -971,9 +981,9 @@ Branch.prototype.loadCondition = function(condition)
 
 /************* Change Color *****************/
 
-function ChangeColor(data)
+function ChangeColor(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.color = new Color([255, 255, 255, 255]);
     this.previousObjectColor = null;
     this.previousObjectBackgroundColor = null;
@@ -1033,9 +1043,9 @@ ChangeColor.prototype.reset = function()
 
 /************* Play Sound *****************/
 
-function PlaySound(data)
+function PlaySound(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.soundPath = "";
     this.soundName = "";
@@ -1090,9 +1100,9 @@ PlaySound.prototype.execute = function()
 
 /************* Stop Sound *****************/
 
-function StopSound(data)
+function StopSound(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.fade = 0;
     this.sound = null;
@@ -1118,9 +1128,9 @@ StopSound.prototype.execute = function()
 
 /************* Show Menu *****************/
 
-function ShowMenu(data)
+function ShowMenu(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.options = 0;
     this.skippable = false;
    
@@ -1161,9 +1171,9 @@ ShowMenu.prototype.scale = function(widthFactor, heightFactor)
 
 /************* End Novel *****************/
 
-function End(data)
+function End(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
 }
 
 belle.utils.extend(Action, End);
@@ -1176,9 +1186,9 @@ End.prototype.execute = function()
 
 /************* Get user input *****************/
 
-function GetUserInput(data)
+function GetUserInput(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.variable = null;
     this.defaultValue = "";
     this.message = "Insert value here:";
@@ -1226,9 +1236,9 @@ GetUserInput.prototype.reset = function()
 
 /************* Change Game Variable *****************/
 
-function ChangeGameVariable(data)
+function ChangeGameVariable(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.variable = "";
     this.operation = "";
@@ -1303,9 +1313,9 @@ ChangeGameVariable.prototype.execute = function()
 
 /************* Run Script *****************/
 
-function RunScript(data)
+function RunScript(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.code = "";
     

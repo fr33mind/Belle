@@ -164,7 +164,7 @@ Point.prototype.distance = function(point)
     
 /*********** BASE OBJECT ***********/
 
-function Object(info)
+function Object(info, parent)
 {
     if ("resource" in info && belle.getResource(info["resource"])) {
         var resourceData = belle.getResource(info["resource"]).data;
@@ -284,6 +284,15 @@ Object.prototype.load = function(data)
     }
     
     return true;
+}
+
+Object.prototype.getScene = function() 
+{
+    if (this.parent && this.parent instanceof belle.Scene)
+      return this.parent;
+    if (this.parent && typeof this.parent.getScene == "function")
+      return this.parent.getScene();
+    return null;
 }
 
 Object.prototype.frameChanged = function()
@@ -723,7 +732,7 @@ Object.prototype.initActions = function(actions)
             continue;
         
         _Action = belle.getActionPrototype([actions[i].type]);
-        actionInstance = new _Action(actions[i]);
+        actionInstance = new _Action(actions[i], true);
         
         //Since the object should be calling this from it's constructor, it hasn't been added to the list of scene objects.
         //Thus we need to explicitly attribute the object.
@@ -795,9 +804,9 @@ Object.prototype.update = function()
 }
 
 /*********** IMAGE OBJECT ***********/
-function Image (data)
+function Image (data, parent)
 {
-    Object.call(this, data);  
+    Object.call(this, data, parent);  
     this.interval = null;
     this.currentFrame = 0;
     this.image = null;
@@ -838,7 +847,7 @@ Image.prototype.isReady = function()
 
 /*********** CHARACTER ***********/
 
-function Character(data)
+function Character(data, parent)
 {
     var path = "";
     var image;
@@ -859,7 +868,7 @@ function Character(data)
         }
     }
     
-    Image.call(this, data);
+    Image.call(this, data, parent);
 }
 
 belle.utils.extend(Image, Character);
@@ -867,9 +876,9 @@ belle.utils.extend(Image, Character);
 
 /*********** TEXT BOX ***********/
 
-function TextBox(info)
+function TextBox(info, parent)
 {
-    Object.call(this, info);
+    Object.call(this, info, parent);
     this.textLeftPadding = [];
     this.textTopPadding = [];
     this.textAlignment = [];
@@ -1104,9 +1113,9 @@ TextBox.prototype.initElement = function()
 
 /*********** Object Group ***********/
 
-function ObjectGroup(data)
+function ObjectGroup(data, parent)
 {
-    Object.call(this, data);
+    Object.call(this, data, parent);
     this.objects = [];
     this.hoveredObject = null;
     
@@ -1132,8 +1141,7 @@ ObjectGroup.prototype.load = function(data) {
 	      continue;
 	    }
 	    
-            objects[i].__parent = this;
-            obj = belle.createObject(objects[i]);
+            obj = belle.createObject(objects[i], this);
             
             if (! obj) {
                 belle.log(objects[i].type + ": is not a valid object type!!!!.");
@@ -1295,9 +1303,9 @@ ObjectGroup.prototype.getObject = function(name)
 
 /*********** DIALOGUE BOX ***********/
 
-function DialogueBox(data)
+function DialogueBox(data, parent)
 {
-    ObjectGroup.call(this, data);
+    ObjectGroup.call(this, data, parent);
     
     this.text = "";
     this.speakerName = "";
@@ -1340,9 +1348,9 @@ DialogueBox.prototype.setText = function(text)
 
 /************** MENU ************/
 
-function Menu(data)
+function Menu(data, parent)
 {
-    ObjectGroup.call(this, data);
+    ObjectGroup.call(this, data, parent);
 }
 
 belle.utils.extend(ObjectGroup, Menu);
@@ -1351,9 +1359,9 @@ belle.utils.extend(ObjectGroup, Menu);
 
 /************** BUTTON ************/
 
-function Button(data)
+function Button(data, parent)
 {
-    TextBox.call(this, data);
+    TextBox.call(this, data, parent);
     this.visible = true;
     if (this.element)
       this.element.style.cursor = "pointer";

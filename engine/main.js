@@ -84,7 +84,7 @@ var addObject = function (object)
         game.currentScene.addObject(object);
 }
 
-var createObject = function (data)
+var createObject = function (data, parent)
 {
     var type = data["type"];
     if (! type) {
@@ -103,7 +103,7 @@ var createObject = function (data)
         return null;
     }
 
-    var obj = new _Object(data);
+    var obj = new _Object(data, parent);
     if (belle.display.DOM)
       obj.initElement();
     return obj;

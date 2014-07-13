@@ -124,8 +124,7 @@ Scene.prototype.loadActions = function(data)
 	      continue;
 	  }
 	  
-	  actions[j].__scene = this;
-	  var actionObject = new belle.actions[actions[j].type](actions[j]);
+	  var actionObject = new belle.actions[actions[j].type](actions[j], this);
 	  this.actions.push(actionObject);
 	  this.states.push({});
       }
@@ -142,8 +141,7 @@ Scene.prototype.loadObjects = function(data)
   if (data.objects && data.objects.length > 0) {
       for(var j=0; j !== data.objects.length; j++) {
 	  var object = data.objects[j];
-	  object.__parent = this;
-	  obj = belle.createObject(object);
+	  obj = belle.createObject(object, this);
 	  if (obj) 
 	      this.objects.push(obj);
       }
