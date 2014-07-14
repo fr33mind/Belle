@@ -36,19 +36,12 @@ Action::Action(const QVariantMap& data, QObject *parent) :
     QObject(parent)
 {
     init();
-
     if (parent && data.contains("object") && data.value("object").type() == QVariant::String) {
-        Scene* scene = qobject_cast<Scene*>(parent);
+        Scene * scene = this->scene();
         if (scene) {
             Object* obj = scene->object(data.value("object").toString());
             if (obj)
                 mObject = obj;
-        }
-        else {
-            //This action maybe be inside another action
-            Action* action = qobject_cast<Action*>(parent);
-            if (action)
-                mObject = action->sceneObject();
         }
     }
 
@@ -276,6 +269,13 @@ Scene* Action::scene()
         Action* action = qobject_cast<Action*>(this->parent());
         if (action->scene())
             return action->scene();
+    }
+
+    //in case this action is inside an object
+    if (qobject_cast<Object*>(this->parent())) {
+        Object* obj = qobject_cast<Object*>(this->parent());
+        if (obj->scene())
+            return obj->scene();
     }
 
     //shouldn't happen either, but just in case
