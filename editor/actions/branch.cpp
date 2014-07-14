@@ -40,7 +40,8 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
             if (actionData.type() != QVariant::Map)
                 continue;
             Action* action = ActionInfoManager::typeToAction(actionData.toMap(), this);
-            appendAction(action, true);
+            if (action)
+                appendAction(action, true);
         }
     }
 
@@ -50,7 +51,8 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
             if (actionData.type() != QVariant::Map)
                 continue;
             Action* action = ActionInfoManager::typeToAction(actionData.toMap(), this);
-            appendAction(action, false);
+            if (action)
+                appendAction(action, false);
         }
     }
 
