@@ -310,17 +310,18 @@ Object.prototype.setCornerRadius = function(radius) {
 
 Object.prototype.globalX = function()
 {
-    if (this.parent)
+    if (this.parent && parseInt(this.parent.x))
         return this.x + this.parent.x;
     return this.x;
 }
 
 Object.prototype.globalY = function()
 {
-    if (this.parent)
+    if (this.parent && parseInt(this.parent.y))
         return this.y + this.parent.y;
     return this.y
 }
+
 
 Object.prototype.globalOuterX = function()
 {
@@ -402,8 +403,8 @@ Object.prototype.contains = function(px, py)
       return false;
   
     var x = this.scaledX, y = this.scaledY;
-    
-    if (this.parent) {
+
+    if (this.parent && parseInt(this.parent.scaledX)) {
         x += this.parent.scaledX;
         y += this.parent.scaledY;        
     }
@@ -732,7 +733,7 @@ Object.prototype.initActions = function(actions)
             continue;
         
         _Action = belle.getActionPrototype([actions[i].type]);
-        actionInstance = new _Action(actions[i], true);
+        actionInstance = new _Action(actions[i], this);
         
         //Since the object should be calling this from it's constructor, it hasn't been added to the list of scene objects.
         //Thus we need to explicitly attribute the object.
