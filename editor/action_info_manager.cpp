@@ -100,7 +100,7 @@ void ActionInfoManager::init()
     StopSound::Info = ActionInfo(QIcon(":/media/no-sound.png"), "StopSound", tr("Stop Sound"));
     ChangeGameVariable::Info = ActionInfo(QIcon(":/media/script.png"), "ChangeGameVariable", tr("Change Game Variable"));
     ChangeBackground::Info = ActionInfo(QIcon(":/media/image.png"), "ChangeBackground", tr("Change Background"));
-    End::Info = ActionInfo(QIcon(":/media/end-novel.png"), "EndNovel", tr("End"));
+    End::Info = ActionInfo(QIcon(":/media/end-novel.png"), "End", tr("End"));
     RunScript::Info = ActionInfo(QIcon(":/media/script.png"), "RunScript", tr("Run Script"));
 
     mTypeToIcon.insert("Action", QIcon());
@@ -202,6 +202,8 @@ Action* ActionInfoManager::typeToAction(const QVariant& data, QObject* parent)
         return new ChangeGameVariable(actionMap, parent);
     else if (type == "RunScript")
         return new RunScript(actionMap, parent);
+    else if (type == "End")
+        return new End(parent);
 
     return 0;
 }
