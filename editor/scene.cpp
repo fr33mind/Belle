@@ -329,6 +329,7 @@ void Scene::setTemporaryBackgroundImage(ImageFile* image)
         if (image && image->isAnimated()) {
             AnimatedImage* anim = dynamic_cast<AnimatedImage*>(mTemporaryBackgroundImage);
             connect(anim->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+            image->movie()->setScaledSize(Scene::size());
             anim->movie()->start();
         }
 
@@ -537,11 +538,6 @@ QVariantMap Scene::toJsonObject(bool internal)
 {
     QVariantMap scene;
 
-    //focus out active action in case it changed something temporarily in the scene
-    for(int i=0; i < mActions.size(); i++)
-        if (mActions[i]->isActive())
-            mActions[i]->focusOut();
-
     scene.insert("name", objectName());
     scene.insert("type", "Scene");
     if (mBackgroundImage)
@@ -645,7 +641,7 @@ void Scene::paint(QPainter & painter)
     QColor bgColor = backgroundColor().isValid() ? backgroundColor() : Qt::gray;
 
     if (mTemporaryBackgroundImage && mTemporaryBackgroundImage->isValid()) {
-        painter.drawPixmap(Scene::point(), mTemporaryBackgroundImage->pixmap());
+        painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mTemporaryBackgroundImage->pixmap());
     }
     else if (mTemporaryBackgroundColor.isValid())
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), mTemporaryBackgroundColor);
