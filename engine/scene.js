@@ -119,14 +119,11 @@ Scene.prototype.loadActions = function(data)
   if (data.actions && data.actions.length > 0) {
       var actions = data.actions;
       for (var j=0; j < actions.length; j++) {
-	  if (! belle.actions[actions[j].type]) {
-	      belle.log("Invalid Action type: " + actions[j].type);
-	      continue;
-	  }
-	  
-	  var actionObject = new belle.actions[actions[j].type](actions[j], this);
-	  this.actions.push(actionObject);
-	  this.states.push({});
+	  var action = belle.createAction(actions[j], this);
+          if (action) {
+            this.actions.push(action);
+            this.states.push({});
+          }
       }
   }
 }

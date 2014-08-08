@@ -511,20 +511,15 @@ function ChangeVisibility(data, parent)
 
     if ("transitions" in data) {
         var transitions = data["transitions"];
-        for(var i=0; i !== transitions.length; i++) {
-            if (! belle.getActionPrototype(transitions[i].type)) {
-                belle.log("TypeError: Action '" + transitions[i].type + "' is not a valid Action"); 
-                continue;
-            }
-            
-            transitions[i].__scene = data.__scene;
-            var transitionAction = belle.getActionPrototype([transitions[i].type]);
-            var action = new transitionAction(transitions[i]);
-	    action.skippable = this.skippable;
-            this.transitions.push(action);
+        for(var i=0; i !== transitions.length; i++) {             
+            var action = belle.createAction(transitions[i], this);
+            if (action) {
+              action.skippable = this.skippable;
+              this.transitions.push(action);
 
-            if (transitions[i].duration && transitions[i].duration > this.duration )
-                this.duration = transitions[i].duration;
+              if (transitions[i].duration && transitions[i].duration > this.duration )
+                  this.duration = transitions[i].duration;
+            }
         }
     }
     
@@ -803,23 +798,22 @@ function Branch(data, parent)
     var branch = this;
     var action;
     var actions;
-    var _Action;
    
     if ( "trueActions" in data) {
         actions = data["trueActions"];
         for(var i=0; i < actions.length; i++) {
-          _Action = belle.getActionPrototype([actions[i].type]);
-          if (_Action)
-            this.trueActions.push(new _Action(actions[i], this));
+          action = belle.createAction(actions[i], this);
+          if (action)
+            this.trueActions.push(action);
         }
     }
     
     if ( "falseActions" in data) {
         actions = data["falseActions"];
         for(var i=0; i < actions.length; i++) {
-          _Action = belle.getActionPrototype([actions[i].type]);
-          if (_Action)
-            this.falseActions.push(new _Action(actions[i], this));
+          action = belle.createAction(actions[i], this);
+          if (action)
+            this.trueActions.push(action);
         }
     }
     

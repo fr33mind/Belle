@@ -84,7 +84,7 @@ var addObject = function (object)
         game.currentScene.addObject(object);
 }
 
-var createObject = function (data, parent)
+function createObject(data, parent)
 {
     var type = data["type"];
     if (! type) {
@@ -108,6 +108,20 @@ var createObject = function (data, parent)
       obj.initElement();
     return obj;
 }
+
+function createAction(data, parent)
+{
+    var type = data["type"];
+    var _Action = belle.actions[type];
+    
+    if (! _Action) {
+        belle.log("'" + type + "' is not a valid action type.");
+        return null;
+    }
+    
+    return new _Action(data, parent);
+}
+
 
 function getObjectPrototype(type)
 {
@@ -385,6 +399,7 @@ belle.setGameDirectory = setGameDirectory;
 belle.load = load;
 belle.addObject = addObject;
 belle.createObject = createObject;
+belle.createAction = createAction;
 belle.getObject = getObject;
 belle.getResource = getResource;
 belle.game = game;
