@@ -100,16 +100,21 @@ QVariantMap Object::fillWithResourceData(QVariantMap data)
 
 Scene * Object::scene()
 {
-    Object* object = this;
+    if (! this->parent())
+        return 0;
 
-    while(object->parent()) {
-        Scene* scene = qobject_cast<Scene*>(object->parent());
-        if (scene)
-            return scene;
-        object = qobject_cast<Object*>(object->parent());
-        if (! object)
-            break;
-    }
+    Scene* scene = qobject_cast<Scene*>(this->parent());
+    if (scene)
+        return scene;
+
+    Object* object = object = qobject_cast<Object*>(this->parent());
+    if (object)
+        return object->scene();
+
+    //in case this object is inside an action
+    Action* action = qobject_cast<Action*>(this->parent());
+    if (action)
+        return action->scene();
 
     return 0;
 }
