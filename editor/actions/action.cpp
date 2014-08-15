@@ -37,9 +37,10 @@ Action::Action(const QVariantMap& data, QObject *parent) :
 {
     init();
     if (parent && data.contains("object") && data.value("object").type() == QVariant::String) {
+        mObjectName = data.value("object").toString();
         Scene * scene = this->scene();
         if (scene) {
-            Object* obj = scene->object(data.value("object").toString());
+            Object* obj = scene->object(mObjectName);
             if (obj)
                 mObject = obj;
         }
@@ -63,6 +64,7 @@ Action::Action(const QVariantMap& data, QObject *parent) :
 void Action::init()
 {
     mObject = 0;
+    mObjectName = "";
     mActive = false;
     mAllowSkipping = true;
     mMouseClickOnFinish = false;
@@ -137,7 +139,15 @@ void Action::setName(const QString & name)
 
 Object* Action::sceneObject() const
 {
-    return mObject;
+    if (mObject)
+        return mObject;
+    else if (! mObjectName.isEmpty()) {
+        Scene * scene = this->scene();
+        if (scene)
+          return scene->object(mObjectName);
+    }
+
+    return 0;
 }
 
 void Action::setSceneObject(Object * object)
@@ -145,13 +155,16 @@ void Action::setSceneObject(Object * object)
     if (mObject)
         mObject->disconnect(this);
     mObject = object;
-    if (mObject)
+    if (mObject) {
+        mObjectName = mObject->name();
         connect(mObject, SIGNAL(destroyed()), this, SLOT(onSceneObjectDestroyed()));
+    }
 }
 
 void Action::onSceneObjectDestroyed()
 {
     mObject = 0;
+    mObjectName = "";
 }
 
 void Action::onDataChanged()
@@ -254,7 +267,7 @@ void Action::focusOut()
     mActive = false;
 }
 
-Scene* Action::scene()
+Scene* Action::scene() const
 {
     //shouldn't happen, but just in case
     if (! this->parent())

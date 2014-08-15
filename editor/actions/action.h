@@ -49,7 +49,7 @@ public:
     Object* sceneObject() const;
     virtual void setSceneObject(Object*);
     static void setActionInfo(ActionInfo*);
-    Scene* scene();
+    Scene* scene() const;
     bool isActive();
 
     void setIcon(const QIcon&);
@@ -100,6 +100,7 @@ public slots:
 
 private:
     Object* mObject;
+    QString mObjectName;
     QIcon mIcon;
     QString mName;
     QString mType;
