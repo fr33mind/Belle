@@ -730,9 +730,6 @@ Object.prototype.initActions = function(actions)
     
     for(var i=0; i !== actions.length; i++) {
         action = belle.createAction(actions[i], this);
-        //Since the object should be calling this from it's constructor, it hasn't been added to the list of scene objects.
-        //Thus we need to explicitly attribute the object.
-        action.object = this;
         actionInstances.push(action);
     }
     
