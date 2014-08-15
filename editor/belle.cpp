@@ -72,6 +72,8 @@ Belle::Belle(QWidget *widget)
     mWebView = new QWebView(this);
     mWebView->setWindowFlags(mWebView->windowFlags() | Qt::Window);
     mWebView->setWindowModality(Qt::WindowModal);
+    QWebSettings* webSettings = mWebView->settings();
+    webSettings->setAttribute(QWebSettings::LocalStorageEnabled, true);
 
     mHttpServer.setServerPort(8000);
     mDisableClick = false;
@@ -706,7 +708,10 @@ void Belle::onRunTriggered()
         }
 
         if (Engine::useBuiltinBrowser()) {
-            mWebView->setUrl(mHttpServer.serverUrl());
+            if (mWebView->url() == mHttpServer.serverUrl())
+                mWebView->reload();
+            else
+                mWebView->setUrl(mHttpServer.serverUrl());
             mWebView->show();
         }
         else {
