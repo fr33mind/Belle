@@ -95,7 +95,7 @@ QList<Object*> ResourceManager::resources()
     return mResources;
 }
 
-Object * ResourceManager::typeToObject(const QString& type, QVariantMap& data, Object* parent)
+Object * ResourceManager::typeToObject(const QString& type, QVariantMap& data, QObject* parent)
 {
     QString _type = type.toLower();
 
@@ -119,7 +119,7 @@ Object * ResourceManager::typeToObject(const QString& type, QVariantMap& data, O
 
 }
 
-Object* ResourceManager::createResource(QVariantMap data, bool appendToResources, Object* parent)
+Object* ResourceManager::createResource(QVariantMap data, bool appendToResources, QObject* parent)
 {
     Object* _resource = 0;
     QString type("");

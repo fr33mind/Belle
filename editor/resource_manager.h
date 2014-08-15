@@ -41,7 +41,7 @@ class ResourceManager : public QObject
 public:
     explicit ResourceManager(QObject *parent = 0);
     void addResource(Object*);
-    Object* createResource(QVariantMap, bool appendToResources=true, Object* parent=0);
+    Object* createResource(QVariantMap, bool appendToResources=true, QObject* parent=0);
     bool contains(const QString&);
     void removeResource(Object*, bool del=false);
 
@@ -49,7 +49,7 @@ public:
     static Object* resource(int);
     static void fillWithResourceData(QVariantMap&);
 
-    Object* typeToObject(const QString&, QVariantMap& extraData, Object* parent=0);
+    Object* typeToObject(const QString&, QVariantMap& extraData, QObject* parent=0);
 
     QString toJavascript();
     void writeToGameFile();

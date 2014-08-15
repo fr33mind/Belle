@@ -38,7 +38,7 @@ ShowMenu::ShowMenu(const QVariantMap& data, QObject *parent) :
     init();
 
     if (data.contains("object") && data.value("object").type() == QVariant::Map) {
-        Object* object = ResourceManager::instance()->createResource(data.value("object").toMap(), false);
+        Object* object = ResourceManager::instance()->createResource(data.value("object").toMap(), false, this);
         setSceneObject(object);
     }
 
