@@ -37,19 +37,20 @@ function Action(data, parent)
     this.elapsedTime = 0;
     this.eventListeners = {};
     this.parent = parent;
+    this.objectName = "";
+    this.object = null;
     
     if (data) {
         if ("object" in data) {
-          var scene = this.getScene();
-          if (scene && typeof data["object"] == "string")
-              this.object = scene.getObject(data["object"]);
+          if (typeof data["object"] == "string") {
+              var scene = this.getScene();
+              if (scene)
+                this.object = scene.getObject(data["object"]);
+              this.objectName = data["object"];
+          }
           else if (typeof data["object"] == "object") {
-              if (scene && data["object"].name)
-                  this.object = scene.getObject(data["object"].name);
-
-              if (! this.object && belle.objects[data["object"].type])  {
-                  this.object = belle.createObject(data["object"], this);
-              }
+            this.objectName = data["object"].name;
+            this.object = belle.createObject(data["object"], this);
           }
         }
             
@@ -166,6 +167,19 @@ Action.prototype.addEventListener = function(ev, listener)
     this.eventListeners[ev].push(listener);
 }
 
+Action.prototype.getObject = function()
+{
+  if (this.object)
+    return this.object;
+  else if (this.objectName) {
+    var scene = this.getScene();
+    if (scene)
+      return scene.getObject(this.objectName);
+  }
+  return null;
+}
+
+
 /*********** FADE ACTION ***********/
 
 function Fade(data, parent) 
@@ -207,7 +221,7 @@ Fade.prototype.execute = function () {
     this.timePassed = 0;
      
     this.interval = setInterval(function() {t.fade();}, this.intervalDuration);        
-    this.object.redraw = true;
+    this.getObject().redraw = true;
 }
 
 Fade.prototype.fade = function () {
@@ -218,12 +232,13 @@ Fade.prototype.fade = function () {
     var passed = now - this.prevTime;
     this.timePassed += passed;
     this.prevTime = now;
+    var object = this.getObject();
    
     if (this.timePassed >= this.duration) {
-        this.object.setOpacity(this.target);
+        object.setOpacity(this.target);
     }
     
-    var opacity = this.object.getOpacity();
+    var opacity = object.getOpacity();
   
     if ((this.fadeType == "in" && opacity >= this.target) ||
        (this.fadeType == "out" && opacity <= this.target)) {
@@ -241,26 +256,27 @@ Fade.prototype.fade = function () {
     
     if (this.fadeType == "in") {
       if (opacity < this.target)
-          this.object.setOpacity(opacity + increment);
+          object.setOpacity(opacity + increment);
     }
     else {
       if (opacity > this.target)
-          this.object.setOpacity(opacity + increment);
+          object.setOpacity(opacity + increment);
     }
       
-    this.object.redraw = true;
+    object.redraw = true;
 }
 
 Fade.prototype.skip = function () {
     clearInterval(this.interval);
     Action.prototype.skip.call(this);
-    this.object.setOpacity(this.target);
+    this.getObject().setOpacity(this.target);
 }
 
 Fade.prototype.reset = function () {
     Action.prototype.reset.call(this);
-    this.object.setOpacity(this.target);
-    this.object.setBackgroundOpacity(this.bgTarget);
+    var object = this.getObject();
+    object.setOpacity(this.target);
+    object.setBackgroundOpacity(this.bgTarget);
 }
 
 /*********** SLIDE ACTION ***********/
@@ -295,15 +311,15 @@ belle.utils.extend(Action, Slide);
 Slide.prototype.execute = function () 
 {
     var t = this;
+    var object = this.getObject();
     this.reset();
     this.timePassed = 0;
     this.prevTime = new Date().getTime();
     this.intervalDuration = Math.round(this.duration / this.startPoint.distance(this.endPoint));
     
-    this.object.setX(this.startPoint.x);
-    this.object.setY(this.startPoint.y);
-    
-    this.object.redraw = true;
+    object.setX(this.startPoint.x);
+    object.setY(this.startPoint.y);
+    object.redraw = true;
     this.interval = setInterval(function() { t.slide(); }, this.intervalDuration);
 }
 
@@ -313,10 +329,11 @@ Slide.prototype.slide = function ()
     var passed = now - this.prevTime;
     this.timePassed += passed;
     this.prevTime = now;
+    var object = this.getObject();
 
     if (this.timePassed >= this.duration) {
-        this.object.setX(this.endPoint.x);
-        this.object.setY(this.endPoint.y);
+        object.setX(this.endPoint.x);
+        object.setY(this.endPoint.y);
     }
     
     passed = passed > this.intervalDuration ? passed : this.intervalDuration;
@@ -328,41 +345,42 @@ Slide.prototype.slide = function ()
       incY = parseInt(passed * this.incY / this.intervalDuration);
     }
     
-    var x = this.object.x, y = this.object.y;
+    var x = object.x, y = object.y;
     
-    if ((incX > 0 && this.object.x < this.endPoint.x) ||
-        (incX < 0 && this.object.x > this.endPoint.x))
+    if ((incX > 0 && object.x < this.endPoint.x) ||
+        (incX < 0 && object.x > this.endPoint.x))
         x += incX;
     
-    if ((incY > 0 && this.object.y < this.endPoint.y) ||
-        (incY < 0 && this.object.y > this.endPoint.y))
+    if ((incY > 0 && object.y < this.endPoint.y) ||
+        (incY < 0 && object.y > this.endPoint.y))
         y += incY;
     
     //if x and y have NOT been modified, set action finished
-    if (x === this.object.x && y === this.object.y) {
+    if (x === object.x && y === object.y) {
         clearInterval(this.interval);
         this.setFinished(true);
         return;
     }
   
-    this.object.moveTo(x, y);
-    this.object.redraw = true;
+    object.moveTo(x, y);
+    object.redraw = true;
 }
 
 Slide.prototype.skip = function () {
     clearInterval(this.interval);
-    this.object.setX(this.endPoint.x);
-    this.object.setY(this.endPoint.y);
+    var object = this.getObject();
+    object.setX(this.endPoint.x);
+    object.setY(this.endPoint.y);
     this.setFinished(true);
 }
 
 Slide.prototype.reset = function () {
     this.timePassed = 0;
     Action.prototype.reset.call(this);
-    
+    var object = this.getObject();
     if (this.objectOriginalPosition) {
-        this.object.setX(this.objectOriginalPosition.x);
-        this.object.setY(this.objectOriginalPosition.y);
+        object.setX(this.objectOriginalPosition.x);
+        object.setY(this.objectOriginalPosition.y);
     }
     
     this.setFinished(false);
@@ -411,23 +429,24 @@ belle.utils.extend(Action, Dialogue);
 Dialogue.prototype.execute = function () {
     var t = this;
     this.index = 0;
-    if (! this.object) {
+    var object = this.getObject();
+    if (! object) {
         this.setFinished(true);
         return;
     }
     
-    if (typeof this.object.setSpeakerName == "function") {
+    if (typeof object.setSpeakerName == "function") {
         if (this.character) //in case character's name changed since the beginning
-            this.object.setSpeakerName(this.character.name);
+            object.setSpeakerName(this.character.name);
         else
-            this.object.setSpeakerName(this.speakerName);
+            object.setSpeakerName(this.speakerName);
     }
-    this.object.setText("");
+    object.setText("");
     this.text = game.replaceVariables(this.text);
     
-    //this.lines = splitText(context.font, this.text, this.object.rect.width-this.object.leftPadding);
+    //this.lines = splitText(context.font, this.text, object.rect.width-object.leftPadding);
     if (this.character)
-        this.object.color = this.character.textColor;
+        object.color = this.character.textColor;
 
     this.interval = setInterval(function() { t.updateText(); }, game.textDelay);
 }
@@ -441,16 +460,17 @@ Dialogue.prototype.updateText = function() {
         return;
     }
 
-    this.object.appendText(this.text.charAt(this.index));
+    this.getObject().appendText(this.text.charAt(this.index));
     this.index += 1;
 }
 
 Dialogue.prototype.skip = function () {
     if (this.skippable && ! this._isFinished()) {
         clearInterval(this.interval);
-        this.object.appendText(this.text.slice(this.index));
+        var object = this.getObject();
+        object.appendText(this.text.slice(this.index));
         this.index = this.text.length;
-        this.object.redraw = true;
+        object.redraw = true;
     }
     Action.prototype.skip.call(this);
 }
@@ -459,10 +479,11 @@ Dialogue.prototype.reset = function ()
 {
     Action.prototype.reset.call(this);
     this.index = 0;
-    if (this.object)
-        this.object.text = "";
-    if (this.object && this.object.speakerName !== undefined)
-        this.object.speakerName = "";
+    var object = this.getObject();
+    if (object)
+        object.text = "";
+    if (object && object.speakerName !== undefined)
+        object.speakerName = "";
 }
 
 /*********** WAIT ACTION ***********/
@@ -533,15 +554,16 @@ ChangeVisibility.prototype.execute = function ()
     if (this.isFinished()) {
       return;
     }
+    var object = this.getObject();
     
-    if (! this.object || this.object.visible == this.show) {
+    if (! object || object.visible == this.show) {
       this.setFinished(true);
       return;
     }
     
     this.initObjectForTransitions();
     if (this.show)
-      this.object.show();
+      object.show();
     
     var that = this;
     for (var i=0; i < this.transitions.length; i++) {
@@ -549,7 +571,7 @@ ChangeVisibility.prototype.execute = function ()
     }
     
     if (this.transitions.length === 0) {
-	this.object.setVisible(this.show);
+        object.setVisible(this.show);
         this.setFinished(true);
     }
     else
@@ -562,15 +584,17 @@ ChangeVisibility.prototype.check = function ()
       return;
     
     var finish = true;
+    var object = this.getObject();
+    
     for (var i=0; i < this.transitions.length; i++) {
         if (! this.transitions[i].isFinished()) {
             finish = false;
-	    break;
-	}
+            break;
+        }
     }
     
     if (finish) {
-      this.object.setVisible(this.show);
+      object.setVisible(this.show);
       this.setFinished(true);
     }
     else {
@@ -606,17 +630,18 @@ ChangeVisibility.prototype.scale = function (widthFactor, heightFactor)
 
 ChangeVisibility.prototype.initObjectForTransitions = function () 
 {
+    var object = this.getObject();
     for (var i=0; i < this.transitions.length; i++) {
-	if (belle.isInstance(this.transitions[i], Fade)) {
-	  if (this.show && ! this.object.isVisible())
-	    this.object.setOpacity(0);
-	}
+        if (belle.isInstance(this.transitions[i], Fade)) {
+          if (this.show && ! object.isVisible())
+            object.setOpacity(0);
+        }
     }
 }
 ChangeVisibility.prototype.setFinished = function(finished) {
       Action.prototype.setFinished.call(this, finished);
       for (var i=0; i !== this.transitions.length; i++)
-	this.transitions[i].setFinished(finished);
+        this.transitions[i].setFinished(finished);
 }
 
 /*********** Show Action ***********/
@@ -1039,17 +1064,18 @@ belle.utils.extend(Action, ChangeColor);
 
 ChangeColor.prototype.execute = function()
 {    
-    if (! this.object) {
+    var object = this.getObject();
+    if (! object) {
         this.setFinished(true);
         return;
     }
     
     if (this.changeObjectColor) {
-        this.object.color = this.color;
+        object.color = this.color;
     }
     
     if (this.changeObjectBackgroundColor) {
-        this.object.setBackgroundColor(this.color);
+        object.setBackgroundColor(this.color);
     }
     
     this.setFinished(true);
@@ -1058,17 +1084,18 @@ ChangeColor.prototype.execute = function()
 ChangeColor.prototype.reset = function()
 {
     Action.prototype.reset.call(this);
-        
+    var object = this.getObject();
+    
     if (this.changeObjectColor && this.previousObjectColor) {
-        this.object.setColor(this.previousObjectColor);
+        object.setColor(this.previousObjectColor);
     }
     
     if (this.changeObjectBackgroundColor && this.previousObjectBackgroundColor) {
-        this.object.setBackgroundColor(this.previousObjectBackgroundColor);
+        object.setBackgroundColor(this.previousObjectBackgroundColor);
     }
     
     if (this.changeObjectColor || this.changeObjectBackgroundColor)
-        this.object.redraw = true;
+        object.redraw = true;
     
     this.setFinished(false);
 }
@@ -1165,19 +1192,20 @@ function ShowMenu(data, parent)
     Action.call(this, data, parent);
     this.options = 0;
     this.skippable = false;
+    var object = this.getObject();
    
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
     
-    if (this.object && this.object.objects.length) {
+    if (object && object.objects.length) {
       var self = this;
-      var buttons = this.object.objects;
+      var buttons = object.objects;
       for(var i=0; i < buttons.length; i++) {
-	buttons[i].addEventListener("mouserelease", function() {
-	    var scene = game.getScene();
-	    scene.removeObject(self.object);
-	    self.setFinished(true);
-	});
+        buttons[i].addEventListener("mouserelease", function() {
+            var scene = game.getScene();
+            scene.removeObject(self.object);
+            self.setFinished(true);
+        });
       }
     }
 }
@@ -1187,18 +1215,19 @@ belle.utils.extend(Action, ShowMenu);
 ShowMenu.prototype.execute = function()
 {
     this.reset();
-    var scene = game.getScene();
-    if (this.object && scene) {
-        scene.addObject(this.object);
+    var scene = this.getScene();
+    var object = this.getObject();
+    if (object && scene) {
+        scene.addObject(object);
     }
 }
 
 ShowMenu.prototype.scale = function(widthFactor, heightFactor)
 {
     Action.prototype.scale.call(this, widthFactor, heightFactor);
-    
-    if (this.object)
-        this.object.scale(widthFactor, heightFactor);
+    var object = this.getObject();
+    if (object)
+        object.scale(widthFactor, heightFactor);
 }
 
 /************* End Novel *****************/
@@ -1253,7 +1282,7 @@ GetUserInput.prototype.execute = function()
     setTimeout(function() {
       var value = prompt(self.message, self.defaultValue);
       if (! value)
-	value = self.defaultValue;
+        value = self.defaultValue;
       game.addVariable(self.variable, value);
     
       self.setFinished(true);
