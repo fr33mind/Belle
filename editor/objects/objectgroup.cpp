@@ -70,21 +70,66 @@ ObjectEditorWidget* ObjectGroup::editorWidget()
     return mEditorWidget;
 }
 
-void ObjectGroup::append(Object* obj)
+void ObjectGroup::append(Object* obj, int spacing)
 {
     if (! obj)
         return;
 
-    int starty = 0;
-    for(int i=0; i < mObjects.size(); i++)
-        starty += mObjects[i]->height();
+    int starty = this->y();
+    for(int i=0; i < mObjects.size(); i++) {
+        if (mObjects[i]->y() + mObjects[i]->height() > starty)
+            starty = mObjects[i]->y() + mObjects[i]->height();
+    }
 
-    mObjects.append(obj);
-    obj->setY(y() + starty);
+    starty += spacing;
+    obj->setY(starty);
     obj->setX(x());
-    resize();
     connect(obj, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
+    mObjects.append(obj);
+    resize();
+    alignObjects();
     //connect(this, SIGNAL(resized(int,int)), obj, SLOT(onParentResized(int, int)));
+}
+
+void ObjectGroup::resize(int x, int y)
+{
+    Object::resize(x, y);
+
+    for(int i=0; i < mObjects.size(); i++) {
+        mObjects[i]->setX(this->x());
+        mObjects[i]->setWidth(this->width());
+    }
+
+    this->alignObjects();
+}
+
+int ObjectGroup::calcSpacing() const
+{
+    if (mObjects.size() < 2)
+        return 0;
+
+    int sumObjHeight = 0;
+    int height = this->height();
+    for(int i=0; i < mObjects.size(); i++)
+        sumObjHeight += mObjects[i]->height();
+    int spacing = (height - sumObjHeight) / (mObjects.size()-1);
+    if (height > sumObjHeight) {
+        return spacing;
+    }
+
+    return 0;
+}
+
+void ObjectGroup::alignObjects()
+{
+    int spacing = this->calcSpacing();
+    if (spacing) {
+        int starty = this->y();
+        for(int i=0; i < mObjects.size(); i++) {
+            mObjects[i]->setY(starty);
+            starty += mObjects[i]->height() + spacing;
+        }
+    }
 }
 
 void ObjectGroup::resize()
@@ -92,10 +137,27 @@ void ObjectGroup::resize()
     int h = 0;
     int w = width();
 
-    for(int i=0; i < mObjects.size(); i++) {
-        if (mObjects[i]->width() > w)
-            w = mObjects[i]->width();
-        h += mObjects[i]->height();
+    if (mObjects.size()) {
+        QRect rect = mObjects.first()->sceneRect();
+        int top = rect.top();
+        int left = rect.left();
+        int right = rect.right();
+        int bottom = rect.bottom();
+
+        for(int i=1; i < mObjects.size(); i++) {
+            rect = mObjects[i]->sceneRect();
+            if (rect.top() < top)
+                top = rect.top();
+            if (rect.left() < left)
+                left = rect.left();
+            if (rect.right() > right)
+                right = rect.right();
+            if (rect.bottom() > bottom)
+                bottom = rect.bottom();
+        }
+
+        w = right - left;
+        h = bottom - top;
     }
 
     setWidth(w);
@@ -224,7 +286,7 @@ Object* ObjectGroup::removeObjectAt(int index)
     if (index >= 0 && index < mObjects.size()) {
         Object* obj = mObjects.takeAt(index);
         obj->disconnect(this);
-        setHeight(height() - obj->height());
+        resize();
         return obj;
     }
     return 0;

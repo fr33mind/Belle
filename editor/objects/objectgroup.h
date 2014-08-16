@@ -36,7 +36,7 @@ public:
     static void setObjectGroupEditorWidget(ObjectGroupEditorWidget*);
     virtual ObjectEditorWidget* editorWidget();
 
-    void append(Object*);
+    void append(Object*, int spacing=0);
     Object* object(int);
     Object* object(const QString&);
     Object* object(const QPoint&);
@@ -46,8 +46,11 @@ public:
     virtual QVariantMap toJsonObject(bool internal=true);
     virtual Object* objectAt(qreal, qreal);
     void resize();
+    virtual void resize(int, int);
     Object* removeObjectAt(int);
     void deleteObjectAt(int);
+    int calcSpacing() const;
+    void alignObjects();
 
     void setWidth(int, bool percent=false);
     void setHeight(int, bool percent=false);

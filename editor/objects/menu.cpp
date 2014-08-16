@@ -32,14 +32,13 @@ Menu::Menu(QObject *parent) :
 
     Button* button = new Button(this);
     button->setResource(mResourceButton);
-    button->setPadding("bottom", 20);
-    button->setWidth(100, true);
+    button->setWidth(this->width());
     this->append(button);
 
     button = new Button(this);
     button->setResource(mResourceButton);
-    button->setWidth(100, true);
-    this->append(button);
+    button->setWidth(this->width());
+    this->append(button, 10);
 }
 
 
@@ -118,11 +117,9 @@ void Menu::setNumberOfOptions(int number)
 void Menu::appendOption(const QString& text)
 {
     Button* button = new Button(text, this);
-    button->setWidth(100, true);
-    if (objects().size() > 0)
-        button->setPadding("top", 10);
+    button->setWidth(this->width());
     button->setResource(mResourceButton);
-    append(button);
+    append(button, 10);
     mConditions.append("");
 }
 
