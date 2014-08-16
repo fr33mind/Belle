@@ -262,7 +262,8 @@ void DrawingSurfaceWidget::mousePressEvent ( QMouseEvent * event )
         mMoving = true;
     }
 
-    emit selectionChanged(object);
+    bool scene = !mObject && !object;
+    emit selectionChanged(object, scene);
     update();
 
     QWidget::mousePressEvent(event);

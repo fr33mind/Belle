@@ -74,7 +74,7 @@ class Belle : public QMainWindow
         void onTwObjectsClicked(QTreeWidgetItem *, int);
         void addScene(Scene* scene=0, SceneManager*sceneManager=0);
         void deleteScene();
-        void onSelectedObjectChanged(Object*);
+        void onSelectedObjectChanged(Object*, bool);
         void onActionCatalogClicked(const QModelIndex&);
         void onActionsViewClicked(const QModelIndex&);
         void onNewAction(Action*);

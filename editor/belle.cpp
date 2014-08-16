@@ -95,7 +95,7 @@ Belle::Belle(QWidget *widget)
     QLayout *vLayout = centralWidget()->layout();
     QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
     mDrawingSurfaceWidget = new DrawingSurfaceWidget(mDefaultSceneManager, scrollArea);
-    connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
+    connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*, bool)), this, SLOT(onSelectedObjectChanged(Object*, bool)));
     scrollArea->setWidget(mDrawingSurfaceWidget);
     scrollArea->setContentsMargins(0, 0, 0, 0);
     scrollArea->viewport()->installEventFilter(mDrawingSurfaceWidget);
@@ -601,13 +601,15 @@ void Belle::onTwObjectsClicked(QTreeWidgetItem *, int)
     layout->addWidget(gwidget);*/
 }
 
-void Belle::onSelectedObjectChanged(Object* obj)
+void Belle::onSelectedObjectChanged(Object* obj, bool scene)
 {
     if (obj) {
         switchWidgetInPropertiesWidget(obj->editorWidget());
         if (obj->editorWidget())
             obj->editorWidget()->updateData(obj);
     }
+    else if (scene && mCurrentSceneManager && mCurrentSceneManager->currentScene())
+        switchWidgetInPropertiesWidget(mCurrentSceneManager->currentScene()->editorWidget());
     else
         switchWidgetInPropertiesWidget(0);
 }
