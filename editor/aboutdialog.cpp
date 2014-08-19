@@ -27,7 +27,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     QString desc = tr("Belle is a cross-platform visual novel maker,<br/>using Qt4 for the editor and HTML5 for the engine.");
     QString copyright = "Copyright &copy; 2012-2014 Carlos Pais";
-    QString version = "Belle 0.4 alpha";
+    QString version = "Belle 0.4.1 alpha";
 
     QString fullDesc = QString("<p><b>%1</b></p><p>%2</p><p>%3</p>").arg(version).arg(desc).arg(copyright);
 
