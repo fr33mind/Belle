@@ -164,7 +164,7 @@ Point.prototype.distance = function(point)
     
 /*********** BASE OBJECT ***********/
 
-function Object(info, parent)
+function Object(info, parent, initElement)
 {
     if ("resource" in info && belle.getResource(info["resource"])) {
         var resourceData = belle.getResource(info["resource"]).data;
@@ -224,6 +224,9 @@ function Object(info, parent)
     }
     
     Object.prototype.load.call(this, info);
+    
+    if(initElement || initElement === undefined)
+      this.initElement();
 }
 
 Object.prototype.load = function(data)
@@ -268,11 +271,11 @@ Object.prototype.load = function(data)
     }
     
     if ("borderWidth" in data) {
-      this.borderWidth = data["borderWidth"];
+      this.setBorderWidth(data["borderWidth"]);
     }
-    
+
     if ("borderColor" in data) {
-      this.borderColor = new Color(data["borderColor"]);
+      this.setBorderColor(new Color(data["borderColor"]));
     }
     
     if ("opacity" in data) {
@@ -280,7 +283,7 @@ Object.prototype.load = function(data)
     }
     
     if ("visible" in data) {
-        this.visible = data["visible"];
+        this.setVisible(data["visible"]);
     }
     
     return true;
@@ -424,6 +427,28 @@ Object.prototype.getBackgroundOpacityF = function()
   return this.backgroundColor.alphaF();
 }
 
+Object.prototype.setVisible = function(visible)
+{
+  this.visible = visible;
+  if (this.visible)
+    $(this.element).show();
+  else
+    $(this.element).hide();
+}
+
+Object.prototype.setBorderColor = function(borderColor)
+{
+  this.borderColor = borderColor;
+  $(this.element).css("border-color", borderColor.toHex());
+}
+
+Object.prototype.setBorderWidth = function(borderWidth)
+{
+  this.borderWidth = borderWidth;
+  $(this.element).css("border-width", borderWidth+"px");
+  $(this.element).css("border-style", "solid");
+}
+
 Object.prototype.setBackgroundOpacity = function(alpha)
 {
     this.backgroundColor.alpha = alpha; 
@@ -459,20 +484,14 @@ Object.prototype.setOpacity = function (alpha)
         alpha = 0;
     else if (alpha > 255)
         alpha = 255;
-    
+
     if (this.opacity != alpha) {
       this.opacity = alpha;
       this.redraw = true;
     }
-    
-    //always update DOM element, since this function is called on constructor
-    //and then on initElement with all children added
+
     if (this.element) {
-	var opacityF = this.getOpacityF();
-	$(this.element).children().each(function(index) {
-	  var childOpacity = $(this).css("opacity") || 0;
-	  $(this).css("opacity", opacityF * childOpacity);
-	});   
+        $(this.element).css("opacity", this.getOpacityF());
     }
 }
 
@@ -736,7 +755,7 @@ Object.prototype.initActions = function(actions)
     return actionInstances;
 }
 
-Object.prototype.initElement = function() 
+Object.prototype.initElement = function()
 {
   if (! this.element)
     return;
@@ -744,24 +763,15 @@ Object.prototype.initElement = function()
   $(this.element).css("position", "absolute");
   $(this.element).width(this.scaledWidth);
   $(this.element).height(this.scaledHeight);
-  if (! this.visible)
-    $(this.element).hide();
+  $(this.backgroundElement).addClass("background");
+
   var $children = $(this.element).children();
   $children.css("position", "absolute");
-  $children.css("width", "100%");
-  $children.css("height", "100%");
+  $children.css("width", $(this.element).width()+"px");
+  $children.css("height", $(this.element).height()+"px");
   $children.css("display", "block");
   $children.css("filter", "inherit");
-    
-  if (this.getOpacityF() != 1) {
-    this.setOpacity(this.opacity);
-  }
-  
-  if (this.getBackgroundOpacityF() != 1)
-    this.setBackgroundOpacity(this.getBackgroundOpacity());
-
-  if (this.borderWidth && this.borderColor)
-    this.element.style.border = this.borderWidth + "px" + " solid " + this.borderColor.toHex(); 
+  $(this.backgroundElement).css({"width": "100%", "height": "100%"});
 }
 
 Object.prototype.serialize = function()
@@ -797,9 +807,9 @@ Object.prototype.update = function()
 }
 
 /*********** IMAGE OBJECT ***********/
-function Image (data, parent)
+function Image (data, parent, initElement)
 {
-    Object.call(this, data, parent);  
+    Object.call(this, data, parent, false);  
     this.interval = null;
     this.currentFrame = 0;
     this.image = null;
@@ -809,6 +819,9 @@ function Image (data, parent)
 	  $(this.element).append(this.image.img);
         }
     }
+    
+    if(initElement || initElement === undefined)
+      this.initElement();
 }
 
 belle.utils.extend(Object, Image);
@@ -840,7 +853,7 @@ Image.prototype.isReady = function()
 
 /*********** CHARACTER ***********/
 
-function Character(data, parent)
+function Character(data, parent, initElement)
 {
     var path = "";
     var image;
@@ -861,7 +874,10 @@ function Character(data, parent)
         }
     }
     
-    Image.call(this, data, parent);
+    Image.call(this, data, parent, false);
+    
+    if(initElement || initElement === undefined)
+      this.initElement();
 }
 
 belle.utils.extend(Image, Character);
@@ -869,9 +885,9 @@ belle.utils.extend(Image, Character);
 
 /*********** TEXT BOX ***********/
 
-function TextBox(info, parent)
+function TextBox(info, parent, initElement)
 {
-    Object.call(this, info, parent);
+    Object.call(this, info, parent, false);
     this.textLeftPadding = [];
     this.textTopPadding = [];
     this.textAlignment = [];
@@ -882,6 +898,9 @@ function TextBox(info, parent)
     game.addEventListener("variableChanged", this, this.update);
     
     TextBox.prototype.load.call(this, info);
+    
+    if(initElement || initElement === undefined)
+      this.initElement();
 }
 
 belle.utils.extend(Object, TextBox);
@@ -1106,13 +1125,16 @@ TextBox.prototype.initElement = function()
 
 /*********** Object Group ***********/
 
-function ObjectGroup(data, parent)
+function ObjectGroup(data, parent, initElement)
 {
-    Object.call(this, data, parent);
+    Object.call(this, data, parent, false);
     this.objects = [];
     this.hoveredObject = null;
-    
+
     ObjectGroup.prototype.load.call(this, data);
+    
+    if(initElement || initElement === undefined)
+      this.initElement();
 }
 
 belle.utils.extend(Object, ObjectGroup);
@@ -1296,9 +1318,9 @@ ObjectGroup.prototype.getObject = function(name)
 
 /*********** DIALOGUE BOX ***********/
 
-function DialogueBox(data, parent)
+function DialogueBox(data, parent, initElement)
 {
-    ObjectGroup.call(this, data, parent);
+    ObjectGroup.call(this, data, parent, initElement);
     
     this.text = "";
     this.speakerName = "";
@@ -1341,20 +1363,19 @@ DialogueBox.prototype.setText = function(text)
 
 /************** MENU ************/
 
-function Menu(data, parent)
+function Menu(data, parent, initElement)
 {
-    ObjectGroup.call(this, data, parent);
+    ObjectGroup.call(this, data, parent, initElement);
 }
 
 belle.utils.extend(ObjectGroup, Menu);
 
 
-
 /************** BUTTON ************/
 
-function Button(data, parent)
+function Button(data, parent, initElement)
 {
-    TextBox.call(this, data, parent);
+    TextBox.call(this, data, parent, initElement);
     this.visible = true;
     if (this.element)
       this.element.style.cursor = "pointer";
