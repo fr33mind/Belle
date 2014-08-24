@@ -450,7 +450,10 @@ void Object::paint(QPainter & painter)
     mBackground.paint(painter, rect, mCornerRadius, opacityF());
 
     if (mBorderColor.isValid()) {
-        painter.setPen(QPen(mBorderColor, mBorderWidth));
+        if (mBorderWidth)
+            painter.setPen(QPen(mBorderColor, mBorderWidth));
+        else
+            painter.setPen(Qt::NoPen);
         if (mCornerRadius)
             painter.drawRoundedRect(rect, mCornerRadius, mCornerRadius);
         else

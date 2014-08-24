@@ -79,6 +79,7 @@ QPixmap ImageTransform::transform(ImageFile* image, const QRect & rect, int radi
     //add support for other positions in the future
     if (mTransformType == Stretch)
         pixmap = pixmap.scaled(rect.width(), rect.height());
+    p.setPen(Qt::NoPen);
     p.setBrush(QBrush(pixmap));
     p.drawRoundedRect(out.rect(), radius, radius);
     p.end();
