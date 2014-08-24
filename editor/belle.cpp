@@ -640,8 +640,16 @@ void Belle::onActionsViewClicked(const QModelIndex& index)
 void Belle::onNewAction(Action * action)
 {
     if (currentScene()) {
-        currentScene()->appendAction(action);
-        mActionsView->scrollToBottom();
+        QModelIndexList indexes = mActionsView->selectionModel()->selectedIndexes();
+        int row = -1;
+        if (indexes.size())
+            row = indexes.last().row();
+        if (row != -1)
+            currentScene()->insertAction(row+1, action);
+        else {
+            currentScene()->appendAction(action);
+            mActionsView->scrollToBottom();
+        }
     }
 
 }
