@@ -491,17 +491,19 @@ void Scene::setActions(const QList<Action *> & actions)
 
 void Scene::appendAction(Action * action, bool copy)
 {
+    insertAction(mActions.size(), action, copy);
+}
+
+void Scene::insertAction(int row, Action* action, bool copy)
+{
     if (! action)
         return;
 
-    if (copy) {
+    if (copy)
         action = ActionInfoManager::typeToAction(action->toJsonObject(), this);
-    }
-    else {
+    else
         action->setParent(this);
-    }
-
-    mActions.append(action);
+    mActions.insert(row, action);
     emit actionAdded(action);
 }
 
@@ -567,11 +569,6 @@ Scene* Scene::copy()
     Scene* scene = new Scene(this->toJsonObject(), this->parent());
     scene->setObjectName(sceneManager()->validSceneName(objectName()));
     return scene;
-}
-
-void Scene::insertAction(int row, Action* action)
-{
-    mActions.insert(row, action);
 }
 
 bool Scene::isValidObjectName(const QString& name)

@@ -96,7 +96,7 @@ class Scene : public QObject
         QString newObjectName(QString);
         void resize(int, int, bool, bool);
 
-        void insertAction(int, Action*);
+        void insertAction(int, Action*, bool copy=false);
         void setActions(const QList<Action*>&);
         void removeActionAt(int, bool del=false);
         void removeAction(Action*, bool del=false);
