@@ -77,8 +77,11 @@ QString Background::path() const
 void Background::paint(QPainter &p, const QRect &rect, int radius, float opacity)
 {
     p.save();
+
     p.setOpacity(mColor.alphaF()*opacity);
-    p.setBrush(mColor);
+    p.setPen(Qt::NoPen); //don't add border
+    if (mColor.isValid())
+        p.setBrush(mColor);
 
     if (radius)
         p.drawRoundedRect(rect, radius, radius);
