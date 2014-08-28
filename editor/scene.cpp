@@ -376,6 +376,11 @@ QString Scene::backgroundPath()
     return "";
 }
 
+ImageFile* Scene::background() const
+{
+    return mBackgroundImage;
+}
+
 void Scene::clearBackground()
 {
     if ( mBackgroundImage ) {

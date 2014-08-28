@@ -43,6 +43,7 @@ public:
 
     void setBackgroundImage(const QString&);
     QString backgroundPath();
+    ImageFile* background() const;
 
     void setBackgroundColor(const QColor&);
     QColor backgroundColor();

@@ -85,6 +85,7 @@ class Scene : public QObject
         void setBackgroundColor(const QColor&);
         QColor backgroundColor();
         QString backgroundPath();
+        ImageFile* background() const;
         int countTextBoxes();
         void removeSelectedObject(bool del=false);
         void removeObject(Object*, bool del=false, bool temporary=false);

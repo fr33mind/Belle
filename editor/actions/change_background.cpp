@@ -87,6 +87,11 @@ void ChangeBackground::setBackgroundImage(const QString & background)
 
 }
 
+ImageFile* ChangeBackground::background() const
+{
+    return mBackgroundImage;
+}
+
 QString ChangeBackground::backgroundPath()
 {
     return ResourceManager::imagePath(mBackgroundImage);
