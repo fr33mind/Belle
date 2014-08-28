@@ -17,6 +17,8 @@
 #ifndef CHOOSEFILEBUTTON_H
 #define CHOOSEFILEBUTTON_H
 
+#include "imagefile.h"
+
 #include <QPushButton>
 
 
@@ -33,6 +35,7 @@ public:
     explicit ChooseFileButton(FilterType filter, QWidget *parent = 0);
     QString filePath();
     void setFilePath(const QString&);
+    void setImageFile(ImageFile*);
     bool hasValidFile();
 
 signals:

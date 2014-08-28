@@ -15,6 +15,7 @@
  */
 
 #include "choosefilebutton.h"
+#include "resource_manager.h"
 
 #include <QFileDialog>
 #include <QFileInfo>
@@ -114,12 +115,28 @@ void ChooseFileButton::setFilePath(const QString & path)
 
     if (file.exists()) {
         setText(file.fileName());
-        if (mActiveFilter == ImageFilter)
-            setIcon(QIcon(mFilePath));
+        if (mActiveFilter == ImageFilter) {
+            ImageFile* image = ResourceManager::image(path);
+            if (image)
+                setIcon(QIcon(image->pixmap()));
+            else
+                setIcon(QIcon(mFilePath));
+        }
     }
     else {
         setText(tr("No File Selected"));
         setIcon(QIcon());
+    }
+}
+
+void ChooseFileButton::setImageFile(ImageFile* image)
+{
+    if (image) {
+        mFilePath = image->path();
+        setIcon(QIcon(image->pixmap()));
+    }
+    else {
+        setFilePath("");
     }
 }
 
