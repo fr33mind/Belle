@@ -67,6 +67,7 @@ public:
     static ImageFile* newImage(const QString&);
     static ImageFile* newImage(const QVariant&);
     static QString imagePath(ImageFile*);
+    static ImageFile* image(const QString&);
     static QMovie* movie(const QString&);
     static QStringList imagePaths();
     static void exportResources(const QDir&);

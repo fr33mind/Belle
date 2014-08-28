@@ -293,6 +293,17 @@ QString ResourceManager::imagePath(ImageFile* image)
     return "";
 }
 
+ImageFile* ResourceManager::image(const QString& path)
+{
+    if (path.isEmpty())
+        return 0;
+
+    if (mImageCache.contains(path))
+        return mImageCache.value(path);
+
+    return 0;
+}
+
 void ResourceManager::incrementReference(ImageFile* image)
 {
     int refs = mImageReferences.value(image, -1);
