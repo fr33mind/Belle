@@ -207,6 +207,7 @@ void ObjectEditorWidget::updateData(Object *currObj)
     mBorderColorButton->setColor(currObj->borderColor());
     mColorButton->setText(currObj->backgroundColor().name());
     mColorButton->setColor(currObj->backgroundColor());
+    mImageChooser->setImageFile(currObj->backgroundImage());
     mBackgroundOpacitySlider->setValue(currObj->backgroundOpacity());
     mNameEdit->setText(currObj->objectName());
     mNameEdit->setStyleSheet("");
