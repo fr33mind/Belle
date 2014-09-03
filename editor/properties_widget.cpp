@@ -406,6 +406,20 @@ void PropertiesWidget::clear(int from)
     this->model()->removeRows(from, this->model()->rowCount());
 }
 
+void PropertiesWidget::removeItem(QStandardItem* item)
+{
+    if (! item)
+        return;
+    QStandardItem* parent = item->parent();
+    if (parent)
+        parent->removeRow(item->row());
+    else
+        this->model()->removeRow(item->row());
+
+    if (parent && ! parent->hasChildren())
+        removeItem(parent);
+}
+
 PropertiesWidget* PropertiesWidget::copy()
 {
     PropertiesWidget* newWidget = new PropertiesWidget();
