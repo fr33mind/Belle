@@ -76,7 +76,7 @@ class DrawingSurfaceWidget : public QWidget
 
 
    signals:
-        void selectionChanged(Object*, bool scene=false);
+        void selectionChanged(Object*);
         void paintFinished();
 
    private slots:

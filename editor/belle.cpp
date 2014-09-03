@@ -57,6 +57,7 @@
 #include "simple_http_server.h"
 #include "save_project_dialog.h"
 #include "update_elements_dialog.h"
+#include "objectsview.h"
 
 static Belle* mInstance = 0;
 
@@ -95,7 +96,7 @@ Belle::Belle(QWidget *widget)
     QLayout *vLayout = centralWidget()->layout();
     QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
     mDrawingSurfaceWidget = new DrawingSurfaceWidget(mDefaultSceneManager, scrollArea);
-    connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*, bool)), this, SLOT(onSelectedObjectChanged(Object*, bool)));
+    connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     scrollArea->setWidget(mDrawingSurfaceWidget);
     scrollArea->setContentsMargins(0, 0, 0, 0);
     scrollArea->viewport()->installEventFilter(mDrawingSurfaceWidget);
@@ -181,6 +182,15 @@ Belle::Belle(QWidget *widget)
     }
 
     mUi.resourcesTabWidget->setCurrentIndex(0);
+
+    //objects viewer
+    mObjectsView = new ObjectsView(this);
+    widget = mUi.objectsViewWidget->widget();
+    layout = widget->layout() ? widget->layout() : new QVBoxLayout(widget);
+    layout->addWidget(mObjectsView);
+    connect(mObjectsView, SIGNAL(objectSelected(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
+    mUi.menuView->addAction(mUi.objectsViewWidget->toggleViewAction());
+    mUi.objectsViewWidget->hide();
 
     addScene();
 
@@ -406,6 +416,17 @@ void Belle::updateActions()
     }
 }
 
+void Belle::updateObjects()
+{
+    Scene * scene = currentScene();
+    if (scene) {
+        mObjectsView->clear();
+        mObjectsView->addObjects(scene->objects());
+        connect(scene, SIGNAL(objectAdded(Object*)), mObjectsView, SLOT(addObject(Object*)), Qt::UniqueConnection);
+        connect(scene, SIGNAL(objectRemoved(Object*)), mObjectsView, SLOT(removeObject(Object*)), Qt::UniqueConnection);
+    }
+}
+
 void Belle::addScene(Scene* scene, SceneManager* sceneManager)
 {
     if (! sceneManager) {
@@ -433,6 +454,7 @@ void Belle::addScene(Scene* scene, SceneManager* sceneManager)
     createSceneTreeItem(scenesWidget(sceneManager), scene, edit);
     updateSceneEditorWidget(scene);
     updateActions();
+    updateObjects();
     mDrawingSurfaceWidget->update();
 }
 
@@ -491,6 +513,7 @@ void Belle::onSceneItemClicked(QTreeWidgetItem *item, int column)
             mCurrentSceneManager->currentScene()->show();
 
         updateActions();
+        updateObjects();
         mDrawingSurfaceWidget->setSceneManager(currSceneManager);
         mDrawingSurfaceWidget->update();
     }
@@ -601,14 +624,14 @@ void Belle::onTwObjectsClicked(QTreeWidgetItem *, int)
     layout->addWidget(gwidget);*/
 }
 
-void Belle::onSelectedObjectChanged(Object* obj, bool scene)
+void Belle::onSelectedObjectChanged(Object* obj)
 {
     if (obj) {
         switchWidgetInPropertiesWidget(obj->editorWidget());
         if (obj->editorWidget())
             obj->editorWidget()->updateData(obj);
     }
-    else if (scene && mCurrentSceneManager && mCurrentSceneManager->currentScene())
+    else if (mCurrentSceneManager && mCurrentSceneManager->currentScene())
         switchWidgetInPropertiesWidget(mCurrentSceneManager->currentScene()->editorWidget());
     else
         switchWidgetInPropertiesWidget(0);

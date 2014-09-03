@@ -26,6 +26,7 @@
 #include "ui_mainwindow.h"
 #include "action_info_manager.h"
 #include "actions_view.h"
+#include "objectsview.h"
 #include "resource_manager.h"
 #include "drawing_surface_widget.h"
 #include "resources_view.h"
@@ -40,6 +41,7 @@ class Belle : public QMainWindow
     Q_OBJECT
 
     ActionsView *mActionsView;
+    ObjectsView* mObjectsView;
     QString mEnginePath;
     DrawingSurfaceWidget* mDrawingSurfaceWidget;
     ResourcesView * mResourcesView;
@@ -74,7 +76,7 @@ class Belle : public QMainWindow
         void onTwObjectsClicked(QTreeWidgetItem *, int);
         void addScene(Scene* scene=0, SceneManager*sceneManager=0);
         void deleteScene();
-        void onSelectedObjectChanged(Object*, bool);
+        void onSelectedObjectChanged(Object*);
         void onActionCatalogClicked(const QModelIndex&);
         void onActionsViewClicked(const QModelIndex&);
         void onNewAction(Action*);
@@ -82,6 +84,7 @@ class Belle : public QMainWindow
         void onRunTriggered();
         void openFileOrProject(QString filepath="");
         void updateActions();
+        void updateObjects();
         void onResourcesDoubleClicked(const QModelIndex&);
         void showAboutDialog();
         void onEditResource(Object*);
