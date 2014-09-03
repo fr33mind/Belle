@@ -131,6 +131,8 @@ class Scene : public QObject
        void selectionChanged(Object*);
        void actionAdded(Action*);
        void actionRemoved(int);
+       void objectAdded(Object*);
+       void objectRemoved(Object*);
 
 private:
        void init(const QString&);

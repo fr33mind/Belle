@@ -180,6 +180,9 @@ void Scene::appendObject(Object* object, bool select, bool temporarily)
     else
         mObjects.append(object);
 
+    if (! temporarily)
+        emit objectAdded(object);
+
     if (select)
         selectObject(object);
 }
@@ -427,6 +430,7 @@ void Scene::removeObject(Object* object, bool del, bool temporary)
         removed = mObjects.removeOne(object);
 
     if (removed) {
+        emit objectRemoved(object);
         if (selectedObject() == object)
             selectObject(0);
         object->disconnect(this);
