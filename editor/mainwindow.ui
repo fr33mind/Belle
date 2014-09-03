@@ -472,6 +472,15 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="objectsViewWidget">
+   <property name="windowTitle">
+    <string>Objects</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4"/>
+  </widget>
   <action name="runAction">
    <property name="icon">
     <iconset resource="media.qrc">
