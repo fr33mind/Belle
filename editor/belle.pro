@@ -114,7 +114,8 @@ HEADERS      += belle.h\
     objects/background.h \
     imagefile.h \
     imagetransform.h \
-    actions/end.h
+    actions/end.h \
+    objectsview.h
                 
 
 SOURCES      += main.cpp\
@@ -211,6 +212,7 @@ SOURCES      += main.cpp\
     objects/background.cpp \
     imagefile.cpp \
     imagetransform.cpp \
-    actions/end.cpp
+    actions/end.cpp \
+    objectsview.cpp
 
 RESOURCES += media.qrc
