@@ -65,12 +65,7 @@ void Image::init()
     setType("Image");
 }
 
-void Image::setImage(const QString& path)
-{
-    setImage(ResourceManager::newImage(path));
-}
-
-void Image::setImage(ImageFile* image)
+void Image::_setImage(ImageFile* image)
 {
     if (image == mImage)
         return;
@@ -95,6 +90,23 @@ void Image::setImage(ImageFile* image)
 
     updateAspectRatio();
     mImageTransform.setImage(mImage);
+}
+
+void Image::setImage(const QString& path)
+{
+    if (mImage && mImage->path() == path)
+        return;
+
+    _setImage(ResourceManager::newImage(path));
+}
+
+void Image::setImage(ImageFile* image)
+{
+    if (mImage == image)
+        return;
+
+    ResourceManager::incrementReference(image);
+    _setImage(image);
 }
 
 ImageFile* Image::image() const

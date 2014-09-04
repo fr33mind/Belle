@@ -51,6 +51,7 @@ public slots:
 
 private:
     void init();
+    void _setImage(ImageFile*);
 
 
 
