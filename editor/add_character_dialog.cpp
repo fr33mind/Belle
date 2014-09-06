@@ -24,23 +24,51 @@
 #include "combobox.h"
 #include "choosefilebutton.h"
 
+
+AddCharacterDialog::AddCharacterDialog(Character* character, QWidget *parent) :
+    QDialog(parent)
+{
+    init(character);
+
+}
+
 AddCharacterDialog::AddCharacterDialog(QWidget *parent) :
     QDialog(parent)
+{
+    init();
+}
+
+void AddCharacterDialog::init(Character* character)
 {
     mUi.setupUi( this );
     setModal(true);
 
     mUi.lImage->setAlignment(Qt::AlignCenter);
-    mUi.statusTreeWidget->setToolTip(tr("Double click to add a new status"));
-    mUi.statusTreeWidget->viewport()->installEventFilter(this);
+    mUi.browseImageButton->setFilter(ChooseFileButton::ImageFilter);
+    mUi.statusTreeWidget->header()->setResizeMode(0, QHeaderView::Stretch);
+    mUi.statusTreeWidget->setIconSize(QSize(32, 32));
 
-    addNewStatus();
+    if (character) {
+        this->setWindowTitle(tr("Edit Character"));
+        mUi.nameEdit->setText(character->name());
+        QHash<QString, QString> statesToPaths = character->statesToPaths();
+        QHashIterator<QString, QString> it(statesToPaths);
+        while(it.hasNext()) {
+            it.next();
+            qDebug() << it.key() << it.value();
+            addState(it.key(), it.value());
+        }
+    }
+
     connect(mUi.statusTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(onItemClicked(QTreeWidgetItem *, int)));
     connect(mUi.statusTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onItemChanged(QTreeWidgetItem *, int)));
 
+    connect(mUi.stateEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onStateEdited(const QString&)));
+    connect(mUi.browseImageButton, SIGNAL(fileSelected(const QString&)), this, SLOT(onImageSelected(const QString&)));
+    connect(mUi.addStateButton, SIGNAL(clicked()), this, SLOT(addNewState()));
+
     show();
 }
-
 
 void AddCharacterDialog::accept()
 {
@@ -50,14 +78,7 @@ void AddCharacterDialog::accept()
     }
 
     if (mUi.statusTreeWidget->topLevelItemCount() == 0) {
-        mUi.errorLabel->setText("You need to add at least one status.");
-        return;
-    }
-
-    QTreeWidgetItem* item = mUi.statusTreeWidget->topLevelItem(mUi.statusTreeWidget->topLevelItemCount()-1);
-    ChooseFileButton* chooseFileButton = static_cast<ChooseFileButton*>(mUi.statusTreeWidget->itemWidget(item, 1));
-    if (! chooseFileButton->hasValidFile()) {
-        mUi.errorLabel->setText(QString("Status '%1' doesn't have any image.").arg(item->text(0)));
+        mUi.errorLabel->setText(tr("You need to add at least one state."));
         return;
     }
 
@@ -99,20 +120,7 @@ void AddCharacterDialog::onItemClicked(QTreeWidgetItem * item, int column)
 
 QString AddCharacterDialog::imagePath(QTreeWidgetItem * item)
 {
-    ChooseFileButton* chooseFileButton = static_cast<ChooseFileButton*>(mUi.statusTreeWidget->itemWidget(item, 1));
-    if (! chooseFileButton)
-        return "";
-
-    return chooseFileButton->filePath();
-}
-
-QIcon AddCharacterDialog::icon(QTreeWidgetItem * item)
-{
-    ChooseFileButton* chooseFileButton = static_cast<ChooseFileButton*>(mUi.statusTreeWidget->itemWidget(item, 1));
-    if (! chooseFileButton)
-        return QIcon();
-
-    return chooseFileButton->icon();
+    return item->data(0, Qt::UserRole).toString();
 }
 
 QString AddCharacterDialog::path()
@@ -122,10 +130,18 @@ QString AddCharacterDialog::path()
 
 void AddCharacterDialog::onImageSelected(const QString& path)
 {
+    if (path.isEmpty()) {
+        mUi.addStateButton->setDisabled(true);
+        return;
+    }
+
     QPixmap pixmap(path);
     if (pixmap.height() > mUi.lImage->height())
         pixmap = pixmap.scaledToHeight(mUi.lImage->height());
     mUi.lImage->setPixmap(pixmap);
+
+    if (! pixmap.isNull() && ! mUi.stateEdit->text().isEmpty())
+        mUi.addStateButton->setDisabled(false);
 }
 
 void AddCharacterDialog::onWidgetStateChanged(bool valid)
@@ -152,61 +168,39 @@ QHash<QString, QString> AddCharacterDialog::statesAndImagePaths()
     return statesToPaths;
 }
 
-bool AddCharacterDialog::eventFilter(QObject * obj, QEvent *ev)
+void AddCharacterDialog::addNewState()
 {
-    if (obj == mUi.statusTreeWidget->viewport() && ev->type() == QEvent::MouseButtonDblClick) {
-        addNewStatus();
-    }
-
-    return false;
+    QString state = mUi.stateEdit->text();
+    QString filepath = mUi.browseImageButton->filePath();
+    addState(state, filepath);
+    mUi.stateEdit->setText("");
+    mUi.browseImageButton->setFilePath("");
+    mUi.addStateButton->setDisabled(true);
 }
 
-void AddCharacterDialog::addNewStatus()
+void AddCharacterDialog::addState(const QString& state, const QString& imagePath)
 {
-    QTreeWidgetItem *item = 0;
-    QString defaultStatus = "default";
-
-    if (mUi.statusTreeWidget->topLevelItemCount() > 0) {
-        item = mUi.statusTreeWidget->topLevelItem(mUi.statusTreeWidget->topLevelItemCount()-1);
-        ChooseFileButton* chooseFileButton = static_cast<ChooseFileButton*>(mUi.statusTreeWidget->itemWidget(item, 1));
-        if (! chooseFileButton)
-            return;
-
-        if (! chooseFileButton->hasValidFile())
-            return;
-
-        int counter = 0;
-        for(int i=0; i < mUi.statusTreeWidget->topLevelItemCount(); i++) {
-            item = mUi.statusTreeWidget->topLevelItem(i);
-            if (item->text(0).contains("default"))
-                counter++;
-        }
-
-        if (counter > 0)
-            defaultStatus += QString::number(counter);
-    }
-
-
-    item = new QTreeWidgetItem(QStringList()<< defaultStatus << "" << "");
+    QTreeWidgetItem *item = new QTreeWidgetItem(mUi.statusTreeWidget);
+    item->setText(0, state);
+    item->setIcon(0, QIcon(imagePath));
+    item->setData(0, Qt::UserRole, imagePath);
     item->setFlags(item->flags() | Qt::ItemIsEditable);
-    mUi.statusTreeWidget->addTopLevelItem(item);
-
     QPushButton *removeBtn = new QPushButton(QIcon(":/media/delete.png"), "", mUi.statusTreeWidget);
-    ChooseFileButton *chooseBtn = new ChooseFileButton(ChooseFileButton::ImageFilter, mUi.statusTreeWidget);
-    mUi.statusTreeWidget->setItemWidget(item, 1, chooseBtn);
-    connect(chooseBtn, SIGNAL(fileSelected(const QString&)), this, SLOT(onImageSelected(const QString&)));
-    mUi.statusTreeWidget->setItemWidget(item, 2, removeBtn);
-    connect(removeBtn, SIGNAL(clicked()), this, SLOT(removeStatus()));
-
+    removeBtn->setFlat(true);
+    connect(removeBtn, SIGNAL(clicked()), this, SLOT(removeState()));
+    mUi.statusTreeWidget->setItemWidget(item, 1, removeBtn);
     for(int i=0; i < mUi.statusTreeWidget->columnCount(); i++)
         mUi.statusTreeWidget->resizeColumnToContents(i);
 }
 
-void AddCharacterDialog::removeStatus()
+void AddCharacterDialog::removeState()
 {
     int index = -1;
     QTreeWidgetItem *item = 0;
     QObject* _sender = sender();
+
+    if (! _sender)
+        return;
 
     for(int i=0; i < mUi.statusTreeWidget->topLevelItemCount(); i++) {
         item = mUi.statusTreeWidget->topLevelItem(i);
@@ -216,7 +210,17 @@ void AddCharacterDialog::removeStatus()
         }
     }
 
-    if (index != -1)
+    if (index != -1) {
         mUi.statusTreeWidget->takeTopLevelItem(index);
+        _sender->deleteLater();
+    }
+}
+
+void AddCharacterDialog::onStateEdited(const QString & text)
+{
+    if (text.isEmpty())
+        mUi.addStateButton->setDisabled(true);
+    else if (mUi.browseImageButton->hasValidFile())
+        mUi.addStateButton->setDisabled(false);
 }
 

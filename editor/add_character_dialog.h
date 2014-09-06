@@ -21,6 +21,7 @@
 #include <QString>
 
 #include "ui_add_character.h"
+#include "character.h"
 
 class AddCharacterDialog : public QDialog {
 
@@ -31,24 +32,28 @@ class AddCharacterDialog : public QDialog {
     Ui::AddCharacterDialog mUi;
 
 public:
-    AddCharacterDialog(QWidget *parent = 0);
+    explicit AddCharacterDialog(QWidget *parent = 0);
+    AddCharacterDialog(Character*, QWidget *parent = 0);
     QString path();
     QString name();
     QHash<QString, QString> statesAndImagePaths();
-    virtual bool eventFilter(QObject *, QEvent *);
     void accept();
 
 protected:
     QString imagePath(QTreeWidgetItem*);
-    QIcon icon(QTreeWidgetItem*);
+    void addState(const QString&, const QString&);
+
+private:
+    void init(Character* character=0);
 
 private slots:
     void onImageSelected(const QString&);
     void onWidgetStateChanged(bool);
     void onItemClicked(QTreeWidgetItem *, int);
     void onItemChanged(QTreeWidgetItem *, int);
-    void addNewStatus();
-    void removeStatus();
+    void addNewState();
+    void removeState();
+    void onStateEdited(const QString&);
 
 };
 
