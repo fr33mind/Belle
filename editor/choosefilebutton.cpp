@@ -22,34 +22,27 @@
 #include <QMessageBox>
 #include <QtDebug>
 
+
+ChooseFileButton::ChooseFileButton(QWidget *parent) :
+    QPushButton(parent)
+{
+    init(NoFilter);
+}
+
 ChooseFileButton::ChooseFileButton(FilterType filter, QWidget *parent) :
     QPushButton(parent)
+{
+    init(filter);
+}
+
+void ChooseFileButton::init(FilterType filter)
 {
     setText(tr("No file selected"));
     connect(this, SIGNAL(clicked()), this, SLOT(onClick()));
     mFilePath = "";
-    QString filters = "";
-    QString extensions("");
-    mActiveFilter = filter;
     mImageExtensions << "png" << "xpm" << "jpg" << "jpeg" << "gif" << "svg" << "svgz";
     mSoundExtensions << "ogg" << "oga" << "mp3" << "aac" << "wav" << "webm";
-
-    switch(filter) {
-        case ImageFilter:
-        foreach(const QString ext, mImageExtensions)
-            extensions += QString("*.%1 ").arg(ext);
-        filters += QString("Images(%1);;").arg(extensions);
-        break;
-        case SoundFilter:
-        foreach(const QString ext, mSoundExtensions)
-            extensions += "*." + ext + " ";
-        filters += QString("Sounds(%1);;").arg(extensions);
-        break;
-    }
-
-    filters += "Any(*.*)";
-
-    mFilters = filters;
+    setFilter(filter);
 }
 
 void ChooseFileButton::onClick()
@@ -143,4 +136,27 @@ void ChooseFileButton::setImageFile(ImageFile* image)
 bool ChooseFileButton::hasValidFile()
 {
     return ! mFilePath.isEmpty();
+}
+
+void ChooseFileButton::setFilter(FilterType filter)
+{
+    QString filters("");
+    QString extensions("");
+
+    switch(filter) {
+        case ImageFilter:
+        foreach(const QString ext, mImageExtensions)
+            extensions += QString("*.%1 ").arg(ext);
+        filters += QString("Images(%1);;").arg(extensions);
+        break;
+        case SoundFilter:
+        foreach(const QString ext, mSoundExtensions)
+            extensions += "*." + ext + " ";
+        filters += QString("Sounds(%1);;").arg(extensions);
+        break;
+    }
+
+    filters += "Any(*.*)";
+    mFilters = filters;
+    mActiveFilter = filter;
 }

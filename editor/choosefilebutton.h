@@ -29,14 +29,17 @@ class ChooseFileButton : public QPushButton
 public:
     enum FilterType {
         ImageFilter,
-        SoundFilter
+        SoundFilter,
+        NoFilter
     };
 
-    explicit ChooseFileButton(FilterType filter, QWidget *parent = 0);
+    explicit ChooseFileButton(QWidget *parent = 0);
+    explicit ChooseFileButton(FilterType filter=NoFilter, QWidget *parent = 0);
     QString filePath();
     void setFilePath(const QString&);
     void setImageFile(ImageFile*);
     bool hasValidFile();
+    void setFilter(FilterType);
 
 signals:
     void fileSelected(const QString&);
@@ -51,6 +54,7 @@ private:
     QStringList mImageExtensions;
     QStringList mSoundExtensions;
     FilterType mActiveFilter;
+    void init(FilterType);
 
 };
 
