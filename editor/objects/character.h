@@ -57,7 +57,7 @@ class Character : public Image
         bool isAvailable();
         void setCurrentState(const QString&);
         QString currentState() const;
-        void addStates(const QHash<QString, QString>&);
+        void setStates(const QHash<QString, QString>&);
         QColor nameColor() const;
         QColor textColor() const;
         void setNameColor(const QColor&);

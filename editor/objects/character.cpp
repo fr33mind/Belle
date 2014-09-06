@@ -33,11 +33,7 @@ Character::Character(const QString& name, const QHash<QString, QString>& statesA
     Image(0, parent)
 {
     init(name);
-
-    mStateToPath = statesAndImagePaths;
-    initStates();
-    if (! statesAndImagePaths.isEmpty())
-        setCurrentState(statesAndImagePaths.keys().first());
+    setStates(statesAndImagePaths);
 }
 
 Character::Character(const QVariantMap& data, QObject* parent) :
@@ -45,19 +41,17 @@ Character::Character(const QVariantMap& data, QObject* parent) :
 {
     init(objectName());
 
+    QHash<QString, QString> states;
     if (data.contains("images") && data.value("images").type() == QVariant::Map) {
         QMapIterator<QString, QVariant> it(data.value("images").toMap());
         while(it.hasNext()) {
             it.next();
             if (it.value().type() == QVariant::String)
-                mStateToPath.insert(it.key(), it.value().toString());
+                states.insert(it.key(), it.value().toString());
         }
     }
 
-    initStates();
-
-    if (! mStateToPath.isEmpty())
-        setCurrentState(mStateToPath.keys().first());
+    setStates(states);
 }
 
 Character::~Character()
@@ -189,13 +183,23 @@ QString Character::currentState() const
     return mCurrentState;
 }
 
-void Character::addStates(const QHash<QString, QString> & states)
+void Character::setStates(const QHash<QString, QString> & states)
 {
+    QList<ImageFile*> images = mStateToImage.values();
+    mStateToImage.clear();
+    mStateToPath = states;
     QHashIterator<QString, QString> it(states);
-    while (it.hasNext()) {
+    while(it.hasNext()) {
         it.next();
-        mStateToPath.insert(it.key(), it.value());
+        mStateToImage.insert(it.key(), ResourceManager::newImage(it.value()));
     }
+
+    foreach(ImageFile* img, images){
+        ResourceManager::decrementReference(img);
+    }
+
+    if (mCurrentState.isEmpty() && ! mStateToPath.isEmpty())
+        setCurrentState(mStateToPath.keys().first());
 }
 
 QColor Character::nameColor() const
@@ -225,9 +229,13 @@ QVariantMap Character::toJsonObject(bool internal)
     QHashIterator<QString, ImageFile*> it(mStateToImage);
 
     while(it.hasNext()) {
-        it.next();        
-        if (it.value())
-            stateToPath.insert(it.key(), it.value()->fileName());
+        it.next();
+        if (it.value()) {
+            QString filename = it.value()->fileName();
+            if (internal)
+                filename = it.value()->path();
+            stateToPath.insert(it.key(), filename);
+        }
     }
 
     object.insert("images", stateToPath);

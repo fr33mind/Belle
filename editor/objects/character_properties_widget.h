@@ -32,7 +32,7 @@ class CharacterPropertiesWidget : public ObjectEditorWidget
     Q_OBJECT
 
     QLineEdit *mNameEdit;
-    QComboBox *mStatusChooser;
+    QComboBox *mStateChooser;
     AddCharacterWidget* mAddCharacterWidget;
     Character* mCurrentCharacter;
     ColorPushButton * mNameColorButton;
@@ -42,6 +42,9 @@ public:
     explicit CharacterPropertiesWidget(QWidget *parent = 0);
     virtual void updateData(Object *);
 
+private:
+    void updateCharacterStates();
+
 signals:
 
 public slots:
@@ -49,7 +52,8 @@ public slots:
 private slots:
     void onNameColorChosen(const QColor&);
     void onTextColorChosen(const QColor&);
-    void onStatusChosen(const QString &);
+    void onStateChanged(const QString &);
+    void editCharacterStates();
 };
 
 #endif // CHARACTER_PROPERTIES_WIDGET_H
