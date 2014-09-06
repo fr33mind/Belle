@@ -204,7 +204,7 @@ void AddCharacterDialog::removeState()
 
     for(int i=0; i < mUi.statusTreeWidget->topLevelItemCount(); i++) {
         item = mUi.statusTreeWidget->topLevelItem(i);
-        if (mUi.statusTreeWidget->itemWidget(item, 2) == _sender) {
+        if (mUi.statusTreeWidget->itemWidget(item, 1) == _sender) {
             index = i;
             break;
         }
@@ -212,6 +212,7 @@ void AddCharacterDialog::removeState()
 
     if (index != -1) {
         mUi.statusTreeWidget->takeTopLevelItem(index);
+        mUi.lImage->setPixmap(QPixmap());
         _sender->deleteLater();
     }
 }
