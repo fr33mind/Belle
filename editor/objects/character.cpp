@@ -42,8 +42,8 @@ Character::Character(const QVariantMap& data, QObject* parent) :
     init(objectName());
 
     QHash<QString, QString> states;
-    if (data.contains("images") && data.value("images").type() == QVariant::Map) {
-        QMapIterator<QString, QVariant> it(data.value("images").toMap());
+    if (data.contains("states") && data.value("states").type() == QVariant::Map) {
+        QMapIterator<QString, QVariant> it(data.value("states").toMap());
         while(it.hasNext()) {
             it.next();
             if (it.value().type() == QVariant::String)
@@ -238,7 +238,9 @@ QVariantMap Character::toJsonObject(bool internal)
         }
     }
 
-    object.insert("images", stateToPath);
+    object.insert("states", stateToPath);
+    if (! mCurrentState.isEmpty())
+        object.insert("state", mCurrentState);
     filterResourceData(object);
 
     return object;
