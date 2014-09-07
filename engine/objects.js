@@ -813,18 +813,26 @@ function Image (data, parent, initElement)
     this.interval = null;
     this.currentFrame = 0;
     this.image = null;
-    if ("image" in data) {
-        this.image = new AnimationImage(data["image"], this);
-        if (this.element) {
-	  $(this.element).append(this.image.img);
-        }
-    }
+    if ("image" in data)
+        this.setImage(data["image"]);
     
     if(initElement || initElement === undefined)
       this.initElement();
 }
 
 belle.utils.extend(Object, Image);
+
+Image.prototype.setImage = function(src)
+{
+  if (! src)
+    return;
+  
+  this.image = new AnimationImage(src, this);
+  if (this.element) {
+    $(this.element).find("img").remove();
+    $(this.element).append(this.image.img);
+  }
+}
 
 Image.prototype.paint = function(context)
 {
@@ -855,27 +863,27 @@ Image.prototype.isReady = function()
 
 function Character(data, parent, initElement)
 {
+    Image.call(this, data, parent, false);
+    
     var path = "";
     var image;
     var state = null;
+    var currState = data["state"];
     this.states = {};
     this.textColor = new Color([255, 255, 255, 255]);
 
-    if ("images" in data) {
-        for(state in data["images"]) {
-            image = new AnimationImage(data["images"][state], this);
-            image.src = data.images[state];
-            this.states[state] = image;
+    if ("states" in data) {
+        for(state in data["states"]) {
+            if (state != currState) {
+              image = new AnimationImage(data.states[state], this);
+              this.states[state] = image;
+            }
         }
         
-        if (state) {
-            data["image"] = this.states[state];
-            this.image = new AnimationImage(this.states[state], this);
-        }
+        this.setImage(data.states[currState]);
+        this.states[currState] = this.image;
     }
-    
-    Image.call(this, data, parent, false);
-    
+
     if(initElement || initElement === undefined)
       this.initElement();
 }
