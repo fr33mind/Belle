@@ -48,6 +48,7 @@ public:
     virtual Action* newAction(QObject* parent=0);
     Object* sceneObject() const;
     virtual void setSceneObject(Object*);
+    void setSceneObject(const QString&);
     static void setActionInfo(ActionInfo*);
     Scene* scene() const;
     bool isActive();

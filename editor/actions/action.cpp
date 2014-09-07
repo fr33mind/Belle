@@ -161,6 +161,13 @@ void Action::setSceneObject(Object * object)
     }
 }
 
+void Action::setSceneObject(const QString& name)
+{
+    Scene* scene = this->scene();
+    if (scene)
+        setSceneObject(scene->object(name));
+}
+
 void Action::onSceneObjectDestroyed()
 {
     mObject = 0;
