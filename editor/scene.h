@@ -52,7 +52,7 @@ class Scene : public QObject
         Scene(const QVariantMap& data, QObject *parent = 0);
         ~Scene();
         SceneManager* sceneManager();
-        QList<Object*> objects();
+        QList<Object*> objects(const QString& type="");
         QList<Object*> temporaryObjects();
         Object* objectAt (qreal, qreal);
         Object* object(const QString&);

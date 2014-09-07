@@ -119,9 +119,17 @@ SceneEditorWidget* Scene::editorWidget()
     return mEditorWidget;
 }
 
-QList<Object*> Scene::objects()
+QList<Object*> Scene::objects(const QString& type)
 {
-    return mObjects;
+    if (type.isEmpty())
+        return mObjects;
+
+    QList<Object*> objects;
+    for(int i=0; i < mObjects.size(); i++)
+        if (mObjects[i]->type() == type)
+            objects.append(mObjects[i]);
+
+    return objects;
 }
 
 QList<Object*> Scene::temporaryObjects()
