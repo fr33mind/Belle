@@ -150,6 +150,11 @@ QHash <QString, QString> Character::statesToPaths()
     return mStateToPath;
 }
 
+QStringList Character::states() const
+{
+    return mStateToPath.keys();
+}
+
 void Character::setAvailable(bool available)
 {
     mAvailable = available;
