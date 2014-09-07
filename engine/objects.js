@@ -890,6 +890,13 @@ function Character(data, parent, initElement)
 
 belle.utils.extend(Image, Character);
 
+Character.prototype.setState = function(state)
+{
+    if (state in this.states) {
+      this.image = this.states[state];
+      this.update();
+    }
+}
 
 /*********** TEXT BOX ***********/
 
