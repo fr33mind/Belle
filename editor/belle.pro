@@ -115,7 +115,9 @@ HEADERS      += belle.h\
     imagefile.h \
     imagetransform.h \
     actions/end.h \
-    objectsview.h
+    objectsview.h \
+    actions/changestate.h \
+    actions/changestate_editorwidget.h
                 
 
 SOURCES      += main.cpp\
@@ -213,6 +215,8 @@ SOURCES      += main.cpp\
     imagefile.cpp \
     imagetransform.cpp \
     actions/end.cpp \
-    objectsview.cpp
+    objectsview.cpp \
+    actions/changestate.cpp \
+    actions/changestate_editorwidget.cpp
 
 RESOURCES += media.qrc

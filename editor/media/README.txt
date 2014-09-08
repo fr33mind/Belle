@@ -33,6 +33,11 @@ COPYRIGHT: (c) Melih Bilgil
 LICENSE: Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
 URL: http://www.picol.org/
 
+FILE: user-group.png
+COPYRIGHT: (c) PAOMEDIA SARL
+LICENSE: CC0 1.0 Universal
+URL: https://www.iconfinder.com/icons/285648/group_user_icon#size=32
+
 FILE: All others* (Oxygen Icon Theme)
 COPYRIGHT: (C) Oxygen Team
 LICENSE: Creative Common Attribution-ShareAlike 3.0 License or the GNU Library General Public License.

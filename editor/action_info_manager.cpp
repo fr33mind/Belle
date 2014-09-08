@@ -37,6 +37,7 @@
 #include "change_background.h"
 #include "end.h"
 #include "runscript.h"
+#include "changestate.h"
 
 QList<Action*> mActionsCatalog = QList<Action*>();
 QHash<QString, QIcon> mTypeToIcon;
@@ -68,6 +69,7 @@ void ActionInfoManager::initEditorWidgets()
     ChangeGameVariable::setChangeGameVariableEditorWidget(new ChangeGameVariableEditorWidget);
     ChangeBackground::setChangeBackgroundEditorWidget(new ChangeBackgroundEditorWidget);
     RunScript::setRunScriptEditorWidget(new RunScriptEditorWidget);
+    ChangeState::setChangeStateEditorWidget(new ChangeStateEditorWidget);
 }
 
 void ActionInfoManager::init()
@@ -80,7 +82,6 @@ void ActionInfoManager::init()
     info->name = "Branch";
     info->type = "Branch";
     Branch::setBranchActionInfo(info);*/
-
 
     Action::Info = ActionInfo(QIcon(), "Action", tr("Action"));
     Show::Info = ActionInfo(QIcon(":/media/show.png"), "Show", tr("Show"));
@@ -102,6 +103,7 @@ void ActionInfoManager::init()
     ChangeBackground::Info = ActionInfo(QIcon(":/media/image.png"), "ChangeBackground", tr("Change Background"));
     End::Info = ActionInfo(QIcon(":/media/end-novel.png"), "End", tr("End"));
     RunScript::Info = ActionInfo(QIcon(":/media/script.png"), "RunScript", tr("Run Script"));
+    ChangeState::Info = ActionInfo(QIcon(":/media/user-group.png"), "ChangeState", tr("Change State"));
 
     mTypeToIcon.insert("Action", QIcon());
     mTypeToIcon.insert("Branch", QIcon(":/media/branch.png"));
@@ -120,6 +122,7 @@ void ActionInfoManager::init()
     mTypeToIcon.insert("PlaySound", QIcon(":/media/sound.png"));
     mTypeToIcon.insert("StopSound", QIcon(":/media/no-sound.png"));
     mTypeToIcon.insert("RunScript", QIcon(":/media/script.png"));
+    mTypeToIcon.insert("ChangeState", QIcon(":/media/object-edit.png"));
 
     initEditorWidgets();
 
@@ -204,6 +207,8 @@ Action* ActionInfoManager::typeToAction(const QVariant& data, QObject* parent)
         return new RunScript(actionMap, parent);
     else if (type == "End")
         return new End(parent);
+    else if (type == "ChangeState")
+        return new ChangeState(parent);
 
     return 0;
 }
@@ -266,6 +271,9 @@ void ActionInfoManager::destroy()
 
     if (RunScript::runScriptEditorWidget())
         RunScript::runScriptEditorWidget()->deleteLater();
+
+    if (ChangeState::changeStateEditorWidget())
+        ChangeState::changeStateEditorWidget()->deleteLater();
 
     for(int i=0; i < mActionsCatalog.size(); i++)
         mActionsCatalog[i]->deleteLater();

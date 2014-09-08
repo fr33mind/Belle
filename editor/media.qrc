@@ -45,5 +45,6 @@
         <file>media/align-vertical-bottom.png</file>
         <file>media/align-vertical-center.png</file>
         <file>media/align-vertical-top.png</file>
+        <file>media/user-group.png</file>
     </qresource>
 </RCC>

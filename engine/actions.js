@@ -700,6 +700,25 @@ ChangeBackground.prototype.execute = function ()
     this.setFinished(true);
 }
 
+/************* Change State *****************/
+
+function ChangeState(data, parent)
+{
+    Action.call(this, data, parent);
+    this.state = data["state"];
+}
+
+belle.utils.extend(Action, ChangeState);
+
+ChangeState.prototype.execute = function () 
+{
+    var object = this.getObject();
+    if (object && typeof object.setState == "function")
+      object.setState(this.state);
+    
+    this.setFinished(true);
+}
+
 /************* LABEL *****************/
 
 function Label (data, parent)
@@ -1401,6 +1420,7 @@ actions.Wait = Wait;
 actions.Show = Show;
 actions.Hide = Hide;
 actions.ChangeBackground = ChangeBackground;
+actions.ChangeState = ChangeState;
 actions.Label = Label;
 actions.GoToLabel = GoToLabel;
 actions.GoToScene = GoToScene;

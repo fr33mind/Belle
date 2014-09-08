@@ -27,6 +27,7 @@ namespace Actions {
         Show,
         Hide,
         ChangeBackground,
+        ChangeState,
         Label,
         GoToLabel,
         GoToScene,

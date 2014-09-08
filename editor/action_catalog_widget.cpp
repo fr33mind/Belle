@@ -37,6 +37,7 @@
 #include "change_game_variable.h"
 #include "change_background.h"
 #include "runscript.h"
+#include "changestate.h"
 
 ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     PropertiesWidget(parent, 1)
@@ -49,6 +50,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     appendRow(Show::Info.icon, Show::Info.name);
     appendRow(Hide::Info.icon, Hide::Info.name);
     appendRow(ChangeBackground::Info.icon, ChangeBackground::Info.name);
+    appendRow(ChangeState::Info.icon, ChangeState::Info.name);
     appendRow(Label::Info.icon, Label::Info.name);
     appendRow(GoToLabel::Info.icon, GoToLabel::Info.name);
     appendRow(GoToScene::Info.icon, GoToScene::Info.name);
@@ -105,6 +107,7 @@ void ActionCatalogWidget::onDoubleClick(const QModelIndex & index)
     case Actions::Show: action = new Show(); break;
     case Actions::Hide: action = new Hide(); break;
     case Actions::ChangeBackground: action = new ChangeBackground(); break;
+    case Actions::ChangeState: action = new ChangeState(); break;
     case Actions::Label: action = new Label(""); break;
     case Actions::GoToLabel: action = new GoToLabel(""); break;
     case Actions::GoToScene: action = new GoToScene(); break;
