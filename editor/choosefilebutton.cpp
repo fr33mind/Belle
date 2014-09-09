@@ -40,6 +40,7 @@ void ChooseFileButton::init(FilterType filter)
     setText(tr("No file selected"));
     connect(this, SIGNAL(clicked()), this, SLOT(onClick()));
     mFilePath = "";
+    mPreviousPath = "";
     mImageExtensions << "png" << "xpm" << "jpg" << "jpeg" << "gif" << "svg" << "svgz";
     mSoundExtensions << "ogg" << "oga" << "mp3" << "aac" << "wav" << "webm";
     setFilter(filter);
@@ -77,11 +78,12 @@ void ChooseFileButton::onClick()
     }
 
     QString filePath = QFileDialog::getOpenFileName(this, tr("Choose File"),
-                                       QDir::currentPath(),
+                                       mPreviousPath,
                                        mFilters);
 
     if (! filePath.isEmpty()) {
         QFileInfo info(filePath);
+        mPreviousPath = info.absolutePath();
         if (mActiveFilter == ImageFilter && mImageExtensions.contains(info.suffix())) {
             emit fileSelected(filePath);
             setFilePath(filePath);
