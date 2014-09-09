@@ -20,6 +20,7 @@
 #include <QFileInfo>
 
 #include "scene.h"
+#include "utils.h"
 
 static CharacterPropertiesWidget* mEditorWidget = 0;
 
@@ -49,9 +50,19 @@ Character::Character(const QVariantMap& data, QObject* parent) :
             if (it.value().type() == QVariant::String)
                 states.insert(it.key(), it.value().toString());
         }
+
+        setStates(states);
     }
 
-    setStates(states);
+    if (data.contains("state") && data.value("state").type() == QVariant::String) {
+        setCurrentState(data.value("state").toString());
+    }
+
+    if (data.contains("nameColor") && data.value("nameColor").type() == QVariant::List)
+        setNameColor(Utils::listToColor(data.value("nameColor").toList()));
+
+    if (data.contains("textColor") && data.value("textColor").type() == QVariant::List)
+        setTextColor(Utils::listToColor(data.value("textColor").toList()));
 }
 
 Character::~Character()
@@ -242,6 +253,11 @@ QVariantMap Character::toJsonObject(bool internal)
             stateToPath.insert(it.key(), filename);
         }
     }
+
+    if (mNameColor.isValid())
+        object.insert("nameColor", Utils::colorToList(mNameColor));
+    if (mTextColor.isValid())
+        object.insert("textColor", Utils::colorToList(mTextColor));
 
     object.insert("states", stateToPath);
     if (! mCurrentState.isEmpty())
