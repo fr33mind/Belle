@@ -35,7 +35,6 @@ signals:
 public slots:
 
 private:
-    ObjectGroup *mCurrentObjectGroup;
 
 };
 

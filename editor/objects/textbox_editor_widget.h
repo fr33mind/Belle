@@ -35,7 +35,6 @@ class TextPropertiesWidget : public ObjectEditorWidget
 
     QTextEdit* mTextEdit;
     ColorPushButton* mColorButton;
-    TextBox* mCurrentObject;
     QComboBox* mHorizontalAlignmentComboBox;
     QComboBox* mVerticalAlignmentComboBox;
     QSpinBox* mFontSizeSpin;

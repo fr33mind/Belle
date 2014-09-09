@@ -23,7 +23,6 @@
 CharacterPropertiesWidget::CharacterPropertiesWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {
-    mCurrentCharacter = 0;
     //mNameEdit = new QLineEdit(this);
 
     QWidget *widget = new QWidget(this);
@@ -60,44 +59,48 @@ void CharacterPropertiesWidget::updateData(Object *obj)
 {
     ObjectEditorWidget::updateData(obj);
 
-    mCurrentCharacter = qobject_cast<Character*>(obj);
-    if (! mCurrentCharacter)
+    Character* character = qobject_cast<Character*>(obj);
+    if (! character)
         return;
 
     //mNameEdit->setText(mCurrentCharacter->name());
-    mNameColorButton->setColor(mCurrentCharacter->nameColor());
-    mTextColorButton->setColor(mCurrentCharacter->textColor());
+    mNameColorButton->setColor(character->nameColor());
+    mTextColorButton->setColor(character->textColor());
     updateCharacterStates();
 }
 
 void CharacterPropertiesWidget::onNameColorChosen(const QColor & color)
 {
-    if (mCurrentCharacter)
-        mCurrentCharacter->setNameColor(color);
+    Character* character = qobject_cast<Character*>(mCurrentObject);
+    if (character)
+        character->setNameColor(color);
 }
 
 void CharacterPropertiesWidget::onTextColorChosen(const QColor & color)
 {
-    if (mCurrentCharacter)
-        mCurrentCharacter->setTextColor(color);
+    Character* character = qobject_cast<Character*>(mCurrentObject);
+    if (character)
+        character->setTextColor(color);
 }
 
 void CharacterPropertiesWidget::onStateChanged(const QString & text)
 {
-    if (mCurrentCharacter)
-        mCurrentCharacter->setCurrentState(text);
+    Character* character = qobject_cast<Character*>(mCurrentObject);
+    if (character)
+        character->setCurrentState(text);
 }
 
 void CharacterPropertiesWidget::updateCharacterStates()
 {
-    if (! mCurrentCharacter)
+    Character* character = qobject_cast<Character*>(mCurrentObject);
+    if (! character)
         return;
 
-    QHash <QString, QString> stateToPath = mCurrentCharacter->statesToPaths();
+    QHash <QString, QString> stateToPath = character->statesToPaths();
     QList<QString> keys = stateToPath.keys();
     mStateChooser->clear();
     int curr = -1;
-    QString currState = mCurrentCharacter->currentState();
+    QString currState = character->currentState();
     for (int i=0; i < keys.size(); i++) {
         if (keys[i] == currState)
             curr = i;
@@ -109,14 +112,15 @@ void CharacterPropertiesWidget::updateCharacterStates()
 
 void CharacterPropertiesWidget::editCharacterStates()
 {
-    if (! mCurrentCharacter)
+    Character* character = qobject_cast<Character*>(mCurrentObject);
+    if (! character)
         return;
 
-    AddCharacterDialog* dialog = new AddCharacterDialog(mCurrentCharacter);
+    AddCharacterDialog* dialog = new AddCharacterDialog(character);
     bool accepted = dialog->exec();
     if (accepted) {
-        mCurrentCharacter->setStates(dialog->statesAndImagePaths());
-        mCurrentCharacter->setName(dialog->name());
+        character->setStates(dialog->statesAndImagePaths());
+        character->setName(dialog->name());
     }
 
     dialog->deleteLater();

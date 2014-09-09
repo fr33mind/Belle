@@ -68,11 +68,13 @@ private slots:
     void onCurrentObjectDestroyed();
     void onKeepAspectRatioToggled(bool);
 
+protected:
+    Object *mCurrentObject;
+
 private:
     ColorPushButton* mColorButton;
     QSlider* mBackgroundOpacitySlider;
     QSlider* mOpacitySlider;
-    Object *mCurrentObject;
     Object *mResourceObject;
     QComboBox* mChooseObjectComboBox;
     QLineEdit* mNameEdit;

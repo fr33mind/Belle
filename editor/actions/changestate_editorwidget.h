@@ -15,7 +15,6 @@ public:
     virtual void updateData(Action*);
 
 private:
-    ChangeState* mChangeStateAction;
     QComboBox* mCharacterBox;
     QComboBox* mStateBox;
 

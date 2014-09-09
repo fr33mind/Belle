@@ -34,7 +34,6 @@ class CharacterPropertiesWidget : public ObjectEditorWidget
     QLineEdit *mNameEdit;
     QComboBox *mStateChooser;
     AddCharacterWidget* mAddCharacterWidget;
-    Character* mCurrentCharacter;
     ColorPushButton * mNameColorButton;
     ColorPushButton * mTextColorButton;
 

@@ -21,7 +21,6 @@
 ObjectGroupEditorWidget::ObjectGroupEditorWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {
-    mCurrentObjectGroup = 0;
 }
 
 void ObjectGroupEditorWidget::updateData(Object* obj)

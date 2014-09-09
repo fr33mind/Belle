@@ -23,7 +23,7 @@ ChangeStateEditorWidget::ChangeStateEditorWidget(QWidget *parent) :
 void ChangeStateEditorWidget::updateData(Action * action)
 {
     ActionEditorWidget::updateData(action);
-    mChangeStateAction = 0;
+    mAction = 0;
     ChangeState* changeStateAction = qobject_cast<ChangeState*>(action);
     if (! changeStateAction)
         return;
@@ -45,7 +45,7 @@ void ChangeStateEditorWidget::updateData(Action * action)
             mStateBox->setCurrentIndex(mStateBox->findText(changeStateAction->state()));
     }
 
-    mChangeStateAction = changeStateAction;
+    mAction = action;
 
     if (currIndex == -1 && mCharacterBox->count())
         mCharacterBox->setCurrentIndex(0);
@@ -53,19 +53,20 @@ void ChangeStateEditorWidget::updateData(Action * action)
 
 void ChangeStateEditorWidget::onObjectChosen(const QString& name)
 {
-    if (! mChangeStateAction)
+    ChangeState* action = qobject_cast<ChangeState*>(mAction);
+    if (! action)
         return;
 
     mStateBox->clear();
-    mChangeStateAction->setSceneObject(name);
-    Character* character = qobject_cast<Character*>(mChangeStateAction->sceneObject());
+    action->setSceneObject(name);
+    Character* character = qobject_cast<Character*>(action->sceneObject());
     if (character)
         mStateBox->addItems(character->states());
 }
 
 void ChangeStateEditorWidget::onStateChosen(const QString& state)
 {
-    if (! mChangeStateAction)
-        return;
-    mChangeStateAction->setState(state);
+    ChangeState* action = qobject_cast<ChangeState*>(mAction);
+    if (action)
+        action->setState(state);
 }

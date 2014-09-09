@@ -58,21 +58,21 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
     connect(mChooseFontWidget, SIGNAL(fontChosen(const QString&)), this, SLOT(onFontChosen(const QString&)));
 
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
-
-    mCurrentObject = 0;
 }
 
 
 void TextPropertiesWidget::onTextEditDataChanged()
 {
-    if (mCurrentObject)
-        mCurrentObject->setText(mTextEdit->toPlainText());
+    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    if (textbox)
+        textbox->setText(mTextEdit->toPlainText());
 }
 
 void TextPropertiesWidget::onColorChosen(const QColor& color)
 {
-    if (mCurrentObject)
-        mCurrentObject->setTextColor(color);
+    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    if (textbox)
+        textbox->setTextColor(color);
 }
 
 void TextPropertiesWidget::updateData(Object *obj)
@@ -117,19 +117,20 @@ void TextPropertiesWidget::updateData(Object *obj)
     mChooseFontWidget->setCurrentFontFamily(textbox->fontFamily());
     mFontSizeSpin->setValue(textbox->fontSize());
 
-    mCurrentObject = textbox;
+    mCurrentObject = obj;
 }
 
 void TextPropertiesWidget::onAlignmentChanged(int index)
 {
     QComboBox* senderCombo = static_cast<QComboBox*>(this->sender());
+    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
 
-    if (index < 0 || index >= senderCombo->count() || ! mCurrentObject)
+    if (index < 0 || index >= senderCombo->count() || ! textbox)
         return;
 
     Qt::Alignment alignment = horizontalAlignment();
     alignment |= verticalAlignment();
-    mCurrentObject->setTextAlignment(alignment);
+    textbox->setTextAlignment(alignment);
 }
 
 Qt::Alignment TextPropertiesWidget::horizontalAlignment()
@@ -169,13 +170,15 @@ Qt::Alignment TextPropertiesWidget::verticalAlignment()
 
 void TextPropertiesWidget::onFontSizeChanged(int size)
 {
-    if (mCurrentObject)
-        mCurrentObject->setFontSize(size);
+    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    if (textbox)
+        textbox->setFontSize(size);
 }
 
 void TextPropertiesWidget::onFontChosen(const QString & family)
 {
-    if (mCurrentObject)
-        mCurrentObject->setFontFamily(family);
+    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    if (textbox)
+        textbox->setFontFamily(family);
 }
 
