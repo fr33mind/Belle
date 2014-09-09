@@ -236,6 +236,9 @@ void TextBox::paint(QPainter & painter)
 {
     Object::paint(painter);
 
+    if (! painter.opacity())
+        return;
+
     QRect rect(sceneRect());
     rect.setWidth(contentWidth());
     rect.setHeight(contentHeight());

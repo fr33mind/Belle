@@ -677,7 +677,7 @@ void Scene::paint(QPainter & painter)
 
     for (int i=0; i < objects.size(); i++) {
         object = objects.at(i);
-        if (object && object->visible()){
+        if (object){
             painter.save();
             object->paint(painter);
             painter.restore();

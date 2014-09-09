@@ -207,6 +207,8 @@ void ObjectGroup::move(int x, int y)
 void ObjectGroup::paint(QPainter & painter)
 {
     Object::paint(painter);
+    if (! painter.opacity())
+        return;
 
     for(int i=0; i < mObjects.size(); i++)
        mObjects[i]->paint(painter);

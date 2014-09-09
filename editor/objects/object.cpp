@@ -438,15 +438,18 @@ void Object::setType(const QString & type)
 
 void Object::paint(QPainter & painter)
 {
-    painter.setOpacity(opacityF());
-
+    QRect rect(mSceneRect.x(), mSceneRect.y(), contentWidth(), contentHeight());
     if (! mVisible || ! mOpacity) {
+        QPen pen(Qt::white);
+        painter.setOpacity(0.5);
+        pen.setWidth(3);
+        painter.setPen(pen);
+        painter.drawRect(rect);
+        painter.setOpacity(0);
         return;
     }
 
     painter.setOpacity(opacityF());
-    QRect rect(mSceneRect.x(), mSceneRect.y(), contentWidth(), contentHeight());
-
     mBackground.paint(painter, rect, mCornerRadius, opacityF());
 
     if (mBorderColor.isValid()) {

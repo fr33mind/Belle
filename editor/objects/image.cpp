@@ -117,6 +117,8 @@ ImageFile* Image::image() const
 void Image::paint(QPainter & painter)
 {
     Object::paint(painter);
+    if (! painter.opacity())
+        return;
 
     if (mImage) {
         if (mImageTransform.hasToBeTransformed(mImage, sceneRect(), cornerRadius()))
