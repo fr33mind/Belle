@@ -185,8 +185,16 @@ void Scene::appendObject(Object* object, bool select, bool temporarily)
 
     if (temporarily)
         mTemporaryObjects.append(object);
-    else
-        mObjects.append(object);
+    else {
+        if (object->type() == "TextBox" || object->type() == "DialogueBox" || object->type() == "Button")
+            mObjects.append(object);
+        else { //set TextBox/DialogueBox/Button over any other object by default
+            int i=mObjects.size()-1;
+            while(i > 0 && (mObjects[i]->type() == "TextBox" || mObjects[i]->type() == "DialogueBox" || mObjects[i]->type() == "Button"))
+                --i;
+            mObjects.insert(i, object);
+        }
+    }
 
     if (! temporarily)
         emit objectAdded(object);
