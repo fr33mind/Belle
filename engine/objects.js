@@ -944,8 +944,10 @@ TextBox.prototype.load = function(data)
     if ("text" in data)
         this.setText(data["text"]);
 	
-    if ("textColor" in data)
+    if ("textColor" in data) {
         this.setTextColor(data["textColor"]);
+        this.defaultTextColor = this.textColor;
+    }
     
     return true;
 }
@@ -1097,6 +1099,9 @@ TextBox.prototype.setText = function(text)
 
 TextBox.prototype.setTextColor = function(color)
 {
+    if (! color)
+      return;
+
     if (color instanceof Array)
         color = new Color(color);
     this.textColor = color;
@@ -1104,6 +1109,11 @@ TextBox.prototype.setTextColor = function(color)
     if (this.textElement) {
         this.textElement.style.color = color.toHex();
     }
+}
+
+TextBox.prototype.activateDefaultTextColor = function()
+{
+    this.textColor = this.defaultTextColor;
 }
 
 TextBox.prototype.scale = function(widthFactor, heightFactor)
@@ -1126,6 +1136,9 @@ TextBox.prototype.serialize = function()
 {
     var data = Object.prototype.serialize.call(this);
     data["text"] = this.text;
+    if (this.textColor)
+      data["textColor"] = this.textColor.serialize();
+
     return data;
 }
 
@@ -1390,8 +1403,16 @@ DialogueBox.prototype.setNameColor = function(color)
 
 DialogueBox.prototype.setTextColor = function(color)
 {
-    if (this.dialgueTextBox)
-      this.dialgueTextBox.setTextColor(color);
+    if (this.dialogueTextBox)
+      this.dialogueTextBox.setTextColor(color);
+}
+
+DialogueBox.prototype.activateDefaultTextColor = function()
+{
+    if (this.speakerTextBox)
+      this.speakerTextBox.activateDefaultTextColor();
+    if (this.dialogueTextBox)
+      this.dialogueTextBox.activateDefaultTextColor();
 }
 
 /************** MENU ************/
