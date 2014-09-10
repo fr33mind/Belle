@@ -870,7 +870,8 @@ function Character(data, parent, initElement)
     var state = null;
     var currState = data["state"];
     this.states = {};
-    this.textColor = new Color([255, 255, 255, 255]);
+    this.nameColor = null;
+    this.textColor = null;
 
     if ("states" in data) {
         for(state in data["states"]) {
@@ -883,6 +884,11 @@ function Character(data, parent, initElement)
         this.setImage(data.states[currState]);
         this.states[currState] = this.image;
     }
+
+    if ("nameColor" in data)
+      this.nameColor = new Color(data["nameColor"]);
+    if ("textColor" in data)
+      this.textColor = new Color(data["textColor"]);
 
     if(initElement || initElement === undefined)
       this.initElement();
