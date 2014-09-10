@@ -1382,6 +1382,18 @@ DialogueBox.prototype.setText = function(text)
     }
 }
 
+DialogueBox.prototype.setNameColor = function(color)
+{
+    if (this.speakerTextBox)
+      this.speakerTextBox.setTextColor(color);
+}
+
+DialogueBox.prototype.setTextColor = function(color)
+{
+    if (this.dialgueTextBox)
+      this.dialgueTextBox.setTextColor(color);
+}
+
 /************** MENU ************/
 
 function Menu(data, parent, initElement)
