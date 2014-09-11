@@ -117,11 +117,6 @@ void DialogueEditorWidget::updateData(Action * action)
         mTextEdit->setText(dialogue->text());
     }
 
-    if (mChooseCharacterWidget->count()) {
-        if (dialogue->characterName().isEmpty())
-            dialogue->setCharacter(mCharacters[0]);
-    }
-
     if (dialogue->character())
         mChooseCharacterWidget->setCurrentIndex(0);
     else
