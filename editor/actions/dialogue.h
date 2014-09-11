@@ -55,9 +55,17 @@ public:
     void setCharacterName(const QString&);
     QString characterName() const;
 
-    virtual void paint(const QPainter &);
     virtual QString displayText() const;
     virtual QVariantMap toJsonObject();
+
+    virtual void focusIn();
+    virtual void focusOut();
+
+    void updateTextBox();
+    void restoreTextBox();
+    void activateTextBoxDefaultTextColor();
+    void activateCharacterColors();
+    void setSceneObject(Object*);
 
 signals:
 

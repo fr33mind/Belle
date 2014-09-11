@@ -34,16 +34,18 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
     init();
 
     if (data.contains("character") && data.value("character").type() == QVariant::String) {
-        mCharacter = qobject_cast<Character*>(ResourceManager::resource(data.value("character").toString()));
+        Scene* scene = this->scene();
+        if (scene)
+            mCharacter = qobject_cast<Character*>(scene->object(data.value("character").toString()));
 
         if (mCharacter)
-            mCharacterName = mCharacter->objectName();
+            mCharacterName = mCharacter->name();
         else
             mCharacterName = data.value("character").toString();
     }
 
     if (data.contains("text") && data.value("text").type() == QVariant::String) {
-            setText(data.value("text").toString());
+        setText(data.value("text").toString());
     }
 
     setMouseClickOnFinish(data.contains("wait"));
@@ -90,20 +92,8 @@ void Dialogue::setCharacter(Character *character)
         this->blockSignals(false);
     }
 
-    //update dialoguebox or textbox
-    if (sceneObject() && character) {
-        DialogueBox* obj = qobject_cast<DialogueBox*>(sceneObject());
-        if (obj) {
-            //dialogueBox->setSpeakerName(name); // has been called in setCharacterName(..)
-            obj->setSpeakerColor(character->nameColor());
-            obj->setTextColor(character->textColor());
-        }
-        else {
-            TextBox* textObj = qobject_cast<TextBox*>(sceneObject());
-            if (textObj)
-                textObj->setTextColor(character->textColor());
-        }
-    }
+    //update DialogueBox or TextBox
+    updateTextBox();
 
     emit dataChanged();
 }
@@ -120,12 +110,7 @@ void Dialogue::setCharacterName(const QString & name)
     mCharacterName = name;
 
     //update dialoguebox if any
-    if (sceneObject()) {
-        DialogueBox* dialogueBox = qobject_cast<DialogueBox*>(sceneObject());
-        if (dialogueBox)
-            dialogueBox->setSpeakerName(name);
-    }
-
+    updateTextBox();
     emit dataChanged();
 }
 
@@ -141,27 +126,13 @@ QString Dialogue::characterName() const
 void Dialogue::setText(const QString & text)
 {
     mText = text;
-
-    TextBox* textObj = qobject_cast<TextBox*>(sceneObject());
-    if (textObj) {
-        textObj->setPlaceholderText(text);
-    }
-    else { //if dialogueBox
-        DialogueBox* dialogueBox = qobject_cast<DialogueBox*>(sceneObject());
-        if (dialogueBox)
-            dialogueBox->setText(text);
-    }
-
+    updateTextBox();
     emit dataChanged();
 }
 
 QString Dialogue::text()
 {
     return mText;
-}
-
-void Dialogue::paint(const QPainter & painter)
-{
 }
 
 QString Dialogue::displayText() const
@@ -192,4 +163,80 @@ QVariantMap Dialogue::toJsonObject()
 void Dialogue::onCharacterDestroyed()
 {
     mCharacter = 0;
+}
+
+void Dialogue::updateTextBox()
+{
+    Object* object = sceneObject();
+    if (! object)
+        return;
+
+    QColor textColor, nameColor;
+    QString name = mCharacterName;
+
+    if (mCharacter) {
+        textColor = mCharacter->textColor();
+        nameColor = mCharacter->nameColor();
+        name = mCharacter->name();
+    }
+
+    DialogueBox* dialogueBox = qobject_cast<DialogueBox*>(object);
+    if (dialogueBox) {
+        dialogueBox->setSpeakerName(name);
+        dialogueBox->setText(mText);
+
+        if (!textColor.isValid() && !nameColor.isValid())
+            dialogueBox->activateDefaultTextColor();
+        else {
+            dialogueBox->setTextColor(textColor);
+            dialogueBox->setSpeakerNameColor(nameColor);
+        }
+    }
+    else {
+        TextBox* textBox = qobject_cast<TextBox*>(object);
+        if (textBox) {
+            if(textColor.isValid())
+                textBox->setTextColor(textColor);
+            else
+                textBox->activateDefaultTextColor();
+            textBox->setPlaceholderText(mText);
+        }
+    }
+}
+
+void Dialogue::restoreTextBox()
+{
+    Object* object = sceneObject();
+    if (! object)
+        return;
+
+    DialogueBox* dialogueBox = qobject_cast<DialogueBox*>(object);
+    if (dialogueBox) {
+       dialogueBox->activateDefaultTextColor();
+       dialogueBox->setText("", "");
+    }
+    else {
+        TextBox* textBox = qobject_cast<TextBox*>(object);
+        if (textBox) {
+            textBox->activateDefaultTextColor();
+            textBox->setPlaceholderText("");
+        }
+    }
+}
+
+void Dialogue::focusIn()
+{
+    updateTextBox();
+}
+
+void Dialogue::focusOut()
+{
+    restoreTextBox();
+}
+
+void Dialogue::setSceneObject(Object * obj)
+{
+    restoreTextBox(); //restore old textbox
+    Action::setSceneObject(obj);
+    updateTextBox(); //update new one
 }
