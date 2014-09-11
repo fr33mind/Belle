@@ -32,6 +32,7 @@ class TextBox : public Object
 
     QString mText;
     QColor mTextColor;
+    QColor mDefaultTextColor;
     QRect mTextRect;
     QString mPlaceholderText;
     Qt::Alignment mTextAlignment;
@@ -46,6 +47,9 @@ public:
     virtual void setText(const QString&);
     void setTextColor(const QColor&);
     QColor textColor();
+    void setDefaultTextColor(const QColor&);
+    QColor defaultTextColor() const;
+    void activateDefaultTextColor();
     QRect textRect();
     QString currentText();
     int fontSize();

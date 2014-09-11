@@ -56,7 +56,7 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
     }
 
     if (data.contains("textColor") && data.value("textColor").type() == QVariant::List)
-        mTextColor = Utils::listToColor(data.value("textColor").toList());
+        setDefaultTextColor(Utils::listToColor(data.value("textColor").toList()));
 
     if (data.contains("textAlignment") && data.value("textAlignment").type() == QVariant::String) {
         QString align = data.value("textAlignment").toString();
@@ -92,7 +92,7 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
 void TextBox::init(const QString& text)
 {
     mText = text;
-    mTextColor = QColor(Qt::black);
+    setDefaultTextColor(QColor(Qt::black));
     mTextRect = sceneRect();
     mPlaceholderText = "";
     mTextAlignment = Qt::AlignLeft | Qt::AlignTop;
@@ -160,6 +160,17 @@ void TextBox::setTextColor(const QColor& color)
 {
     mTextColor = color;
     emit dataChanged();
+}
+
+void TextBox::setDefaultTextColor(const QColor& color)
+{
+    mDefaultTextColor = color;
+    setTextColor(color);
+}
+
+void TextBox::activateDefaultTextColor()
+{
+    setTextColor(mDefaultTextColor);
 }
 
 void TextBox::move(int x, int y)
@@ -253,11 +264,8 @@ void TextBox::paint(QPainter & painter)
 QVariantMap TextBox::toJsonObject(bool internal)
 {
     QVariantMap object = Object::toJsonObject(internal);
-    QVariantList color;
-    color << mTextColor.red() << mTextColor.green() << mTextColor.blue()
-             << mTextColor.alpha();
 
-    object.insert("textColor", color);
+    object.insert("textColor", Utils::colorToList(mDefaultTextColor));
     object.insert("text", mText);
     object.insert("textAlignment", textAlignmentAsString());
     if (mFont != Object::defaultFont())
