@@ -72,7 +72,7 @@ void TextPropertiesWidget::onColorChosen(const QColor& color)
 {
     TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
     if (textbox)
-        textbox->setTextColor(color);
+        textbox->setDefaultTextColor(color);
 }
 
 void TextPropertiesWidget::updateData(Object *obj)
@@ -85,12 +85,10 @@ void TextPropertiesWidget::updateData(Object *obj)
     if (! textbox->text().isEmpty())
         textbox->setPlaceholderText("");
 
-    if (textbox == mCurrentObject)
-        return;
-
-    mCurrentObject = 0;
+    textbox->activateDefaultTextColor();
 
     ObjectEditorWidget::updateData(obj);
+    mCurrentObject = 0;
 
     mChooseFontWidget->loadFonts();
 
@@ -112,7 +110,6 @@ void TextPropertiesWidget::updateData(Object *obj)
     }
 
     mTextEdit->setText(textbox->text());
-    mColorButton->setText(textbox->textColor().name());
     mColorButton->setColor(textbox->textColor());
     mChooseFontWidget->setCurrentFontFamily(textbox->fontFamily());
     mFontSizeSpin->setValue(textbox->fontSize());
