@@ -413,7 +413,7 @@ function Dialogue(data, parent)
     if (data) {
         if ("character" in data) {
             this.speakerName = data["character"];
-            this.character = belle.getObject(data["character"]);
+            this.character = this.getScene().getObject(data["character"]);
         }
         
         if ("text" in data) {
@@ -435,19 +435,21 @@ Dialogue.prototype.execute = function () {
         return;
     }
     
-    if (typeof object.setSpeakerName == "function") {
-        if (this.character) //in case character's name changed since the beginning
-            object.setSpeakerName(this.character.name);
-        else
-            object.setSpeakerName(this.speakerName);
-    }
-    object.setText("");
-    this.text = game.replaceVariables(this.text);
-    
-    //this.lines = splitText(context.font, this.text, object.rect.width-object.leftPadding);
-    if (this.character)
-        object.color = this.character.textColor;
+    object.activateDefaultTextColor();
 
+    if (typeof object.setSpeakerName == "function")
+      object.setSpeakerName(this.character ? this.character.name : this.speakerName);
+
+    if (this.character) {
+      object.setTextColor(this.character.textColor);
+
+      if (typeof object.setNameColor == "function")
+        object.setNameColor(this.character.nameColor);
+    }
+
+    object.setText("");
+
+    this.text = game.replaceVariables(this.text);
     this.interval = setInterval(function() { t.updateText(); }, game.textDelay);
 }
 
