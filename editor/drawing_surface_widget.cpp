@@ -207,6 +207,7 @@ void DrawingSurfaceWidget::paintSceneTo(QPaintDevice * paintDevice)
         return;
 
     QPainter painter(paintDevice);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
     scene->paint(painter);
     drawSelection(painter, scene->selectedObject());
 }
