@@ -114,8 +114,9 @@ void AddCharacterDialog::onItemClicked(QTreeWidgetItem * item, int column)
     mPrevName = item->text(0);
 
     QString path = imagePath(item);
-    if (! path.isEmpty())
-        onImageSelected(path);
+    QPixmap pixmap = mPixmapCache.value(path, QPixmap());
+    if (! pixmap.isNull())
+        mUi.lImage->setPixmap(pixmap);
 }
 
 QString AddCharacterDialog::imagePath(QTreeWidgetItem * item)
@@ -137,9 +138,8 @@ void AddCharacterDialog::onImageSelected(const QString& path)
 
     QPixmap pixmap(path);
     if (pixmap.height() > mUi.lImage->height())
-        pixmap = pixmap.scaledToHeight(mUi.lImage->height());
-    mUi.lImage->setPixmap(pixmap);
-
+        pixmap = pixmap.scaledToHeight(mUi.lImage->height(), Qt::SmoothTransformation);
+    mPixmapCache.insert(path, pixmap);
     if (! pixmap.isNull() && ! mUi.stateEdit->text().isEmpty())
         mUi.addStateButton->setDisabled(false);
 }
@@ -213,8 +213,16 @@ void AddCharacterDialog::removeState()
     if (index != -1) {
         mUi.statusTreeWidget->takeTopLevelItem(index);
         mUi.lImage->setPixmap(QPixmap());
+        clearCache(item);
         _sender->deleteLater();
     }
+}
+
+void AddCharacterDialog::clearCache(QTreeWidgetItem * item)
+{
+    QString path = imagePath(item);
+    if (mPixmapCache.contains(path))
+        mPixmapCache.remove(path);
 }
 
 void AddCharacterDialog::onStateEdited(const QString & text)

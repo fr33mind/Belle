@@ -30,6 +30,7 @@ class AddCharacterDialog : public QDialog {
     QString mPath;
     QString mPrevName;
     Ui::AddCharacterDialog mUi;
+    QHash<QString, QPixmap> mPixmapCache;
 
 public:
     explicit AddCharacterDialog(QWidget *parent = 0);
@@ -45,6 +46,7 @@ protected:
 
 private:
     void init(Character* character=0);
+    void clearCache(QTreeWidgetItem*);
 
 private slots:
     void onImageSelected(const QString&);
