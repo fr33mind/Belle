@@ -28,14 +28,15 @@ class DialogueBox : public ObjectGroup
         explicit DialogueBox(QObject* parent=0, const QString& name="DialogueBox");
         DialogueBox(const QVariantMap& data, QObject* parent=0);
         ~DialogueBox();
-        void setTextColor(const QColor &) {}
+        void setTextColor(const QColor &);
+        void setSpeakerNameColor(const QColor &);
         void setText(const QString &, const QString &);
         void setText(const QString &);
         void setSpeakerName(const QString&);
+        void activateDefaultTextColor();
 
         virtual void paint(QPainter &);
         virtual void move(int , int);
-        void setSpeakerColor(const QColor&);
         virtual QVariantMap toJsonObject(bool internal=true);
         /*static DialogueEditorWidget* dialogueEditorWidget();
         static void setDialogueEditorWidget(DialogueEditorWidget *);
