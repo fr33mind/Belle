@@ -1,3 +1,22 @@
+## Belle 0.4.2a | 12/09/2014
+
+#### [General]
+- Added ChangeState action.
+- Fixed a couple of issues with the Character object.
+
+#### [Editor]
+- Improved add character dialog window.
+- Added a button to edit character states after being created.
+- Added white border to invisible objects.
+- Added objects view widget.
+- TextBox, DialogueBox and Button objects now stay over other objects, by default.
+- Fixed crash when changing states in character.
+- Fixed background color in objects when not using any color.
+- Choose file buttons now remember last used directory.
+- Fixed crash when trying to change a deleted object/action.
+- Fixed some issues when changing TextBox objects in Dialogue's action editor.
+- Set image transforms smoother.
+
 ## Belle 0.4.1a | 19/08/2014
 
 - Added dialog to save changes when closing the editor.
