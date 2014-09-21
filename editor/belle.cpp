@@ -213,6 +213,7 @@ Belle::Belle(QWidget *widget)
 
 
     //connect actions' signals with the respective slots
+    connect(mUi.newProjectAction, SIGNAL(triggered()), this, SLOT(newProject()));
     connect(mUi.openProjectAction, SIGNAL(triggered()), this, SLOT(openFileOrProject()));
     connect(mUi.aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     connect(mUi.saveProjectAction, SIGNAL(triggered()), this, SLOT(saveProject()));
@@ -251,13 +252,7 @@ Belle::Belle(QWidget *widget)
     connect(mDeleteScene, SIGNAL(triggered()), this, SLOT(deleteScene()));
 
     restoreSettings();
-
-    //load default game
-    QDir def(Engine::defaultPath());
-    if (def.exists(GAME_FILENAME)) {
-        openFileOrProject(def.absoluteFilePath(GAME_FILENAME));
-        mSavePath = "";
-    }
+    loadDefaultGame();
 }
 
 void Belle::saveSettings()
@@ -862,6 +857,16 @@ QVariantMap Belle::readGameFile(const QString& filepath) const
     return data.toMap();
 }
 
+void Belle::clearProject()
+{
+    mDefaultSceneManager->removeScenes(true);
+    mPauseSceneManager->removeScenes(true);
+    ResourceManager::instance()->removeResources(true);
+    ResourceManager::setRelativePath("");
+    mSavePath = "";
+    mCurrentRunDirectory = "";
+}
+
 void Belle::openFileOrProject(QString filepath)
 {
     QStringList filters;
@@ -882,13 +887,9 @@ void Belle::openFileOrProject(QString filepath)
         return;
     }
 
-    mDefaultSceneManager->removeScenes(true);
-    mPauseSceneManager->removeScenes(true);
-    ResourceManager::instance()->removeResources(true);
-    ResourceManager::setRelativePath(QFileInfo(filepath).absolutePath());
+    clearProject();
     mSavePath = QFileInfo(filepath).absolutePath();
-    mCurrentRunDirectory = "";
-
+    ResourceManager::setRelativePath(QFileInfo(filepath).absolutePath());
     setNovelProperties(object);
     ResourceManager::importResources(object);
 
@@ -1307,19 +1308,54 @@ bool Belle::hasChanges() const
     return false;
 }
 
-void Belle::closeEvent(QCloseEvent *event)
+bool Belle::confirmQuit(const QString& title, const QString& text)
 {
     if (hasChanges()) {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, tr("Quit"), tr("You have unsaved changes.\nDo you want to save changes before closing?"),
+        reply = QMessageBox::question(this, title, text,
                                       QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel, QMessageBox::Cancel);
 
-        if (reply == QMessageBox::Yes) {
+        if (reply == QMessageBox::Yes)
             saveProject();
-        }
-        else if(reply == QMessageBox::Cancel) {
-            event->ignore();
-        }
+
+        if (reply == QMessageBox::Yes || reply == QMessageBox::No)
+            return true;
+
+        return false;
+    }
+
+    return true;
+}
+
+void Belle::closeEvent(QCloseEvent *event)
+{
+    bool confirmed = confirmQuit(tr("Quit?"), tr("You have unsaved changes.\nDo you want to save changes before closing?"));
+
+    if(! confirmed)
+        event->ignore();
+}
+
+bool Belle::loadDefaultGame()
+{
+    QDir def(Engine::defaultPath());
+    if (def.exists(GAME_FILENAME)) {
+        openFileOrProject(def.absoluteFilePath(GAME_FILENAME));
+        mSavePath = "";
+        return true;
+    }
+
+    return false;
+}
+
+void Belle::newProject()
+{
+    bool confirmed = confirmQuit(tr("New Project"), tr("You have unsaved changes.\nDo you want to save changes before creating a new project?"));
+
+    if (confirmed) {
+        clearProject();
+        bool loaded = loadDefaultGame();
+        if (! loaded)
+            addScene();
     }
 }
 

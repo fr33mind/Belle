@@ -35,6 +35,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="newProjectAction"/>
     <addaction name="openProjectAction"/>
     <addaction name="saveProjectAction"/>
     <addaction name="exportProject"/>
@@ -607,6 +608,15 @@
    </property>
    <property name="text">
     <string>Pause Screen</string>
+   </property>
+  </action>
+  <action name="newProjectAction">
+   <property name="icon">
+    <iconset resource="media.qrc">
+     <normaloff>:/media/document-new.png</normaloff>:/media/document-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Project</string>
    </property>
   </action>
  </widget>

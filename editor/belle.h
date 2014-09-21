@@ -98,6 +98,7 @@ class Belle : public QMainWindow
         void onSceneRemoved(int);
         QString exportProject(const QString& path="", bool toRun=false);
         void saveProject();
+        void newProject();
 
 protected:
         virtual void closeEvent(QCloseEvent*);
@@ -131,7 +132,9 @@ private:
         QVariantMap createGameFile() const;
         QVariantMap readGameFile(const QString&) const;
         bool hasChanges() const;
-
+        bool confirmQuit(const QString&, const QString&);
+        bool loadDefaultGame();
+        void clearProject();
 };
 
 #endif
