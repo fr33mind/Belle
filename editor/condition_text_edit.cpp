@@ -17,22 +17,58 @@
 #include "condition_text_edit.h"
 
 #include <QDebug>
+#include <QPainter>
 
 #include "condition_dialog.h"
 
 ConditionTextEdit::ConditionTextEdit(QWidget *parent) :
     QTextEdit(parent)
 {
-    setToolTip(tr("Double click here for graphical condition editor or "
-                  "just write the conditions yourself if you prefer."));
+    setMouseTracking(true);
+    mEditPixmap = QIcon(":/media/object-edit.png").pixmap(20, 20);
 }
 
-void ConditionTextEdit::mouseDoubleClickEvent(QMouseEvent *e)
+void ConditionTextEdit::mouseReleaseEvent(QMouseEvent *e)
 {
-    ConditionDialog dialog(this->toPlainText());
-    dialog.exec();
+    QTextEdit::mouseReleaseEvent(e);
 
-    if (dialog.result() == QDialog::Accepted) {
-        setPlainText(dialog.condition());
+    QPoint pos = editPixmapPos();
+    if (e->x() > pos.x() && e->y() < pos.y() + mEditPixmap.height()) {
+        ConditionDialog dialog(this->toPlainText());
+        dialog.exec();
+
+        if (dialog.result() == QDialog::Accepted) {
+            setPlainText(dialog.condition());
+        }
+        e->accept();
     }
+}
+
+void ConditionTextEdit::mouseMoveEvent(QMouseEvent *e)
+{
+    QTextEdit::mouseMoveEvent(e);
+
+    if (! viewport())
+        return;
+
+    QPoint pos = editPixmapPos();
+    if (e->x() > pos.x() && e->y() < pos.y() + mEditPixmap.height()) {
+        viewport()->setCursor(Qt::PointingHandCursor);
+    }
+    else if (viewport()->cursor().shape() != Qt::IBeamCursor) {
+        viewport()->setCursor(Qt::IBeamCursor);
+    }
+}
+
+void ConditionTextEdit::paintEvent(QPaintEvent *e)
+{
+    QTextEdit::paintEvent(e);
+    QPainter p(viewport());
+    QPoint pos = editPixmapPos();
+    p.drawPixmap(pos.x(), pos.y(), mEditPixmap);
+}
+
+QPoint ConditionTextEdit::editPixmapPos() const
+{
+    return QPoint(width() - mEditPixmap.width() - 5, 2);
 }

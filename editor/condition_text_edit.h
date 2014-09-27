@@ -18,20 +18,24 @@
 #define CONDITION_TEXT_EDIT_H
 
 #include <QTextEdit>
+#include <QPixmap>
 
 class ConditionTextEdit : public QTextEdit
 {
     Q_OBJECT
+
 public:
     explicit ConditionTextEdit(QWidget *parent = 0);
 
 protected:
-    virtual void mouseDoubleClickEvent(QMouseEvent *);
+    virtual void mouseReleaseEvent(QMouseEvent *);
+    virtual void mouseMoveEvent(QMouseEvent *);
+    virtual void paintEvent(QPaintEvent *);
 
-signals:
-
-public slots:
-
+private:
+    QPoint editPixmapPos() const;
+private:
+    QPixmap mEditPixmap;
 };
 
 #endif // CONDITION_TEXT_EDIT_H
