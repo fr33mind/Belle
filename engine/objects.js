@@ -829,15 +829,25 @@ function Image (data, parent, initElement)
 
 belle.utils.extend(Object, Image);
 
-Image.prototype.setImage = function(src)
+Image.prototype.setImage = function(img)
 {
-  if (! src)
+  if (! img)
     return;
-  
-  this.image = new AnimationImage(src, this);
-  if (this.element) {
-    $(this.element).find("img").remove();
-    $(this.element).append(this.image.img);
+  var oldImg = this.image;
+  if (typeof img == "string") {
+    if (! this.image || this.image.img.src != img)
+      this.image = new AnimationImage(img, this);
+  }
+  else if (img instanceof AnimationImage) {
+    this.image = img;
+  }
+
+  if (this.image != oldImg) {
+    this.update();
+    if (this.element) {
+      $(this.element).find("img").remove();
+      $(this.element).append(this.image.img);
+    }
   }
 }
 
@@ -906,8 +916,7 @@ belle.utils.extend(Image, Character);
 Character.prototype.setState = function(state)
 {
     if (state in this.states) {
-      this.image = this.states[state];
-      this.update();
+      this.setImage(this.states[state]);
     }
 }
 
