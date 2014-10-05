@@ -1029,7 +1029,7 @@ TextBox.prototype.alignText = function(text, size)
         for (var i=0; i < this.textParts.length; i++) {
             var size = belle.utils.textSize(this.textParts[i], this.font);
             var width = size[0];
-            var height = size[1] / 1.2;
+            var height = Math.round(size[1] / 1.2);
             var leftPadding = 0;
             sumHeight += height;
             this.textTopPadding.push(sumHeight);
@@ -1037,7 +1037,7 @@ TextBox.prototype.alignText = function(text, size)
             if (this.textAlignment) {
                 if (width < this.width) {
                     if (this.textAlignment.contains("HCenter")) {
-                        leftPadding = (this.width - width) / 2;
+                        leftPadding = Math.round((this.width - width) / 2);
                     }
                     else if (this.textAlignment.contains("Right")) {
                         leftPadding = this.width - width;
