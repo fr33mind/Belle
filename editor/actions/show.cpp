@@ -24,8 +24,8 @@ Show::Show(const QVariantMap &data, QObject *parent):
 {
     init();
 
-    if (data.contains("state") && data.value("state").type() == QVariant::String ) {
-
+    if (data.contains("state") && data.value("state").type() == QVariant::String) {
+        setCharacterState(data.value("state").toString());
     }
 }
 
@@ -45,10 +45,13 @@ void Show::init()
 
 void Show::setCharacterState(const QString& state)
 {
-    mCharacterState = state;
+    if (mCharacterState != state) {
+        mCharacterState = state;
+        emit dataChanged();
+    }
 }
 
-QString Show::characterState()
+QString Show::characterState() const
 {
     return mCharacterState;
 }

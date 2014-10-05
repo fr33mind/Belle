@@ -20,6 +20,8 @@
 #include "change_visibility.h"
 #include "show_editor_widget.h"
 
+class ChangeVisibility;
+
 class Show : public ChangeVisibility
 {
     Q_OBJECT
@@ -37,7 +39,7 @@ public:
     static void setShowEditorWidget(ShowEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
     void setCharacterState(const QString&);
-    QString characterState();
+    QString characterState() const;
     QVariantMap toJsonObject();
 
 private:

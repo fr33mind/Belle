@@ -563,6 +563,9 @@ ChangeVisibility.prototype.execute = function ()
       return;
     }
     
+    if (object instanceof belle.objects.Character && this.characterState)
+      object.setState(this.characterState);
+      
     this.initObjectForTransitions();
     if (this.show)
       object.show();
@@ -653,6 +656,8 @@ function Show(data, parent)
     data.show = true;
     ChangeVisibility.call(this, data, parent);
     this.characterState = "";
+    if ("state" in data)
+      this.characterState = data["state"];
 }
 
 belle.utils.extend(ChangeVisibility, Show);

@@ -32,6 +32,26 @@ ShowEditorWidget::ShowEditorWidget(QWidget *parent):
 void ShowEditorWidget::updateData(Action *action)
 {
     ChangeVisibilityEditorWidget::updateData(action);
+
+    Show* show = qobject_cast<Show*>(action);
+    if (! show)
+        return;
+
+    mAction = 0;
+    mObjectStateWidget->clear();
+    Character* character = qobject_cast<Character*>(show->sceneObject());
+    if (character) {
+        mObjectStateWidget->addItems(character->states());
+        int currIndex = mObjectStateWidget->findText(show->characterState());
+        if (currIndex != -1)
+            mObjectStateWidget->setCurrentIndex(currIndex);
+        else
+            mObjectStateWidget->setCurrentIndex(-1);
+    }
+
+    mAction = action;
+    if (character && show->characterState().isEmpty())
+        mObjectStateWidget->setCurrentIndex(0);
 }
 
 void ShowEditorWidget::onStateChanged(int index)
@@ -39,11 +59,10 @@ void ShowEditorWidget::onStateChanged(int index)
     Show* show = qobject_cast<Show*>(mAction);
     if (show && show->sceneObject()) {
         Character *character = qobject_cast<Character*>(show->sceneObject());
-        if (character) {
-            character->setCurrentState(mObjectStateWidget->currentText());
-            show->setDisplayText(character->objectName() + " (" + character->currentState() + ")");
+        if (character)
             show->setCharacterState(mObjectStateWidget->currentText());
-        }
+        else
+            show->setCharacterState("");
     }
 }
 

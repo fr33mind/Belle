@@ -15,6 +15,7 @@
  */
 
 #include "change_visibility.h"
+#include "show.h"
 
 #include <QDebug>
 
@@ -104,8 +105,12 @@ QString ChangeVisibility::displayText() const
         text += sceneObject()->objectName() + " ";
 
     Character* character = qobject_cast<Character*>(sceneObject());
-    if (character)
-        text += QString(" (%1)").arg(character->currentState());
+    if (character && toShow()) {
+        const Show* _this = qobject_cast<const Show*>(this);
+        if (_this) {
+            text += QString("(%1) ").arg(_this->characterState());
+        }
+    }
 
     const Fade* fade = fadeAction();
     const Slide* slide = slideAction();
@@ -152,12 +157,12 @@ void ChangeVisibility::setSceneObject(Object* obj)
     emit dataChanged();
 }
 
-bool ChangeVisibility::toShow()
+bool ChangeVisibility::toShow() const
 {
     return mToShow;
 }
 
-bool ChangeVisibility::toHide()
+bool ChangeVisibility::toHide() const
 {
     return ! mToShow;
 }

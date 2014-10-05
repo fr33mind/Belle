@@ -47,8 +47,8 @@ public:
     void setCharacter(Character*);
     Character* character() const;
     virtual QVariantMap toJsonObject();
-    bool toShow();
-    bool toHide();
+    bool toShow() const;
+    bool toHide() const;
     virtual void setSceneObject(Object *);
 
     void setFadeAction(Fade*);
