@@ -86,7 +86,7 @@ bool ImageFile::isAnimated(const QString& path)
 {
     bool animated = false;
     QImageReader reader(path);
-    if (reader.canRead() && reader.supportsAnimation()) {
+    if (reader.canRead() && reader.supportsAnimation() && reader.imageCount() > 1) {
         animated = true;
     }
 
