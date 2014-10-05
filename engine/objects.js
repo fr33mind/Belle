@@ -925,6 +925,11 @@ function TextBox(info, parent, initElement)
     this.displayedText = "";
     game.addEventListener("variableChanged", this, this.update);
     
+    if ("font" in info) 
+        this.setFont(info["font"]);
+    else
+      this.setFont(game.font);
+    
     TextBox.prototype.load.call(this, info);
     
     if(initElement || initElement === undefined)
@@ -939,17 +944,14 @@ TextBox.prototype.load = function(data)
     
     if (! loaded)
       return false;
-    
-    if ("font" in data) 
-	this.setFont(data["font"]);
-    else
-	this.setFont(game.font);
   
     if ("textAlignment" in data)
-        this.textAlignment = data["textAlignment"].split("|");
-    
+      this.textAlignment = data["textAlignment"].split("|");
+
+    var text = "";
     if ("text" in data)
-        this.setText(data["text"]);
+      text = data["text"];
+    this.setText(text);
 	
     if ("textColor" in data) {
         this.setTextColor(data["textColor"]);
