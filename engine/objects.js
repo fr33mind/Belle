@@ -559,8 +559,7 @@ Object.prototype.paint = function(context)
         
         context.closePath();
         
-	context.stroke();
-	context.clip();
+		context.clip();
     }
     else if (this.borderWidth > 0) {
 	context.beginPath();
