@@ -192,6 +192,13 @@ function Object(info, parent, initElement)
     this.mouseLeaveActions = [];
     this.name = "";
     this.defaultState = null; 
+    this.paintX = false;
+    this.paintY = false; 
+    this.paintWidth = false;
+    this.paintHeight = false;
+    this.redraw = false;
+    this.redrawing = false;
+    this.hovering = false;
     this.loaded = true;
     this.data = info;
     this.parent = parent ? parent : null;
@@ -234,24 +241,25 @@ Object.prototype.load = function(data)
     if (! data)
       return false;
   
-    this.setX(data.x);
-    this.setY(data.y);
-    this.setWidth(data.width);
-    this.setHeight(data.height);
-    this.backgroundColor = new Color([255, 255, 255, 255]);
-    this.backgroundImage = null;
     this.cornerRadius = 0;
     this.opacity = 255;
     this.borderWidth = 0;
     this.borderColor = null;
     this.visible = false;
-    this.paintX = false;
-    this.paintY = false; 
-    this.paintWidth = false;
-    this.paintHeight = false;
-    this.redraw = false;
-    this.redrawing = false;
-    this.hovering = false;
+    this.backgroundColor = new Color([255, 255, 255, 255]);
+    this.backgroundImage = null;
+    
+    if ("x" in data)
+      this.setX(data.x);
+    
+    if ("y" in data)
+      this.setY(data.y);
+
+    if ("width" in data)
+      this.setWidth(data.width);
+    
+    if ("height" in data)
+      this.setHeight(data.height);
     
     if ("name" in data)
         this.name = data["name"];
