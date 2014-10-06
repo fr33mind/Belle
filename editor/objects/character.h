@@ -53,6 +53,7 @@ class Character : public Image
         static void setCharacterEditorWidget(CharacterPropertiesWidget *);
         virtual ObjectEditorWidget* editorWidget();
         QHash <QString, QString> statesToPaths();
+        QHash <QString, ImageFile*> statesToImages();
         QStringList states() const;
         void setAvailable(bool);
         bool isAvailable();

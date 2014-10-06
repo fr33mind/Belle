@@ -24,7 +24,6 @@
 #include "combobox.h"
 #include "choosefilebutton.h"
 
-
 AddCharacterDialog::AddCharacterDialog(Character* character, QWidget *parent) :
     QDialog(parent)
 {
@@ -43,6 +42,7 @@ void AddCharacterDialog::init(Character* character)
     mUi.setupUi( this );
     setModal(true);
 
+    mPrevName = "";
     mUi.lImage->setAlignment(Qt::AlignCenter);
     mUi.browseImageButton->setFilter(ChooseFileButton::ImageFilter);
     mUi.statusTreeWidget->header()->setResizeMode(0, QHeaderView::Stretch);
@@ -51,12 +51,18 @@ void AddCharacterDialog::init(Character* character)
     if (character) {
         this->setWindowTitle(tr("Edit Character"));
         mUi.nameEdit->setText(character->name());
-        QHash<QString, QString> statesToPaths = character->statesToPaths();
-        QHashIterator<QString, QString> it(statesToPaths);
+        QHash<QString, ImageFile*> statesToImages = character->statesToImages();
+        QHashIterator<QString, ImageFile*> it(statesToImages);
         while(it.hasNext()) {
             it.next();
-            qDebug() << it.key() << it.value();
-            addState(it.key(), it.value());
+            ImageFile* image = it.value();
+            if (image) {
+                QPixmap pixmap = image->pixmap();
+                if (pixmap.height() > mUi.lImage->height())
+                    pixmap = pixmap.scaledToHeight(mUi.lImage->height(), Qt::SmoothTransformation);
+                mPixmapCache.insert(image->path(), pixmap);
+                addState(it.key(), image->path());
+            }
         }
     }
 

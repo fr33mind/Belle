@@ -21,6 +21,7 @@
 
 #include "scene.h"
 #include "utils.h"
+#include "resource_manager.h"
 
 static CharacterPropertiesWidget* mEditorWidget = 0;
 
@@ -48,7 +49,7 @@ Character::Character(const QVariantMap& data, QObject* parent) :
         while(it.hasNext()) {
             it.next();
             if (it.value().type() == QVariant::String)
-                states.insert(it.key(), it.value().toString());
+                states.insert(it.key(), ResourceManager::absolutePath(it.value().toString()));
         }
 
         setStates(states);
@@ -159,6 +160,11 @@ ObjectEditorWidget* Character::editorWidget()
 QHash <QString, QString> Character::statesToPaths()
 {
     return mStateToPath;
+}
+
+QHash <QString, ImageFile*> Character::statesToImages()
+{
+    return mStateToImage;
 }
 
 QStringList Character::states() const
