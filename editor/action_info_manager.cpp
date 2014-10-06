@@ -208,7 +208,7 @@ Action* ActionInfoManager::typeToAction(const QVariant& data, QObject* parent)
     else if (type == "End")
         return new End(parent);
     else if (type == "ChangeState")
-        return new ChangeState(parent);
+        return new ChangeState(actionMap, parent);
 
     return 0;
 }

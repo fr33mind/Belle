@@ -15,6 +15,7 @@ public:
 
 public:
     explicit ChangeState(QObject *parent = 0);
+    ChangeState(const QVariantMap&, QObject *parent = 0);
     static ChangeStateEditorWidget* changeStateEditorWidget();
     static void setChangeStateEditorWidget(ChangeStateEditorWidget*);
     virtual ActionEditorWidget* editorWidget();

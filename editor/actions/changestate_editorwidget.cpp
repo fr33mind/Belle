@@ -38,16 +38,24 @@ void ChangeStateEditorWidget::updateData(Action * action)
         mCharacterBox->addItem(object->name());
     }
 
-    mCharacterBox->setCurrentIndex(-1);
-    if (currIndex != -1) {
+    if (currIndex != -1)
         mCharacterBox->setCurrentIndex(currIndex);
-        if (! changeStateAction->state().isEmpty())
-            mStateBox->setCurrentIndex(mStateBox->findText(changeStateAction->state()));
+    else
+        mCharacterBox->setCurrentIndex(-1);
+
+    mStateBox->clear();
+    if (currObject) {
+        Character* character = qobject_cast<Character*>(currObject);
+        if (character)
+            mStateBox->addItems(character->states());
     }
+
+    if (! changeStateAction->state().isEmpty())
+        mStateBox->setCurrentIndex(mStateBox->findText(changeStateAction->state()));
 
     mAction = action;
 
-    if (currIndex == -1 && mCharacterBox->count())
+    if (! currObject && mCharacterBox->count())
         mCharacterBox->setCurrentIndex(0);
 }
 
@@ -59,6 +67,7 @@ void ChangeStateEditorWidget::onObjectChosen(const QString& name)
 
     mStateBox->clear();
     action->setSceneObject(name);
+    action->setState("");
     Character* character = qobject_cast<Character*>(action->sceneObject());
     if (character)
         mStateBox->addItems(character->states());

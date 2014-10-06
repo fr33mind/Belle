@@ -11,11 +11,21 @@ ChangeState::ChangeState(QObject *parent) :
     init();
 }
 
+ChangeState::ChangeState(const QVariantMap& data, QObject *parent) :
+    Action(data, parent)
+{
+    init();
+
+    if (data.contains("state") && data.value("state").type() == QVariant::String)
+        setState(data.value("state").toString());
+}
+
 void ChangeState::init()
 {
     setName(Info.name);
     setType(Info.type);
     setIcon(Info.icon);
+    mState = "";
 }
 
 void ChangeState::setChangeStateEditorWidget(ChangeStateEditorWidget * widget)
