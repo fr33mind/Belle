@@ -386,26 +386,103 @@ Object.prototype.overlaped = function(object)
     return true;
 }
 
+Object.prototype.translateX = function(x, type)
+{
+  if (belle.utils.isNumber(x))
+    return x;
+
+  var scene = this.getScene();
+  if (! scene)
+    return null;
+
+  if (x == "left") {
+    if (type == "out")
+      return -1 * this.width;
+    else
+      return 0;
+  }
+
+  if (x == "center")
+    return (scene.width / 2) - (object.width / 2);
+
+  if (x == "right") {
+    if (type == "out")
+      return scene.width;
+    else
+      return scene.width - object.width;
+  }
+
+  return null;
+}
+
+Object.prototype.translateY = function(y, type)
+{
+  if (belle.utils.isNumber(y))
+    return y;
+
+  var scene = this.getScene();
+  if (! scene)
+    return null;
+
+  if (y == "top") {
+    if (type == "out")
+      return this.height * -1;
+    else
+      return 0;
+  }
+
+  if (y == "center")
+    return (scene.height / 2) - (object.height / 2);
+
+  if (y == "bottom") {
+    if (type == "out")
+      return scene.height;
+    else
+      return scene.height - object.height;
+  }
+
+  return null;
+}
+
 Object.prototype.setX = function(x)
 {
-    
+    if (this.x == x)
+      return;
+
+    if (typeof x == "string") {
+      x = this.translateX(x);
+      if (x === null)
+        return;
+    }
+
     this.x = this.scaledX = x;
     var scale = belle.display.scaledWidthFactor;
     if (scale != 1)
         this.scaledX *= scale;
-    
+
     if (this.element)
         this.element.style.left = this.scaledX + "px";
+    this.update();
 }
 
 Object.prototype.setY = function(y)
 {
+    if (this.y == y)
+      return;
+
+    if (typeof y == "string") {
+      y = this.translateY(y);
+      if (y === null)
+        return;
+    }
+
     this.y = this.scaledY = y;
     var scale = belle.display.scaledHeightFactor;
     if (scale != 1)
         this.scaledY *= scale;
     if (this.element)
         this.element.style.top = this.scaledY + "px";
+    this.update();
 }
 
 Object.prototype.contains = function(px, py)
