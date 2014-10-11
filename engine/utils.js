@@ -158,8 +158,14 @@ utils.isPercentSize = function(value)
     return value.search(/[0-9]+\%/g) != -1;
 }
 
+utils.isNaN = function(value)
+{
+  //NaN value is never equal to itself
+  return (value !== value);
+}
+
 utils.isNumber = function(n) {
-  return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
+  return ! utils.isNaN(parseInt(n));
 }
 
 utils.initElement = function (element, info)
@@ -277,6 +283,11 @@ utils.setBorderRadius = function(elem, radius) {
     elem.style.borderRadius = radius + "px"; // standard
     elem.style.MozBorderRadius = radius + "px"; // Mozilla
     elem.style.WebkitBorderRadius = radius + "px";; // WebKit
+}
+
+utils.distance = function(x1, y1, x2, y2)
+{
+  return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
 }
 
 }(belle.utils));
