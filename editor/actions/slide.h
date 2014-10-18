@@ -28,13 +28,14 @@ class Slide : public Action
 {
     Q_OBJECT
 
-    QPoint mStartPoint;
-    QPoint mEndPoint;
-    QPoint mObjectOriginalPoint;
-    float mDuration;
-
 public:
     static ActionInfo Info;
+
+    enum Type {
+        In,
+        Out,
+        Custom
+    };
 
 public:
     explicit Slide(QObject *parent = 0);
@@ -43,22 +44,18 @@ public:
     static void setSlideEditorWidget(SlideEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
     virtual QString displayText() const;
-    int startX() const;
-    int startY() const;
-    int endX() const;
-    int endY() const;
-    QPoint startPoint() const;
-    QPoint endPoint() const;
-    void setStartPoint(const QPoint&);
-    void setStartX(int);
-    void setStartY(int);
-    void setEndPoint(const QPoint&);
-    void setEndX(int);
-    void setEndY(int);
-
-    float duration() const;
-    void setDuration(float);
-    //void setSceneObject(Object *);
+    Type slideType() const;
+    QString slideTypeAsString() const;
+    void setSlideType(Type);
+    void setSlideType(const QString&);
+    void setDestX(int);
+    void setDestX(const QString&);
+    QString destX() const;
+    void setDestY(int);
+    void setDestY(const QString&);
+    QString destY() const;
+    double duration() const;
+    void setDuration(double);
     virtual void finishedEditing();
     virtual QVariantMap toJsonObject();
 
@@ -69,9 +66,14 @@ private slots:
     void objectPositionChanged(int, int);
 
 private:
+    Type mSlideType;
+    QString mDestX;
+    QString mDestY;
+    QPoint mObjectOriginalPoint;
+    double mDuration;
+
     void init();
-
-
+    void updateSlideType();
 };
 
 #endif // SLIDE_H

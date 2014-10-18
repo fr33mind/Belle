@@ -115,7 +115,7 @@ QString ChangeVisibility::displayText() const
     const Fade* fade = fadeAction();
     const Slide* slide = slideAction();
 
-    float duration = 0.0;
+    double duration = 0.0;
 
     if (fade && fade->duration() || slide && slide->duration()) {
         text += tr("with") + " ";
@@ -191,7 +191,7 @@ QVariantMap ChangeVisibility::toJsonObject()
 {
     QVariantMap object = Action::toJsonObject();
     QVariantList transitions;
-    if (mSlideAction && mSlideAction->startPoint() != mSlideAction->endPoint())
+    if (mSlideAction && (! mSlideAction->destX().isEmpty() || ! mSlideAction->destY().isEmpty()))
         transitions.append(mSlideAction->toJsonObject());
     if (mFadeAction && mFadeAction->duration() > 0)
         transitions.append(mFadeAction->toJsonObject());

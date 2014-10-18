@@ -32,14 +32,13 @@ class SlideEditorWidget : public ActionEditorWidget
     Q_OBJECT
 
     ResourceManager * mResources;
-    QSpinBox* mStartXSlider;
-    QSpinBox* mStartYSlider;
-    QSpinBox* mEndXSlider;
-    QSpinBox* mEndYSlider;
     QDoubleSpinBox*  mDurationSpinBox;
-    QPushButton* mStartButton;
-    QPushButton* mEndButton;
     QComboBox* mObjectChooser;
+    QComboBox* mDestXChooser;
+    QAbstractItemModel* mDestXChooserEmptyModel;
+    QAbstractItemModel* mDestXChooserModel;
+    QComboBox* mDestYChooser;
+    QComboBox* mTypeChooser;
     bool mIsDown;
 
 public:
@@ -50,12 +49,19 @@ public:
 signals:
 
 
+private:
+    void setupDestChooser(int type=0);
+
 private slots:
     void onButtonClicked();
-    void onSliderValueChanged(int);
+//    void onSliderValueChanged(int);
     void onResourceChanged(int);
+    void onTypeChanged(int);
+    void onDestXChanged(const QString&);
+    void onDestYChanged(const QString&);
+    void onDestXChanged(int);
+    void onDestYChanged(int);
     void onDurationChanged(double);
-    void onGetObjectCoordinates();
 
 };
 

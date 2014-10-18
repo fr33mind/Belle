@@ -19,65 +19,48 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QDebug>
+#include <QHBoxLayout>
+#include <QIntValidator>
 
-#include "slide.h"
 #include "scene_manager.h"
 
 SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-
-    //mStartButton = new QPushButton("(0, 0)", this);
-    //mEndButton = new QPushButton("(0, 0)", this);
     mObjectChooser = new QComboBox(this);
-    mStartXSlider = new QSpinBox(this);
-    mStartYSlider = new QSpinBox(this);
-    QPushButton* objectCoordStartButton = new QPushButton(tr("Get Coordinates"), this);
-    objectCoordStartButton->setObjectName("start");
-    mEndXSlider = new QSpinBox(this);
-    mEndYSlider = new QSpinBox(this);
-    QPushButton* objectCoordEndButton = new QPushButton(tr("Get Coordinates"), this);
-    objectCoordEndButton->setObjectName("end");
+    mTypeChooser = new QComboBox(this);
+    mTypeChooser->addItems(QStringList() << tr("In") << tr("Out") << tr("Custom"));
     mDurationSpinBox = new QDoubleSpinBox(this);
     mDurationSpinBox->setSingleStep(0.1);
     mDurationSpinBox->setMinimum(0);
 
-    mStartXSlider->setObjectName("start x");
-    mStartYSlider->setObjectName("start y");
-    mEndXSlider->setObjectName("end x");
-    mEndYSlider->setObjectName("end y");
+    QWidget * positionWidget = new QWidget(this);
+    QHBoxLayout* hLayout = new QHBoxLayout(positionWidget);
+    mDestXChooser = new QComboBox(positionWidget);
+    mDestYChooser = new QComboBox(positionWidget);
 
+    //configure position choosers
+    setupDestChooser();
+    mDestXChooser->setValidator(new QIntValidator(mDestXChooser));
+    mDestYChooser->setValidator(new QIntValidator(mDestYChooser));
+
+    hLayout->addWidget(mDestXChooser);
+    hLayout->addWidget(mDestYChooser);
     beginGroup(tr("Slide Action"));
     appendRow(tr("Object"), mObjectChooser, "Object");
-
-    beginSubGroup(tr("Start Point"));
-    appendRow(tr("Get object's coordinates"), objectCoordStartButton);
-    appendRow("x", mStartXSlider);
-    appendRow("y", mStartYSlider);
-    endGroup();
-
-    beginSubGroup(tr("End Point"));
-    appendRow(tr("Get object's coordinates"), objectCoordEndButton);
-    appendRow("x", mEndXSlider);
-    appendRow("y", mEndYSlider);
-    endGroup();
-
+    appendRow(tr("Type"), mTypeChooser);
+    appendRow(tr("Destination"), positionWidget);
     appendRow(tr("Duration (sec)"),  mDurationSpinBox);
     endGroup();
 
-    connect(mStartXSlider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
-    connect(mStartYSlider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
-    connect(mEndXSlider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
-    connect(mEndYSlider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
     connect(mObjectChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onResourceChanged(int)));
+    connect(mTypeChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onTypeChanged(int)));
+    connect(mDestXChooser, SIGNAL(editTextChanged(const QString &)), this, SLOT(onDestXChanged(const QString &)));
+    connect(mDestYChooser, SIGNAL(editTextChanged(const QString &)), this, SLOT(onDestYChanged(const QString &)));
+    connect(mDestXChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onDestXChanged(int)));
+    connect(mDestYChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onDestYChanged(int)));
     connect(mDurationSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onDurationChanged(double)));
-    connect(objectCoordStartButton, SIGNAL(clicked()), this, SLOT(onGetObjectCoordinates()));
-    connect(objectCoordEndButton, SIGNAL(clicked()), this, SLOT(onGetObjectCoordinates()));
 
-    /*connect(mStartButton, SIGNAL(pressed()), this, SLOT(onButtonClicked()));
-    connect(mEndButton, SIGNAL(pressed()), this, SLOT(onButtonClicked()));
-    mStartButton->installEventFilter(this);
-    mEndButton->installEventFilter(this);*/
     mIsDown = false;
     resizeColumnToContents(0);
 }
@@ -90,12 +73,6 @@ void SlideEditorWidget::updateData(Action * action)
 
     ActionEditorWidget::updateData(action);
     mAction = 0;
-
-    mStartXSlider->setValue(slide->startX());
-    mStartYSlider->setValue(slide->startY());
-
-    mEndXSlider->setValue(slide->endX());
-    mEndYSlider->setValue(slide->endY());
 
     mDurationSpinBox->setValue(slide->duration());
 
@@ -121,11 +98,18 @@ void SlideEditorWidget::updateData(Action * action)
     if (! currObj && ! objects.isEmpty())
         slide->setSceneObject(objects[0]);
 
-    if (slide->sceneObject()) {
-        mStartXSlider->setRange(-slide->sceneObject()->width(), Scene::width());
-        mStartYSlider->setRange(-slide->sceneObject()->height(), Scene::height());
-        mEndXSlider->setRange(-slide->sceneObject()->width(), Scene::width());
-        mEndYSlider->setRange(-slide->sceneObject()->height(), Scene::height());
+
+    mTypeChooser->setCurrentIndex(static_cast<int>(slide->slideType()));
+    bool custom = (slide->slideType() == Slide::Custom);
+    setupDestChooser(slide->slideType());
+
+    if(custom) {
+        mDestXChooser->setEditText(slide->destX());
+        mDestYChooser->setEditText(slide->destY());
+    }
+    else {
+        mDestXChooser->setCurrentIndex(mDestXChooser->findData(slide->destX()));
+        mDestYChooser->setCurrentIndex(mDestYChooser->findData(slide->destY()));
     }
 
     mAction = action;
@@ -137,7 +121,6 @@ void SlideEditorWidget::onButtonClicked()
     btn->setChecked(! btn->isChecked());
     //mIsDown = true;
     //btn->setDown(true);
-
 }
 
 bool SlideEditorWidget::eventFilter(QObject *obj, QEvent *event)
@@ -165,28 +148,6 @@ bool SlideEditorWidget::eventFilter(QObject *obj, QEvent *event)
     //if ((obj == mStartButton || obj == mEndButton) && event->)
 }
 
-void SlideEditorWidget::onSliderValueChanged(int value)
-{
-    Slide * slide  = qobject_cast<Slide*>(mAction);
-    if (! slide)
-        return;
-
-    QString name(sender()->objectName());
-    if (name.contains("start")) {
-        if (name.contains("x"))
-            slide->setStartX(value);
-        else
-            slide->setStartY(value);
-    }
-    else if(name.contains("end")) {
-        if (name.contains("x"))
-            slide->setEndX(value);
-        else
-            slide->setEndY(value);
-    }
-
-}
-
 void SlideEditorWidget::onDurationChanged(double dur) {
     Slide * slide  = qobject_cast<Slide*>(mAction);
     if (slide)
@@ -204,29 +165,71 @@ void SlideEditorWidget::onResourceChanged(int index)
 
         if (slide->sceneObject() != obj) {
             slide->setSceneObject(obj);
-            slide->setStartX(obj->x());
-            slide->setStartY(obj->y());
-
-            mStartXSlider->setValue(slide->startX());
-            mStartYSlider->setValue(slide->startY());
         }
     }
 }
 
-void SlideEditorWidget::onGetObjectCoordinates()
+void SlideEditorWidget::onTypeChanged(int type)
 {
     Slide * slide  = qobject_cast<Slide*>(mAction);
-    if (slide && slide->sceneObject()) {
-        if (sender()->objectName() == "start") {
-            slide->setStartX(slide->sceneObject()->x());
-            slide->setStartY(slide->sceneObject()->y());
-            mStartXSlider->setValue(slide->startX());
-            mStartYSlider->setValue(slide->startY());
-        } else if (sender()->objectName() == "end") {
-            slide->setEndX(slide->sceneObject()->x());
-            slide->setEndY(slide->sceneObject()->y());
-            mEndXSlider->setValue(slide->endX());
-            mEndYSlider->setValue(slide->endY());
-        }
+    if (slide) {
+        slide->setSlideType(static_cast<Slide::Type>(type));
+        setupDestChooser(slide->slideType());
+    }
+}
+
+void SlideEditorWidget::onDestXChanged(const QString & pos)
+{
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (slide)
+        slide->setDestX(pos.toInt());
+}
+
+void SlideEditorWidget::onDestYChanged(const QString & pos)
+{
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (slide)
+        slide->setDestY(pos.toInt());
+}
+
+void SlideEditorWidget::onDestXChanged(int index)
+{
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (slide)
+        slide->setDestX(mDestXChooser->itemData(index).toString());
+}
+
+void SlideEditorWidget::onDestYChanged(int index)
+{
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (slide)
+        slide->setDestY(mDestYChooser->itemData(index).toString());
+}
+
+void SlideEditorWidget::setupDestChooser(int type)
+{
+    bool custom = (type == Slide::Custom);
+    mDestXChooser->setEditable(custom);
+    mDestYChooser->setEditable(custom);
+    mDestXChooser->clear();
+    mDestYChooser->clear();
+
+    if (type == Slide::Custom) {
+        mDestXChooser->lineEdit()->setPlaceholderText("X");
+        mDestYChooser->lineEdit()->setPlaceholderText("Y");
+    }
+    else if (type == Slide::Out || type == Slide::In) {
+        mDestXChooser->addItem("", "");
+        mDestXChooser->addItem(tr("Left"), "left");
+        if (type == Slide::In)
+            mDestXChooser->addItem(tr("Center"), "center");
+        mDestXChooser->addItem(tr("Right"), "right");
+        mDestYChooser->addItem("", "");
+        mDestYChooser->addItem(tr("Top"), "top");
+        if (type == Slide::In)
+            mDestYChooser->addItem(tr("Center"), "center");
+        mDestYChooser->addItem(tr("Bottom"), "bottom");
+        mDestXChooser->setCurrentIndex(0);
+        mDestYChooser->setCurrentIndex(0);
     }
 }

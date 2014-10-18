@@ -32,20 +32,17 @@ Slide::Slide(const QVariantMap& data, QObject *parent) :
 {
     init();
 
-    if (data.contains("startX") && data.value("startX").canConvert(QVariant::Double))
-        setStartX(data.value("startX").toFloat());
+    if (data.contains("destX") && data.value("destX").canConvert(QVariant::String))
+        setDestX(data.value("destX").toString());
 
-    if (data.contains("startY") && data.value("startY").canConvert(QVariant::Double))
-        setStartY(data.value("startY").toFloat());
+    if (data.contains("destY") && data.value("destY").canConvert(QVariant::String))
+        setDestY(data.value("destY").toString());
 
-    if (data.contains("endX") && data.value("endX").canConvert(QVariant::Double))
-        setEndX(data.value("endX").toFloat());
-
-    if (data.contains("endY") && data.value("endY").canConvert(QVariant::Double))
-        setEndY(data.value("endY").toFloat());
+    if (data.contains("slideType") && data.value("slideType").canConvert(QVariant::String))
+        setSlideType(data.value("slideType").toString());
 
     if (data.contains("duration") && data.value("duration").canConvert(QVariant::Double))
-        setDuration(data.value("duration").toFloat());
+        setDuration(data.value("duration").toDouble());
 }
 
 
@@ -57,6 +54,9 @@ void Slide::init()
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |
     Interaction::MouseMove);
     mObjectOriginalPoint = QPoint();
+    mSlideType = Slide::In;
+    mDestX = "";
+    mDestY = "";
     mDuration = 1;
 }
 
@@ -77,100 +77,104 @@ ActionEditorWidget* Slide::editorWidget()
 
 QString Slide::displayText() const
 {
-    if (! this->sceneObject())
+    if (! this->sceneObject() || mDestX.isEmpty() && mDestY.isEmpty())
         return "";
 
-    return QString("\"%1\" from (%2, %3) to (%4, %5)").arg(this->sceneObject()->objectName())
-                                                .arg(mStartPoint.x())
-                                                .arg(mStartPoint.y())
-                                                .arg(mEndPoint.x())
-                                                .arg(mEndPoint.y());
+    return QString("Slide %1 \"%2\" to (%3, %4)").arg(slideTypeAsString())
+                                                .arg(this->sceneObject()->objectName())
+                                                .arg(mDestX)
+                                                .arg(mDestY);
 }
 
-int Slide::startX() const
+Slide::Type Slide::slideType() const
 {
-    return mStartPoint.x();
+    return mSlideType;
 }
 
-int Slide::startY() const
+QString Slide::slideTypeAsString() const
 {
-    return mStartPoint.y();
+    switch(mSlideType) {
+        case Slide::In: return "in";
+        case Slide::Out: return "out";
+        case Slide::Custom: return "custom";
+    }
+
+    return "";
 }
 
-int Slide::endX() const
+void Slide::setSlideType(Slide::Type type)
 {
-    return mEndPoint.x();
-}
-
-int Slide::endY() const
-{
-    return mEndPoint.y();
-}
-
-void Slide::setStartPoint(const QPoint& point)
-{
-    mStartPoint = point;
-}
-
-QPoint Slide::startPoint() const
-{
-    return mStartPoint;
-}
-
-void Slide::setStartX(int x)
-{
-    mStartPoint.setX(x);
-    //if (sceneObject())
-    //    sceneObject()->setX(x);
-    emit dataChanged();
-}
-
-void Slide::setStartY(int y)
-{
-    mStartPoint.setY(y);
-    //if (sceneObject())
-    //    sceneObject()->setY(y);
-    emit dataChanged();
-}
-
-QPoint Slide::endPoint() const
-{
-    return mEndPoint;
-}
-
-void Slide::setEndPoint(const QPoint& point)
-{
-    mEndPoint = point;
-}
-
-void Slide::setEndX(int x)
-{
-    mEndPoint.setX(x);
-    //if (sceneObject())
-    //    sceneObject()->setX(x);
-    emit dataChanged();
-}
-
-void Slide::setEndY(int y)
-{
-    mEndPoint.setY(y);
-    //if (sceneObject())
-     //   sceneObject()->setY(y);
-    emit dataChanged();
-}
-
-/*void Slide::setSceneObject(Object * object)
-{
-    if (! object || object == sceneObject())
+    if (mSlideType == type)
         return;
 
-    if (sceneObject())
-        disconnect(sceneObject(), SIGNAL(positionChanged(int,int)), this, SLOT(objectPositionChanged(int, int)));
-    Action::setSceneObject(object);
-    mObjectOriginalPoint = object->sceneRect().topLeft();
-    connect(sceneObject(), SIGNAL(positionChanged(int,int)), this, SLOT(objectPositionChanged(int, int)));
-}*/
+    mSlideType = type;
+    emit dataChanged();
+}
 
+void Slide::setSlideType(const QString& type)
+{
+    QString t = type.toLower();
+    if (t == "in")
+        mSlideType = Slide::In;
+    else if (t == "out")
+        mSlideType = Slide::Out;
+    else if(t == "custom")
+        mSlideType = Slide::Custom;
+    else
+        return;
+    emit dataChanged();
+}
+
+void Slide::updateSlideType()
+{
+    bool ok1, ok2;
+    mDestX.toInt(&ok1);
+    mDestY.toInt(&ok2);
+    if (ok1 || ok2)
+        this->setSlideType(Slide::Custom);
+    else
+        this->setSlideType(Slide::In);
+}
+
+void Slide::setDestX(const QString& pos)
+{
+    if (mDestX == pos)
+        return;
+
+    mDestX = pos;
+    emit dataChanged();
+}
+
+void Slide::setDestX(int x)
+{
+    if (slideType() == Slide::Custom)
+        setDestX(QString::number(x));
+}
+
+QString Slide::destX() const
+{
+    return mDestX;
+}
+
+void Slide::setDestY(const QString& pos)
+{
+    if (mDestY == pos)
+        return;
+
+    mDestY = pos;
+    emit dataChanged();
+}
+
+void Slide::setDestY(int y)
+{
+    if (slideType() == Slide::Custom)
+        setDestY(QString::number(y));
+}
+
+QString Slide::destY() const
+{
+    return mDestY;
+}
 
 void Slide::finishedEditing()
 {
@@ -186,25 +190,24 @@ void Slide::objectPositionChanged(int x, int y)
     mObjectOriginalPoint.setY(y);
 }
 
-float Slide::duration() const{
+double Slide::duration() const
+{
     return mDuration;
 }
 
-void Slide::setDuration(float dur) {
+void Slide::setDuration(double dur) {
     if (mDuration != dur) {
         mDuration = dur;
         emit dataChanged();
     }
 }
 
-
 QVariantMap Slide::toJsonObject()
 {
     QVariantMap action = Action::toJsonObject();
-    action.insert("startX", mStartPoint.x());
-    action.insert("startY", mStartPoint.y());
-    action.insert("endX", mEndPoint.x());
-    action.insert("endY", mEndPoint.y());
+    action.insert("slideType", slideTypeAsString());
+    action.insert("destX", mDestX);
+    action.insert("destY", mDestY);
     action.insert("duration", mDuration);
 
     return action;
