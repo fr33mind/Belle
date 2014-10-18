@@ -403,13 +403,13 @@ Object.prototype.translateX = function(x, type)
   }
 
   if (x == "center")
-    return (scene.width / 2) - (object.width / 2);
+    return (scene.width / 2) - (this.width / 2);
 
   if (x == "right") {
     if (type == "out")
       return scene.width;
     else
-      return scene.width - object.width;
+      return scene.width - this.width;
   }
 
   return null;
@@ -432,13 +432,13 @@ Object.prototype.translateY = function(y, type)
   }
 
   if (y == "center")
-    return (scene.height / 2) - (object.height / 2);
+    return (scene.height / 2) - (this.height / 2);
 
   if (y == "bottom") {
     if (type == "out")
       return scene.height;
     else
-      return scene.height - object.height;
+      return scene.height - this.height;
   }
 
   return null;

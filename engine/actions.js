@@ -302,35 +302,35 @@ function Slide(data, parent)
 
 belle.utils.extend(Action, Slide);
 
-Slide.prototype.execute = function () 
+Slide.prototype.execute = function ()
 {
     var t = this;
     var object = this.getObject();
+
     if (! object) {
       this.setFinished(true);
       return;
     }
-    
+
     this.startX = object.x;
     this.startY = object.y;
     this.endX = object.translateX(this.destX, this.slideType);
     this.endY = object.translateY(this.destY, this.slideType);
-    this.endX = this.endX ? this.endX : this.startX;
-    this.endY = this.endY ? this.endY : this.startY;
+    this.endX = this.endX !== null ? this.endX : this.startX;
+    this.endY = this.endY !== null ? this.endY : this.startY;
     this.timePassed = 0;
     this.incXPerMs = this.incYPerMs = 0;
+    this.incX = this.incY = 0;
+
     if (this.duration) {
-      this.incXPerMs = (Math.abs(this.endX) - Math.abs(this.startX)) / this.duration;
-      this.incYPerMs = (Math.abs(this.endY) - Math.abs(this.startY)) / this.duration;
+      this.incXPerMs = Math.abs(Math.abs(this.endX) - Math.abs(this.startX)) / this.duration;
+      this.incYPerMs = Math.abs(Math.abs(this.endY) - Math.abs(this.startY)) / this.duration;
     }
 
     if (this.endX < this.startX)
       this.incXPerMs *= -1;
-
     if (this.endY < this.startY)
       this.incYPerMs *= -1;
-
-    this.incX = this.incY = 0;
 
     if (this.endX != this.startX)
       this.incX = parseInt(this.incXPerMs * 10);
@@ -342,8 +342,8 @@ Slide.prototype.execute = function ()
     this.interval = setInterval(function() { t.slide(); }, 10);
 }
 
-Slide.prototype.slide = function () 
-{   
+Slide.prototype.slide = function ()
+{
     var now = new Date;
     var passed = now - this.prevTime;
     this.prevTime = now;
@@ -355,7 +355,6 @@ Slide.prototype.slide = function ()
 
     if (this.incXPerMs) {
       var xdif = parseInt((this.startX + this.timePassed * this.incXPerMs) - (x + incX));
-      xdif = incX < 0 ? -xdif: xdif;
       incX = Math.round(incX + xdif);
     }
 
