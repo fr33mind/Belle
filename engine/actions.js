@@ -284,26 +284,20 @@ Fade.prototype.reset = function () {
 function Slide(data, parent)
 {
     Action.call(this, data, parent);
-    this.startPoint = new Point(data["startX"], data["startY"]);
-    this.endPoint = new Point(data["endX"], data["endY"]);
+    this.destX = data["destX"];
+    this.destY = data["destY"];
+    this.slideType = data["slideType"];
+    this.startX = 0;
+    this.startY = 0;
     this.duration = 0;
     this.timePassed = 0;
     this.intervalDuration = 0;
-    this.prevTime = 0;
-    this.objectOriginalPosition = null;
+    this.prevTime = null;
     
     if ("duration" in data)
         this.duration = data["duration"];
     
     this.duration *= 1000;
-    this.incX = 2;
-    this.incY = 2;
-
-    if (this.startPoint.x > this.endPoint.x)
-        this.incX *= -1;
-
-    if (this.startPoint.y > this.endPoint.y)
-        this.incY *= -1;
 }
 
 belle.utils.extend(Action, Slide);
@@ -312,90 +306,96 @@ Slide.prototype.execute = function ()
 {
     var t = this;
     var object = this.getObject();
-    this.reset();
-    this.timePassed = 0;
-    this.prevTime = new Date().getTime();
-    this.intervalDuration = Math.round(this.duration / this.startPoint.distance(this.endPoint));
+    if (! object) {
+      this.setFinished(true);
+      return;
+    }
     
-    object.setX(this.startPoint.x);
-    object.setY(this.startPoint.y);
-    object.redraw = true;
-    this.interval = setInterval(function() { t.slide(); }, this.intervalDuration);
+    this.startX = object.x;
+    this.startY = object.y;
+    this.endX = object.translateX(this.destX, this.slideType);
+    this.endY = object.translateY(this.destY, this.slideType);
+    this.endX = this.endX ? this.endX : this.startX;
+    this.endY = this.endY ? this.endY : this.startY;
+    this.timePassed = 0;
+    this.incXPerMs = this.incYPerMs = 0;
+    if (this.duration) {
+      this.incXPerMs = (Math.abs(this.endX) - Math.abs(this.startX)) / this.duration;
+      this.incYPerMs = (Math.abs(this.endY) - Math.abs(this.startY)) / this.duration;
+    }
+
+    if (this.endX < this.startX)
+      this.incXPerMs *= -1;
+
+    if (this.endY < this.startY)
+      this.incYPerMs *= -1;
+
+    this.incX = this.incY = 0;
+
+    if (this.endX != this.startX)
+      this.incX = parseInt(this.incXPerMs * 10);
+
+    if (this.endY != this.startY)
+      this.incY = parseInt(this.incYPerMs * 10);
+
+    this.prevTime = new Date;
+    this.interval = setInterval(function() { t.slide(); }, 10);
 }
 
 Slide.prototype.slide = function () 
 {   
-    var now = new Date().getTime();
+    var now = new Date;
     var passed = now - this.prevTime;
-    this.timePassed += passed;
     this.prevTime = now;
+    this.timePassed += passed;
     var object = this.getObject();
-
-    if (this.timePassed >= this.duration) {
-        object.setX(this.endPoint.x);
-        object.setY(this.endPoint.y);
-    }
-    
-    passed = passed > this.intervalDuration ? passed : this.intervalDuration;
+    var x = object.x, y = object.y;
     var incX = this.incX;
     var incY = this.incY;
-    
-    if (this.intervalDuration) {
-      incX = parseInt(passed * this.incX / this.intervalDuration);
-      incY = parseInt(passed * this.incY / this.intervalDuration);
+
+    if (this.incXPerMs) {
+      var xdif = parseInt((this.startX + this.timePassed * this.incXPerMs) - (x + incX));
+      xdif = incX < 0 ? -xdif: xdif;
+      incX = Math.round(incX + xdif);
     }
-    
-    var x = object.x, y = object.y;
-    
-    if ((incX > 0 && object.x < this.endPoint.x) ||
-        (incX < 0 && object.x > this.endPoint.x))
-        x += incX;
-    
-    if ((incY > 0 && object.y < this.endPoint.y) ||
-        (incY < 0 && object.y > this.endPoint.y))
-        y += incY;
-    
-    //if x and y have NOT been modified, set action finished
-    if (x === object.x && y === object.y) {
+
+    if (this.incYPerMs) {
+      var ydif = parseInt((this.startY + this.timePassed * this.incYPerMs) - (y + incY));
+      incY = Math.round(incY + ydif);
+    }
+
+    x += incX;
+    y += incY;
+
+    if (incX > 0 && object.x > this.endX || incX < 0 && object.x < this.endX)
+        x = this.endX;
+    if (incY > 0 && object.y > this.endY || incY < 0 && object.y < this.endY)
+        y = this.endY;
+
+    object.moveTo(x, y);
+
+    if (x == this.endX && y == this.endY) {
         clearInterval(this.interval);
         this.setFinished(true);
-        return;
     }
-  
-    object.moveTo(x, y);
-    object.redraw = true;
 }
 
 Slide.prototype.skip = function () {
     clearInterval(this.interval);
     var object = this.getObject();
-    object.setX(this.endPoint.x);
-    object.setY(this.endPoint.y);
-    this.setFinished(true);
-}
-
-Slide.prototype.reset = function () {
-    this.timePassed = 0;
-    Action.prototype.reset.call(this);
-    var object = this.getObject();
-    if (this.objectOriginalPosition) {
-        object.setX(this.objectOriginalPosition.x);
-        object.setY(this.objectOriginalPosition.y);
+    if (object) {
+      object.setX(this.endX);
+      object.setY(this.endY);
     }
-    
-    this.setFinished(false);
+    this.setFinished(true);
 }
 
 Slide.prototype.scale = function(widthFactor, heightFactor)
 {
     Action.prototype.scale.call(this, widthFactor, heightFactor);
-    
-    this.startPoint.x *= widthFactor;
-    this.startPoint.y *= heightFactor;
     this.endPoint.x *= widthFactor;
     this.endPoint.y *= heightFactor;
 }
-
 
 /*********** DIALOGUE ACTION ***********/
 
