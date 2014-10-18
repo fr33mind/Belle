@@ -59,7 +59,7 @@ private:
     void init();
 
     Fade::Type mFadeType;
-    float mDuration;
+    double mDuration;
 
 };
 
