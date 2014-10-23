@@ -446,9 +446,6 @@ Object.prototype.translateY = function(y, type)
 
 Object.prototype.setX = function(x)
 {
-    if (this.x == x)
-      return;
-
     if (typeof x == "string") {
       x = this.translateX(x);
       if (x === null)
@@ -467,9 +464,6 @@ Object.prototype.setX = function(x)
 
 Object.prototype.setY = function(y)
 {
-    if (this.y == y)
-      return;
-
     if (typeof y == "string") {
       y = this.translateY(y);
       if (y === null)
@@ -491,10 +485,9 @@ Object.prototype.contains = function(px, py)
       return false;
   
     var x = this.scaledX, y = this.scaledY;
-
     if (this.parent && parseInt(this.parent.scaledX)) {
         x += this.parent.scaledX;
-        y += this.parent.scaledY;        
+        y += this.parent.scaledY;
     }
     
     if ( px >= x && px <=  x+this.scaledWidth && py >= y && py <= y+this.scaledHeight)
@@ -704,26 +697,44 @@ Object.prototype.addEventListener = function(event, listener)
         this.eventListeners["mousemove"].push(listener);        
 }
  
-Object.prototype.processEvent = function(event)
+Object.prototype.mouseDown = function(event)
+{
+  return this.processEvent(event, "mousedown");
+}
+
+Object.prototype.mouseUp = function(event)
+{
+    return this.processEvent(event, "mouseup");
+}
+
+Object.prototype.mouseMove = function(event)
+{
+    if (this.hovering)
+      return false;
+
+    return this.processEvent(event, "mousemove");
+}
+
+Object.prototype.processEvent = function(event, type)
 {
     var x = event.canvasX;
     var y = event.canvasY;
 
-    if ((this.hovering && event.type == "mousemove") || ! this.contains(x, y))
+    if (! this.contains(x, y))
         return false;
     
     var actions = [];
     var listeners = [];
 
-    if (event.type == "mousemove") {
+    if (type == "mousemove") {
         actions = this.mouseMoveActions;
         listeners = this.eventListeners["mousemove"];
     }
-    else if (event.type == "mouseup") {
+    else if (type == "mouseup") {
         actions = this.mouseReleaseActions;
         listeners = this.eventListeners["mouserelease"];
     }
-    else if (event.type == "mousedown") {
+    else if (type == "mousedown") {
         actions = this.mousePressActions;
         listeners = this.eventListeners["mousepress"];
     }

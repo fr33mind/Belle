@@ -22,6 +22,7 @@ var container = $("#belle");
 var hoveredObject = null;
 var pressedObject = null;
 var display = belle.display;
+var touchEnabled = false;
 
 function resize() 
 {
@@ -40,125 +41,6 @@ if (window.addEventListener)
 else if (window.attachEvent)
   window.attachEvent('resize', resize);
 
-function mapToDisplay(event)
-{
-    if (! container.length)
-        container = $("#belle");
-    var x;
-    var y;
-    var IE = document.all ? true : false; // check to see if using IE
-
-    if (IE) { //do if internet explorer 
-        var scrollLeft = document.documentElement ? document.documentElement.scrollLeft :document.body.scrollLeft;
-        x = event.clientX + scrollLeft;
-        var scrollTop = document.documentElement ? document.documentElement.scrollTop :document.body.scrollTop;
-        y = event.clientY + scrollTop;
-    }
-    else {  //do for all other browsers
-        x = (window.Event) ? event.pageX : event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
-        y = (window.Event) ? event.pageY : event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
-    }
-
-    var offset = container.offset();
-    var width = container.width();
-    var height = container.height();
-    x -= offset.left;
-    y -= offset.top;
-    event.canvasX = x;
-    event.canvasY = y;
-    
-    if (x < 0 || y < 0 || x > width || y > height)
-        return false;
-    
-    return true;
-}
-
-document.onmousemove = function(event)
-{
-    var scene = game.getScene();
-    if (! scene)
-      return;
-    
-    var ev = event || window.event || window.Event;
-    if (! mapToDisplay(ev))
-        return;
-    
-    var prevHoveredObject = hoveredObject;
-    hoveredObject = null;
-    var objects = scene.objects;
-    for (var i=objects.length-1; i !== -1; --i) {
-        if (objects[i].contains(ev.canvasX, ev.canvasY)) {
-            hoveredObject = objects[i];
-            break;
-        }
-    }
-
-    if (prevHoveredObject != hoveredObject) {
-      if (prevHoveredObject)
-	prevHoveredObject.mouseLeaveEvent(ev);
-      
-      if (hoveredObject)
-	hoveredObject.mouseEnterEvent(ev);
-    }
-    else if (hoveredObject)
-      hoveredObject.processEvent(ev);
-}
-
-document.onmouseup = function(event)
-{
-    var ev = event || window.event || window.Event;
-    var processed = false;
-    
-    if (detectbutton(ev) != "left")
-      return;
-    
-    if (! mapToDisplay(ev))
-        return;
-    
-    if (pressedObject && hoveredObject == pressedObject) {
-        if (hoveredObject.processEvent(ev))
-            processed = true;
-    }
-    
-    if (! processed) {
-      var a = game.getScene().getAction();
-      if (a)
-	a.skip();
-    }
-}
-
-document.onmousedown = function(event) 
-{
-    var ev = event || window.event || window.Event;
-    
-    if (detectbutton(ev) != "left")
-      return;
-      
-    pressedObject = hoveredObject;
-    
-    if (hoveredObject) {
-        mapToDisplay(event);
-        hoveredObject.processEvent(ev);
-    }
-}
-
-document.onkeyup = function(event) 
-{
-    var ev = event || window.event || window.Event;
-
-    switch(ev.keyCode) {
-        case 13: //ENTER
-        case 32: //SPACE
-	    var a = game.getScene().getAction();
-            if (a)
-                a.skip();
-        break;
-        case 27:
-            belle.pause();
-            break;
-    }
-}
-
 function detectbutton(e)
 {
     var button = "";
@@ -176,6 +58,180 @@ function detectbutton(e)
 
     return button;
 }
+
+function detectHoveredObject(ev)
+{
+    var scene = game.getScene();
+    if (! scene)
+      return;
+
+    var objects = scene.objects;
+    for (var i=objects.length-1; i !== -1; --i) {
+        if (objects[i].contains(ev.canvasX, ev.canvasY)) {
+            return objects[i];
+        }
+    }
+
+    return null;
+}
+
+function mapToDisplay(event)
+{
+    if (! container.length)
+        container = $("#belle");
+
+    var x = event.pageX;
+    var y = event.pageY;
+    var offset = container.offset();
+    var width = container.width();
+    var height = container.height();
+
+    x -= offset.left;
+    y -= offset.top;
+    event.canvasX = x;
+    event.canvasY = y;
+
+    if (x < 0 || y < 0 || x > width || y > height)
+        return false;
+    
+    return true;
+}
+
+function mouseDown(ev)
+{
+    if (ev.type == "mousedown" && detectbutton(ev) != "left")
+      return;
+
+    pressedObject = hoveredObject;
+
+    //there may be no hovered object on touch devices
+    if (! pressedObject && ev.type == "touchstart") {
+        mapToDisplay(ev);
+        pressedObject = hoveredObject = detectHoveredObject(ev);
+        hoveredObject.mouseEnterEvent(ev);
+        hoveredObject.mouseDown(ev);
+    }
+    else if (hoveredObject) {
+        mapToDisplay(ev);
+        hoveredObject.mouseDown(ev);
+    }
+}
+
+function mouseUp(ev)
+{
+    if (ev.type == "mouseup" && detectbutton(ev) != "left")
+      return;
+
+    var processed = false;
+    if (! mapToDisplay(ev))
+        return;
+
+    if (pressedObject && hoveredObject == pressedObject) {
+        if (hoveredObject.mouseUp(ev))
+            processed = true;
+        pressedObject = null;
+        if (ev.type == "touchend") {
+          hoveredObject.mouseLeaveEvent(ev);
+          hoveredObject = null;
+        }
+    }
+
+    if (! processed) {
+      var a = game.getScene().getAction();
+      if (a)
+        a.skip();
+    }
+}
+
+function mouseMove(ev)
+{
+    if (! mapToDisplay(ev))
+        return;
+
+    var prevHoveredObject = hoveredObject;
+    hoveredObject = detectHoveredObject(ev);
+
+    if (prevHoveredObject != hoveredObject) {
+      if (prevHoveredObject)
+        prevHoveredObject.mouseLeaveEvent(ev);
+
+      if (hoveredObject)
+        hoveredObject.mouseEnterEvent(ev);
+    }
+    else if (hoveredObject)
+      hoveredObject.mouseMove(ev);
+}
+
+//equivalent to mousedown
+$(document).bind('touchstart', function(e){
+  var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+  if (touch) {
+    touchEnabled = true;
+    e.preventDefault();
+    e.stopPropagation();
+    e.pageX = touch.pageX;
+    e.pageY = touch.pageY;
+    mouseDown.call(this, e);
+  }
+});
+
+//equivalent to mouseup
+$(document).bind('touchend', function(e){
+  var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+  if (touch) {
+    touchEnabled = true;
+    e.preventDefault();
+    e.stopPropagation();
+    e.pageX = touch.pageX;
+    e.pageY = touch.pageY;
+    mouseUp.call(this, e);
+  }
+});
+
+//equivalent to mousemove
+$(document).bind('touchmove', function(e){
+  var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+  if (touch) {
+    touchEnabled = true;
+    e.preventDefault();
+    e.stopPropagation();
+    e.pageX = touch.pageX;
+    e.pageY = touch.pageY;
+    mouseMove.call(this, e);
+  }
+});
+
+$(document).bind('mousedown', function(e){
+  if (touchEnabled)
+    return;
+  mouseDown.call(this, e);
+});
+
+$(document).bind('mouseup', function(e){
+  if (touchEnabled)
+    return;
+  mouseUp.call(this, e);
+});
+
+$(document).bind('mousemove', function(e){
+  if (touchEnabled)
+    return;
+  mouseMove.call(this, e);
+});
+
+$(document).keyup(function(ev) {
+  switch(ev.keyCode) {
+        case 13: //ENTER
+        case 32: //SPACE
+	    var a = game.getScene().getAction();
+            if (a)
+                a.skip();
+        break;
+        case 27:
+            belle.pause();
+            break;
+    }
+});
 
 }(EventDispatcher));
 
