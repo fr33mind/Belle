@@ -211,20 +211,13 @@ inline int fontSize(const QString& font)
 
 inline QString fontFamily(const QString& font)
 {
-    QStringList fontParts = font.split(" ", QString::SkipEmptyParts);
-    if (fontParts.size() >= 2) {
-        if (fontParts[0].contains("px"))
-            fontParts.removeAt(0);
-        if (Utils::isNumber(fontParts[0])) {
-            fontParts.removeAt(0);
-            if (fontParts[0] == "px")
-                fontParts.removeAt(0);
-        }
-
-        return fontParts.join("");
+    QRegExp fontpattern("^[0-9]+px[ ]+(.+)$");
+    if (fontpattern.exactMatch(font)) {
+        QStringList textparts = fontpattern.capturedTexts();
+        return textparts.last();
     }
 
-    return "";
+    return font;
 }
 
 inline QString font(int fontSize, const QString& fontFamily) {
