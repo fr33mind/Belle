@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>
+   Belle - Visual novel maker
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link href="css/bootstrap.min.css" media="screen" rel="stylesheet" type="text/css"/>
+  <link href="css/bootstrap-theme.min.css" media="screen" rel="stylesheet" type="text/css"/>
+  <link href="css/style.css" media="screen" rel="stylesheet" type="text/css"/>
+  <script src="js/jquery-1.11.1.min.js" type="text/javascript">
+  </script>
+  <script src="js/bootstrap.min.js" type="text/javascript">
+  </script>
+ </head>
+ <body>
+  <!--<div id="background"></div>-->
+  <nav class="navbar navbar-default" role="navigation">
+   <div class="container-fluid container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+     <button class="navbar-toggle collapsed" data-target="#bs-example-navbar-collapse-1" data-toggle="collapse" type="button">
+      <span class="sr-only">
+       Toggle navigation
+      </span>
+      <span class="icon-bar">
+      </span>
+      <span class="icon-bar">
+      </span>
+      <span class="icon-bar">
+      </span>
+     </button>
+     <a class="navbar-brand" href="index.html">
+      Belle
+     </a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+     <ul class="nav navbar-nav">
+      <li>
+       <a href="about.html">
+        About
+       </a>
+      </li>
+      <li>
+       <a href="download.html">
+        Download
+       </a>
+      </li>
+      <li class="active">
+       <a href="support.html">
+        Support
+       </a>
+      </li>
+      <li>
+       <a href="demo.html">
+        Demo
+       </a>
+      </li>
+     </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+   </div>
+   <!-- /.container-fluid -->
+  </nav>
+  <div>
+   <section class="main">
+    <div class="container" id="container">
+     <div class="support" id="contents">
+      <div id="documentation">
+       <div class="item">
+        <h3>
+         Documentation
+        </h3>
+        <p>
+         You can find some documentation
+         <a href="http://www.nongnu.org/belle/docs/index.html" target="_blank">
+          here
+         </a>
+         . (outdated)
+        </p>
+       </div>
+       <div class="item">
+        <h3>
+         Reporting issues
+        </h3>
+        <p>
+         If you encounter any issue with Belle, you can report it using the project's
+         <a href="https://github.com/fr33mind/Belle/issues" target="_blank">
+          issue tracking system
+         </a>
+         .
+        </p>
+       </div>
+       <div class="item">
+        <h3>
+         Contact
+        </h3>
+        <p>
+         For any doubt or suggestion feel free to contact me by
+         <a href="mailto:freemind@live.com.pt">
+          e-mail
+         </a>
+         .
+        </p>
+       </div>
+       <div class="item">
+        <h3>
+         Frequently Asked Questions
+        </h3>
+        <ul id="faq-index">
+         <li>
+          <a href="#q0">
+           Does Belle require coding?
+          </a>
+         </li>
+         <li>
+          <a href="#q1">
+           Can i sell a game made with Belle?
+          </a>
+         </li>
+         <li>
+          <a href="#q2">
+           Can i distribute my game offline?
+          </a>
+         </li>
+         <li>
+          <a href="#q3">
+           How can i distribute my game offline?
+          </a>
+         </li>
+         <li>
+          <a href="#q4">
+           How can i distribute my game online?
+          </a>
+         </li>
+         <li>
+          <a href="#q5">
+           Is this just a clone of Novelty?
+          </a>
+         </li>
+         <li>
+          <a href="#q6">
+           Isn't a text-based engine better?
+          </a>
+         </li>
+         <li>
+          <a href="#q7">
+           Is Belle ready to use?
+          </a>
+         </li>
+         <li>
+          <a href="#q8">
+           Is it in active development?
+          </a>
+         </li>
+         <li>
+          <a href="#q9">
+           What if Belle gets abandoned?
+          </a>
+         </li>
+         <li>
+          <a href="#q10">
+           Is there a forum planned in the future?
+          </a>
+         </li>
+         <li>
+          <a href="#q11">
+           Is Internet Explorer 8 or older going to be supported?
+          </a>
+         </li>
+         <li>
+          <a href="#q12">
+           Recommended browser(s)?
+          </a>
+         </li>
+        </ul>
+        <ul id="faq">
+         <li>
+          <a name="q0">
+          </a>
+          <h4>
+           Does Belle require coding?
+          </h4>
+          <p>
+           No.
+          </p>
+          <p>
+           Belle aims to be as easy to use as possible and for making the typical visual novel you shouldn't need any coding whatsoever.
+          </p>
+          <p>
+           However, there is a possibility of extending the game using
+           <a href="https://en.wikipedia.org/wiki/JavaScript" target="_blank">
+            Javascript
+           </a>
+           , for those who might want/need it.
+          </p>
+         </li>
+         <li>
+          <a name="q1">
+          </a>
+          <h4>
+           Can i sell a game made with Belle?
+          </h4>
+          <p>
+           Yes.
+          </p>
+         </li>
+         <li>
+          <a name="q2">
+          </a>
+          <h4>
+           Can i distribute my game offline?
+          </h4>
+          <p>
+           Yes.
+          </p>
+         </li>
+         <li>
+          <a name="q3">
+          </a>
+          <h4>
+           How can i distribute my game offline?
+          </h4>
+          <p>
+           Export your project using File &gt; Export, zip that folder and share it. That's it!
+           <br/>
+           To run the game just double-click the index.html and it should open with your preferred browser.
+          </p>
+         </li>
+         <li>
+          <a name="q4">
+          </a>
+          <h4>
+           How can i distribute my game online?
+          </h4>
+          <p>
+           Export your project using the menu option File &gt; Export and upload the exported folder to, for example, Dropbox (other file storage services might work aswell) and share the public link.
+          You can check this
+           <a href="http://infoheap.com/how-to-use-dropbox-as-mini-webserver/" target="_blank">
+            tutorial
+           </a>
+           for Dropbox.
+          </p>
+         </li>
+         <li>
+          <a name="q5">
+          </a>
+          <h4>
+           Is this just a clone of Novelty?
+          </h4>
+          <p>
+           Not exactly.
+          </p>
+          <p>
+           Despite the similar design, there are some major differences between Belle and Novelty.
+            For example, Belle is cross-platform, free software (open source) and deploys
+            games for the web, which can be played in a desktop or mobile, offline or online. Whereas Novelty is Windows only, proprietary (closed source) and deploys games just for Windows.
+          </p>
+          <p>
+           Besides the above differences, there are other ones, both technical and in design, which makes Belle completely
+           <b>
+            incompatible
+           </b>
+           with Novelty.
+          </p>
+         </li>
+         <li>
+          <a name="q6">
+          </a>
+          <h4>
+           Isn't a text-based engine better?
+          </h4>
+          <p>
+           Not really.
+          </p>
+          <p>
+           Visual novels and other similar games are heavy on writting (dialogues), so a text-based engine would seem to be perfect for them. However visual novels are also visual (like the name implies) and to manipulate visual elements easily and quickly we use graphical tools. That's why the best tool would not be something that's just text-based but also not something that's too graphical, meaning not something that depends too much on point and click.
+          </p>
+          <p>
+           As of now, Belle is still very graphical, but in the future will try to facilitate some tasks (e.g. writing dialogues), that now
+            would require a lot of jumping from mouse to keyboard, but at the same time keep the ease of use that it has now.
+          </p>
+         </li>
+         <li>
+          <a name="q7">
+          </a>
+          <h4>
+           Is Belle ready to use?
+          </h4>
+          <p>
+           Depends.
+          </p>
+          <p>
+           Although Belle has been in development for quite some time, being already fairly stable and with many features implemented,
+           <b>
+            it still is a work in progress and it's not guaranteed to work flawlessly
+           </b>
+           . With that said, it's up to you to decide whether you're willing to accept the possible risk involved.
+          </p>
+          <p>
+           If it helps, before going directly into a big project, first check the features available and make some simple test game(s). In case you find some issue
+          or you have any suggestion, feel free to contact me.
+          </p>
+         </li>
+         <li>
+          <a name="q8">
+          </a>
+          <h4>
+           Is it in active development?
+          </h4>
+          <p id="active-dev">
+           You can check for activity in the
+           <a href="https://github.com/fr33mind/Belle/commits/master" target="_blank">
+            repository
+           </a>
+           .
+          </p>
+         </li>
+         <li>
+          <a name="q9">
+          </a>
+          <h4>
+           What if Belle gets abandoned?
+          </h4>
+          <p>
+           Tough question.
+          </p>
+          <p>
+           First of all, i hope i can move Belle to a completely stable, full-featured application. However i can't promise anything,
+            since i'm doing this on my scarce free time.
+          </p>
+          <p>
+           Secondly, before you make your game you can and should check and test if Belle is the right tool for you.
+          </p>
+          <p>
+           And third, but not less important, Belle is free software (open source), so if it gets abandoned anyone can get the code, fork it and continue development.
+          </p>
+          <p>
+           Anyway, this question can be applied to any project, really.
+          </p>
+         </li>
+         <li>
+          <a name="q10">
+          </a>
+          <h4>
+           Is there a forum planned in the future?
+          </h4>
+          <p>
+           Yes.
+          </p>
+          <p>
+           Not only that, but maybe a platform for visual novels, which would be integrated with Belle's editor
+          for easy deployment. However the top priority now is to get the engine and editor completely stable and feature-rich.
+          </p>
+         </li>
+         <li>
+          <a name="q11">
+          </a>
+          <h4>
+           Is Internet Explorer 8 or older going to be supported?
+          </h4>
+          <p>
+           No.
+          </p>
+          <p>
+           At first it was planned to support at least Internet Explorer 7 and 8. However due to time constraints and the fact
+          that these browsers are really outdated and shouldn't be supported anymore, support for them is going to be dropped.
+          </p>
+         </li>
+         <li>
+          <a name="q12">
+          </a>
+          <h4>
+           Recommended browser(s)?
+          </h4>
+          <p>
+           Here's a non-extensive list of recommended browsers:
+          </p>
+          <ul id="browsers">
+           <li>
+            Mozilla Firefox
+           </li>
+           <li>
+            Google Chrome
+           </li>
+           <li>
+            Internet Explorer 9 or newer
+           </li>
+           <li>
+            Opera
+           </li>
+           <li>
+            Safari
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </div>
+      </div>
+      <script>
+       $.get('//api.github.com/repos/fr33mind/Belle',
+      function(response){
+          if (response) {
+            var lastUpdate = new Date(response["pushed_at"]),
+                monthNames = [ "January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December" ],
+              msg = "Last update was " + lastUpdate.getDate() + " of " + monthNames[lastUpdate.getMonth()] + " " + lastUpdate.getFullYear();
+            $('#active-dev').text(msg);
+          }
+      },
+      'JSON'
+  );
+      </script>
+     </div>
+    </div>
+   </section>
+  </div>
+  <footer>
+   <p>
+    Icons:
+    <a href="https://en.wikipedia.org/wiki/File:NewTux.svg" target="_blank">
+     Linux
+    </a>
+    ,
+    <a href="https://dribbble.com/shots/1722859-Vector-Logotypes" target="_blank">
+     Windows
+    </a>
+    ,
+    <a href="https://dribbble.com/shots/1722859-Vector-Logotypes" target="_blank">
+     Apple
+    </a>
+    ,
+    <a href="https://en.wikipedia.org/wiki/File:HTML5-logo.svg" target="_blank">
+     HTML5
+    </a>
+    ,
+    <a href="http://design.ubuntu.com/wp-content/uploads/logo-ubuntu_cof-orange-hex.png">
+     Ubuntu
+    </a>
+    ,
+    <a href="https://commons.wikimedia.org/wiki/File:Archlinux-icon-crystal-64.svg">
+     Archlinux
+    </a>
+    ,
+    <a href="https://en.wikipedia.org/wiki/File:Gentoo_Linux_logo_matte.svg">
+     Gentoo
+    </a>
+    ,
+    <a href="http://glyphicons.com/" target="_blank">
+     Glyphicons
+    </a>
+    .
+   </p>
+   <p>
+    Using
+    <a href="http://jquery.com/" target="_blank">
+     jQuery
+    </a>
+    and
+    <a href="http://getbootstrap.com" target="_blank">
+     Bootstrap
+    </a>
+    .
+   </p>
+   <p>
+    Archlinux and Gentoo packages provided by
+    <a href="http://qt-apps.org/usermanager/search.php?username=mrbitt" target="_blank">
+     mrbitt
+    </a>
+    .
+   </p>
+  </footer>
+ </body>
+</html>
