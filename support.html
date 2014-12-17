@@ -401,18 +401,21 @@
        </div>
       </div>
       <script>
-       $.get('//api.github.com/repos/fr33mind/Belle',
-      function(response){
-          if (response) {
-            var lastUpdate = new Date(response["pushed_at"]),
-                monthNames = [ "January", "February", "March", "April", "May", "June",
-              "July", "August", "September", "October", "November", "December" ],
-              msg = "Last update was " + lastUpdate.getDate() + " of " + monthNames[lastUpdate.getMonth()] + " " + lastUpdate.getFullYear();
-            $('#active-dev').text(msg);
-          }
-      },
-      'JSON'
-  );
+       function updateActivity(data) {
+      if (data) {
+        var lastUpdate = new Date(data["data"]["pushed_at"]),
+            monthNames = [ "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December" ],
+          msg = "Last update was " + lastUpdate.getDate() + " of " + monthNames[lastUpdate.getMonth()] + " " + lastUpdate.getFullYear() + ".";
+        $('#active-dev').text(msg);
+      }
+  }
+
+  (function() {
+    var script = document.createElement('script');
+    script.src = 'https://api.github.com/repos/fr33mind/Belle?callback=updateActivity';
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }());
       </script>
      </div>
     </div>
