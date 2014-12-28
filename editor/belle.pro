@@ -10,7 +10,7 @@ DEPENDPATH += actions objects
 TARGET = belle
 TARGET.path = $$PREFIX/
 CONFIG+=debug
-QT += network webkit
+QT += core widgets network webkitwidgets
 
 FORMS += mainwindow.ui\
     novel_properties_dialog.ui \
@@ -37,8 +37,8 @@ HEADERS      += belle.h\
     actions_view.h \
     actions_model.h \
     actions/wait.h \
-    action_editor_widget.h \
-    wait_editor_widget.h \
+    actions/action_editor_widget.h \
+    actions/wait_editor_widget.h \
     actions/dialogue.h \
     actions/dialogue_editor_widget.h \
     objects/dialoguebox.h \

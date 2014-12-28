@@ -7,7 +7,7 @@ ObjectsView::ObjectsView(QWidget *parent) :
     PropertiesWidget(parent, 1)
 {
     this->setHeaderHidden(true);
-    this->header()->setResizeMode(QHeaderView::ResizeToContents);
+    this->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     connect(this, SIGNAL(clicked(const QModelIndex&)), this, SLOT(itemClicked(const QModelIndex&)));
 }
 

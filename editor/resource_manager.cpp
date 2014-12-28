@@ -444,7 +444,7 @@ void ResourceManager::exportCustomFonts(const QDir& dir)
             fontName = families[0];
 
         //write css for font
-        file.write(Utils::fontFace(fontName).toAscii());
+        file.write(Utils::fontFace(fontName).toUtf8());
         file.write("\n");
     }
 
