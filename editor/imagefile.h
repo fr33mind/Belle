@@ -5,34 +5,38 @@
 #include <QPixmap>
 #include <QMovie>
 
-class ImageFile
+#include "asset.h"
+
+class ImageFile : public Asset
 {
 public:
-    explicit ImageFile();
     ImageFile(const QString&, bool load=true);
     virtual ~ImageFile();
 
-    virtual bool isAnimated();
-    virtual QMovie* movie();
+    virtual bool isAnimated() const;
+    virtual QMovie* movie() const;
     virtual int frameNumber() const;
-    virtual QPixmap pixmap();
-    virtual int width();
-    virtual int height();
-    virtual QRect rect();
-    virtual bool isValid();
-    QString path() const;
-    QString fileName() const;
-    QString name() const;
-    void setName(const QString&);
-    bool save(const QString&);
+    virtual QPixmap pixmap() const;
+    virtual int width() const;
+    virtual int height() const;
+    virtual QRect rect() const;
+    virtual bool isValid() const;
+    virtual bool save(const QString&);
 
     static bool isAnimated(const QString&);
     static ImageFile* create(const QString&);
+    static bool isTransparent(const QImage&);
+
+protected:
+    bool mTransparent;
+    bool isTransparent() const;
+    virtual void checkTransparency();
 
 private:
     QPixmap mPixmap;
     QString mPath;
     QString mName;
+
 };
 
 #endif // IMAGEFILE_H

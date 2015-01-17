@@ -5,27 +5,26 @@
 
 #include "animationimage.h"
 
-ImageFile::ImageFile()
-{
-}
-
-ImageFile::ImageFile(const QString&path, bool load)
+ImageFile::ImageFile(const QString&path, bool load) :
+    Asset(path, Asset::Image)
 {
     if (load)
         mPixmap = QPixmap(path);
     mPath = path;
+    //no need to check for transparency for non-animated images
+    mTransparent = false;
 }
 
 ImageFile::~ImageFile()
 {
 }
 
-bool ImageFile::isAnimated()
+bool ImageFile::isAnimated() const
 {
     return false;
 }
 
-QMovie* ImageFile::movie()
+QMovie* ImageFile::movie() const
 {
     return 0;
 }
@@ -37,49 +36,42 @@ int ImageFile::frameNumber() const
     return -1;
 }
 
-QPixmap ImageFile::pixmap()
+QPixmap ImageFile::pixmap() const
 {
     return mPixmap;
 }
 
-QString ImageFile::path() const
+bool ImageFile::isValid() const
 {
-    return mPath;
-}
-
-QString ImageFile::fileName() const
-{
-    return QFileInfo(mPath).fileName();
-}
-
-QString ImageFile::name() const
-{
-    return mName;
-}
-
-void ImageFile::setName(const QString& name)
-{
-    mName = name;
-}
-
-bool ImageFile::isValid()
-{
+    bool valid = Asset::isValid();
+    if (! valid)
+        return false;
     return !mPixmap.isNull();
 }
 
-int ImageFile::width()
+int ImageFile::width() const
 {
     return mPixmap.width();
 }
 
-int ImageFile::height()
+int ImageFile::height() const
 {
     return mPixmap.height();
 }
 
-QRect ImageFile::rect()
+QRect ImageFile::rect() const
 {
     return mPixmap.rect();
+}
+
+void ImageFile::checkTransparency()
+{
+    mTransparent = ImageFile::isTransparent(mPixmap.toImage());
+}
+
+bool ImageFile::isTransparent() const
+{
+    return mTransparent;
 }
 
 bool ImageFile::isAnimated(const QString& path)
@@ -99,6 +91,22 @@ ImageFile* ImageFile::create(const QString& path)
         return new AnimatedImage(path);
 
     return new ImageFile(path);
+}
+
+bool ImageFile::isTransparent(const QImage& image)
+{
+    bool useAlpha = false;
+    const uchar* pixelData = image.bits();
+    int bytes = image.byteCount();
+
+    for (const QRgb* pixel = reinterpret_cast<const QRgb*>(pixelData); bytes > 0; pixel++, bytes -= sizeof(QRgb)) {
+        if (qAlpha(*pixel) != UCHAR_MAX) {
+            useAlpha = true;
+            break;
+        }
+    }
+
+    return useAlpha;
 }
 
 bool ImageFile::save(const QString & path)
