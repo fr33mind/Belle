@@ -1,6 +1,9 @@
 #include "animationimage.h"
 
 #include <QFileInfo>
+#include <QByteArray>
+#include <QBuffer>
+#include <QImage>
 
 #include "utils.h"
 #include "resource_manager.h"
@@ -10,7 +13,8 @@ AnimatedImage::AnimatedImage(const QString& path) :
 {
     //support for animated images
     mMovie = new QMovie(path);
-     mMovie->jumpToFrame(0);
+    mMovie->jumpToFrame(0);
+    checkTransparency();
     QString movieName = mMovie->fileName();
     QString frameName = "";
 
@@ -36,40 +40,40 @@ void AnimatedImage::init()
 {
 }
 
-bool AnimatedImage::isAnimated()
+bool AnimatedImage::isAnimated() const
 {
     if (mMovie && mMovie->isValid())
         return true;
     return false;
 }
 
-QMovie* AnimatedImage::movie()
+QMovie* AnimatedImage::movie() const
 {
     return mMovie;
 }
 
-QPixmap AnimatedImage::pixmap()
+QPixmap AnimatedImage::pixmap() const
 {
     if (mMovie)
         return mMovie->currentPixmap();
     return QPixmap();
 }
 
-int AnimatedImage::width()
+int AnimatedImage::width() const
 {
     if (mMovie)
         return mMovie->currentPixmap().width();
     return 0;
 }
 
-int AnimatedImage::height()
+int AnimatedImage::height() const
 {
     if (mMovie)
         return mMovie->currentPixmap().height();
     return 0;
 }
 
-bool AnimatedImage::isValid()
+bool AnimatedImage::isValid() const
 {
     if (mMovie)
         return mMovie->isValid();
@@ -94,4 +98,70 @@ QRect AnimatedImage::rect() const
         return mMovie->frameRect();
 
     return QRect();
+}
+
+void AnimatedImage::checkTransparency()
+{
+    mTransparent = false;
+    if (! mMovie || ! mMovie->isValid())
+        return;
+
+    mMovie->jumpToFrame(0);
+    bool transparent = false;
+    for(int i=0; i < mMovie->frameCount(); i++) {
+        bool res =  mMovie->jumpToNextFrame();
+        if (! res)
+            continue;
+        transparent = ImageFile::isTransparent(mMovie->currentImage());
+        if (transparent)
+            break;
+    }
+
+    mTransparent = transparent;
+}
+
+QVariantMap AnimatedImage::toJsonObject()
+{
+    QVariantMap data = Asset::toJsonObject();
+    if (!mMovie || ! mMovie->isValid())
+        return data;
+
+    int currFrame = -1;
+    if (mMovie->state() == QMovie::Running) {
+        currFrame = mMovie->currentFrameNumber();
+        mMovie->stop();
+    }
+
+    QString format("JPG");
+    if (isTransparent())
+        format = "PNG";
+
+    QVariantList frames;
+    mMovie->jumpToFrame(0);
+    for(int i=0; i < mMovie->frameCount(); i++) {
+        bool res =  mMovie->jumpToNextFrame();
+        if (! res)
+            continue;
+        QImage image = mMovie->currentImage();
+        QByteArray arr;
+        QBuffer buf(&arr);
+        buf.open(QIODevice::WriteOnly);
+        image.save(&buf, format.toAscii());
+        buf.close();
+        QByteArray imageData;
+        imageData.append(QString("data:image/%1;base64,").arg(format.toLower()));
+        imageData.append(arr.toBase64());
+        QVariantMap frameData;
+        frameData.insert("data", imageData);
+        frameData.insert("delay", mMovie->nextFrameDelay());
+        frames.append(frameData);
+    }
+
+    if (currFrame != -1) {
+        mMovie->jumpToFrame(currFrame);
+        mMovie->start();
+    }
+
+    data.insert("frames", frames);
+    return data;
 }

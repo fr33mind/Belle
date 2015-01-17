@@ -20,16 +20,20 @@ public:
     AnimatedImage(QPixmap*);
     virtual ~AnimatedImage();
 
-    QPixmap pixmap();
-    bool isAnimated();
-    bool isValid();
-    QMovie* movie();
-    int width();
-    int height();
+    QPixmap pixmap() const;
+    bool isAnimated() const;
+    bool isValid() const;
+    QMovie* movie() const;
+    int width() const;
+    int height() const;
     int frameNumber() const;
     QStringList framesNames() const;
     QRect rect() const;
+    virtual QVariantMap toJsonObject();
     
+protected:
+    virtual void checkTransparency();
+
 signals:
     
 public slots:
