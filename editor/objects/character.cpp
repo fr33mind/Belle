@@ -49,7 +49,7 @@ Character::Character(const QVariantMap& data, QObject* parent) :
         while(it.hasNext()) {
             it.next();
             if (it.value().type() == QVariant::String)
-                states.insert(it.key(), ResourceManager::absolutePath(it.value().toString()));
+                states.insert(it.key(), it.value().toString());
         }
 
         setStates(states);
@@ -71,7 +71,7 @@ Character::~Character()
     QHashIterator<QString, ImageFile*> it(mStateToImage);
     while(it.hasNext()) {
         it.next();
-        ResourceManager::decrementReference(it.value());
+        AssetManager::instance()->releaseAsset(it.value());
     }
     mStateToImage.clear();
 }
@@ -92,7 +92,8 @@ void Character::initStates()
     QHashIterator<QString, QString> it(mStateToPath);
     while(it.hasNext()) {
         it.next();
-        mStateToImage.insert(it.key(), ResourceManager::newImage(it.value()));
+        ImageFile* image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(it.value(), Asset::Image));
+        mStateToImage.insert(it.key(), image);
     }
 }
 
@@ -108,7 +109,7 @@ void Character::removeState(const QString& state)
 
     if ((! path.isEmpty()) && mStateToImage.contains(path)) {
         ImageFile * image = mStateToImage.take(path);
-        ResourceManager::decrementReference(image);
+        AssetManager::instance()->releaseAsset(image);
     }
 }
 
@@ -213,11 +214,12 @@ void Character::setStates(const QHash<QString, QString> & states)
     QHashIterator<QString, QString> it(states);
     while(it.hasNext()) {
         it.next();
-        mStateToImage.insert(it.key(), ResourceManager::newImage(it.value()));
+        ImageFile* image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(it.value(), Asset::Image));
+        mStateToImage.insert(it.key(), image);
     }
 
     foreach(ImageFile* img, images){
-        ResourceManager::decrementReference(img);
+        AssetManager::instance()->releaseAsset(img);
     }
 
     if (mCurrentState.isEmpty() && ! mStateToPath.isEmpty())
@@ -253,7 +255,7 @@ QVariantMap Character::toJsonObject(bool internal)
     while(it.hasNext()) {
         it.next();
         if (it.value()) {
-            QString filename = it.value()->fileName();
+            QString filename = it.value()->name();
             if (internal)
                 filename = it.value()->path();
             stateToPath.insert(it.key(), filename);

@@ -27,7 +27,6 @@
 #include <QHash>
 
 class CharacterPropertiesWidget;
-class ResourceManager;
 
 class Character : public Image
 {

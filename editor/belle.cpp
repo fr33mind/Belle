@@ -253,6 +253,15 @@ Belle::Belle(QWidget *widget)
 
     restoreSettings();
     loadDefaultGame();
+
+//    QDir fonts("/usr/share/fonts/truetype/lao/");
+//    foreach(QFileInfo file, fonts.entryInfoList()) {
+//        qDebug() << file.absoluteFilePath();
+//        if (file.isFile()) {
+//        int id = QFontDatabase::addApplicationFont(file.absoluteFilePath());
+//        qDebug() << QFontDatabase::applicationFontFamilies(id);
+//        }
+//    }
 }
 
 void Belle::saveSettings()
@@ -314,6 +323,7 @@ Belle::~Belle()
 
     ActionInfoManager::destroy();
     ResourceManager::destroy();
+    AssetManager::instance()->removeAssets();
 
     saveSettings();
 }
@@ -785,9 +795,6 @@ QString Belle::exportProject(const QString& _path, bool toRun)
         projectDir = QDir(mCurrentRunDirectory);
     }
 
-    //copy images and fonts in use
-    ResourceManager::exportResources(projectDir);
-
     //copy all engine files
     QStringList fileNames = engineDir.entryList(QStringList() << "*.js" << "*.html" << "*.css", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
     bool pathChanged = Engine::pathChanged();
@@ -796,6 +803,9 @@ QString Belle::exportProject(const QString& _path, bool toRun)
             QFile::remove(projectDir.absoluteFilePath(fileName));
         QFile::copy(engineDir.absoluteFilePath(fileName), projectDir.absoluteFilePath(fileName));
     }
+
+    //copy images, sounds and fonts in use
+    AssetManager::instance()->save(projectDir);
 
     //export gameFile
     exportGameFile(projectDir.absoluteFilePath(fileName));
@@ -822,7 +832,7 @@ void Belle::saveProject()
     if (QFile::exists(mSavePath)) {
         QDir projectDir(mSavePath);
         //copy images and fonts in use
-        ResourceManager::exportResources(projectDir);
+        AssetManager::instance()->save(projectDir);
         //export gameFile
         exportGameFile(projectDir.absoluteFilePath(GAME_FILENAME));
 
@@ -862,7 +872,8 @@ void Belle::clearProject()
     mDefaultSceneManager->removeScenes(true);
     mPauseSceneManager->removeScenes(true);
     ResourceManager::instance()->removeResources(true);
-    ResourceManager::setRelativePath("");
+    AssetManager::instance()->setLoadPath("");
+    AssetManager::instance()->removeAssets();
     mSavePath = "";
     mCurrentRunDirectory = "";
 }
@@ -889,9 +900,10 @@ void Belle::openFileOrProject(QString filepath)
 
     clearProject();
     mSavePath = QFileInfo(filepath).absolutePath();
-    ResourceManager::setRelativePath(QFileInfo(filepath).absolutePath());
+    AssetManager::instance()->setLoadPath(mSavePath);
     setNovelProperties(object);
-    ResourceManager::importResources(object);
+    AssetManager::instance()->load(QDir(mSavePath));
+    ResourceManager::instance()->importResources(object);
 
     //pause screen import
     if (object.contains("pauseScreen") && object.value("pauseScreen").type() == QVariant::Map) {
@@ -910,7 +922,7 @@ void Belle::openFileOrProject(QString filepath)
         mCurrentSceneManager = mDefaultSceneManager;
         importScenes(scenes, mDefaultSceneManager);
         mDefaultSceneManager->setCurrentSceneIndex(0);
-        ResourceManager::setRelativePath("");
+        AssetManager::instance()->setLoadPath("");
         updateActions();
     }
 
@@ -933,8 +945,6 @@ QVariantMap Belle::createGameFile() const
     QVariantMap jsonFile;
     QString font = Utils::font(mNovelData.value("fontSize").toInt(), mNovelData.value("fontFamily").toString());
     QMapIterator<QString, QVariant> it(mNovelData);
-    QStringList customFonts = ResourceManager::customFonts();
-    jsonFile.insert("customFonts", customFonts);
 
     while(it.hasNext()){
         it.next();
@@ -945,15 +955,9 @@ QVariantMap Belle::createGameFile() const
     jsonFile.insert("font", font);
     jsonFile.remove("fontSize");
     jsonFile.remove("fontFamily");
-    QString display = ResourceManager::display();
-    if (display == "DOM")
-        jsonFile.insert("display", ResourceManager::display());
 
-    QVariantMap res;
-    for (int i=0; i < ResourceManager::instance()->resources().size(); i++) {
-        res.insert(ResourceManager::instance()->resources().at(i)->objectName(), ResourceManager::instance()->resources().at(i)->toJsonObject(false));
-    }
-    jsonFile.insert("resources", res);
+    QVariantMap resourcesData = ResourceManager::instance()->exportResources();
+    jsonFile.insert("resources", resourcesData);
 
     QVariantList scenes;
     for (int i=0; i < mDefaultSceneManager->size(); i++) {

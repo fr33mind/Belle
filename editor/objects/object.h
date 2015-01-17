@@ -30,6 +30,7 @@
 #include "padding.h"
 #include "animationimage.h"
 #include "background.h"
+#include "assetmanager.h"
 
 #define RESIZE_RECT_WIDTH 7
 

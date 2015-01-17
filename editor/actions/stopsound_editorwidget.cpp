@@ -50,24 +50,22 @@ void StopSoundEditorWidget::updateData(Action * action)
     ActionEditorWidget::updateData(stopSound);
     mAction = 0;
 
-    QString sound = stopSound->sound();
-    QStringList sounds = ResourceManager::sounds();
-    if (! sound.isEmpty()) {
-        int index = sounds.indexOf(sound);
-        if (index != -1) {
-            sounds.removeAt(index);
-            sounds.prepend(sound);
-        }
-    }
+    QString currSound = stopSound->sound();
+    QList<Asset*> sounds = AssetManager::instance()->assets(Asset::Audio);
 
     mSoundEdit->clear();
-    for(int i=0; i < sounds.size(); i++)
-        mSoundEdit->insertItem(i, sounds[i]);
+    if (! currSound.isEmpty())
+        mSoundEdit->addItem(currSound);
+
+    for(int i=0; i < sounds.size(); i++) {
+        if (sounds[i]->name() != stopSound->sound())
+            mSoundEdit->insertItem(i, sounds[i]->name());
+    }
     mSoundEdit->setCurrentIndex(0);
     mFadeOutSpinBox->setValue(stopSound->fadeTime());
 
     if (stopSound->sound().isEmpty() && ! sounds.isEmpty())
-        stopSound->setSound(sounds.first());
+        stopSound->setSound(sounds.first()->name());
 
     mAction = action;
 }

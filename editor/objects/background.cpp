@@ -14,7 +14,7 @@ Background::Background()
 Background::~Background()
 {
     if (mImage)
-        ResourceManager::decrementReference(mImage);
+        AssetManager::instance()->releaseAsset(mImage);
 }
 
 int Background::opacity() const
@@ -57,7 +57,7 @@ void Background::setImage(const QString& path)
     if (mImage && mImage->path() == path)
         return;
 
-    mImage = ResourceManager::newImage(path);
+    mImage = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(path, Asset::Image));
 }
 
 void Background::setImage(ImageFile* image)

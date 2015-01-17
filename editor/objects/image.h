@@ -23,7 +23,6 @@
 #include "image.h"
 #include "object.h"
 
-
 class Image : public Object
 {
     Q_OBJECT

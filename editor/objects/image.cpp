@@ -21,6 +21,7 @@
 #include <QMovie>
 
 #include "imagetransform.h"
+#include "assetmanager.h"
 
 //Image::Image(QPixmap *image, QObject *parent, const QString& name) :
 //    Object(parent, name)
@@ -34,7 +35,8 @@ Image::Image(const QString& path, QObject *parent, const QString& name) :
 {
     init();
     setImage(path);
-    setName(QFileInfo(ResourceManager::mediaName(path)).baseName());
+    if (mImage)
+        setName(QFileInfo(mImage->name()).baseName());
 }
 
 Image::Image(const QVariantMap& data, QObject* parent):
@@ -55,7 +57,7 @@ Image::Image(const QVariantMap& data, QObject* parent):
 
 Image::~Image()
 {
-    ResourceManager::decrementReference(mImage);
+    AssetManager::instance()->releaseAsset(mImage);
 }
 
 void Image::init()
@@ -75,7 +77,7 @@ void Image::_setImage(ImageFile* image)
         mImage->movie()->disconnect(this);
     }
 
-    ResourceManager::decrementReference(mImage);
+    AssetManager::instance()->releaseAsset(mImage);
     mImage = image;
 
     if (mImage && mImage->isAnimated()) {
@@ -97,7 +99,8 @@ void Image::setImage(const QString& path)
     if (mImage && mImage->path() == path)
         return;
 
-    _setImage(ResourceManager::newImage(path));
+    Asset *image = AssetManager::instance()->loadAsset(path, Asset::Image);
+    _setImage(dynamic_cast<ImageFile*>(image));
 }
 
 void Image::setImage(ImageFile* image)
@@ -105,7 +108,6 @@ void Image::setImage(ImageFile* image)
     if (mImage == image)
         return;
 
-    ResourceManager::incrementReference(image);
     _setImage(image);
 }
 

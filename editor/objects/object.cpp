@@ -25,6 +25,7 @@
 #include "scene.h"
 #include "utils.h"
 #include "scene_manager.h"
+#include "resource_manager.h"
 
 static ObjectEditorWidget * mEditorWidget = 0;
 static QFont mDefaultFont;
@@ -77,8 +78,8 @@ void Object::init(const QString& name)
 
 Object::~Object()
 {
-    //if (mBackgroundImage)
-    //    delete mBackgroundImage;
+    if (mBackground.image())
+        AssetManager::instance()->releaseAsset(mBackground.image());
 }
 
 QVariantMap Object::fillWithResourceData(QVariantMap data)
@@ -107,7 +108,7 @@ Scene * Object::scene()
     if (scene)
         return scene;
 
-    Object* object = object = qobject_cast<Object*>(this->parent());
+    Object* object = qobject_cast<Object*>(this->parent());
     if (object)
         return object->scene();
 
@@ -512,9 +513,9 @@ void Object::setBackgroundImage(const QString & path)
         image->movie()->disconnect(this);
     }
 
-    ResourceManager::decrementReference(image);
+    AssetManager::instance()->releaseAsset(image);
 
-    image = ResourceManager::newImage(path);
+    image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(path, Asset::Image));
     if (image && image->isAnimated()) {
         connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
         image->movie()->start();

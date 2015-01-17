@@ -6,7 +6,8 @@
 #include <QFileDialog>
 #include <QDebug>
 
-#include "resource_manager.h"
+#include "assetmanager.h"
+#include "fontfile.h"
 
 static QStringList mFontFamilies;
 
@@ -21,6 +22,7 @@ ChooseFontWidget::ChooseFontWidget(QWidget *parent) :
 
 void ChooseFontWidget::setCurrentFontFamily(const QString& family)
 {
+    qDebug() << family << mFontFamilies.indexOf(family);
     if (mFontFamilies.contains(family)) {
         mCurrentFamily = family;
         setCurrentIndex(mFontFamilies.indexOf(family));
@@ -67,10 +69,10 @@ bool ChooseFontWidget::loadSystemFonts()
 
 bool ChooseFontWidget::loadCustomFonts()
 {
-    if (ResourceManager::customFontsCount() != mCustomFontsIds.size()) {
-        QList<int> ids = ResourceManager::customFontsIds();
+    QList<int> fontsIds = AssetManager::instance()->fontsIds();
+    if (fontsIds.size() != mCustomFontsIds.size()) {
         QStringList families;
-        foreach(int id, ids) {
+        foreach(int id, fontsIds) {
             if (! mCustomFontsIds.contains(id)) {
                 mCustomFontsIds.append(id);
                 families = QFontDatabase::applicationFontFamilies(id);
@@ -98,7 +100,8 @@ void ChooseFontWidget::onItemActivated(int index)
         QStringList families;
 
         if (! filePath.isEmpty()) {
-            int id = ResourceManager::newFont(filePath);
+            FontFile* fontFile = dynamic_cast<FontFile*>(AssetManager::instance()->loadAsset(filePath, Asset::Font));
+            int id = fontFile->id();
             if (id != -1) {
                 loadFonts();
                 families = mFontDatabase.applicationFontFamilies(id);
@@ -121,7 +124,8 @@ void ChooseFontWidget::onItemActivated(int index)
 
 void ChooseFontWidget::focusInEvent(QFocusEvent *e)
 {
-    if (mCustomFontsIds.size() != ResourceManager::customFontsCount() || mFontFamilies.size() != count()-1) {
+    QList<int> fonts = AssetManager::instance()->fontsIds();
+    if (mCustomFontsIds.size() !=  fonts.size() || mFontFamilies.size() != count()-1) {
         loadFonts();
         setCurrentFontFamily(mCurrentFamily);
     }

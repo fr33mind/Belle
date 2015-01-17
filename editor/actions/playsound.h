@@ -27,7 +27,7 @@ class PlaySound : public Action
     Q_OBJECT
 
     int mVolume;
-    QString mSoundName;
+    Asset* mSound;
     bool mLoop;
 
 public:

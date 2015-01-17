@@ -49,7 +49,7 @@ void PlaySound::init()
     setName(Info.name);
     setIcon(Info.icon);
     mVolume = 100;
-    mSoundName = "";
+    mSound = 0;
     mLoop = false;
     connect(this, SIGNAL(objectNameChanged()), this, SLOT(onObjectNameChanged()));
 }
@@ -71,24 +71,31 @@ ActionEditorWidget* PlaySound::editorWidget()
 
 void PlaySound::setSoundPath(const QString & path)
 {
-    mSoundName = ResourceManager::newSound(path);
+    mSound = AssetManager::instance()->loadAsset(path, Asset::Audio);
+    if (! mSound)
+        return;
+
     if (! path.isEmpty()) {
         QString name = "";
         if (! objectName().isEmpty())
             name += objectName() + ": ";
 
-        setDisplayText(name + mSoundName);
+        setDisplayText(name + mSound->name());
     }
 }
 
 QString PlaySound::soundPath()
 {
-    return ResourceManager::mediaPath(mSoundName);
+    if (mSound)
+        return mSound->path();
+    return "";
 }
 
 QString PlaySound::soundName()
 {
-    return mSoundName;
+    if (mSound)
+        return mSound->name();
+    return "";
 }
 
 void PlaySound::setVolume(int vol)
@@ -113,17 +120,19 @@ bool PlaySound::loop()
 
 void PlaySound::onObjectNameChanged()
 {
+    if (! mSound)
+        return;
     QString name = "";
     if (! objectName().isEmpty())
         name += objectName() + ": ";
 
-    setDisplayText(name + mSoundName);
+    setDisplayText(name + mSound->name());
 }
 
 QVariantMap PlaySound::toJsonObject()
 {
     QVariantMap action = Action::toJsonObject();
-    action.insert("sound", mSoundName);
+    action.insert("sound", mSound ? mSound->name() : "");
     action.insert("volume", mVolume);
     action.insert("loop", mLoop);
     return action;

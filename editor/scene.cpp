@@ -24,6 +24,7 @@
 #include "textbox.h"
 #include "utils.h"
 #include "drawing_surface_widget.h"
+#include "resource_manager.h"
 
 static QSize mSize;
 static QPoint mPoint;
@@ -79,7 +80,7 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
 
 Scene::~Scene()
 {
-    ResourceManager::decrementReference(mBackgroundImage);
+    AssetManager::instance()->releaseAsset(mBackgroundImage);
     if (mScenePixmap)
         delete mScenePixmap;
     mScenePixmap = 0;
@@ -310,13 +311,14 @@ void Scene::fillWidth()
 
 void Scene::setBackgroundImage(const QString & path)
 {
-    ImageFile* image = ResourceManager::newImage(path);
+    AssetManager* assetManager = AssetManager::instance();
+    ImageFile* image = dynamic_cast<ImageFile*>(assetManager->loadAsset(path, Asset::Image));
 
     if (mBackgroundImage != image) {
         if (mBackgroundImage && mBackgroundImage->isAnimated()) {
             mBackgroundImage->movie()->disconnect(this);
         }
-        ResourceManager::decrementReference(mBackgroundImage);
+        assetManager->releaseAsset(mBackgroundImage);
 
         if (image && image->isValid()) {
             if (image->isAnimated()) {
@@ -403,7 +405,7 @@ ImageFile* Scene::background() const
 void Scene::clearBackground()
 {
     if ( mBackgroundImage ) {
-        ResourceManager::decrementReference(mBackgroundImage);
+        AssetManager::instance()->releaseAsset(mBackgroundImage);
         mBackgroundImage = 0;
         emit dataChanged();
     }
@@ -568,7 +570,7 @@ QVariantMap Scene::toJsonObject(bool internal)
     scene.insert("name", objectName());
     scene.insert("type", "Scene");
     if (mBackgroundImage)
-        scene.insert("backgroundImage", mBackgroundImage->fileName());
+        scene.insert("backgroundImage", mBackgroundImage->name());
 
     if (mBackgroundColor.isValid())
         scene.insert("backgroundColor", Utils::colorToList(mBackgroundColor));

@@ -16,8 +16,8 @@
 
 #include "change_background.h"
 #include "scene_manager.h"
-#include "resource_manager.h"
 #include "utils.h"
+#include "assetmanager.h"
 
 #include <QFileInfo>
 #include <QtDebug>
@@ -69,11 +69,11 @@ ActionEditorWidget* ChangeBackground::editorWidget()
 
 void ChangeBackground::setBackgroundImage(const QString & background)
 { 
-    ImageFile* image = ResourceManager::newImage(background);
+    ImageFile* image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(background, Asset::Image));
     if (mBackgroundImage == image)
         return;
 
-    ResourceManager::decrementReference(mBackgroundImage);
+    AssetManager::instance()->releaseAsset(mBackgroundImage);
     mBackgroundImage = image;
 
     QFileInfo info(background);
@@ -94,7 +94,7 @@ ImageFile* ChangeBackground::background() const
 
 QString ChangeBackground::backgroundPath()
 {
-    return ResourceManager::imagePath(mBackgroundImage);
+    return mBackgroundImage->path();
 }
 
 void ChangeBackground::setBackgroundColor(const QColor& color)
@@ -139,7 +139,7 @@ void ChangeBackground::focusOut()
 QVariantMap ChangeBackground::toJsonObject()
 {
     QVariantMap data = Action::toJsonObject();
-    QString path = ResourceManager::imagePath(mBackgroundImage);
+    QString path = mBackgroundImage ? mBackgroundImage->path() : "";
 
     if (! path.isEmpty())
         data.insert("backgroundImage", QFileInfo(path).fileName());
