@@ -30,12 +30,6 @@
 
 static QList<Object*> mResources;
 static ResourceManager* mInstance = new ResourceManager();
-static QHash<QString, ImageFile*> mImageCache;
-static QHash<ImageFile*, int> mImageReferences;
-static QHash<QString, int> mFontsPaths;
-static QHash<QString, QString> mMediaResources;
-static QHash<QString, QString> mSounds;
-static QString mRelativePath = "";
 
 ResourceManager::ResourceManager(QObject *parent) :
     QObject(parent)
@@ -203,18 +197,6 @@ void  ResourceManager::removeResources(bool del)
         removeResource(mResources[i], del);
 
     mResources.clear();
-
-    QHashIterator <QString, ImageFile*>it(mImageCache);
-    ImageFile* image = 0;
-    while(it.hasNext()) {
-        it.next();
-        image = static_cast<ImageFile*>(it.value());
-        if (image)
-            delete image;
-    }
-
-    mImageCache.clear();
-    mImageReferences.clear();
 }
 
 void  ResourceManager::destroy()
@@ -226,229 +208,6 @@ void  ResourceManager::destroy()
 ResourceManager* ResourceManager::instance()
 {
     return mInstance;
-}
-
-QString ResourceManager::absolutePath(const QString& path)
-{
-    if (! mRelativePath.isEmpty()) {
-         QDir dir(mRelativePath);
-         if (dir.exists(path))
-             return dir.absoluteFilePath(path);
-    }
-    return path;
-}
-
-ImageFile* ResourceManager::newImage(const QVariant& imageData)
-{
-    if (imageData.type() == QVariant::String) {
-        return newImage(imageData.toString());
-    }
-    else if (imageData.type() == QVariant::Map) {
-        QVariantMap imageMap = imageData.toMap();
-        if (imageMap.contains("src"))
-            return newImage(imageMap.value("src").toString());
-    }
-
-    return 0;
-}
-
-ImageFile* ResourceManager::newImage(const QString& fileName)
-{
-    QString path;
-    //fileName can be either a full path or just the file name
-    if (mMediaResources.contains(fileName))
-        path = ResourceManager::mediaPath(fileName);
-    else
-        path = ResourceManager::absolutePath(fileName);
-
-    if (mImageCache.contains(path)) {
-        incrementReference(mImageCache.value(path));
-        return mImageCache.value(path);
-    }
-
-    if (! QFile::exists(path))
-        return 0;
-
-    ImageFile* image = ImageFile::create(path);
-    image->setName(newMedia(path));
-    mImageCache.insert(path, image);
-    mImageReferences.insert(image, 1);
-
-    return image;
-}
-
-QString ResourceManager::imagePath(ImageFile* image)
-{
-    if (! image)
-        return "";
-
-    QHashIterator<QString, ImageFile*> it(mImageCache);
-
-    while(it.hasNext()) {
-        it.next();
-        if (it.value() == image)
-            return it.key();
-    }
-
-    return "";
-}
-
-ImageFile* ResourceManager::image(const QString& path)
-{
-    if (path.isEmpty())
-        return 0;
-
-    if (mImageCache.contains(path))
-        return mImageCache.value(path);
-
-    return 0;
-}
-
-void ResourceManager::incrementReference(ImageFile* image)
-{
-    int refs = mImageReferences.value(image, -1);
-    if (refs == -1)
-        return;
-    refs++;
-    mImageReferences.insert(image, refs);
-}
-
-
-void ResourceManager::decrementReference(const QPixmap& _pixmap)
-{
-    QHashIterator<QString, ImageFile*> it(mImageCache);
-    ImageFile* image = 0;
-    while(it.hasNext()) {
-        it.next();
-        if (it.value()->pixmap().toImage() == _pixmap.toImage()) {
-            image = it.value();
-            break;
-        }
-    }
-
-    decrementReference(image);
-}
-
-void ResourceManager::decrementReference(ImageFile* image)
-{
-    if(! image || ! mImageReferences.contains(image))
-        return;
-
-    int refs = mImageReferences.value(image);
-    if (refs <= 1)
-    {
-        mImageReferences.remove(image);
-
-        QString keyPath = ResourceManager::imagePath(image);
-        if (! keyPath.isEmpty())
-            mImageCache.remove(keyPath);
-
-        delete image;
-    }
-    else {
-        refs--;
-        mImageReferences.insert(image, refs);
-    }
-}
-
-QStringList ResourceManager::imagePaths()
-{
-    return mImageCache.keys();
-}
-
-void ResourceManager::setRelativePath(const QString & path)
-{
-    mRelativePath = path;
-}
-
-int ResourceManager::newFont(const QString& p)
-{
-    QString path = ResourceManager::absolutePath(p);
-    if (mFontsPaths.contains(path))
-        return mFontsPaths.value(path, -1);
-
-    int id = QFontDatabase::addApplicationFont(path);
-    mFontsPaths.insert(path, id);
-    ResourceManager::newMedia(path);
-    return id;
-}
-
-QString ResourceManager::newMedia(const QString& path)
-{
-    QString absPath = absolutePath(path);
-    QFileInfo info(absPath);
-    QString name = info.fileName();
-
-    if (mMediaResources.contains(name)) {
-        if (absPath == mMediaResources.value(name))
-            return name; //file already added, do nothing
-
-        while(mMediaResources.contains(name) && mMediaResources.value(name) != absPath)
-            name = Utils::incrementLastNumber(name);
-    }
-
-    mMediaResources.insert(name, absPath);
-    return name;
-}
-
-QString ResourceManager::mediaPath(const QString& name)
-{
-    if (mMediaResources.contains(name))
-        return mMediaResources.value(name);
-    return "";
-}
-
-QString ResourceManager::mediaName(const QString& path)
-{
-    QHashIterator<QString, QString> it(mMediaResources);
-    while(it.hasNext()) {
-        it.next();
-        if (it.value() == path)
-            return it.key();
-    }
-    return "";
-}
-
-void ResourceManager::exportResources(const QDir& dir)
-{
-    ResourceManager::exportCustomFonts(dir);
-
-    //export everything else (e.g. sounds)
-    QHashIterator<QString, QString> it(mMediaResources);
-    while(it.hasNext()) {
-        it.next();
-        if (! QFile::exists(dir.absoluteFilePath(it.key())))
-            QFile::copy(it.value(), dir.absoluteFilePath(it.key()));
-    }
-}
-
-void ResourceManager::exportCustomFonts(const QDir& dir)
-{
-    QHashIterator<QString, int> it(mFontsPaths);
-    QFile file(dir.absoluteFilePath("fontfaces.css"));
-    if (! file.open(QFile::WriteOnly | QFile::Text))
-        return;
-
-    while(it.hasNext()) {
-        it.next();
-        QString fontName = ResourceManager::mediaName(it.key());
-        if (fontName.isEmpty())
-            fontName = QFileInfo(it.key()).baseName();
-
-        //copy font file
-        QFile::copy(it.key(), dir.absoluteFilePath(fontName));
-
-        //determine font's family name.
-        QStringList families = QFontDatabase::applicationFontFamilies(it.value());
-        if (families.size() == 1)
-            fontName = families[0];
-
-        //write css for font
-        file.write(Utils::fontFace(fontName).toAscii());
-        file.write("\n");
-    }
-
-    file.close();
 }
 
 void ResourceManager::importResources(const QVariantMap& data)
@@ -464,60 +223,15 @@ void ResourceManager::importResources(const QVariantMap& data)
             ResourceManager::instance()->createResource(it.value().toMap());
         }
     }
+}
 
-    if (data.contains("customFonts") && data.value("customFonts").type() == QVariant::List) {
-        QVariantList fonts = data.value("customFonts").toList();
-        foreach(const QVariant& font, fonts){
-            newFont(font.toString());
-        }
+QVariantMap ResourceManager::exportResources()
+{
+    QVariantMap resourcesData;
+    QList<Object*> resources = ResourceManager::resources();
+    for (int i=0; i < resources.size(); i++) {
+        resourcesData.insert(resources.at(i)->objectName(), resources.at(i)->toJsonObject(false));
     }
+    return resourcesData;
 }
 
-QString ResourceManager::display()
-{
-    QString display = "canvas";
-    foreach(const QString& path, mImageCache.keys()) {
-        ImageFile* image = mImageCache[path];
-        if (image && image->isAnimated()) {
-            display = "DOM";
-            break;
-        }
-    }
-
-    return display;
-}
-
-int ResourceManager::customFontsCount()
-{
-    return mFontsPaths.keys().size();
-}
-
-QList<int> ResourceManager::customFontsIds()
-{
-    return mFontsPaths.values();
-}
-
-QStringList ResourceManager::customFonts()
-{
-    QStringList fonts;
-    QHashIterator<QString, int> it(mFontsPaths);
-    while(it.hasNext()) {
-        it.next();
-        QFileInfo info(it.key());
-        fonts.append(info.fileName());
-    }
-
-    return fonts;
-}
-
-QString ResourceManager::newSound(const QString& path)
-{
-    QString name = ResourceManager::newMedia(path);
-    mSounds.insert(name, path);
-    return name;
-}
-
-QStringList ResourceManager::sounds()
-{
-    return mSounds.keys();
-}

@@ -44,46 +44,18 @@ public:
     Object* createResource(QVariantMap, bool appendToResources=true, QObject* parent=0);
     bool contains(const QString&);
     void removeResource(Object*, bool del=false);
-
     static Object* resource(const QString&);
     static Object* resource(int);
     static void fillWithResourceData(QVariantMap&);
-
     Object* typeToObject(const QString&, QVariantMap& extraData, QObject* parent=0);
-
-    QString toJavascript();
-    void writeToGameFile();
     bool isValidName(const QString&);
     QString newName(QString);
     QString newName(Object*);
     static void setRelativePath(const QString&);
     static ResourceManager* instance();
     static QList<Object*> resources();
-
-    static int newFont(const QString&);
-    static QStringList customFonts();
-    static int customFontsCount();
-    static QList<int> customFontsIds();
-    static ImageFile* newImage(const QString&);
-    static ImageFile* newImage(const QVariant&);
-    static QString imagePath(ImageFile*);
-    static ImageFile* image(const QString&);
-    static QMovie* movie(const QString&);
-    static QStringList imagePaths();
-    static void exportResources(const QDir&);
-    static void exportCustomFonts(const QDir&);
-    static QString newMedia(const QString&);
-    static QString mediaPath(const QString&);
-    static QString mediaName(const QString&);
-    static QString absolutePath(const QString&);
     static void importResources(const QVariantMap&);
-    static QString display();
-    static QString newSound(const QString&);
-    static QStringList sounds();
-
-    static void incrementReference(ImageFile*);
-    static void decrementReference(ImageFile*);
-    static void decrementReference(const QPixmap&);
+    static QVariantMap exportResources();
 
     static void destroy();
     void removeResources(bool del);
