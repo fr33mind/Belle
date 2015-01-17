@@ -28,7 +28,7 @@
 #include "interaction.h"
 #include "object_editor_widget.h"
 #include "padding.h"
-#include "animationimage.h"
+#include "animatedimage.h"
 #include "background.h"
 #include "assetmanager.h"
 

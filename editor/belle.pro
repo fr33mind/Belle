@@ -104,7 +104,7 @@ HEADERS      += belle.h\
     engine.h \
     drawing_surface_widget.h \
     add_character_dialog.h \
-    animationimage.h \
+    animatedimage.h \
     choosefontwidget.h \
     simple_http_server.h \
     save_project_dialog.h \
@@ -207,7 +207,7 @@ SOURCES      += main.cpp\
     engine.cpp \
     drawing_surface_widget.cpp \
     add_character_dialog.cpp \
-    animationimage.cpp \
+    animatedimage.cpp \
     choosefontwidget.cpp \
     simple_http_server.cpp \
     save_project_dialog.cpp \

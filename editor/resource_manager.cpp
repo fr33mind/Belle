@@ -26,7 +26,7 @@
 #include "textbox.h"
 #include "button.h"
 #include "menu.h"
-#include "animationimage.h"
+#include "animatedimage.h"
 
 static QList<Object*> mResources;
 static ResourceManager* mInstance = new ResourceManager();

@@ -5,7 +5,7 @@
 #include <QImage>
 #include <QColor>
 
-#include "animationimage.h"
+#include "animatedimage.h"
 #include "imagetransform.h"
 
 class Background

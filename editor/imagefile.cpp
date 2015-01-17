@@ -3,7 +3,7 @@
 #include <QMovie>
 #include <QFileInfo>
 
-#include "animationimage.h"
+#include "animatedimage.h"
 
 ImageFile::ImageFile(const QString&path, bool load) :
     Asset(path, Asset::Image)
