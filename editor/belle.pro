@@ -117,7 +117,10 @@ HEADERS      += belle.h\
     actions/end.h \
     objectsview.h \
     actions/changestate.h \
-    actions/changestate_editorwidget.h
+    actions/changestate_editorwidget.h \
+    assetmanager.h \
+    asset.h \
+    fontfile.h
                 
 
 SOURCES      += main.cpp\
@@ -217,6 +220,9 @@ SOURCES      += main.cpp\
     actions/end.cpp \
     objectsview.cpp \
     actions/changestate.cpp \
-    actions/changestate_editorwidget.cpp
+    actions/changestate_editorwidget.cpp \
+    assetmanager.cpp \
+    asset.cpp \
+    fontfile.cpp
 
 RESOURCES += media.qrc
