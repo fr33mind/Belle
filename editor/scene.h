@@ -116,6 +116,10 @@ class Scene : public QObject
 
         void paint(QPainter&);
         
+    protected:
+        void _appendObject(Object*);
+        void _reorderObject(Object*);
+
     private slots:
         void onResizeEvent(const QResizeEvent&);
 

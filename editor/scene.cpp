@@ -59,7 +59,7 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
                 continue;
             Object* obj = ResourceManager::instance()->createResource(objects[i].toMap(), false);
             if (obj)
-                appendObject(obj);
+                _appendObject(obj);
         }
     }
 
@@ -170,8 +170,7 @@ void Scene::addCopyOfObject(Object* object, bool select)
     obj->setResource(object);
 }
 
-
-void Scene::appendObject(Object* object, bool select, bool temporarily)
+void Scene::_appendObject(Object* object)
 {
     if (! object)
         return;
@@ -184,18 +183,36 @@ void Scene::appendObject(Object* object, bool select, bool temporarily)
     object->setObjectName(newObjectName(object->objectName()));
     connect(object, SIGNAL(dataChanged()), DrawingSurfaceWidget::instance(), SLOT(update()));
 
-    if (temporarily)
-        mTemporaryObjects.append(object);
-    else {
-        if (object->type() == "TextBox" || object->type() == "DialogueBox" || object->type() == "Button")
-            mObjects.append(object);
-        else { //set TextBox/DialogueBox/Button over any other object by default
-            int i=mObjects.size()-1;
-            while(i > 0 && (mObjects[i]->type() == "TextBox" || mObjects[i]->type() == "DialogueBox" || mObjects[i]->type() == "Button"))
-                --i;
+    mObjects.append(object);
+}
+
+void Scene::_reorderObject(Object* object)
+{
+    if (object->type() != "TextBox" && object->type() != "DialogueBox" && object->type() != "Button") {
+        int index = mObjects.indexOf(object);
+        int i=index-1;
+        while(i >= 0 && (mObjects[i]->type() == "TextBox" || mObjects[i]->type() == "DialogueBox" || mObjects[i]->type() == "Button")) {
+            --i;
+        }
+
+        ++i;
+        if (i != index) {
+            mObjects.takeAt(index);
             mObjects.insert(i, object);
         }
     }
+}
+
+void Scene::appendObject(Object* object, bool select, bool temporarily)
+{
+    if (! object)
+        return;
+
+    this->_appendObject(object);
+    if (temporarily)
+        mTemporaryObjects.append(object);
+    else
+        this->_reorderObject(object);
 
     if (! temporarily)
         emit objectAdded(object);
