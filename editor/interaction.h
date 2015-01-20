@@ -17,21 +17,39 @@
 #ifndef INPUT_EVENTS_H
 #define INPUT_EVENTS_H
 
+#include <QString>
 
-namespace Interaction
+class Interaction
 {
+
+public:
     enum InputEvent {
         None = 0,
         MousePress = 1,
         MouseRelease = 2,
-        MouseMove = 4
+        MouseMove = 3
     };
 
-    Q_DECLARE_FLAGS(InputEvents, Interaction::InputEvent);
 
-    Q_DECLARE_OPERATORS_FOR_FLAGS(Interaction::InputEvents);
-}
+    static QString toString(InputEvent ev) {
+        switch(ev) {
+            //TODO: Rename events
+            case None:
+                return "None";
+            case MousePress:
+                return "onMousePress";
+            case MouseRelease:
+                return "onMouseRelease";
+            case MouseMove:
+                return "onMouseMove";
+        }
 
+        return "";
+    }
 
+    Q_DECLARE_FLAGS(InputEvents, InputEvent);
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Interaction::InputEvents);
 
 #endif // INPUT_EVENTS_H
