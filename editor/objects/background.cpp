@@ -9,6 +9,7 @@ Background::Background()
 {
     mImage = 0;
     mColor = QColor();
+    mOpacity = 0;
 }
 
 Background::~Background()
@@ -19,11 +20,12 @@ Background::~Background()
 
 int Background::opacity() const
 {
-    return mColor.alpha();
+    return mOpacity;
 }
 
 void Background::setOpacity(int a)
 {
+    mOpacity = a;
     mColor.setAlpha(a);
 }
 
@@ -35,6 +37,7 @@ QColor Background::color() const
 void Background::setColor(const QColor& color)
 {
     mColor = color;
+    mColor.setAlpha(mOpacity);
 }
 
 ImageTransform::TransformType Background::positioning() const

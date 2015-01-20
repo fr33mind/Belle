@@ -37,6 +37,7 @@ private:
     ImageFile *mImage;
     ImageTransform mImageTransform;
     QColor mColor;
+    int mOpacity;
 };
 
 #endif // BACKGROUND_H
