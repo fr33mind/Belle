@@ -375,19 +375,16 @@ void PropertiesWidget::append(PropertiesWidget* propertiesWidget, int startAt, c
 void PropertiesWidget::setFilters(const QStringList& filters)
 {
     QStandardItemModel *model = mModel;
-    QList<QStandardItem *> items;
-
-    if (filters.isEmpty()) {
-        items = model->findItems("");
-        for (int i=0; i < items.size(); i++)
-            if (this->isRowHidden(items[i]->row(), items[i]->parent()->index()))
-                this->setRowHidden(items[i]->row(), items[i]->parent()->index(), false);
-
-        return;
-    }
-
+    QModelIndex index;
     QModelIndexList _indexes;
     QModelIndexList indexes;
+
+    //reset hidden rows
+    for (int i=0; i < model->rowCount(); i++) {
+        index = model->index(i, 0);
+        if (this->isRowHidden(index.row(), index.parent()))
+            this->setRowHidden(index.row(), index.parent(), false);
+    }
 
     foreach(const QString& filter, filters) {
         //can't use findItems because we need to search text in UserRole+1 not in DisplayRole
