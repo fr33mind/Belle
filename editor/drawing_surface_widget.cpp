@@ -51,8 +51,8 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     //this->setWidget(widget);*/
 
     //create context menu actions
-    mCancelEditObject = new QAction(QIcon(":/media/go-up.png"), tr("Cancel edit"), this);
-    mEditObject = new QAction(QIcon(":/media/go-up.png"), tr("Edit"), this);
+    mCancelEditObject = new QAction(QIcon(":/media/object-edit.png"), tr("Cancel edit"), this);
+    mEditObject = new QAction(QIcon(":/media/object-edit.png"), tr("Edit"), this);
 
     mMoveUp = new QAction(QIcon(":/media/go-up.png"), tr("Move to front"), this);
     mMoveDown = new QAction(QIcon(":/media/go-down.png"), tr("Move to back"), this);
@@ -372,18 +372,16 @@ void DrawingSurfaceWidget::resizeEvent(QResizeEvent * event)
 
 void DrawingSurfaceWidget::onCustomContextMenuRequested(const QPoint& point)
 {
-    if (! mSceneManager->currentScene() || mObject)
+    if (! mSceneManager->currentScene() && ! mObject)
         return;
 
     QMenu menu;
+    bool inScene = mObject ? false : true;
     Object* selectedObject = 0;
     if (mObject)
         selectedObject = mObject->selectedObject();
     else
         selectedObject = mSceneManager->currentScene()->selectedObject();
-
-    if (cursor().shape() != Qt::ArrowCursor)
-        setCursor(Qt::ArrowCursor);
 
     if (selectedObject) {
         ObjectGroup * objectGroup = qobject_cast<ObjectGroup*>(selectedObject);
@@ -396,30 +394,35 @@ void DrawingSurfaceWidget::onCustomContextMenuRequested(const QPoint& point)
         else if (selectedObject->hasObjectAsParent())
             menu.addAction(mCancelEditObject);
 
-        menu.addAction(mMoveUp);
-        menu.addAction(mMoveDown);
-        menu.addAction(mFillWidth);
-        menu.addSeparator();
-        if (! mObject) {
+        if (inScene) {
+            menu.addAction(mMoveUp);
+            menu.addAction(mMoveDown);
+            menu.addAction(mFillWidth);
+            menu.addSeparator();
+
             menu.addAction(mAlignHorizontally);
             menu.addAction(mAlignVertically);
             menu.addSeparator();
+
+            menu.addAction(mCopyObject);
+            menu.addAction(mCutObject);
+            if (! mSceneManager->clipboard()->isEmpty())
+                menu.addAction(mPasteObject);
+            menu.addAction(mDeleteObject);
         }
-        menu.addAction(mCopyObject);
-        menu.addAction(mCutObject);
-        if (! mSceneManager->clipboard()->isEmpty())
-            menu.addAction(mPasteObject);
-        menu.addAction(mDeleteObject);
     }
-    else {
+    else if (inScene) {
         if (! mSceneManager->clipboard()->isEmpty())
             menu.addAction(mPasteObject);
         if (mSceneManager->currentScene()->backgroundImage())
             menu.addAction(mClearBackground);
     }
 
-    if (! menu.actions().isEmpty())
+    if (! menu.actions().isEmpty()) {
+        if (cursor().shape() != Qt::ArrowCursor)
+            setCursor(Qt::ArrowCursor);
         menu.exec(mapToGlobal(point));
+    }
 
     mMousePressed = false;
 }
