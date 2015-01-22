@@ -152,8 +152,12 @@ Object* Action::sceneObject() const
 
 void Action::setSceneObject(Object * object)
 {
+    if (mObject == object)
+        return;
+
     if (mObject)
         mObject->disconnect(this);
+
     mObject = object;
     if (mObject) {
         mObjectName = mObject->name();
