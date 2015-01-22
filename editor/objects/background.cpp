@@ -36,8 +36,11 @@ QColor Background::color() const
 
 void Background::setColor(const QColor& color)
 {
-    mColor = color;
-    mColor.setAlpha(mOpacity);
+    if (color.isValid()) {
+        mColor = color;
+        //for backwards compatibility
+        setOpacity(color.alpha());
+    }
 }
 
 ImageTransform::TransformType Background::positioning() const
