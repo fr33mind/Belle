@@ -42,6 +42,22 @@ Character::Character(const QVariantMap& data, QObject* parent) :
     Image(data, parent)
 {
     init(objectName());
+    _load(data);
+}
+
+Character::~Character()
+{
+    QHashIterator<QString, ImageFile*> it(mStateToImage);
+    while(it.hasNext()) {
+        it.next();
+        AssetManager::instance()->releaseAsset(it.value());
+    }
+    mStateToImage.clear();
+}
+
+void Character::_load(const QVariantMap& data)
+{
+    this->blockNotifications(true);
 
     QHash<QString, QString> states;
     if (data.contains("states") && data.value("states").type() == QVariant::Map) {
@@ -64,16 +80,14 @@ Character::Character(const QVariantMap& data, QObject* parent) :
 
     if (data.contains("textColor") && data.value("textColor").type() == QVariant::List)
         setTextColor(Utils::listToColor(data.value("textColor").toList()));
+
+    this->blockNotifications(false);
 }
 
-Character::~Character()
+void Character::load(const QVariantMap& data)
 {
-    QHashIterator<QString, ImageFile*> it(mStateToImage);
-    while(it.hasNext()) {
-        it.next();
-        AssetManager::instance()->releaseAsset(it.value());
-    }
-    mStateToImage.clear();
+    Image::load(data);
+    _load(data);
 }
 
 void Character::init(const QString& name)
@@ -198,7 +212,7 @@ void Character::setCurrentState(const QString & state)
         mStateToImage.insert(state, image());
     }
 
-    emit dataChanged();
+    this->notify("state", state);
 }
 
 QString Character::currentState() const
@@ -211,16 +225,20 @@ void Character::setStates(const QHash<QString, QString> & states)
     QList<ImageFile*> images = mStateToImage.values();
     mStateToImage.clear();
     mStateToPath = states;
+    QVariantMap statesNotify;
     QHashIterator<QString, QString> it(states);
     while(it.hasNext()) {
         it.next();
         ImageFile* image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(it.value(), Asset::Image));
         mStateToImage.insert(it.key(), image);
+        statesNotify.insert(it.key(), it.value());
     }
 
     foreach(ImageFile* img, images){
         AssetManager::instance()->releaseAsset(img);
     }
+
+    this->notify("states", statesNotify);
 
     if (mCurrentState.isEmpty() && ! mStateToPath.isEmpty())
         setCurrentState(mStateToPath.keys().first());
@@ -238,12 +256,20 @@ QColor Character::textColor() const
 
 void Character::setNameColor(const QColor & color)
 {
+    if (mNameColor == color)
+        return;
+
     mNameColor = color;
+    this->notify("nameColor", Utils::colorToList(color));
 }
 
 void Character::setTextColor(const QColor & color)
 {
+    if (mTextColor == color)
+        return;
+
     mTextColor = color;
+    this->notify("textColor", Utils::colorToList(color));
 }
 
 QVariantMap Character::toJsonObject(bool internal)

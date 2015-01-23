@@ -47,9 +47,11 @@ public:
 signals:
 
 public slots:
+    virtual void load(const QVariantMap&);
 
 private:
     void init();
+    void _load(const QVariantMap&);
     void _setImage(ImageFile*);
 
 

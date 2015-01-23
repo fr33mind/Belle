@@ -35,14 +35,16 @@ Object::Object(QObject* parent, const QString& name):
 {
     init(name);
     updateResizeRects();
+    emit dataChanged();
 }
 
 Object::Object(const QVariantMap& data, QObject* parent):
     QObject(parent)
 {
     init("Object");
-    setProperties(data);
+    _load(data);
     updateResizeRects();
+    emit dataChanged();
 }
 
 void Object::init(const QString& name)
@@ -63,6 +65,11 @@ void Object::init(const QString& name)
     mKeepAspectRatio = false;
     mAspectRatio = 1;
     mScaledBackgroundImage = 0;
+    mChangesAccepted = true;
+    mChangesPropagated = true;
+    mEventToActions.insert(Interaction::MouseMove, QList<Action*>());
+    mEventToActions.insert(Interaction::MousePress, QList<Action*>());
+    mEventToActions.insert(Interaction::MouseRelease, QList<Action*>());
 
     //check if name is valid
     if (objectName().isEmpty()) {
@@ -78,6 +85,8 @@ void Object::init(const QString& name)
 
 Object::~Object()
 {
+    emit destroyed(this);
+
     if (mBackground.image())
         AssetManager::instance()->releaseAsset(mBackground.image());
 }
@@ -99,7 +108,7 @@ QVariantMap Object::fillWithResourceData(QVariantMap data)
     return data;
 }
 
-Scene * Object::scene()
+Scene * Object::scene() const
 {
     if (! this->parent())
         return 0;
@@ -219,10 +228,8 @@ QColor Object::backgroundColor() const
 
 void Object::setBackgroundColor(const QColor & color)
 {
-    notify("backgroundColor", Utils::colorToList(color), Utils::colorToList(mBackground.color()));
-    int alpha = mBackground.opacity();
     mBackground.setColor(color);
-    mBackground.setOpacity(alpha);
+    notify("backgroundColor", Utils::colorToList(color), Utils::colorToList(mBackground.color()));
 }
 
 int Object::backgroundOpacity() const
@@ -314,18 +321,15 @@ void Object::setY(int y)
 {
     mSceneRect.moveTo(mSceneRect.x(), y + mPadding.top());
     updateResizeRects();
-    QVariantMap data;
-    data.insert("y", y);
-    emit dataChanged(data);
+    //FIXME: Implement proper relative positions.
+    notify("y", this->y());
 }
 
 void Object::setX(int x)
 {
     mSceneRect.moveTo(x + padding("left"), mSceneRect.y());
     updateResizeRects();
-    QVariantMap data;
-    data.insert("x", x);
-    emit dataChanged(data);
+    notify("x", this->x());
 }
 
 int Object::x() const
@@ -467,8 +471,29 @@ void Object::paint(QPainter & painter)
 
 Object* Object::copy()
 {
-    Object * obj = ResourceManager::instance()->createResource(toJsonObject(), false);
-    return obj;
+    return ResourceManager::instance()->createObject(toJsonObject(true), this->parent());
+}
+
+void Object::replaceEventActions(Interaction::InputEvent event, const QList<Action*>& actions)
+{
+    QList<Action*> delActions;
+    QList<Action*> currActions = mEventToActions.value(event);
+    for(int i=0; i < currActions.size(); i++) {
+        if (! actions.contains(currActions[i])) {
+            delActions.append(currActions[i]);
+        }
+    }
+
+    for(int i=0; i < delActions.size(); i++) {
+        removeEventAction(event, delActions[i], true);
+    }
+
+    mEventToActions.insert(event, actions);
+}
+
+void Object::setEventActions(Interaction::InputEvent event, const QList<Action*>& actions)
+{
+    replaceEventActions(event, actions);
 }
 
 void Object::appendEventAction(Interaction::InputEvent event, Action * action)
@@ -487,6 +512,15 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
             actions.insert(index, action);
 
         mEventToActions.insert(event, actions);
+
+        if (changesPropagated()) {
+            QVariantList actionsVariant;
+            for(int i=0; i < actions.size(); i++) {
+                actionsVariant.append(qVariantFromValue((QObject*)actions[i]));
+            }
+
+            this->notify(Interaction::toString(event), actionsVariant);
+        }
     }
 }
 
@@ -496,9 +530,40 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
    if (index >= 0 && index < actions.size()) {
        Action* action = actions.takeAt(index);
        if (del)
-        action->deleteLater();
+            action->deleteLater();
        mEventToActions.insert(event, actions);
+
+       if (changesPropagated()) {
+           QVariantList actionsVariant;
+           for(int i=0; i < actions.size(); i++) {
+               actionsVariant.append(qVariantFromValue((QObject*)actions[i]));
+           }
+
+           this->notify(Interaction::toString(event), actionsVariant);
+       }
    }
+}
+
+void Object::removeEventAction(Interaction::InputEvent event, Action* action, bool del)
+{
+    if (! action)
+        return;
+    QList<Action*> actions = mEventToActions.value(event);
+    this->removeEventActionAt(event, actions.indexOf(action), del);
+}
+
+void Object::removeAllEventActions(Interaction::InputEvent event, bool del)
+{
+    QList<Action*> actions = mEventToActions.value(event);
+    if (del) {
+        for(int i=0; i < actions.size(); i++) {
+            if (actions[i]->parent() == this)
+                actions[i]->deleteLater();
+        }
+    }
+
+    actions.clear();
+    mEventToActions.insert(event, actions);
 }
 
 void Object::setBackgroundImage(const QString & path)
@@ -535,7 +600,12 @@ ImageFile* Object::backgroundImage() const
 
 QList<Action*> Object::actionsForEvent(Interaction::InputEvent event)
 {
-    return mEventToActions.value(event);
+    return mEventToActions.value(event, QList<Action*>());
+}
+
+bool Object::hasActionForEvent(Action* action, Interaction::InputEvent event)
+{
+    return mEventToActions.value(event, QList<Action*>()).contains(action);
 }
 
 QVariantMap Object::toJsonObject(bool internal)
@@ -556,6 +626,7 @@ QVariantMap Object::toJsonObject(bool internal)
     color << bgColor.red() << bgColor.green() << bgColor.blue()
              << bgColor.alpha();
     object.insert("backgroundColor", color);
+    object.insert("backgroundOpacity", mBackground.opacity());
 
     if (mCornerRadius) {
         object.insert("cornerRadius", mCornerRadius);
@@ -859,7 +930,7 @@ bool Object::visible()
 void Object::setVisible(bool visible)
 {
     mVisible = visible;
-    emit dataChanged();
+    this->notify("visible", visible);
 }
 
 Object* Object::objectAt(qreal x, qreal y)
@@ -928,22 +999,74 @@ void Object::setPadding(const Padding& padding)
 
 void Object::setResource(Object* resource)
 {
+    if (! resource || mResource == resource)
+        return;
+
     if (mResource)
         mResource->disconnect(this);
 
     mResource = resource;
-    connect(mResource, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onResourceChanged(const QVariantMap&)));
-    connect(mResource, SIGNAL(destroyed()), this, SLOT(onResourceDestroyed()));
+    mResource->addClone(this);
+    this->addObserver(mResource);
+    connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()));
 }
 
-Object* Object::resource()
+Object* Object::resource() const
 {
     return mResource;
 }
 
-void Object::onResourceDestroyed()
+void Object::addClone(Object* object)
+{
+    if (! object)
+        return;
+
+    mClones.append(object);
+    connect(object, SIGNAL(destroyed(Object*)), this, SLOT(cloneDestroyed(Object*)));
+    this->addObserver(object);
+}
+
+void Object::removeClone(Object* object)
+{
+    if (object && mClones.contains(object)) {
+        moveAllSharedEventActions(object, this);
+        mClones.removeAt(mClones.indexOf(object));
+    }
+}
+
+QList<Object*> Object::clones() const
+{
+    return mClones;
+}
+
+void Object::resourceDestroyed()
 {
     mResource = 0;
+}
+
+void Object::cloneDestroyed(Object* obj)
+{
+    this->removeClone(obj);
+}
+
+void Object::moveSharedEventActions(Object* src, Object* dest, Interaction::InputEvent ev)
+{
+    if (! src || ! dest)
+        return;
+
+    QList<Action*> actions;
+    actions = src->actionsForEvent(ev);
+    for(int i=0; i < actions.size(); i++) {
+        if (dest->hasActionForEvent(actions[i], ev))
+            actions[i]->setParent(dest);
+    }
+}
+
+void Object::moveAllSharedEventActions(Object* src, Object* dest)
+{
+    moveSharedEventActions(src, dest, Interaction::MouseMove);
+    moveSharedEventActions(src, dest, Interaction::MousePress);
+    moveSharedEventActions(src, dest, Interaction::MouseRelease);
 }
 
 bool Object::hasObjectAsParent()
@@ -957,12 +1080,21 @@ bool Object::hasObjectAsParent()
     return false;
 }
 
-void Object::setProperties(const QVariantMap &data)
+void Object::_load(const QVariantMap &data)
 {
+    QVariantList eventActions;
+    QVariantMap actionData;
+    QList<Action*> actions;
+    Action* action;
+
+    if (data.isEmpty())
+        return;
 
     if (data.contains("resource") && data.value("resource").type() == QVariant::String) {
-        mResource = ResourceManager::instance()->resource(data.value("resource").toString());
+        this->setResource(ResourceManager::instance()->resource(data.value("resource").toString()));
     }
+
+    blockNotifications(true);
 
     if (data.contains("name") && data.value("name").type() == QVariant::String)
         setObjectName(data.value("name").toString());
@@ -972,20 +1104,15 @@ void Object::setProperties(const QVariantMap &data)
 
     if (data.contains("backgroundColor") && data.value("backgroundColor").type() == QVariant::List) {
         QColor color = Utils::listToColor(data.value("backgroundColor").toList());
-        if (color.isValid())
-            mBackground.setColor(color);
+        setBackgroundColor(color);
     }
 
     if (data.contains("backgroundOpacity") && data.value("backgroundOpacity").type() == QVariant::Int) {
-        if (data.contains("previousValue") && data.value("previousValue").type() == QVariant::Int)
-            if (data.value("previousValue").toInt() != mBackground.opacity())
-                return;
-
-        mBackground.setOpacity(data.value("backgroundOpacity").toInt());
+        setBackgroundOpacity(data.value("backgroundOpacity").toInt());
     }
 
     if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String) {
-        mBackground.setImage(data.value("backgroundImage").toString());
+        setBackgroundImage(data.value("backgroundImage").toString());
     }
 
     if (data.contains("x") && data.value("x").canConvert(QVariant::Int)) {
@@ -1001,7 +1128,7 @@ void Object::setProperties(const QVariantMap &data)
             setWidth(Utils::parseSize(width), Utils::isPercentSize(width));
         }
         else if (data.value("width").canConvert(QVariant::Int))
-            mSceneRect.setWidth(data.value("width").toInt());
+            setWidth(data.value("width").toInt());
     }
 
     if (data.contains("height") && data.value("height").canConvert(QVariant::Int)) {
@@ -1010,71 +1137,195 @@ void Object::setProperties(const QVariantMap &data)
             setHeight(Utils::parseSize(height), Utils::isPercentSize(height));
         }
         else if (data.value("height").canConvert(QVariant::Int))
-            mSceneRect.setHeight(data.value("height").toInt());
+            setHeight(data.value("height").toInt());
     }
 
     if (data.contains("cornerRadius") && data.value("cornerRadius").canConvert(QVariant::Int)) {
-        mCornerRadius = data.value("cornerRadius").toInt();
+        setCornerRadius(data.value("cornerRadius").toInt());
     }
 
     if (data.contains("visible") && data.value("visible").type() == QVariant::Bool)
         setVisible(data.value("visible").toBool());
 
-    QVariantList eventActions;
-    QVariantMap actionData;
-    QList<Action*> actions;
-    Action* action;
+
     if (data.contains("onMouseMove") && data.value("onMouseMove").type() == QVariant::List) {
+        actions.clear();
         eventActions = data.value("onMouseMove").toList();
         for(int i=0; i < eventActions.size(); i++) {
-            actionData = eventActions[i].toMap();
-            action = ActionInfoManager::typeToAction(actionData, this);
+            action = 0;
+            if (eventActions[i].type() == QVariant::Map) {
+                actionData = eventActions[i].toMap();
+                action = ActionInfoManager::typeToAction(actionData, this);
+            }
+            else if (eventActions[i].type() == QMetaType::QObjectStar) {
+                action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
+            }
+
             if (action)
                 actions.append(action);
         }
-        mEventToActions.insert(Interaction::MouseMove, actions);
+        replaceEventActions(Interaction::MouseMove, actions);
     }
 
-    actions.clear();
     if (data.contains("onMousePress") && data.value("onMousePress").type() == QVariant::List) {
+        actions.clear();
         eventActions = data.value("onMousePress").toList();
 
         for(int i=0; i < eventActions.size(); i++) {
-            actionData = eventActions[i].toMap();
-            action = ActionInfoManager::typeToAction(actionData, this);
+            if (eventActions[i].type() == QVariant::Map) {
+                actionData = eventActions[i].toMap();
+                action = ActionInfoManager::typeToAction(actionData, this);
+            }
+            else if (eventActions[i].type() == QMetaType::QObjectStar) {
+                action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
+            }
+
             if (action)
                 actions.append(action);
         }
-        mEventToActions.insert(Interaction::MousePress, actions);
+        replaceEventActions(Interaction::MousePress, actions);
     }
 
-    actions.clear();
     if (data.contains("onMouseRelease") && data.value("onMouseRelease").type() == QVariant::List) {
+        actions.clear();
         eventActions = data.value("onMouseRelease").toList();
 
         for(int i=0; i < eventActions.size(); i++) {
-            actionData = eventActions[i].toMap();
-            action = ActionInfoManager::typeToAction(actionData, this);
+            if (eventActions[i].type() == QVariant::Map) {
+                actionData = eventActions[i].toMap();
+                action = ActionInfoManager::typeToAction(actionData, this);
+            }
+            else if (eventActions[i].type() == QMetaType::QObjectStar) {
+                action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
+            }
+
             if (action)
                 actions.append(action);
         }
-        mEventToActions.insert(Interaction::MouseRelease, actions);
+        replaceEventActions(Interaction::MouseRelease, actions);
     }
 
     if (data.contains("borderWidth") && data.value("borderWidth").canConvert(QVariant::Int))
-        mBorderWidth = data.value("borderWidth").toInt();
+        setBorderWidth(data.value("borderWidth").toInt());
     if (data.contains("borderColor") && data.value("borderColor").type() == QVariant::List)
-        mBorderColor = Utils::listToColor(data.value("borderColor").toList());
+        setBorderColor(Utils::listToColor(data.value("borderColor").toList()));
 
     mPadding = Padding(data.value("padding").toMap());
+
+    blockNotifications(false);
 }
 
-void Object::notify(const QString & key, const QVariant & value, const QVariant & prevValue)
+void Object::load(const QVariantMap &data)
+{
+    QVariantMap _data = data;
+    //properties that shouldn't be copied!
+    _data.remove("x");
+    _data.remove("y");
+    _data.remove("name");
+    _data.remove("visible");
+    this->_load(_data);
+}
+
+void Object::blockNotifications(bool block)
+{
+    // don't block signals for resources
+    if (block && isResource())
+        return;
+
+    this->blockSignals(block);
+}
+
+void Object::notify(const QString & key, const QVariant & value, const QVariant & prev)
 {
     QVariantMap data;
     data.insert(key, value);
-    data.insert("previousValue", prevValue);
+    if (prev.isValid())
+        data.insert("previousValue", prev);
+    //bool acceptsChanges = changesAccepted();
+    //acceptChanges(false);
     emit dataChanged(data);
+    //acceptChanges(acceptsChanges);
+}
+
+void Object::addObserver(Object * object)
+{
+    if (! changesPropagated())
+        return;
+
+    if (object && object->changesAccepted()) {
+        connect(this, SIGNAL(dataChanged(const QVariantMap&)), object, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
+    }
+}
+
+void Object::removeObserver(Object * object)
+{
+    if (object) {
+        disconnect(this, SIGNAL(dataChanged(const QVariantMap&)), object, SLOT(load(const QVariantMap&)));
+    }
+}
+
+void Object::acceptChanges(bool accept)
+{
+    mChangesAccepted = accept;
+
+    if (isResource()) {
+        if (accept) {
+            for(int i=0; i < mClones.size(); i++) {
+                mClones[i]->addObserver(this);
+            }
+        }
+        else {
+            for(int i=0; i < mClones.size(); i++)
+                mClones[i]->removeObserver(this);
+        }
+    }
+    else {
+        if (accept)
+            mResource->addObserver(this);
+        else
+            mResource->removeObserver(this);
+    }
+}
+
+void Object::propagateChanges(bool propagate)
+{
+    mChangesPropagated = propagate;
+
+    if (isResource()) {
+        if (propagate) {
+            for(int i=0; i < mClones.size(); i++) {
+                if (mClones[i]->changesAccepted())
+                    this->addObserver(mClones[i]);
+            }
+        }
+        else {
+            for(int i=0; i < mClones.size(); i++) {
+                if (mClones[i]->changesAccepted())
+                    this->removeObserver(mClones[i]);
+            }
+        }
+    }
+    else {
+        if (propagate)
+            this->addObserver(mResource);
+        else
+            this->removeObserver(mResource);
+    }
+}
+
+bool Object::isResource() const
+{
+    return (mResource || scene()) ? false : true;
+}
+
+bool Object::changesAccepted() const
+{
+    return mChangesAccepted;
+}
+
+bool Object::changesPropagated() const
+{
+    return mChangesPropagated;
 }
 
 void Object::onParentResized(int w, int h)
@@ -1103,8 +1354,11 @@ int Object::borderWidth()
 
 void Object::setBorderWidth(int w)
 {
+    if (mBorderWidth == w)
+        return;
+
     mBorderWidth = w;
-    emit dataChanged();
+    this->notify("borderWidth", w);
 }
 
 QColor Object::borderColor()
@@ -1114,8 +1368,11 @@ QColor Object::borderColor()
 
 void Object::setBorderColor(const QColor & color)
 {
+    if (mBorderColor == color)
+        return;
+
     mBorderColor = color;
-    emit dataChanged();
+    this->notify("borderColor", Utils::colorToList(mBorderColor));
 }
 
 QString Object::defaultFontFamily()
@@ -1146,17 +1403,6 @@ void Object::setDefaultFont(const QFont& font)
 QFont Object::defaultFont()
 {
     return mDefaultFont;
-}
-
-void Object::onResourceChanged(const QVariantMap & data)
-{
-    QVariantMap _data = data;
-    //ignore coordinates
-    if (_data.contains("x"))
-        _data.remove("x");
-    if (_data.contains("y"))
-        _data.remove("y");
-    setProperties(_data);
 }
 
 void Object::show()

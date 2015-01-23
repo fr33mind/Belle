@@ -63,7 +63,7 @@ class Object : public QObject
         void stopResizing();
         int percentWidth() const;
         int percentHeight() const;
-        Scene* scene();
+        Scene* scene() const;
         bool isValidName(const QString&);
 
         int borderWidth();
@@ -116,10 +116,16 @@ class Object : public QObject
         QString type();
         void setType(const QString&);
         void update();
+        void setEventActions(Interaction::InputEvent, const QList<Action*> &);
         void appendEventAction(Interaction::InputEvent, Action*);
         void insertEventAction(Interaction::InputEvent, int, Action*);
         void removeEventActionAt(Interaction::InputEvent, int, bool del=false);
+        void removeEventAction(Interaction::InputEvent, Action*, bool del=false);
+        void removeAllEventActions(Interaction::InputEvent, bool del=false);
         QList<Action*> actionsForEvent(Interaction::InputEvent);
+        bool hasActionForEvent(Action*, Interaction::InputEvent);
+        void moveSharedEventActions(Object*, Object*, Interaction::InputEvent);
+        void moveAllSharedEventActions(Object*, Object*);
         virtual void paint(QPainter&);
         Object* copy();
         virtual QVariantMap toJsonObject(bool internal=true);
@@ -141,7 +147,20 @@ class Object : public QObject
         QVariantMap fillWithResourceData(QVariantMap);
 
         void setResource(Object*);
-        Object* resource();
+        Object* resource() const;
+
+        void addClone(Object*);
+        void removeClone(Object*);
+        QList<Object*> clones() const;
+
+        void addObserver(Object*);
+        void removeObserver(Object*);
+
+        bool changesAccepted() const;
+        bool changesPropagated() const;
+
+        bool isResource() const;
+        void blockNotifications(bool);
 
         bool setName(const QString&);
         QString name();
@@ -159,13 +178,16 @@ class Object : public QObject
 
     public slots:
         void onResizeEvent(QResizeEvent*);
-        void setProperties(const QVariantMap &);
+        virtual void load(const QVariantMap &);
         void onParentResized(int, int);
+        void acceptChanges(bool);
+        void propagateChanges(bool);
 
     signals:
         void dataChanged(const QVariantMap& data=QVariantMap());
         void positionChanged(int, int);
         void resized(int, int);
+        void destroyed(Object* object=0);
 
     private:
         //void init(const QString &, int, int, QObject*);
@@ -175,6 +197,8 @@ class Object : public QObject
         int parentWidth() const;
         int parentHeight() const;
         void updateScaledBackgroundImage();
+        void _load(const QVariantMap&);
+        void replaceEventActions(Interaction::InputEvent, const QList<Action*> &);
 
     protected:
         QRect mSceneRect;
@@ -190,7 +214,7 @@ class Object : public QObject
         QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
         bool mEditableName;
         Object* mResource;
-        void notify(const QString&, const QVariant&, const QVariant&);
+        void notify(const QString&, const QVariant&, const QVariant& prev=QVariant());
         void updateAspectRatio();
 
     private: //variables
@@ -208,10 +232,13 @@ class Object : public QObject
         int mCornerRadius;
         QPixmap* mScaledBackgroundImage;
         Background mBackground;
+        QList<Object*> mClones;
+        bool mChangesAccepted;
+        bool mChangesPropagated;
 
 private slots:
-        void onResourceDestroyed();
-        void onResourceChanged(const QVariantMap&);
+        void resourceDestroyed();
+        void cloneDestroyed(Object*);
 
 };
 

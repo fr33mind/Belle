@@ -43,6 +43,18 @@ Image::Image(const QVariantMap& data, QObject* parent):
     Object(data, parent)
 {
     init();
+    _load(data);
+
+}
+
+Image::~Image()
+{
+    AssetManager::instance()->releaseAsset(mImage);
+}
+
+void Image::_load(const QVariantMap& data)
+{
+    this->blockNotifications(true);
 
     if (data.contains("image")) {
         if (data.value("image").type() == QVariant::String)
@@ -53,11 +65,14 @@ Image::Image(const QVariantMap& data, QObject* parent):
                 setImage(img.value("src").toString());
         }
     }
+
+    this->blockNotifications(false);
 }
 
-Image::~Image()
+void Image::load(const QVariantMap& data)
 {
-    AssetManager::instance()->releaseAsset(mImage);
+    Object::load(data);
+    _load(data);
 }
 
 void Image::init()

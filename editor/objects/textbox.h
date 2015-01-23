@@ -83,7 +83,11 @@ public:
 
 signals:
 
+private:
+    void _load(const QVariantMap &);
+
 public slots:
+    virtual void load(const QVariantMap &);
 
 };
 

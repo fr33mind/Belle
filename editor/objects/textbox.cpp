@@ -45,6 +45,12 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
     Object(data, parent)
 {
     init("");
+    _load(data);
+}
+
+void TextBox::_load(const QVariantMap& data)
+{
+    this->blockNotifications(true);
 
     if (data.contains("text") && data.value("text").type() == QVariant::String) {
         QTextCodec *codec = QTextCodec::codecForName("UTF-8");
@@ -76,17 +82,25 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
         else if (align.contains("Bottom", Qt::CaseInsensitive))
             alignment |= Qt::AlignBottom;
 
-        mTextAlignment = alignment;
+        setTextAlignment(alignment);
     }
 
     if (data.contains("font") && data.value("font").type() == QVariant::String) {
         QString font = data.value("font").toString();
-        mFont.setFamily(Utils::fontFamily(font));
-        mFont.setPixelSize(Utils::fontSize(font));
+        setFontFamily(Utils::fontFamily(font));
+        setFontSize(Utils::fontSize(font));
     }
 
     if (data.contains("placeholderText") && data.value("placeholderText").type() == QVariant::String)
         this->setPlaceholderText(data.value("placeholderText").toString());
+
+    this->blockNotifications(false);
+}
+
+void TextBox::load(const QVariantMap& data)
+{
+    Object::load(data);
+    this->_load(data);
 }
 
 void TextBox::init(const QString& text)
@@ -159,7 +173,7 @@ QColor TextBox::textColor()
 void TextBox::setTextColor(const QColor& color)
 {
     mTextColor = color;
-    emit dataChanged();
+    this->notify("textColor", Utils::colorToList(color));
 }
 
 void TextBox::setDefaultTextColor(const QColor& color)
@@ -320,7 +334,7 @@ QString TextBox::textAlignmentAsString()
 void TextBox::setTextAlignment(Qt::Alignment alignment)
 {
     mTextAlignment = alignment;
-    emit dataChanged();
+    this->notify("textAlignment", textAlignmentAsString());
 }
 
 int TextBox::fontSize()
@@ -331,7 +345,7 @@ int TextBox::fontSize()
 void TextBox::setFontSize(int size)
 {
     mFont.setPixelSize(size);
-    emit dataChanged();
+    this->notify("font", Utils::font(mFont.pixelSize(), mFont.family()));
 }
 
 QString TextBox::fontFamily()
@@ -342,7 +356,7 @@ QString TextBox::fontFamily()
 void TextBox::setFontFamily(const QString& family)
 {
     mFont.setFamily(family);
-    emit dataChanged();
+    this->notify("font", Utils::font(mFont.pixelSize(), mFont.family()));
 }
 
 
