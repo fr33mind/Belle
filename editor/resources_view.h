@@ -27,6 +27,8 @@ class ResourcesView : public PropertiesWidget
     QList<Object*> mObjects;
     QHash<QStandardItem*, Object*> mItemToObject;
     QAction* mEditResourceAction;
+    QAction* mRenameAction;
+    QAction* mRemoveAction;
 
 public:
     explicit ResourcesView(QWidget *parent = 0);
@@ -47,6 +49,9 @@ public slots:
     //void onItemDoubleClicked(const QModelIndex&);
     void onResourceRemoved(Object*);
     void onObjectDataChanged(const QVariantMap&);
+
+private slots:
+    void contextMenuRequested(const QPoint&);
 
 private:
     void removeObject(Object*, bool del=false);

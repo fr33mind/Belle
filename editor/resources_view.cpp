@@ -20,6 +20,7 @@
 #include <QAction>
 #include <QStandardItemModel>
 #include <QModelIndex>
+#include <QMenu>
 
 #include "scene_manager.h"
 
@@ -31,23 +32,39 @@ ResourcesView::ResourcesView(QWidget *parent) :
     //edit action
     mEditResourceAction = new QAction(QIcon(":/media/object-edit.png"), tr("Edit"), this);
     connect(mEditResourceAction, SIGNAL(triggered()), this, SLOT(onEditResource()));
-    addAction(mEditResourceAction);
 
     //rename action
-    QAction* renameAction = new QAction(QIcon(":/media/edit-clear.png"), tr("Rename"), this);
-    connect(renameAction, SIGNAL(triggered()), this, SLOT(onRenameActionTriggered()));
-    addAction(renameAction);
+    mRenameAction = new QAction(QIcon(":/media/edit-clear.png"), tr("Rename"), this);
+    connect(mRenameAction, SIGNAL(triggered()), this, SLOT(onRenameActionTriggered()));
 
     //remove action
-    QAction* removeAction = new QAction(QIcon(":/media/delete.png"), tr("Remove"), this);
-    connect(removeAction, SIGNAL(triggered()), this, SLOT(onRemoveResource()));
-    addAction(removeAction);
+    mRemoveAction = new QAction(QIcon(":/media/delete.png"), tr("Remove"), this);
+    connect(mRemoveAction, SIGNAL(triggered()), this, SLOT(onRemoveResource()));
 
-    setContextMenuPolicy(Qt::ActionsContextMenu);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuRequested(const QPoint&)));
     //connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onItemDoubleClicked(const QModelIndex&)));
     connect(ResourceManager::instance(), SIGNAL(resourceAdded(Object*)), this, SLOT(addObject(Object*)));
     connect(ResourceManager::instance(), SIGNAL(resourceRemoved(Object*)), this, SLOT(onResourceRemoved(Object*)));
     this->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::SelectedClicked);
+}
+
+void ResourcesView::contextMenuRequested(const QPoint & point)
+{
+    QMenu menu;
+    QModelIndex index;
+
+    if (! selectedIndexes().isEmpty()) {
+        index = selectedIndexes().first();
+        menu.addAction(mEditResourceAction);
+        menu.addAction(mRenameAction);
+        menu.addSeparator();
+        Object* object = this->object(index);
+        if (object && object->clones().isEmpty())
+            menu.addAction(mRemoveAction);
+    }
+
+    menu.exec(mapToGlobal(point));
 }
 
 void ResourcesView::addObject(Object * object)
