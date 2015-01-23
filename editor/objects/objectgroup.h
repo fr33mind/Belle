@@ -41,16 +41,17 @@ public:
     Object* object(const QString&);
     Object* object(const QPoint&);
     QList<Object*> objects();
+    QVariantList variantObjects() const;
     virtual void paint(QPainter&);
     virtual void move(int x, int y);
     virtual QVariantMap toJsonObject(bool internal=true);
     virtual Object* objectAt(qreal, qreal);
-    void resize();
+    void adaptSize();
     virtual void resize(int, int);
-    Object* removeObjectAt(int);
-    void deleteObjectAt(int);
+    void removeObjectAt(int, bool del=false);
+    void removeAllObjects(bool del=false);
     int calcSpacing() const;
-    void alignObjects();
+    int minHeight() const;
 
     void setWidth(int, bool percent=false);
     void setHeight(int, bool percent=false);
@@ -63,11 +64,24 @@ public:
 signals:
 
 public slots:
+    virtual void load(const QVariantMap &);
+
+private slots:
+    void objectDestroyed(Object*);
+    void objectChanged(const QVariantMap&);
 
 private:
     QList<Object*> mObjects;
+    QList<Object*> mStickyObjects;
     bool mEditingMode;
     void init();
+    void _load(const QVariantMap&);
+    int indexOf(Object*);
+    void alignObjects();
+    void alignObjectsHorizontally();
+    void alignObjectsVertically();
+    void checkStickyObjects();
+    void addStickyObject(Object*);
 };
 
 #endif // OBJECTGROUP_H

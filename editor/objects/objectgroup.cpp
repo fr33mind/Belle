@@ -30,22 +30,53 @@ ObjectGroup::ObjectGroup(const QVariantMap& data, QObject *parent) :
     Object(data, parent)
 {
     init();
+    this->_load(data);
+}
+
+void ObjectGroup::_load(const QVariantMap& data)
+{
+    this->blockNotifications(true);
     ResourceManager * resourceManager = ResourceManager::instance();
 
     if (data.contains("objects") && data.value("objects").type() == QVariant::List) {
+        this->removeAllObjects(true);
         QVariantList objects = data.value("objects").toList();
         Object *obj = 0;
 
         for(int i=0; i < objects.size(); i++) {
             if (objects[i].type() == QVariant::Map) {
-                obj = resourceManager->createResource(objects[i].toMap(), false, this);
-                if(obj)
-                    append(obj);
+                obj = resourceManager->createObject(objects[i].toMap(), this);
             }
-            else
-                qWarning() << Q_FUNC_INFO << "Couldn't create resource because it's not a valid JSON object.";
+            else if (objects[i].type() == QMetaType::QObjectStar) {
+                obj = qobject_cast<Object*>(objects[i].value<QObject*>());
+            }
+
+            if(obj)
+                append(obj);
         }
     }
+
+    //internal data passed between resource and clones
+    if (data.contains("_object") && data.value("_object").type() == QVariant::Map) {
+        QVariantMap object = data.value("_object").toMap();
+        if (object.contains("_index") && object.value("_index").canConvert(QVariant::Int)) {
+            int _index = object.value("_index").toInt();
+            if (_index >= 0 && _index < mObjects.size()) {
+                mObjects[_index]->load(object);
+                //some properties are ignored by default so we need to apply them here for the child objects
+                if (object.contains("visible") && object.value("visible").type() == QVariant::Bool)
+                    mObjects[_index]->setVisible(object.value("visible").toBool());
+            }
+        }
+    }
+
+    this->blockNotifications(false);
+}
+
+void ObjectGroup::load(const QVariantMap& data)
+{
+    Object::load(data);
+    this->_load(data);
 }
 
 void ObjectGroup::init()
@@ -83,21 +114,26 @@ void ObjectGroup::append(Object* obj, int spacing)
 
     starty += spacing;
     obj->setY(starty);
-    obj->setX(x());
-    connect(obj, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
+    obj->setX(this->x());
+    connect(obj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(objectChanged(const QVariantMap&)));
+    connect(obj, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)));
     mObjects.append(obj);
-    resize();
-    alignObjects();
+    adaptSize();
+    checkStickyObjects();
+    this->notify("objects", variantObjects());
     //connect(this, SIGNAL(resized(int,int)), obj, SLOT(onParentResized(int, int)));
 }
 
 void ObjectGroup::resize(int x, int y)
 {
-    Object::resize(x, y);
+    int prevWidth = this->width();
+    int prevHeight = this->height();
+    int prevY = this->y();
 
-    for(int i=0; i < mObjects.size(); i++) {
-        mObjects[i]->setX(this->x());
-        mObjects[i]->setWidth(this->width());
+    Object::resize(x, y);
+    if (this->height() < minHeight()) {
+        this->setY(prevY);
+        this->setHeight(minHeight());
     }
 
     this->alignObjects();
@@ -120,7 +156,60 @@ int ObjectGroup::calcSpacing() const
     return 0;
 }
 
+int ObjectGroup::minHeight() const
+{
+    int height = 0;
+    for(int i=0; i < mObjects.size(); i++) {
+        height += mObjects[i]->height();
+    }
+    return height;
+}
+
 void ObjectGroup::alignObjects()
+{
+    alignObjectsHorizontally();
+    alignObjectsVertically();
+}
+
+void ObjectGroup::alignObjectsHorizontally()
+{
+    QRect rect = this->sceneRect(), objRect;
+    int x = this->x(), objX=0, leftspace=0, objWidth=0;
+
+    for(int i=0; i < mObjects.size(); i++) {
+        objRect = mObjects[i]->sceneRect();
+        objWidth = mObjects[i]->width();
+
+        if (objRect.left() < rect.left()) {
+            mObjects[i]->setX(x);
+            objRect = mObjects[i]->sceneRect();
+        }
+        else if (rect.left() < objRect.left()) {
+            if (mStickyObjects.contains(mObjects[i]))
+                mObjects[i]->setWidth(this->width());
+        }
+
+        if (objRect.right() > rect.right()) {
+            objX = mObjects[i]->x();
+            leftspace = objRect.x() - rect.x();
+            leftspace -= objRect.right() - rect.right();
+            objX = x;
+            if (leftspace >= 0)
+                objX = x + leftspace;
+            else
+                objWidth -= leftspace * -1;
+            mObjects[i]->setX(objX);
+            mObjects[i]->setWidth(objWidth);
+            addStickyObject(mObjects[i]);
+        }
+        else if (objRect.right() < rect.right()) {
+            if (mStickyObjects.contains(mObjects[i]))
+                mObjects[i]->setWidth(this->width());
+        }
+    }
+}
+
+void ObjectGroup::alignObjectsVertically()
 {
     int spacing = this->calcSpacing();
     if (spacing) {
@@ -132,36 +221,39 @@ void ObjectGroup::alignObjects()
     }
 }
 
-void ObjectGroup::resize()
+void ObjectGroup::adaptSize()
 {
+    if (mObjects.isEmpty())
+        return;
+
     int h = 0;
     int w = width();
 
-    if (mObjects.size()) {
-        QRect rect = mObjects.first()->sceneRect();
-        int top = rect.top();
-        int left = rect.left();
-        int right = rect.right();
-        int bottom = rect.bottom();
+    QRect rect = mObjects.first()->sceneRect();
+    int top = rect.top();
+    int left = rect.left();
+    int right = rect.right();
+    int bottom = rect.bottom();
 
-        for(int i=1; i < mObjects.size(); i++) {
-            rect = mObjects[i]->sceneRect();
-            if (rect.top() < top)
-                top = rect.top();
-            if (rect.left() < left)
-                left = rect.left();
-            if (rect.right() > right)
-                right = rect.right();
-            if (rect.bottom() > bottom)
-                bottom = rect.bottom();
-        }
-
-        w = right - left;
-        h = bottom - top;
+    for(int i=1; i < mObjects.size(); i++) {
+        rect = mObjects[i]->sceneRect();
+        if (rect.top() < top)
+            top = rect.top();
+        if (rect.left() < left)
+            left = rect.left();
+        if (rect.right() > right)
+            right = rect.right();
+        if (rect.bottom() > bottom)
+            bottom = rect.bottom();
     }
 
-    setWidth(w);
-    setHeight(h);
+    w = right - left;
+    h = bottom - top;
+
+    Object::setX(left);
+    Object::setY(top);
+    Object::setWidth(w);
+    Object::setHeight(h);
 }
 
 Object * ObjectGroup::object(int index)
@@ -219,13 +311,23 @@ QList<Object*> ObjectGroup::objects()
     return mObjects;
 }
 
+QVariantList ObjectGroup::variantObjects() const
+{
+    QVariantList objects;
+    for(int i=0; i < mObjects.size(); i++) {
+        objects.append(QVariant::fromValue(qobject_cast<QObject*>(mObjects[i])));
+    }
+    return objects;
+}
+
 Object* ObjectGroup::objectAt(qreal x, qreal y)
 {
     if (mEditingMode) {
-        for(int i=mObjects.size()-1; i >= 0; i--)
+        for(int i=mObjects.size()-1; i >= 0; i--) {
             if (mObjects[i]->contains(x, y)) {
                 return mObjects[i];
             }
+        }
     }
     if (this->contains(x, y))
         return this;
@@ -279,26 +381,84 @@ void ObjectGroup::setEditingMode(bool mode)
 {
     mEditingMode = mode;
     if (! mEditingMode) {
-        resize();
+        adaptSize();
+        checkStickyObjects();
     }
 }
 
-Object* ObjectGroup::removeObjectAt(int index)
+void ObjectGroup::checkStickyObjects()
+{
+    mStickyObjects.clear();
+    for(int i=0; i < mObjects.size(); i++) {
+        if (mObjects[i]->width() == this->width())
+            mStickyObjects.append(mObjects[i]);
+    }
+}
+
+void ObjectGroup::addStickyObject(Object * obj)
+{
+    if (obj->width() == this->width() && ! mStickyObjects.contains(obj)) {
+        mStickyObjects.append(obj);
+    }
+}
+
+void ObjectGroup::removeObjectAt(int index, bool del)
 {
     if (index >= 0 && index < mObjects.size()) {
         Object* obj = mObjects.takeAt(index);
+        mStickyObjects.removeAt(index);
+        this->notify("objects", variantObjects());
         obj->disconnect(this);
-        resize();
-        return obj;
+        if (del)
+            obj->deleteLater();
+        adaptSize();
     }
-    return 0;
 }
 
-void ObjectGroup::deleteObjectAt(int index)
+void ObjectGroup::removeAllObjects(bool del)
 {
-    Object* obj = removeObjectAt(index);
-    if (obj)
-        obj->deleteLater();
+    bool signalsAlreadyBlocked = this->signalsBlocked();
+    //don't emit a signal for each removed object
+    //instead emit a signal with empty list
+    if (! signalsAlreadyBlocked)
+        this->blockSignals(true);
+    for(int i=0; i < mObjects.size(); i++) {
+        this->removeObjectAt(i, del);
+    }
+    this->blockSignals(signalsAlreadyBlocked);
+    this->notify("objects", QVariantList());
+}
+
+
+int ObjectGroup::indexOf(Object * object)
+{
+    if (object) {
+        return mObjects.indexOf(object);
+    }
+
+    return -1;
+}
+
+void ObjectGroup::objectDestroyed(Object * object)
+{
+    int index = mObjects.indexOf(object);
+    if (index != -1)
+        this->removeObjectAt(index);
+}
+
+void ObjectGroup::objectChanged(const QVariantMap& data)
+{
+    Object * sender = qobject_cast<Object*>(this->sender());
+    QVariantMap object = data;
+    int index = this->indexOf(sender);
+
+    if (! object.isEmpty() && index != -1) {
+        object.insert("_index", index);
+        this->notify("_object", object);
+    }
+    else {
+        emit dataChanged();
+    }
 }
 
 QVariantMap ObjectGroup::toJsonObject(bool internal)
