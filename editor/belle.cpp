@@ -882,6 +882,7 @@ void Belle::clearProject()
 void Belle::openFileOrProject(QString filepath)
 {
     QStringList filters;
+    QDir saveDir;
 
     filters << tr("Game File") + "(game_data.js)"
             << "Javascript (*.js)";
@@ -902,10 +903,19 @@ void Belle::openFileOrProject(QString filepath)
 
     clearProject();
     mSavePath = QFileInfo(filepath).absolutePath();
+    saveDir = QFileInfo(filepath).absoluteDir();
     AssetManager::instance()->setLoadPath(mSavePath);
     setNovelProperties(object);
     AssetManager::instance()->load(QDir(mSavePath));
     ResourceManager::instance()->importResources(object);
+    //FIXME: For backwards compatibility, remove at some point
+    if (object.contains("customFonts")) {
+        QVariantList customFonts = object["customFonts"].toList();
+        if (! customFonts.isEmpty()) {
+            for(int i=0; i < customFonts.size(); i++)
+                AssetManager::instance()->loadAsset(saveDir.absoluteFilePath(customFonts[i].toString()), Asset::Font);
+        }
+    }
 
     //pause screen import
     if (object.contains("pauseScreen") && object.value("pauseScreen").type() == QVariant::Map) {
