@@ -142,11 +142,11 @@ Object* Scene::objectAt (qreal x, qreal y)
 {
     for(int i=mTemporaryObjects.size()-1; i >= 0; --i)
         if (mTemporaryObjects[i]->contains(x, y))
-            return mTemporaryObjects[i];
+            return mTemporaryObjects[i]->objectAt(x, y);
 
     for(int i=mObjects.size()-1; i >= 0; --i) 
         if (mObjects[i]->contains(x, y))
-            return mObjects[i];
+            return mObjects[i]->objectAt(x, y);
 
     return 0;
 }
