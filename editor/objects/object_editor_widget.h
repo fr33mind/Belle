@@ -20,6 +20,7 @@
 #include <QHash>
 #include <QCheckBox>
 #include <QSpinBox>
+#include <QLabel>
 
 //#include "action_info_manager.h"
 #include "combobox.h"
@@ -67,6 +68,8 @@ private slots:
     void onObjectDataChanged(const QVariantMap&);
     void onCurrentObjectDestroyed();
     void onKeepAspectRatioToggled(bool);
+    void acceptChanges(bool);
+    void propagateChanges(bool);
 
 protected:
     Object *mCurrentObject;
@@ -91,6 +94,12 @@ private:
     QSpinBox* mBorderWidthSpinBox;
     ColorPushButton* mBorderColorButton;
     QCheckBox* mKeepAspectRatioCheckbox;
+    QComboBox* mClonesComboBox;
+    QLabel* mResourceLabel;
+    QCheckBox* mAcceptsChangesCheckbox;
+    QCheckBox* mPropagatesChangesCheckbox;
+    QCheckBox* mResourceAcceptsChangesCheckbox;
+    QCheckBox* mResourcePropagatesChangesCheckbox;
 };
 
 #endif // SCENE_OBJECT_PROPERTIES_WIDGET_H

@@ -37,6 +37,7 @@ QHash<QObject*, Interaction::InputEvent> mWidgetToEvent = QHash<QObject*, Intera
 ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     PropertiesWidget(parent)
 {
+    QStandardItem* lastItem = 0;
     QRegExpValidator * validator = new QRegExpValidator(QRegExp("^[0-9]+(%){0,1}$"), this);
 
     //mChooseObjectComboBox = new QComboBox(this);
@@ -77,6 +78,40 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     this->appendRow(tr("Keep aspect ratio"), mKeepAspectRatioCheckbox);
     this->appendRow(tr("Opacity"), mOpacitySlider);
     this->endGroup();
+
+    mResourceLabel = new QLabel(this);
+    mResourceLabel->setMargin(4);
+    mAcceptsChangesCheckbox = new QCheckBox(this);
+    mPropagatesChangesCheckbox = new QCheckBox(this);
+    connect(mAcceptsChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(acceptChanges(bool)));
+    connect(mPropagatesChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(propagateChanges(bool)));
+
+    this->beginGroup(tr("Resource"), "Resource");
+    lastItem = this->lastItem();
+    this->appendRow(tr("Name"), mResourceLabel);
+    this->appendRow(tr("Accepts changes"), mAcceptsChangesCheckbox);
+    this->appendRow(tr("Propagates changes"), mPropagatesChangesCheckbox);
+    this->endGroup();
+    lastItem->child(1)->setToolTip(tr("Accepts changes from the resource it was cloned from"));
+    lastItem->child(2)->setToolTip(tr("Propagates its changes to the resource it was cloned from"));
+
+    mClonesComboBox = new QComboBox(this);
+    mResourceAcceptsChangesCheckbox = new QCheckBox(this);
+    mResourcePropagatesChangesCheckbox = new QCheckBox(this);
+    connect(mResourceAcceptsChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(acceptChanges(bool)));
+    connect(mResourcePropagatesChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(propagateChanges(bool)));
+
+    this->beginGroup(tr("Clones"), "Clones");
+    lastItem = this->lastItem();
+    this->appendRow(tr("Clones"), mClonesComboBox);
+    this->appendRow(tr("Accepts changes"), mResourceAcceptsChangesCheckbox);
+    this->appendRow(tr("Propagates changes"), mResourcePropagatesChangesCheckbox);
+    this->endGroup();
+
+    lastItem->child(1)->setToolTip(tr("Accepts changes from cloned objects on the scene(s) "
+                                      "that are propagating their changes"));
+    lastItem->child(2)->setToolTip(tr("Propagates its changes to cloned objects on the scene(s) that "
+                              "accept resource changes"));
 
     this->beginGroup(tr("Bounding Rect"));
     mBorderWidthSpinBox = new QSpinBox(this);
@@ -191,6 +226,30 @@ void ObjectEditorWidget::updateData(Object *currObj)
 
     connect(currObj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
     connect(currObj, SIGNAL(destroyed()), this, SLOT(onCurrentObjectDestroyed()));
+
+    if (currObj->isResource()) {
+        this->setFilters(QStringList() << "Resource");
+        QList<Object*> clones = currObj->clones();
+        QString name("");
+        mClonesComboBox->clear();
+
+        for(int i=0; i < clones.size(); i++) {
+            name = QString("%1 (%2)").arg(clones[i]->name())
+                                     .arg(clones[i]->scene() ? clones[i]->scene()->objectName() : "");
+            mClonesComboBox->addItem(name);
+        }
+        mResourceAcceptsChangesCheckbox->setChecked(currObj->changesAccepted());
+        mResourcePropagatesChangesCheckbox->setChecked(currObj->changesPropagated());
+    }
+    else if (currObj->resource()){
+       this->setFilters(QStringList() << "Clones");
+       mResourceLabel->setText(currObj->resource()->name());
+       mAcceptsChangesCheckbox->setChecked(currObj->changesAccepted());
+       mPropagatesChangesCheckbox->setChecked(currObj->changesPropagated());
+    }
+    else {
+        this->setFilters(QStringList() << "Resource" << "Clones");
+    }
 
     ////mChooseObjectComboBox->clear();
     mObjectsHierarchy.clear();
@@ -465,4 +524,16 @@ void ObjectEditorWidget::onKeepAspectRatioToggled(bool keep)
 {
     if (mCurrentObject)
         mCurrentObject->setKeepAspectRatio(keep);
+}
+
+void ObjectEditorWidget::acceptChanges(bool accept)
+{
+    if (mCurrentObject)
+        mCurrentObject->acceptChanges(accept);
+}
+
+void ObjectEditorWidget::propagateChanges(bool propagate)
+{
+    if (mCurrentObject)
+        mCurrentObject->propagateChanges(propagate);
 }
