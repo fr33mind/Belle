@@ -57,7 +57,7 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
         for(int i=0; i < objects.size(); i++) {
             if (objects[i].type() != QVariant::Map)
                 continue;
-            Object* obj = ResourceManager::instance()->createResource(objects[i].toMap(), false);
+            Object* obj = ResourceManager::instance()->createObject(objects[i].toMap(), this);
             if (obj)
                 _appendObject(obj);
         }
@@ -165,7 +165,7 @@ void Scene::addCopyOfObject(Object* object, bool select)
         return;
 
     QVariantMap data(object->toJsonObject(true));
-    Object * obj = ResourceManager::instance()->createResource(data, false);
+    Object * obj = ResourceManager::instance()->createObject(data, this);
     appendObject(obj, select);
     obj->setResource(object);
 }

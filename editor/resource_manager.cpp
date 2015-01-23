@@ -42,13 +42,18 @@ void ResourceManager::addResource(Object * obj)
         if (! isValidName(obj->objectName()))
            obj->setObjectName(newName(obj));
 
-        if (! obj->parent())
+        if (obj->parent() != this)
             obj->setParent(this);
 
         connect(obj, SIGNAL(dataChanged()), this, SIGNAL(resourceChanged()));
         mResources.append(obj);
         emit resourceAdded(obj);
     }
+}
+
+void ResourceManager::addResource(const QVariantMap& data)
+{
+    addResource(this->createObject(data, this));
 }
 
 bool ResourceManager::isValidName(const QString& name)
@@ -113,10 +118,11 @@ Object * ResourceManager::typeToObject(const QString& type, QVariantMap& data, Q
 
 }
 
-Object* ResourceManager::createResource(QVariantMap data, bool appendToResources, QObject* parent)
+Object* ResourceManager::createObject(const QVariantMap& info, QObject* parent)
 {
     Object* _resource = 0;
     QString type("");
+    QVariantMap data = info;
 
     fillWithResourceData(data);
 
@@ -130,8 +136,6 @@ Object* ResourceManager::createResource(QVariantMap data, bool appendToResources
     if (object && _resource)
         object->setResource(_resource);
 
-    if (appendToResources)
-        addResource(object);
     return object;
 }
 
@@ -220,7 +224,7 @@ void ResourceManager::importResources(const QVariantMap& data)
             if (it.value().type() != QVariant::Map)
                 continue;
 
-            ResourceManager::instance()->createResource(it.value().toMap());
+            ResourceManager::instance()->addResource(it.value().toMap());
         }
     }
 }

@@ -41,7 +41,8 @@ class ResourceManager : public QObject
 public:
     explicit ResourceManager(QObject *parent = 0);
     void addResource(Object*);
-    Object* createResource(QVariantMap, bool appendToResources=true, QObject* parent=0);
+    void addResource(const QVariantMap&);
+    Object* createObject(const QVariantMap&, QObject* parent=0);
     bool contains(const QString&);
     void removeResource(Object*, bool del=false);
     static Object* resource(const QString&);

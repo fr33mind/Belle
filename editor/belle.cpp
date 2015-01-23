@@ -380,10 +380,11 @@ void Belle::onResourcesDoubleClicked(const QModelIndex& index)
 
     Object* resource = mResourcesView->object(index);
     if (resource) {
-        QVariantMap data(resource->toJsonObject());
-        Object * object = ResourceManager::instance()->createResource(data, false);
+        QVariantMap data(resource->toJsonObject(true));
+        Object * object = ResourceManager::instance()->createObject(data, scene);
         if (object) {
-            object->setResource(resource);
+            if (! object->resource())
+                object->setResource(resource);
             scene->appendObject(object, true);
         }
     }
@@ -881,6 +882,7 @@ void Belle::clearProject()
 void Belle::openFileOrProject(QString filepath)
 {
     QStringList filters;
+
     filters << tr("Game File") + "(game_data.js)"
             << "Javascript (*.js)";
 
