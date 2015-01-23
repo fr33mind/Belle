@@ -94,6 +94,8 @@ void Image::_setImage(ImageFile* image)
 
     AssetManager::instance()->releaseAsset(mImage);
     mImage = image;
+    if (mImage)
+        AssetManager::instance()->loadAsset(mImage->path());
 
     if (mImage && mImage->isAnimated()) {
         connect(mImage->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
