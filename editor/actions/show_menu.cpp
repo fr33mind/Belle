@@ -99,7 +99,7 @@ void ShowMenu::focusIn()
 void ShowMenu::focusOut()
 {
     if (sceneObject() && this->scene()) {
-        this->scene()->removeObject(sceneObject(), false, true);
+        this->scene()->removeObject(sceneObject(), false);
     }
 }
 

@@ -170,20 +170,25 @@ void Scene::addCopyOfObject(Object* object, bool select)
     obj->setResource(object);
 }
 
-void Scene::_appendObject(Object* object)
+void Scene::_appendObject(Object* object, bool temporary)
 {
     if (! object)
         return;
 
-    //connect(object, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
-    if (object->parent() != this)
-        object->setParent(this);
+    if (temporary) {
+        mTemporaryObjects.append(object);
+    }
+    else {
+        if (object->parent() != this)
+            object->setParent(this);
 
-    //test if it's a valid name before adding the object to scene.
-    object->setObjectName(newObjectName(object->objectName()));
+        //test if it's a valid name before adding the object to scene.
+        object->setObjectName(newObjectName(object->objectName()));
+        mObjects.append(object);
+    }
+
     connect(object, SIGNAL(dataChanged()), DrawingSurfaceWidget::instance(), SLOT(update()));
-
-    mObjects.append(object);
+    connect(object, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)));
 }
 
 void Scene::_reorderObject(Object* object)
@@ -208,10 +213,9 @@ void Scene::appendObject(Object* object, bool select, bool temporarily)
     if (! object)
         return;
 
-    this->_appendObject(object);
-    if (temporarily)
-        mTemporaryObjects.append(object);
-    else
+    this->_appendObject(object, temporarily);
+
+    if (! temporarily)
         this->_reorderObject(object);
 
     if (! temporarily)
@@ -453,13 +457,14 @@ void Scene::setPoint(const QPoint & point)
     mPoint = point;
 }
 
-void Scene::removeObject(Object* object, bool del, bool temporary)
+void Scene::removeObject(Object* object, bool del)
 {
     if (! object)
         return;
 
     bool removed = false;
-    if (temporary && mTemporaryObjects.contains(object))
+
+    if (mTemporaryObjects.contains(object))
         removed = mTemporaryObjects.removeOne(object);
     else if (mObjects.contains(object))
         removed = mObjects.removeOne(object);
@@ -469,8 +474,9 @@ void Scene::removeObject(Object* object, bool del, bool temporary)
         if (selectedObject() == object)
             selectObject(0);
         object->disconnect(this);
-        if (del)
+        if (del && object->parent() == this) {
             object->deleteLater();
+        }
         emit dataChanged();
     }
 }
@@ -760,4 +766,9 @@ int Scene::indexOf(QObject * obj)
     }
 
     return -1;
+}
+
+void Scene::objectDestroyed(Object * object)
+{
+    removeObject(object);
 }

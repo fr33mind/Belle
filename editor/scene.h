@@ -88,7 +88,7 @@ class Scene : public QObject
         ImageFile* background() const;
         int countTextBoxes();
         void removeSelectedObject(bool del=false);
-        void removeObject(Object*, bool del=false, bool temporary=false);
+        void removeObject(Object*, bool del=false);
         void selectObject(Object*);
         void highlightObject(Object*);
         Object * highlightedObject();
@@ -117,11 +117,12 @@ class Scene : public QObject
         void paint(QPainter&);
         
     protected:
-        void _appendObject(Object*);
+        void _appendObject(Object*, bool temporary=false);
         void _reorderObject(Object*);
 
     private slots:
         void onResizeEvent(const QResizeEvent&);
+        void objectDestroyed(Object*);
 
     public slots:
         void moveSelectedObjectUp();
