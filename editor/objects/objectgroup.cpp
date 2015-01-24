@@ -372,6 +372,14 @@ void ObjectGroup::setHeight(int height, bool percent)
     }*/
 }
 
+void ObjectGroup::setOpacity(int opacity)
+{
+    Object::setOpacity(opacity);
+
+    for(int i=0; i < mObjects.size(); i++)
+        mObjects[i]->setOpacity(opacity);
+}
+
 bool ObjectGroup::editingMode()
 {
     return mEditingMode;

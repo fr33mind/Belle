@@ -90,7 +90,7 @@ class Object : public QObject
 
         int opacity() const;
         qreal opacityF() const;
-        void setOpacity(int);
+        virtual void setOpacity(int);
 
         int width() const;
         int height() const;
