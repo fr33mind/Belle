@@ -155,6 +155,12 @@
     return "";
   }
 
+  Game.prototype.getModel = function() {
+    if (this.isPaused())
+      return this.pauseModel;
+    return this.mainModel;
+  }
+
   Game.prototype.isPaused = function() {
     return this.mainModel.isPaused();
   }
@@ -379,7 +385,7 @@
   }
 
   Game.prototype.getSavedGames =  function() {
-      var title = this.title;
+      var title = this.properties.title;
       var gameData = $.jStorage.get(title, {});
       var savedGames = gameData["savedGames"] || [];
       return savedGames;
