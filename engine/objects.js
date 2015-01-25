@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2014 Carlos Pais
- * 
+/* Copyright (C) 2012-2015 Carlos Pais
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -14,270 +14,85 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var belle = belle || {};
-belle.objects = {};
+(function(belle) {
 
-(function(objects) {
+var Color = belle.graphics.Color,
+  Frame = belle.Frame,
+  GraphicImage = belle.graphics.Image,
+  AnimatedImage = belle.graphics.AnimatedImage,
+  objects = belle.objects;
 
-/*********** AnimationImage **********/
-
-function AnimationImage(imageData, parent)
-{
-    this.imageLoaded = false;
-    this.frames = null;
-    this.currentFrame = 0;
-    this.frameDelay = 100; // 100ms by default
-    this.framesLoaded = 0;
-    this.image = null;
-    this.interval = null;
-    this.parent = parent;
-    this.animated = false;
-    
-    this.load(imageData);
-}
-
-AnimationImage.prototype.load = function (imageData) 
-{ 
-    var that = this;
-    if (typeof imageData === "object" && "src" in imageData) {
-        //activate DOM mode if game contains animated image
-        if ("animated" in imageData && imageData["animated"])
-            belle.display.DOM = true;
-        imageData = imageData["src"];
-    }
-    
-    if (typeof imageData === "string") {
-        this.img = new window.Image();
-        this.img.onload = function() { 
-            that.imageLoaded = true;
-        };
-
-        this.img.src = belle.game.directory + imageData;
-        this.img.style.width = "100%";
-        this.img.style.height = "100%";
-        this.img.style.display = "block";
-    }
-}
-
-AnimationImage.prototype.isReady = function () { 
-    if (this.frames) {
-        if (this.frames.length == this.framesLoaded)
-            return true;
-        else
-            return false;
-    }
-    
-    if (this.img)
-        return this.img.complete && this.imageLoaded;
-    
-    return true;
-}
-
-AnimationImage.prototype.paint = function(context, x, y, width, height) {
-   
-    if (! context)
-        return;
-    
-    if (this.img.complete) {
-        context.drawImage(this.img, x, y, width, height);
-    }
-    else if (this.frames) {
-        context.drawImage(this.frames[this.currentFrame], x, y, width, height);
-        this.currentFrame++;
-        if (this.currentFrame >= this.frames.length)
-            this.currentFrame = 0;
-    }
-}
-
-AnimationImage.prototype.serialize = function() 
-{
-    var data = {};
-    data = $(this.img).attr("src");
-    return data;
-}
-
-/**** COLOR ****/
-var Color = function(components)
-{
-    var error = false;
-    if (components.length < 4) {
-        error = true;
-        belle.log("Color(components) : Missing one or more color component(s)");
-    }
-    
-    if (error) {
-        this.red = 0;
-        this.green = 0;
-        this.blue = 0;
-        this.alpha = 0;
-    }
-    else {
-        this.red = components[0];
-        this.green = components[1];
-        this.blue = components[2];
-        this.alpha = components[3];
-    }
-}
-
-Color.prototype.toString = function()
-{
-    return 'rgba(' + this.red + ',' + this.green + ',' + this.blue + ',' + this.alphaF() + ')';
-}
-
-Color.prototype.componentToHex = function (c) 
-{
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-}
-
-Color.prototype.toHex = function()
-{
-    return "#" + this.componentToHex(this.red) + this.componentToHex(this.green) + this.componentToHex(this.blue);
-}
-
-Color.prototype.alphaF = function()
-{
-    return this.alpha / 255;
-}
-
-Color.prototype.serialize = function()
-{
-    return [this.red, this.green, this.blue, this.alpha];
-}
-
-/*********** POINT **********/
-var Point = function (x, y)
-{
-    this.x = x;
-    this.y = y;
-    
-    if (this.x === null || this.x === undefined)
-        this.x = 0;
-    if (this.y === null || this.y === undefined)
-        this.y = 0;
-}
-
-Point.prototype.distance = function(point) 
-{
-    return Math.sqrt(Math.pow(point.x-this.x, 2) + Math.pow(point.y-this.y, 2));
-}
-    
-/*********** BASE OBJECT ***********/
+/*********** OBJECT ***********/
 
 function Object(info, parent, initElement)
 {
-    if ("resource" in info && belle.getResource(info["resource"])) {
-        var resourceData = belle.getResource(info["resource"]).data;
-        belle.utils.extendJsonObject(info, resourceData);
-    }
-    
-    //check for percent width or height and for percent widths or heights
-    if ("__parent" in info) 
-        var parent = info["__parent"];
-    
-    if (typeof info.width == "string" && belle.utils.isPercentSize(info.width) && parent && parseInt(parent.width) != NaN)
-        info.width =  parseInt(info.width) * parent.width / 100;
+    Frame.call(this, info, parent);
 
-    if (typeof info.height == "string" && belle.utils.isPercentSize(info.height) && parent && parseInt(parent.height) != NaN)
-        info.height =  parseInt(info.height) * parent.height / 100;
-    
     this.element = document.createElement("div");
     this.backgroundElement = document.createElement("div");
     this.element.appendChild(this.backgroundElement);
-   
+
     this.roundedRect = false;
     this.mousePressActions = [];
     this.mouseReleaseActions = [];
     this.mouseMoveActions = [];
     this.mouseLeaveActions = [];
-    this.name = "";
-    this.defaultState = null; 
-    this.paintX = false;
-    this.paintY = false; 
-    this.paintWidth = false;
-    this.paintHeight = false;
-    this.redraw = false;
+    this.defaultState = null;
     this.redrawing = false;
     this.hovering = false;
     this.loaded = true;
     this.data = info;
-    this.parent = parent ? parent : null;
-    this.type = info["type"];
     this.resource = info["resource"] || "";
     this.eventListeners = {
         "mousepress" : [],
         "mouserelease" : [],
         "mousemove" : []
     };
-    
+
     var actions;
     var action;
     var actionObject;
-    
+
     if ("onMousePress" in info) {
         this.mousePressActions = this.initActions(info["onMousePress"]);
     }
-    
+
     if ("onMouseRelease" in info) {
         this.mouseReleaseActions = this.initActions(info["onMouseRelease"]);
     }
-    
+
     if ("onMouseMove" in info) {
         this.mouseMoveActions = this.initActions(info["onMouseMove"]);
     }
-    
+
     if ("onMouseLeave" in info) {
         this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
     }
-    
+
     Object.prototype.load.call(this, info);
-    
+
     if(initElement || initElement === undefined)
       this.initElement();
 }
+
+belle.extend(Object, Frame);
 
 Object.prototype.load = function(data)
 {
     if (! data)
       return false;
-  
+
+    Frame.prototype.load.call(this, data);
+
     this.cornerRadius = 0;
     this.opacity = 255;
     this.borderWidth = 0;
     this.borderColor = null;
-    this.visible = false;
-    this.backgroundColor = new Color([255, 255, 255, 255]);
-    this.backgroundImage = null;
-    
-    if ("x" in data)
-      this.setX(data.x);
-    
-    if ("y" in data)
-      this.setY(data.y);
-
-    if ("width" in data)
-      this.setWidth(data.width);
-    
-    if ("height" in data)
-      this.setHeight(data.height);
-    
-    if ("name" in data)
-        this.name = data["name"];
-    
-    if ("backgroundColor" in data) {
-        this.setBackgroundColor(new Color(data["backgroundColor"]));
-    }
 
     if ("cornerRadius" in data && data["cornerRadius"] > 0) {
       this.setCornerRadius(data["cornerRadius"]);
     }
-    
-    if( "backgroundImage" in data) {
-        this.backgroundImage = new AnimationImage(data["backgroundImage"], this);
-        if (this.backgroundElement)
-            this.backgroundElement.appendChild(this.backgroundImage.img);
-    }
-    
+
     if ("borderWidth" in data) {
       this.setBorderWidth(data["borderWidth"]);
     }
@@ -285,30 +100,12 @@ Object.prototype.load = function(data)
     if ("borderColor" in data) {
       this.setBorderColor(new Color(data["borderColor"]));
     }
-    
+
     if ("opacity" in data) {
-	this.setOpacity(data["opacity"]);
+        this.setOpacity(data["opacity"]);
     }
-    
-    if ("visible" in data) {
-        this.setVisible(data["visible"]);
-    }
-    
+
     return true;
-}
-
-Object.prototype.getScene = function() 
-{
-    if (this.parent && this.parent instanceof belle.Scene)
-      return this.parent;
-    if (this.parent && typeof this.parent.getScene == "function")
-      return this.parent.getScene();
-    return null;
-}
-
-Object.prototype.frameChanged = function()
-{
-    this.redraw = true;
 }
 
 Object.prototype.setCornerRadius = function(radius) {
@@ -318,21 +115,6 @@ Object.prototype.setCornerRadius = function(radius) {
     if (this.cornerRadius > 0)
       this.roundedRect = true;
 }
-
-Object.prototype.globalX = function()
-{
-    if (this.parent && parseInt(this.parent.x))
-        return this.x + this.parent.x;
-    return this.x;
-}
-
-Object.prototype.globalY = function()
-{
-    if (this.parent && parseInt(this.parent.y))
-        return this.y + this.parent.y;
-    return this.y
-}
-
 
 Object.prototype.globalOuterX = function()
 {
@@ -366,10 +148,10 @@ Object.prototype.outerHeight = function()
 
 Object.prototype.overlaps = function(object)
 {
-    if ( object.outerX() > this.outerX() + this.outerWidth() || object.outerY() > this.outerY() + this.outerHeight() || 
+    if ( object.outerX() > this.outerX() + this.outerWidth() || object.outerY() > this.outerY() + this.outerHeight() ||
       this.outerX() > object.outerX() + object.outerWidth() || this.outerY() > object.outerY() + object.outerHeight() )
         return false;
-        
+
     return true;
 }
 
@@ -377,141 +159,13 @@ Object.prototype.overlaped = function(object)
 {
     if (object.paintX === false || this.paintX === false)
       return false;
-    
+
     //paint* variables already contain the proper position and size values
     if ( object.paintX > this.paintX + this.paintWidth || object.paintY > this.paintY + this.paintHeight ||
-      this.paintX > object.paintX + object.paintWidth || this.paintY > object.paintY + object.paintHeight ) 
-	return false;
-        
+      this.paintX > object.paintX + object.paintWidth || this.paintY > object.paintY + object.paintHeight )
+        return false;
+
     return true;
-}
-
-Object.prototype.translateX = function(x, type)
-{
-  if (belle.utils.isNumber(x))
-    return x;
-
-  var scene = this.getScene();
-  if (! scene)
-    return null;
-
-  if (x == "left") {
-    if (type == "out")
-      return -1 * this.width;
-    else
-      return 0;
-  }
-
-  if (x == "center")
-    return (scene.width / 2) - (this.width / 2);
-
-  if (x == "right") {
-    if (type == "out")
-      return scene.width;
-    else
-      return scene.width - this.width;
-  }
-
-  return null;
-}
-
-Object.prototype.translateY = function(y, type)
-{
-  if (belle.utils.isNumber(y))
-    return y;
-
-  var scene = this.getScene();
-  if (! scene)
-    return null;
-
-  if (y == "top") {
-    if (type == "out")
-      return this.height * -1;
-    else
-      return 0;
-  }
-
-  if (y == "center")
-    return (scene.height / 2) - (this.height / 2);
-
-  if (y == "bottom") {
-    if (type == "out")
-      return scene.height;
-    else
-      return scene.height - this.height;
-  }
-
-  return null;
-}
-
-Object.prototype.setX = function(x)
-{
-    if (typeof x == "string") {
-      x = this.translateX(x);
-      if (x === null)
-        return;
-    }
-
-    this.x = this.scaledX = x;
-    var scale = belle.display.scaledWidthFactor;
-    if (scale != 1)
-        this.scaledX *= scale;
-
-    if (this.element)
-        this.element.style.left = this.scaledX + "px";
-    this.update();
-}
-
-Object.prototype.setY = function(y)
-{
-    if (typeof y == "string") {
-      y = this.translateY(y);
-      if (y === null)
-        return;
-    }
-
-    this.y = this.scaledY = y;
-    var scale = belle.display.scaledHeightFactor;
-    if (scale != 1)
-        this.scaledY *= scale;
-    if (this.element)
-        this.element.style.top = this.scaledY + "px";
-    this.update();
-}
-
-Object.prototype.contains = function(px, py)
-{
-    if (! this.visible)
-      return false;
-  
-    var x = this.scaledX, y = this.scaledY;
-    if (this.parent && parseInt(this.parent.scaledX)) {
-        x += this.parent.scaledX;
-        y += this.parent.scaledY;
-    }
-    
-    if ( px >= x && px <=  x+this.scaledWidth && py >= y && py <= y+this.scaledHeight)
-        return true;
-    return false;
-}
-
-Object.prototype.getBackgroundOpacity = function()
-{
-  return this.backgroundColor.alpha;
-}
-
-Object.prototype.getBackgroundOpacityF = function()
-{
-  return this.backgroundColor.alphaF();
-}
-
-Object.prototype.setVisible = function(visible)
-{
-  this.visible = visible;
-  if (this.visible)
-    $(this.element).show();
-  else
-    $(this.element).hide();
 }
 
 Object.prototype.setBorderColor = function(borderColor)
@@ -525,25 +179,6 @@ Object.prototype.setBorderWidth = function(borderWidth)
   this.borderWidth = borderWidth;
   $(this.element).css("border-width", borderWidth+"px");
   $(this.element).css("border-style", "solid");
-}
-
-Object.prototype.setBackgroundOpacity = function(alpha)
-{
-    this.backgroundColor.alpha = alpha; 
-    if (this.backgroundElement) {
-      $(this.backgroundElement).css("opacity", this.getBackgroundOpacityF() * this.getOpacityF());
-    }
-}
-
-Object.prototype.setBackgroundColor = function(color)
-{
-    if (color != this.color) {
-      this.backgroundColor = color;
-      if (this.backgroundElement)
-	  this.backgroundElement.style.backgroundColor = color.toHex();
-      this.setBackgroundOpacity(color.alpha);
-      this.update();
-    }
 }
 
 Object.prototype.getOpacity = function (alpha)
@@ -575,43 +210,33 @@ Object.prototype.setOpacity = function (alpha)
 
 Object.prototype.paint = function(context)
 {
-    if (! this.redraw ||this.redrawing)
-        return false;
-    
-    this.redrawing = true;
-        
-    if (! this.visible) {
-        this.redrawing = false;
-        this.redraw = false;
-        return false;
-    }
-    
+    if (! this.visible)
+      return;
+
     var x = this.globalX();
     var y = this.globalY();
-    
+
     context.globalAlpha = this.getOpacityF();
-    
+
     if (this.borderWidth > 0) {
-      	context.lineWidth = this.borderWidth;
-	context.strokeStyle = this.borderColor ? this.borderColor.toString() : 'black';
+        context.lineWidth = this.borderWidth;
+        context.strokeStyle = this.borderColor ? this.borderColor.toString() : 'black';
     }
-    
-    context.fillStyle  = this.backgroundColor.toString();
 
     if (this.roundedRect) {
-        
+
         var width = this.width;
         var height = this.height;
         var xradius = this.cornerRadius;
         var yradius = this.cornerRadius;
-	
+
         context.beginPath();
-       
+
         context.moveTo(x+xradius, y);
         context.lineTo(x+width-xradius, y); //to work with IE
          //draw top and top right corner
         context.arcTo(x + width, y, x + width, y + yradius, yradius);
-        
+
         //to work with IE
         context.lineTo(x+width, y+height-yradius);
         //draw right and bottom right corner
@@ -626,48 +251,32 @@ Object.prototype.paint = function(context)
         context.lineTo(x, y+yradius);
         //draw left and top left corner
         context.arcTo(x, y, x+xradius, y, xradius);
-        
+
         context.closePath();
-        
-		context.clip();
+
+        context.clip();
     }
     else if (this.borderWidth > 0) {
-	context.beginPath();
-	context.rect(x, y, this.width, this.height);
-	context.stroke();
-	context.closePath();
+        context.beginPath();
+        context.rect(x, y, this.width, this.height);
+        context.stroke();
+        context.closePath();
     }
-        
-    if (this.backgroundImage) {
-        this.backgroundImage.paint(context, x, y, this.width, this.height);
-    }
-    else {
-        context.fillRect(x, y, this.width, this.height);
-    }
-    
+
+    //draw background
+    Frame.prototype.paint.call(this, context);
+
     this.paintX = this.globalOuterX();
     this.paintY = this.globalOuterY();
     this.paintWidth = this.outerWidth();
     this.paintHeight = this.outerHeight();
-    
-    this.redrawing = false;
-    this.redraw = false;
-    return true;
-}
-
-Object.prototype.isReady = function()
-{
-    if (this.backgroundImage)
-        return this.backgroundImage.isReady();
-
-    return true;
 }
 
 Object.prototype.mouseLeaveEvent = function(ev)
 {
     if (! this.visible)
       return;
-    
+
     if (this.defaultState)
       this.load(this.defaultState);
 
@@ -678,33 +287,23 @@ Object.prototype.mouseEnterEvent = function(ev)
 {
     if (! this.visible)
       return;
-      
-    if (this.mouseMoveActions && this.mouseMoveActions.length || 
+
+    if (this.mouseMoveActions && this.mouseMoveActions.length ||
       this.eventListeners["mousemove"] && this.eventListeners["mousemove"].length)
       this.defaultState = this.serialize();
-    
-    this.processEvent(ev);
+
+    this.processEvent(ev, "mouseMove");
     this.hovering = true;
 }
 
-Object.prototype.addEventListener = function(event, listener)
-{
-    if (event == "mousepress")
-        this.eventListeners["mousepress"].push(listener);
-    else if (event == "mouserelease")
-        this.eventListeners["mouserelease"].push(listener);
-    else if (event == "mousemove")
-        this.eventListeners["mousemove"].push(listener);        
-}
- 
 Object.prototype.mouseDown = function(event)
 {
-  return this.processEvent(event, "mousedown");
+  return this.processEvent(event, "mouseDown");
 }
 
 Object.prototype.mouseUp = function(event)
 {
-    return this.processEvent(event, "mouseup");
+  return this.processEvent(event, "mouseUp");
 }
 
 Object.prototype.mouseMove = function(event)
@@ -712,7 +311,7 @@ Object.prototype.mouseMove = function(event)
     if (this.hovering)
       return false;
 
-    return this.processEvent(event, "mousemove");
+    return this.processEvent(event, "mouseMove");
 }
 
 Object.prototype.processEvent = function(event, type)
@@ -722,109 +321,33 @@ Object.prototype.processEvent = function(event, type)
 
     if (! this.contains(x, y))
         return false;
-    
-    var actions = [];
-    var listeners = [];
 
-    if (type == "mousemove") {
+    var actions = [],
+        triggered = false;
+
+    if (type == "mouseMove") {
         actions = this.mouseMoveActions;
-        listeners = this.eventListeners["mousemove"];
     }
-    else if (type == "mouseup") {
+    else if (type == "mouseUp") {
         actions = this.mouseReleaseActions;
-        listeners = this.eventListeners["mouserelease"];
     }
-    else if (type == "mousedown") {
+    else if (type == "mouseDown") {
         actions = this.mousePressActions;
-        listeners = this.eventListeners["mousepress"];
     }
-    
-    for(var i =0; i !== actions.length; i++) 
-        actions[i].execute();
-    for (var i=0; i !== listeners.length; i++)
-        listeners[i].call(this);
 
-    if (actions.length || listeners.length)
+    for(var i =0; i !== actions.length; i++)
+        actions[i].execute();
+
+    triggered = this.trigger(type);
+
+    if (actions.length || triggered)
       return true;
     return false;
-}
-
-Object.prototype.moveTo = function(x, y) 
-{
-    this.setX(x);
-    this.setY(y);
 }
 
 Object.prototype.needsRedraw = function()
 {
     return this.redraw;
-}
-
-Object.prototype.clear = function (context)
-{
-    //paint* variables already contain the proper position and size values
-    if (this.paintX !== false && this.paintY !== false) {
-        context.clearRect(this.paintX, this.paintY, this.paintWidth, this.paintHeight);
-        this.paintX = this.paintY = this.paintWidth = this.paintHeight = false;
-    }
-}
-
-Object.prototype.setWidth = function(width)
-{
-    this.width = this.scaledWidth = width;
-    var scale = belle.display.scaledWidthFactor;
-    if (scale != 1)
-        this.scaledWidth *= scale;
-    
-    if (this.element) {
-        if (typeof width == "string" && width.indexOf("%") !== -1)
-            this.element.style.width = this.width;
-        else
-            this.element.style.width = this.scaledWidth + "px";
-    }
-}
-
-Object.prototype.setHeight = function(height)
-{
-    this.height = this.scaledHeight = height;
-    var scale = belle.display.scaledHeightFactor;
-    if (scale != 1)
-        this.scaledHeight *= scale;
-    if (this.element) {
-        if (typeof height == "string" && height.indexOf("%") !== -1)
-            this.element.style.height = this.height;
-        else
-            this.element.style.height = this.scaledHeight + "px";
-    }
-}
-
-Object.prototype.show = function()
-{
-    this.visible = true;
-    this.redraw = true;
-    if (this.element)
-        this.element.style.display = "block";
-}
-
-Object.prototype.hide = function()
-{
-    this.visible = false;
-    this.redraw = true;
-    if (this.element)
-        this.element.style.display = "none";
-}
-
-Object.prototype.isVisible = function()
-{
-    return this.visible;
-}
-
-Object.prototype.setVisible = function(visible)
-{
-    if (visible)
-        this.show();
-    else
-        this.hide();
 }
 
 Object.prototype.scale = function(widthFactor, heightFactor)
@@ -836,17 +359,17 @@ Object.prototype.scale = function(widthFactor, heightFactor)
   this.redraw = true;
 }
 
-Object.prototype.initActions = function(actions) 
+Object.prototype.initActions = function(actions)
 {
     var actionInstances = [];
     var actionInstance = [];
     var action = null;
-    
+
     for(var i=0; i !== actions.length; i++) {
         action = belle.createAction(actions[i], this);
         actionInstances.push(action);
     }
-    
+
     return actionInstances;
 }
 
@@ -856,8 +379,8 @@ Object.prototype.initElement = function()
     return;
 
   $(this.element).css("position", "absolute");
-  $(this.element).width(this.scaledWidth);
-  $(this.element).height(this.scaledHeight);
+  $(this.element).width(this.width);
+  $(this.element).height(this.height);
   $(this.backgroundElement).addClass("background");
 
   var $children = $(this.element).children();
@@ -873,16 +396,16 @@ Object.prototype.serialize = function()
 {
   var data = {};
   var serialize = belle.serialize;
-  
+
   data["name"] = this.name;
   data["x"] = this.x;
   data["y"] = this.y;
   data["width"] = this.width;
   data["height"] = this.height;
   if (this.backgroundImage)
-    data["backgroundImage"] = serialize(this.backgroundImage);
-  
-  data["backgroundColor"] = serialize(this.backgroundColor);
+    data["backgroundImage"] = serialize(this.background.image);
+
+  data["backgroundColor"] = serialize(this.background.color);
   data["cornerRadius"] = this.cornerRadius;
   if (this.borderWidth)
     data["borderWidth"] = this.borderWidth;
@@ -890,47 +413,48 @@ Object.prototype.serialize = function()
     data["borderColor"] = serialize(this.borderColor);
   data["opacity"] = this.opacity;
   data["visible"] = this.visible;
-  
-  return data;
-}
 
-Object.prototype.update = function()
-{
-  if (this.parent && typeof this.parent.update == "function")
-    this.parent.update();
-  this.redraw = true;
+  return data;
 }
 
 /*********** IMAGE OBJECT ***********/
 function Image (data, parent, initElement)
 {
-    Object.call(this, data, parent, false);  
+    Object.call(this, data, parent, false);
     this.interval = null;
     this.currentFrame = 0;
     this.image = null;
     if ("image" in data)
         this.setImage(data["image"]);
-    
+
     if(initElement || initElement === undefined)
       this.initElement();
 }
 
-belle.utils.extend(Object, Image);
+belle.extend(Image, Object);
 
 Image.prototype.setImage = function(img)
 {
   if (! img)
     return;
-  var oldImg = this.image;
+
+  var oldImg = this.image,
+      assetManager = this.getGame().getAssetManager();
+
+  if (! assetManager)
+    return;
+
   if (typeof img == "string") {
     if (! this.image || this.image.img.src != img)
-      this.image = new AnimationImage(img, this);
+      this.image = assetManager.loadAsset(img, "Image");
+    this._bindImage(this.image);
   }
-  else if (img instanceof AnimationImage) {
+  else if (belle.isInstance(img, GraphicImage)) {
     this.image = img;
   }
 
   if (this.image != oldImg) {
+    this._unbindImage(oldImg);
     this.update();
     if (this.element) {
       $(this.element).find("img").remove();
@@ -941,14 +465,14 @@ Image.prototype.setImage = function(img)
 
 Image.prototype.paint = function(context)
 {
-    var draw = Object.prototype.paint.call(this, context);
-    if (! draw)
-        return false;
+    if (! this.visible)
+      return;
 
-    this.image.paint(context, this.globalX(), this.globalY(), this.width, this.height);
-    
-    this.redraw = false;
-    return true;
+    Object.prototype.paint.call(this, context);
+
+    if (this.image) {
+      context.drawImage(this.image.getElement(), this.globalX(), this.globalY(), this.width, this.height);
+    }
 }
 
 Image.prototype.isReady = function()
@@ -956,20 +480,30 @@ Image.prototype.isReady = function()
     var ready = Object.prototype.isReady.call(this);
     if (! ready)
         return ready;
-   
+
     if (this.image)
         return this.image.isReady();
 
     return true;
 }
 
+Image.prototype.setVisible = function(visible)
+{
+  Frame.prototype.setVisible.call(this, visible);
+  if (this.image && this.image.isAnimated()) {
+    if (this.visible)
+      this.image.play();
+    else
+      this.image.stop();
+  }
+}
 
 /*********** CHARACTER ***********/
 
 function Character(data, parent, initElement)
 {
     Image.call(this, data, parent, false);
-    
+
     var path = "";
     var image;
     var state = null;
@@ -985,7 +519,7 @@ function Character(data, parent, initElement)
               this.states[state] = image;
             }
         }
-        
+
         this.setImage(data.states[currState]);
         this.states[currState] = this.image;
     }
@@ -999,7 +533,7 @@ function Character(data, parent, initElement)
       this.initElement();
 }
 
-belle.utils.extend(Image, Character);
+belle.extend(Character, Image);
 
 Character.prototype.setState = function(state)
 {
@@ -1020,28 +554,32 @@ function TextBox(info, parent, initElement)
     this.textElement = document.createElement("div");
     this.element.appendChild(this.textElement);
     this.displayedText = "";
-    game.addEventListener("variableChanged", this, this.update);
-    
-    if ("font" in info) 
-        this.setFont(info["font"]);
+    var game = this.getGame();
+
+    game.bind("variableChanged", this, function() {
+      this.update();
+    });
+
+    if ("font" in info)
+      this.setFont(info["font"]);
     else
-      this.setFont(game.font);
-    
+      this.setFont(game.properties.font);
+
     TextBox.prototype.load.call(this, info);
-    
+
     if(initElement || initElement === undefined)
       this.initElement();
 }
 
-belle.utils.extend(Object, TextBox);
+belle.extend(TextBox, Object);
 
 TextBox.prototype.load = function(data)
-{   
+{
     var loaded = Object.prototype.load.call(this, data);
-    
+
     if (! loaded)
       return false;
-  
+
     if ("textAlignment" in data)
       this.textAlignment = data["textAlignment"].split("|");
 
@@ -1049,35 +587,32 @@ TextBox.prototype.load = function(data)
     if ("text" in data)
       text = data["text"];
     this.setText(text);
-	
+
     if ("textColor" in data) {
         this.setTextColor(data["textColor"]);
         this.defaultTextColor = this.textColor;
     }
-    
+
     return true;
 }
 
 TextBox.prototype.paint = function(context)
 {
-    var draw = Object.prototype.paint.call(this, context);
-    
-    if (! draw)
-        return false;
-    
-    this.redrawing = true;
-    
-    var width = this.width;
-    var height = this.height;
+    if (! this.visible)
+      return;
+
+    Object.prototype.paint.call(this, context);
+
     var x = this.globalX();
     var y = this.globalY();
     context.fillStyle = this.textColor.toString();
     var defaultFont = context.font;
-    
+    var game = this.getGame();
+
     if (this.font)
        context.font = this.font;
-    
-    var text = game.replaceVariables(this.text);
+
+    var text = game ? game.replaceVariables(this.text) : this.text;
     if (text != this.displayedText)
         this.alignText();
     this.displayedText = text;
@@ -1085,44 +620,42 @@ TextBox.prototype.paint = function(context)
     for (var i=this.textParts.length-1; i !== -1; --i) {
         context.fillText(this.textParts[i], x+this.textLeftPadding[i], y+this.textTopPadding[i], this.width);
     }
-    
+
     context.font = defaultFont;
-  
-    this.redrawing = false;
-    return true;
 }
 
 TextBox.prototype.alignText = function(text, size)
 {
     if (! text && ! this.text)
         return;
+    var game = this.getGame();
     if (! text)
-        text = game.replaceVariables(this.text);
-    
+        text = game ? game.replaceVariables(this.text) : this.text;
+
     if (belle.display.DOM && this.textElement) {
         text = text.replace("\n", "<br/>");
         if (this.textAlignment.contains("HCenter"))
             this.textElement.style.textAlign = "center";
         else if (this.textAlignment.contains("Right"))
-            this.textElement.style.textAlign = "right";  
+            this.textElement.style.textAlign = "right";
         else
-            this.textElement.style.textAlign = "left"; 
-        
+            this.textElement.style.textAlign = "left";
+
         if (this.textAlignment.contains("VCenter")) {
-	    this.textElement.style.top = "0";
-	    this.textElement.style.verticalAlign = "middle";
-	}
+            this.textElement.style.top = "0";
+            this.textElement.style.verticalAlign = "middle";
+        }
         else if (this.textAlignment.contains("Bottom")) {
-	  this.textElement.style.top = "auto";
-	  this.textElement.style.bottom = "0";
+          this.textElement.style.top = "auto";
+          this.textElement.style.bottom = "0";
         }
     }
-    else {    
+    else {
         this.textParts = belle.utils.splitText(text, this.font, this.width);
         this.textLeftPadding.length = 0;
         this.textTopPadding.length = 0;
         var sumHeight = 0;
-        
+
         for (var i=0; i < this.textParts.length; i++) {
             var size = belle.utils.textSize(this.textParts[i], this.font);
             var width = size[0];
@@ -1141,18 +674,19 @@ TextBox.prototype.alignText = function(text, size)
                     }
                 }
             }
-            
+
             this.textLeftPadding.push(leftPadding);
         }
-        
+
         if (sumHeight < this.height) {
             var topOffset = 0;
-            if (this.textAlignment.contains("VCenter")) 
+            if (this.textAlignment.contains("VCenter"))
                 topOffset = (this.height - sumHeight) / 2;
             else if (this.textAlignment.contains("Bottom"))
                 topOffset = this.height - sumHeight;
             topOffset = topOffset > 0 ? topOffset : 0;
-            
+
+            topOffset = Math.round(topOffset);
             for(var i=0; i < this.textTopPadding.length; i++)
                 this.textTopPadding[i] += topOffset;
         }
@@ -1163,17 +697,18 @@ TextBox.prototype.needsRedraw = function()
 {
     if (this.redraw)
         return true;
-    
+
     if (! this.visible)
         return false;
-    
-    var displayText = game.replaceVariables(this.text);
-    
+
+    var game = this.getGame();
+    var displayText = game ? game.replaceVariables(this.text) : this.text;
+
     if (displayText != this.displayedText) {
         this.redraw = true;
         return true;
     }
-    
+
     return false;
 }
 
@@ -1185,9 +720,9 @@ TextBox.prototype.appendText = function(text)
 TextBox.prototype.setFont = function(font)
 {
     if (font && this.font != font) {
-	this.font = font;
-	if (this.textElement)
-	  this.textElement.style.font = font;
+        this.font = font;
+        if (this.textElement)
+          this.textElement.style.font = font;
         this.alignText();
         this.update();
     }
@@ -1197,7 +732,8 @@ TextBox.prototype.setText = function(text)
 {
     if (this.text != text) {
         this.text = text;
-        this.textElement.innerHTML = game.replaceVariables(text.replace("\n", "<br/>"));
+        var game = this.getGame();
+        this.textElement.innerHTML = game ? game.replaceVariables(text.replace("\n", "<br/>")) : text;
         this.alignText();
         this.redraw = true;
     }
@@ -1211,7 +747,7 @@ TextBox.prototype.setTextColor = function(color)
     if (color instanceof Array)
         color = new Color(color);
     this.textColor = color;
-    
+
     if (this.textElement) {
         this.textElement.style.color = color.toHex();
     }
@@ -1227,8 +763,8 @@ TextBox.prototype.scale = function(widthFactor, heightFactor)
   Object.prototype.scale.call(this, widthFactor, heightFactor);
 
   if (this.textElement) {
-    this.textElement.style.width = this.scaledWidth + "px";
-    this.textElement.style.height = this.scaledHeight + "px";
+    this.textElement.style.width = this.width + "px";
+    this.textElement.style.height = this.height + "px";
     var font = parseInt(this.font);
     if (font !== NaN) {
         font *= widthFactor;
@@ -1251,14 +787,15 @@ TextBox.prototype.serialize = function()
 TextBox.prototype.update = function()
 {
     Object.prototype.update.call(this);
-    if (this.textElement)
+    var game = this.getGame();
+    if (this.textElement && game)
       this.textElement.innerHTML = game.replaceVariables(this.text);
 }
 
-TextBox.prototype.initElement = function() 
+TextBox.prototype.initElement = function()
 {
   Object.prototype.initElement.call(this);
-  
+
   this.textElement.style.display = "table-cell";
   this.textElement.style.position = "relative";
 }
@@ -1272,44 +809,51 @@ function ObjectGroup(data, parent, initElement)
     this.hoveredObject = null;
 
     ObjectGroup.prototype.load.call(this, data);
-    
+
     if(initElement || initElement === undefined)
       this.initElement();
+
 }
 
-belle.utils.extend(Object, ObjectGroup);
+belle.extend(ObjectGroup, Object);
 
 ObjectGroup.prototype.load = function(data) {
-    
+
     var loaded = Object.prototype.load.call(this, data);
-    
+
     if (! loaded)
       return false;
-    
-    if ("objects" in data) {	
-        var obj;
-        var objects = data["objects"];
+
+    if ("objects" in data) {
+        var obj,
+            objects = data["objects"],
+            game = this.getGame();
+
         for (var i=0; i !== objects.length; i++) {
-	    obj = this.getObject(objects[i].name);
-	    if (obj) {
-	      obj.load(objects[i]);
-	      continue;
-	    }
-	    
-            obj = belle.createObject(objects[i], this);
-            
+            obj = this.getObject(objects[i].name);
+            if (obj) {
+              obj.load(objects[i]);
+              //fix x,y coords
+              obj.setX(obj.x - this.x);
+              obj.setY(obj.y - this.y);
+              continue;
+            }
+
+            obj = game.createObject(objects[i], this);
+
             if (! obj) {
-                belle.log(objects[i].type + ": is not a valid object type!!!!.");
+                belle.log(objects[i].type + ": is not a valid object type");
                 continue;
             }
             var left = parseInt(this.element.style.left);
             var elemLeft = parseInt(obj.element.style.left);
-            obj.setX(elemLeft - left);
-            
+            //TODO: position should be relative to parent or global?
+            obj.setX(obj.x - this.x);
+
             var top = parseInt(this.element.style.top);
             var elemTop = parseInt(obj.element.style.top);
-            obj.setY(elemTop - top);
-            
+            obj.setY(obj.y - this.y);
+
             //if (belle.display.DOM) {
                 obj.element.style.display = "block";
                 obj.element.style.left = obj.x + "px";
@@ -1317,11 +861,12 @@ ObjectGroup.prototype.load = function(data) {
                 obj.element.style.top = obj.y + "px";
                 this.element.appendChild(obj.element);
             //}
-            
+
             this.objects.push(obj);
         }
     }
-    
+
+
     return true;
 }
 
@@ -1339,60 +884,62 @@ ObjectGroup.prototype.objectAt = function(x, y)
             return this.objects[i];
         }
     }
-    
+
     return null;
 }
 
 ObjectGroup.prototype.paint = function(context)
 {
-    var draw = Object.prototype.paint.call(this, context);
-    if (! draw)
-        return false;
-    
+    if (! this.visible)
+      return;
+
+    Object.prototype.paint.call(this, context);
+
     for(var i=0; i !== this.objects.length; i++) {
         this.objects[i].redraw = true;
-	context.save();
+        context.save();
         this.objects[i].paint(context);
-	context.restore();
+        this.objects[i].redraw = false;
+        context.restore();
     }
-    
-    this.redraw = false;
-    return true;
 }
 
 ObjectGroup.prototype.mouseLeaveEvent = function(event)
 {
   Object.prototype.mouseLeaveEvent.call(this, event);
-  
+
   if (this.hoveredObject) {
     this.hoveredObject.mouseLeaveEvent(event);
     this.hoveredObject = null;
   }
 }
 
-ObjectGroup.prototype.processEvent = function(event)
+ObjectGroup.prototype.processEvent = function(event, type)
 {
     var x = event.canvasX;
     var y = event.canvasY;
+
     if (! this.visible || ! this.contains(x, y))
         return false;
-    
+
     var result = Object.prototype.processEvent.call(this, event);
     var object = this.objectAt(x, y);
-    
+
+
     if (this.hoveredObject != object) {
       if (this.hoveredObject)
-	this.hoveredObject.mouseLeaveEvent(event);
-        
-      if (object) 
-	object.mouseEnterEvent(event);
+        this.hoveredObject.mouseLeaveEvent(event);
+
+      if (object)
+        object.mouseEnterEvent(event);
     }
-    
+
     this.hoveredObject = object;
-    
-    if (object)
-      result = object.processEvent(event);
-        
+
+    if (object) {
+      result = object.processEvent(event, type);
+    }
+
     return result;
 }
 
@@ -1414,14 +961,14 @@ ObjectGroup.prototype.needsRedraw = function()
             break;
         }
     }
-    
+
     return this.redraw;
 }
 
 ObjectGroup.prototype.scale = function(widthFactor, heightFactor)
 {
   Object.prototype.scale.call(this, widthFactor, heightFactor);
-  
+
   for (var i=0; i !== this.objects.length; i++) {
     this.objects[i].scale(widthFactor, heightFactor);
   }
@@ -1430,17 +977,17 @@ ObjectGroup.prototype.scale = function(widthFactor, heightFactor)
 ObjectGroup.prototype.isReady = function()
 {
   var ready = Object.prototype.isReady.call(this);
-  
+
   if (! ready)
       return false;
-  
+
   for(var i=0; i < this.objects.length; i++){
     if (! this.objects[i].isReady()) {
         ready = false;
         break;
     }
   }
-  
+
   return ready;
 }
 
@@ -1449,10 +996,10 @@ ObjectGroup.prototype.getObject = function(name)
   if (name) {
     for (var i=0; i !== this.objects.length; i++) {
       if (this.objects[i].name == name)
-	return this.objects[i];
+        return this.objects[i];
     }
   }
-  
+
   return null;
 }
 
@@ -1461,12 +1008,12 @@ ObjectGroup.prototype.getObject = function(name)
 function DialogueBox(data, parent, initElement)
 {
     ObjectGroup.call(this, data, parent, initElement);
-    
+
     this.text = "";
     this.speakerName = "";
     this.speakerTextBox = null;
     this.dialgueTextBox = null;
-    
+
     for(var i=0; i !== this.objects.length; i++) {
         if (this.objects[i].name === "speakerTextBox")
             this.speakerTextBox = this.objects[i];
@@ -1475,7 +1022,7 @@ function DialogueBox(data, parent, initElement)
     }
 }
 
-belle.utils.extend(ObjectGroup, DialogueBox);
+belle.extend(DialogueBox, ObjectGroup);
 
 DialogueBox.prototype.setSpeakerName = function(text)
 {
@@ -1528,7 +1075,7 @@ function Menu(data, parent, initElement)
     ObjectGroup.call(this, data, parent, initElement);
 }
 
-belle.utils.extend(ObjectGroup, Menu);
+belle.extend(Menu, ObjectGroup);
 
 
 /************** BUTTON ************/
@@ -1539,15 +1086,13 @@ function Button(data, parent, initElement)
     this.visible = true;
     if (this.element)
       this.element.style.cursor = "pointer";
+
 }
 
-belle.utils.extend(TextBox, Button);
+belle.extend(Button, TextBox);
 
 // Expose the public methods
 
-objects.Point = Point;
-objects.AnimationImage = AnimationImage;
-objects.Color = Color;
 objects.Object = Object;
 objects.Image = Image;
 objects.TextBox = TextBox;
@@ -1557,6 +1102,6 @@ objects.DialogueBox = DialogueBox;
 objects.Button = Button;
 objects.Menu = Menu;
 
-}(belle.objects));
+}(belle));
 
 belle.log("Objects module loaded!");
