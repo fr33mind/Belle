@@ -192,7 +192,13 @@ belle.extend(Fade, Action);
 
 Fade.prototype.execute = function () {
     var t = this;
-    
+
+    var object = this.getObject();
+    if (! object) {
+      this.setFinished(true);
+      return;
+    }
+
     this.prevTime = new Date().getTime();
     this.timePassed = 0;
      
@@ -220,7 +226,7 @@ Fade.prototype.fade = function () {
        (this.fadeType == "out" && opacity <= this.target)) {
         clearInterval(this.interval);
         this.interval = null;
-        this.finished = true;
+        this.setFinished(true);
         this.timePassed = 0;
         return;
     }
