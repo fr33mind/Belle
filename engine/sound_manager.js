@@ -14,9 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */ 
 
-game.soundManager = game.soundManager || {};
-
-(function(soundManager){
+(function(SoundManager){
   
 var channels = {
   "voice" : [],
@@ -68,7 +66,11 @@ function _addSound(sound, channel, options) {
   return null;
 }
 
-soundManager.play = function(sound, channel, options) {
+function SoundManager()
+{
+}
+
+SoundManager.prototype.play = function(sound, channel, options) {
   sound = _addSound(sound, channel, options);
   
   if (sound) {
@@ -78,71 +80,71 @@ soundManager.play = function(sound, channel, options) {
   }
 }
   
-soundManager.stop = function(sound, channel, fade) {
+SoundManager.prototype.stop = function(sound, channel, fade) {
   sound = _getSound(sound, channel);
   
   if (sound)
     sound.stop();
 }
 
-soundManager.stopAll = function(channel, fade) {
+SoundManager.prototype.stopAll = function(channel, fade) {
   var sounds = _getSounds(channel);
 
   if (sounds)
       sounds.stop();
 }
 
-soundManager.pause = function(sound, channel, fade) {
+SoundManager.prototype.pause = function(sound, channel, fade) {
   sound = _getSound(sound);
   
   if (sound)
     sound.stop();
 }
 
-soundManager.pauseAll = function(channel, fade) {
+SoundManager.prototype.pauseAll = function(channel, fade) {
   var sounds = _getSounds(channel);
 
   if (sounds)
     sounds.pause();
 }
 
-soundManager.mute = function(sound, channel) {
+SoundManager.prototype.mute = function(sound, channel) {
   sound = _getSound(sound, channel);
   
   if (sound)
     sound.mute();
 }
 
-soundManager.muteAll = function(channel) {
+SoundManager.prototype.muteAll = function(channel) {
   var sounds = _getSounds(channel);
 
   if (sounds)
     sounds.mute();
 }
 
-soundManager.unmute = function(sound, channel) {
+SoundManager.prototype.unmute = function(sound, channel) {
   sound = _getSound(sound, channel);
   
   if (sound)
     sound.unmute();
 }
 
-soundManager.unmuteAll = function(channel) {
+SoundManager.prototype.unmuteAll = function(channel) {
   var sounds = _getSounds(channel);
 
   if (sounds)
     sounds.unmute();
 }
 
-soundManager.load = function(sound, channel, options) {
+SoundManager.prototype.load = function(sound, channel, options) {
   _addSound(sound, channel, options);
 }
 
-soundManager.getSounds = function(channel) {
+SoundManager.prototype.getSounds = function(channel) {
   return _getSounds(channel).getSounds();
 };
 
-soundManager.getPlayingSounds = function(channel) {
+SoundManager.prototype.getPlayingSounds = function(channel) {
   var sounds = this.getSounds();
   for(var i=0; i < sounds.length; i++) {
       if (sounds[i].isEnded())
@@ -151,4 +153,6 @@ soundManager.getPlayingSounds = function(channel) {
   return sounds;
 };
   
-})(game.soundManager);
+belle.SoundManager = SoundManager;
+
+})(belle);
