@@ -17,7 +17,6 @@
 (function(utils) {
 
 var dummy = null;
-function surrogateCtor() {}
  
 function getBody()
 {
@@ -56,16 +55,6 @@ utils.isObjectEmpty = function(object)
                 return false;
     }
     return true;
-}
-
-utils.extend = function (base, sub) 
-{
-    // Copy the prototype from the base to setup inheritance
-    surrogateCtor.prototype = base.prototype;
-    // Tricky huh?
-    sub.prototype = new surrogateCtor();
-    // Remember the constructor property was set wrong, let's fix it
-    sub.prototype.constructor = sub;
 }
 
 utils.textSize = function(text, font) 
