@@ -65,8 +65,7 @@ void Object::init(const QString& name)
     mKeepAspectRatio = false;
     mAspectRatio = 1;
     mScaledBackgroundImage = 0;
-    mChangesAccepted = true;
-    mChangesPropagated = true;
+    mSync = true;
     mEventToActions.insert(Interaction::MouseMove, QList<Action*>());
     mEventToActions.insert(Interaction::MousePress, QList<Action*>());
     mEventToActions.insert(Interaction::MouseRelease, QList<Action*>());
@@ -498,7 +497,7 @@ void Object::setEventActions(Interaction::InputEvent event, const QList<Action*>
 
 void Object::appendEventAction(Interaction::InputEvent event, Action * action)
 {
-    insertEventAction(event, mEventToActions.value(event, QList<Action*>()).size(), action);
+    insertEventAction(event, mEventToActions.value(event).size(), action);
 }
 
 void Object::insertEventAction(Interaction::InputEvent event, int index, Action * action)
@@ -511,9 +510,13 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
         if (index >= 0 && index <= actions.size())
             actions.insert(index, action);
 
+        action->setParent(this);
         mEventToActions.insert(event, actions);
 
-        if (changesPropagated()) {
+        if (mSync) {
+            if (mResource)
+                action->setParent(mResource);
+
             QVariantList actionsVariant;
             for(int i=0; i < actions.size(); i++) {
                 actionsVariant.append(qVariantFromValue((QObject*)actions[i]));
@@ -529,11 +532,11 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
    QList<Action*> actions = mEventToActions.value(event);
    if (index >= 0 && index < actions.size()) {
        Action* action = actions.takeAt(index);
-       if (del)
+       if (del && action->parent() == this)
             action->deleteLater();
        mEventToActions.insert(event, actions);
 
-       if (changesPropagated()) {
+       if (mSync) {
            QVariantList actionsVariant;
            for(int i=0; i < actions.size(); i++) {
                actionsVariant.append(qVariantFromValue((QObject*)actions[i]));
@@ -552,12 +555,12 @@ void Object::removeEventAction(Interaction::InputEvent event, Action* action, bo
     this->removeEventActionAt(event, actions.indexOf(action), del);
 }
 
-void Object::removeAllEventActions(Interaction::InputEvent event, bool del)
+void Object::removeEventActions(Interaction::InputEvent event, bool del)
 {
     QList<Action*> actions = mEventToActions.value(event);
     if (del) {
         for(int i=0; i < actions.size(); i++) {
-            if (actions[i]->parent() == this)
+            if (del && actions[i]->parent() == this)
                 actions[i]->deleteLater();
         }
     }
@@ -638,36 +641,57 @@ QVariantMap Object::toJsonObject(bool internal)
 
     QVariantList jsonActions;
     QList<Action*> actions = mEventToActions.value(Interaction::MousePress);
-    if (actions.size() > 0) {
+    if (internal) {
+        for(int i=0; i < actions.size(); i++)
+            jsonActions.append(qVariantFromValue((QObject*)actions[i]));
+    }
+    else {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(actions[i]->toJsonObject());
-        object.insert("onMousePress", jsonActions);
     }
+
+    if (jsonActions.size() || internal)
+        object.insert("onMousePress", jsonActions);
 
     jsonActions.clear();
     actions = mEventToActions.value(Interaction::MouseRelease);
-    if (actions.size() > 0) {
+    if (internal) {
+        for(int i=0; i < actions.size(); i++)
+            jsonActions.append(qVariantFromValue((QObject*)actions[i]));
+    }
+    else {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(actions[i]->toJsonObject());
-        object.insert("onMouseRelease", jsonActions);
     }
+
+    if (jsonActions.size() || internal)
+        object.insert("onMouseRelease", jsonActions);
+
 
     jsonActions.clear();
     actions = mEventToActions.value(Interaction::MouseMove);
-    if (actions.size() > 0) {
+    if (internal) {
+        for(int i=0; i < actions.size(); i++)
+            jsonActions.append(qVariantFromValue((QObject*)actions[i]));
+    }
+    else {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(actions[i]->toJsonObject());
-        object.insert("onMouseMove", jsonActions);
     }
+
+    if (jsonActions.size() || internal)
+        object.insert("onMouseMove", jsonActions);
 
 
     object.insert("visible", mVisible);
     if (! mPadding.isEmpty())
         object.insert("padding", mPadding.toJsonObject());
-    if (mBorderWidth > 0)
+    if (mBorderWidth > 0 || internal)
         object.insert("borderWidth", mBorderWidth);
-    if (mBorderColor.isValid())
+    if (mBorderColor.isValid() || internal)
         object.insert("borderColor", Utils::colorToList(mBorderColor));
+
+    object.insert("sync", mSync);
 
     //remove attributes that are the same in the resource
     filterResourceData(object);
@@ -1007,7 +1031,8 @@ void Object::setResource(Object* resource)
 
     mResource = resource;
     mResource->addClone(this);
-    this->addObserver(mResource);
+    if (isSynced())
+        this->addObserver(mResource);
     connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()));
 }
 
@@ -1023,7 +1048,8 @@ void Object::addClone(Object* object)
 
     mClones.append(object);
     connect(object, SIGNAL(destroyed(Object*)), this, SLOT(cloneDestroyed(Object*)));
-    this->addObserver(object);
+    if (object->isSynced())
+        this->addObserver(object);
 }
 
 void Object::removeClone(Object* object)
@@ -1090,11 +1116,11 @@ void Object::_load(const QVariantMap &data)
     if (data.isEmpty())
         return;
 
+    blockNotifications(true);
+
     if (data.contains("resource") && data.value("resource").type() == QVariant::String) {
         this->setResource(ResourceManager::instance()->resource(data.value("resource").toString()));
     }
-
-    blockNotifications(true);
 
     if (data.contains("name") && data.value("name").type() == QVariant::String)
         setObjectName(data.value("name").toString());
@@ -1164,6 +1190,7 @@ void Object::_load(const QVariantMap &data)
             if (action)
                 actions.append(action);
         }
+
         replaceEventActions(Interaction::MouseMove, actions);
     }
 
@@ -1207,8 +1234,13 @@ void Object::_load(const QVariantMap &data)
 
     if (data.contains("borderWidth") && data.value("borderWidth").canConvert(QVariant::Int))
         setBorderWidth(data.value("borderWidth").toInt());
+
     if (data.contains("borderColor") && data.value("borderColor").type() == QVariant::List)
         setBorderColor(Utils::listToColor(data.value("borderColor").toList()));
+
+    if (data.contains("sync") && data.value("sync").type() == QVariant::Bool) {
+        mSync = data.value("sync").toBool();
+    }
 
     mPadding = Padding(data.value("padding").toMap());
 
@@ -1229,7 +1261,7 @@ void Object::load(const QVariantMap &data)
 void Object::blockNotifications(bool block)
 {
     // don't block signals for resources
-    if (block && isResource())
+    if (block && mClones.size())
         return;
 
     this->blockSignals(block);
@@ -1241,18 +1273,13 @@ void Object::notify(const QString & key, const QVariant & value, const QVariant 
     data.insert(key, value);
     if (prev.isValid())
         data.insert("previousValue", prev);
-    //bool acceptsChanges = changesAccepted();
-    //acceptChanges(false);
+
     emit dataChanged(data);
-    //acceptChanges(acceptsChanges);
 }
 
 void Object::addObserver(Object * object)
 {
-    if (! changesPropagated())
-        return;
-
-    if (object && object->changesAccepted()) {
+    if (object && object->isSynced()) {
         connect(this, SIGNAL(dataChanged(const QVariantMap&)), object, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
     }
 }
@@ -1264,68 +1291,64 @@ void Object::removeObserver(Object * object)
     }
 }
 
-void Object::acceptChanges(bool accept)
-{
-    mChangesAccepted = accept;
-
-    if (isResource()) {
-        if (accept) {
-            for(int i=0; i < mClones.size(); i++) {
-                mClones[i]->addObserver(this);
-            }
-        }
-        else {
-            for(int i=0; i < mClones.size(); i++)
-                mClones[i]->removeObserver(this);
-        }
-    }
-    else {
-        if (accept)
-            mResource->addObserver(this);
-        else
-            mResource->removeObserver(this);
-    }
-}
-
-void Object::propagateChanges(bool propagate)
-{
-    mChangesPropagated = propagate;
-
-    if (isResource()) {
-        if (propagate) {
-            for(int i=0; i < mClones.size(); i++) {
-                if (mClones[i]->changesAccepted())
-                    this->addObserver(mClones[i]);
-            }
-        }
-        else {
-            for(int i=0; i < mClones.size(); i++) {
-                if (mClones[i]->changesAccepted())
-                    this->removeObserver(mClones[i]);
-            }
-        }
-    }
-    else {
-        if (propagate)
-            this->addObserver(mResource);
-        else
-            this->removeObserver(mResource);
-    }
-}
-
 bool Object::isResource() const
 {
-    return (mResource || scene()) ? false : true;
+    return this->parent() == ResourceManager::instance() ? true : false;
 }
 
-bool Object::changesAccepted() const
+void Object::copyResourceActions(Interaction::InputEvent event)
 {
-    return mChangesAccepted;
+    QList<Action*> actions = mEventToActions.value(event);
+    QList<Action*> copiedActions;
+    Action* action = 0;
+
+    for(int i=0; i < actions.size(); i++) {
+        if (actions[i]->parent() != this)
+            action = ActionInfoManager::typeToAction(actions[i]->toJsonObject(), this);
+        else
+            action = actions[i];
+        copiedActions.append(action);
+    }
+
+    mEventToActions.insert(event, copiedActions);
 }
 
-bool Object::changesPropagated() const
+void Object::sync()
 {
-    return mChangesPropagated;
+    if (mResource) {
+        this->load(mResource->toJsonObject(true));
+        this->addObserver(mResource);
+        mResource->addObserver(this);
+        emit synced();
+    }
+}
+
+void Object::unsync()
+{
+    if (mResource) {
+        this->removeObserver(mResource);
+        mResource->removeObserver(this);
+        copyResourceActions(Interaction::MouseMove);
+        copyResourceActions(Interaction::MousePress);
+        copyResourceActions(Interaction::MouseRelease);
+    }
+}
+
+void Object::setSync(bool sync)
+{
+    if (mSync == sync)
+        return;
+
+    mSync = sync;
+    if (mSync)
+        this->sync();
+    else
+        this->unsync();
+}
+
+bool Object::isSynced() const
+{
+    return mSync;
 }
 
 void Object::onParentResized(int w, int h)

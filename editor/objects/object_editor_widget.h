@@ -68,11 +68,14 @@ private slots:
     void onObjectDataChanged(const QVariantMap&);
     void onCurrentObjectDestroyed();
     void onKeepAspectRatioToggled(bool);
-    void acceptChanges(bool);
-    void propagateChanges(bool);
+    void syncToggled(bool);
+    void reload();
 
 protected:
     Object *mCurrentObject;
+
+private:
+    void updateEventActions(Object*);
 
 private:
     ColorPushButton* mColorButton;
@@ -96,10 +99,8 @@ private:
     QCheckBox* mKeepAspectRatioCheckbox;
     QComboBox* mClonesComboBox;
     QLabel* mResourceLabel;
-    QCheckBox* mAcceptsChangesCheckbox;
-    QCheckBox* mPropagatesChangesCheckbox;
-    QCheckBox* mResourceAcceptsChangesCheckbox;
-    QCheckBox* mResourcePropagatesChangesCheckbox;
+    QCheckBox* mSyncCheckbox;
+    bool mShowSyncMsg;
 };
 
 #endif // SCENE_OBJECT_PROPERTIES_WIDGET_H

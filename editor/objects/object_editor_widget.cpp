@@ -81,37 +81,22 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
 
     mResourceLabel = new QLabel(this);
     mResourceLabel->setMargin(4);
-    mAcceptsChangesCheckbox = new QCheckBox(this);
-    mPropagatesChangesCheckbox = new QCheckBox(this);
-    connect(mAcceptsChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(acceptChanges(bool)));
-    connect(mPropagatesChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(propagateChanges(bool)));
+    mSyncCheckbox = new QCheckBox(this);
+    connect(mSyncCheckbox, SIGNAL(toggled(bool)), this, SLOT(syncToggled(bool)));
 
     this->beginGroup(tr("Resource"), "Resource");
     lastItem = this->lastItem();
     this->appendRow(tr("Name"), mResourceLabel);
-    this->appendRow(tr("Accepts changes"), mAcceptsChangesCheckbox);
-    this->appendRow(tr("Propagates changes"), mPropagatesChangesCheckbox);
+    this->appendRow(tr("Sync"), mSyncCheckbox);
     this->endGroup();
-    lastItem->child(1)->setToolTip(tr("Accepts changes from the resource it was cloned from"));
-    lastItem->child(2)->setToolTip(tr("Propagates its changes to the resource it was cloned from"));
+    lastItem->child(1)->setToolTip(tr("Synchronizes data from this object to the resource "
+                                      "it was cloned from."));
 
     mClonesComboBox = new QComboBox(this);
-    mResourceAcceptsChangesCheckbox = new QCheckBox(this);
-    mResourcePropagatesChangesCheckbox = new QCheckBox(this);
-    connect(mResourceAcceptsChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(acceptChanges(bool)));
-    connect(mResourcePropagatesChangesCheckbox, SIGNAL(toggled(bool)), this, SLOT(propagateChanges(bool)));
 
     this->beginGroup(tr("Clones"), "Clones");
-    lastItem = this->lastItem();
     this->appendRow(tr("Clones"), mClonesComboBox);
-    this->appendRow(tr("Accepts changes"), mResourceAcceptsChangesCheckbox);
-    this->appendRow(tr("Propagates changes"), mResourcePropagatesChangesCheckbox);
     this->endGroup();
-
-    lastItem->child(1)->setToolTip(tr("Accepts changes from cloned objects on the scene(s) "
-                                      "that are propagating their changes"));
-    lastItem->child(2)->setToolTip(tr("Propagates its changes to cloned objects on the scene(s) that "
-                              "accept resource changes"));
 
     this->beginGroup(tr("Bounding Rect"));
     mBorderWidthSpinBox = new QSpinBox(this);
@@ -225,30 +210,26 @@ void ObjectEditorWidget::updateData(Object *currObj)
         return;
 
     connect(currObj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
+    connect(currObj, SIGNAL(synced()), this, SLOT(reload()));
     connect(currObj, SIGNAL(destroyed()), this, SLOT(onCurrentObjectDestroyed()));
 
-    if (currObj->isResource()) {
+    if (currObj->resource()) {
+       this->setFilters(QStringList() << "Clones");
+       mResourceLabel->setText(currObj->resource()->name());
+       mSyncCheckbox->setChecked(currObj->isSynced());
+    }
+    else if (currObj->isResource()) {
         this->setFilters(QStringList() << "Resource");
         QList<Object*> clones = currObj->clones();
         QString name("");
         mClonesComboBox->clear();
 
         for(int i=0; i < clones.size(); i++) {
-            name = QString("%1 (%2)").arg(clones[i]->name())
-                                     .arg(clones[i]->scene() ? clones[i]->scene()->objectName() : "");
+            name = QString("\"%1\" in \"%2\" (%3)").arg(clones[i]->name())
+                                     .arg(clones[i]->scene() ? clones[i]->scene()->objectName() : "")
+                                     .arg(clones[i]->isSynced() ? tr("Synced") : tr("Not synced"));
             mClonesComboBox->addItem(name);
         }
-        mResourceAcceptsChangesCheckbox->setChecked(currObj->changesAccepted());
-        mResourcePropagatesChangesCheckbox->setChecked(currObj->changesPropagated());
-    }
-    else if (currObj->resource()){
-       this->setFilters(QStringList() << "Clones");
-       mResourceLabel->setText(currObj->resource()->name());
-       mAcceptsChangesCheckbox->setChecked(currObj->changesAccepted());
-       mPropagatesChangesCheckbox->setChecked(currObj->changesPropagated());
-    }
-    else {
-        this->setFilters(QStringList() << "Resource" << "Clones");
     }
 
     ////mChooseObjectComboBox->clear();
@@ -284,36 +265,44 @@ void ObjectEditorWidget::updateData(Object *currObj)
     else
         mHeightEditor->setText(QString::number(currObj->height()));
 
-
-    QList<Action*> actions;
-    QObject *object;
-
-    mMousePressComboBox->clear();
-    actions = currObj->actionsForEvent(Interaction::MousePress);
-    for(int i=0; i < actions.size(); i++) {
-        object = actions[i];
-        mMousePressComboBox->addItem(actions[i]->icon(), actions[i]->toString(), qVariantFromValue(object));
-    }
-
-    mMouseReleaseComboBox->clear();
-    actions = currObj->actionsForEvent(Interaction::MouseRelease);
-    for(int i=0; i < actions.size(); i++) {
-        object = actions[i];
-        mMouseReleaseComboBox->addItem(actions[i]->icon(), actions[i]->toString(), qVariantFromValue(object));
-    }
-
-    mMouseMoveComboBox->clear();
-    actions = currObj->actionsForEvent(Interaction::MouseMove);
-    for(int i=0; i < actions.size(); i++) {
-        object = actions[i];
-        mMouseMoveComboBox->addItem(actions[i]->icon(), actions[i]->toString(), qVariantFromValue(object));
-    }
+    updateEventActions(currObj);
 
     mCornerRadiusSpinBox->setValue(currObj->cornerRadius());
     mVisibleCheckbox->setChecked(currObj->visible());
     mKeepAspectRatioCheckbox->setChecked(currObj->keepAspectRatio());
 
     mCurrentObject = currObj;
+}
+
+void ObjectEditorWidget::updateEventActions(Object* object)
+{
+    QList<Action*> actions;
+    Action *action;
+
+    mMousePressComboBox->clear();
+    mMouseReleaseComboBox->clear();
+    mMouseMoveComboBox->clear();
+
+    if (! object)
+        return;
+
+    actions = object->actionsForEvent(Interaction::MousePress);
+    for(int i=0; i < actions.size(); i++) {
+        action = actions[i];
+        mMousePressComboBox->addItem(action->icon(), action->toString(), qVariantFromValue(qobject_cast<QObject*>(action)));
+    }
+
+    actions = object->actionsForEvent(Interaction::MouseRelease);
+    for(int i=0; i < actions.size(); i++) {
+        action = actions[i];
+        mMouseReleaseComboBox->addItem(action->icon(), action->toString(), qVariantFromValue(qobject_cast<QObject*>(action)));
+    }
+
+    actions = object->actionsForEvent(Interaction::MouseMove);
+    for(int i=0; i < actions.size(); i++) {
+        action = actions[i];
+        mMouseMoveComboBox->addItem(action->icon(), action->toString(), qVariantFromValue(qobject_cast<QObject*>(action)));
+    }
 }
 
 void ObjectEditorWidget::onAddItemActivated()
@@ -327,8 +316,6 @@ void ObjectEditorWidget::onAddItemActivated()
 
     if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
         Action* action = dialog.selectedAction();
-        action->setSceneObject(mCurrentObject);
-        action->setParent(mCurrentObject);
         mCurrentObject->appendEventAction(event, action);
         ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
         if(comboBox) {
@@ -526,14 +513,18 @@ void ObjectEditorWidget::onKeepAspectRatioToggled(bool keep)
         mCurrentObject->setKeepAspectRatio(keep);
 }
 
-void ObjectEditorWidget::acceptChanges(bool accept)
+void ObjectEditorWidget::syncToggled(bool _sync)
 {
-    if (mCurrentObject)
-        mCurrentObject->acceptChanges(accept);
+    if (mCurrentObject) {
+        mCurrentObject->setSync(_sync);
+    }
 }
 
-void ObjectEditorWidget::propagateChanges(bool propagate)
+void ObjectEditorWidget::reload()
 {
-    if (mCurrentObject)
-        mCurrentObject->propagateChanges(propagate);
+    if (! mCurrentObject)
+        return;
+    Object* obj = mCurrentObject;
+    mCurrentObject = 0;
+    updateData(obj);
 }

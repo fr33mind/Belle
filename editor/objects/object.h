@@ -121,7 +121,7 @@ class Object : public QObject
         void insertEventAction(Interaction::InputEvent, int, Action*);
         void removeEventActionAt(Interaction::InputEvent, int, bool del=false);
         void removeEventAction(Interaction::InputEvent, Action*, bool del=false);
-        void removeAllEventActions(Interaction::InputEvent, bool del=false);
+        void removeEventActions(Interaction::InputEvent, bool del=false);
         QList<Action*> actionsForEvent(Interaction::InputEvent);
         bool hasActionForEvent(Action*, Interaction::InputEvent);
         void moveSharedEventActions(Object*, Object*, Interaction::InputEvent);
@@ -146,6 +146,9 @@ class Object : public QObject
         void filterResourceData(QVariantMap&);
         QVariantMap fillWithResourceData(QVariantMap);
 
+        void lock();
+        void unlock();
+
         void setResource(Object*);
         Object* resource() const;
 
@@ -156,11 +159,11 @@ class Object : public QObject
         void addObserver(Object*);
         void removeObserver(Object*);
 
-        bool changesAccepted() const;
-        bool changesPropagated() const;
-
         bool isResource() const;
         void blockNotifications(bool);
+
+        bool isSynced() const;
+        void setSync(bool);
 
         bool setName(const QString&);
         QString name();
@@ -180,14 +183,15 @@ class Object : public QObject
         void onResizeEvent(QResizeEvent*);
         virtual void load(const QVariantMap &);
         void onParentResized(int, int);
-        void acceptChanges(bool);
-        void propagateChanges(bool);
 
     signals:
         void dataChanged(const QVariantMap& data=QVariantMap());
+        void eventActionAdded(Interaction::InputEvent, Action*);
+        void eventActionRemoved(Interaction::InputEvent, Action*);
         void positionChanged(int, int);
         void resized(int, int);
         void destroyed(Object* object=0);
+        void synced();
 
     private:
         //void init(const QString &, int, int, QObject*);
@@ -199,6 +203,10 @@ class Object : public QObject
         void updateScaledBackgroundImage();
         void _load(const QVariantMap&);
         void replaceEventActions(Interaction::InputEvent, const QList<Action*> &);
+        void copyResourceActions(Interaction::InputEvent);
+        void sync();
+        void unsync();
+
 
     protected:
         QRect mSceneRect;
@@ -233,8 +241,8 @@ class Object : public QObject
         QPixmap* mScaledBackgroundImage;
         Background mBackground;
         QList<Object*> mClones;
-        bool mChangesAccepted;
-        bool mChangesPropagated;
+        bool mSync;
+        bool mLock;
 
 private slots:
         void resourceDestroyed();
