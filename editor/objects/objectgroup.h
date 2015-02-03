@@ -83,6 +83,7 @@ private:
     void alignObjectsVertically();
     void checkStickyObjects();
     void addStickyObject(Object*);
+    void _append(Object*);
 };
 
 #endif // OBJECTGROUP_H

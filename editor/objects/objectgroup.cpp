@@ -52,7 +52,7 @@ void ObjectGroup::_load(const QVariantMap& data)
             }
 
             if(obj)
-                append(obj);
+                _append(obj);
         }
     }
 
@@ -101,6 +101,15 @@ ObjectEditorWidget* ObjectGroup::editorWidget()
     return mEditorWidget;
 }
 
+void ObjectGroup::_append(Object* obj)
+{
+    connect(obj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(objectChanged(const QVariantMap&)));
+    connect(obj, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)));
+    mObjects.append(obj);
+    adaptSize();
+    checkStickyObjects();
+}
+
 void ObjectGroup::append(Object* obj, int spacing)
 {
     if (! obj)
@@ -115,11 +124,7 @@ void ObjectGroup::append(Object* obj, int spacing)
     starty += spacing;
     obj->setY(starty);
     obj->setX(this->x());
-    connect(obj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(objectChanged(const QVariantMap&)));
-    connect(obj, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)));
-    mObjects.append(obj);
-    adaptSize();
-    checkStickyObjects();
+    _append(obj);
     this->notify("objects", variantObjects());
     //connect(this, SIGNAL(resized(int,int)), obj, SLOT(onParentResized(int, int)));
 }
