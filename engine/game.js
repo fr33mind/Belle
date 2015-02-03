@@ -292,9 +292,9 @@
     if (! id)
       id = 0;
 
-    var scene = this.models["main"].getScene();
+    var scene = this.mainModel.getScene();
     var name = scene.name;
-    var title = this.title;
+    var title = this.properties.title;
     var gameData = $.jStorage.get(title, {});
     var savedGames = gameData["savedGames"] || [];
     var i = 0;
@@ -311,7 +311,7 @@
         id = i;
     }
 
-    var entry = this.models["main"].serialize();
+    var entry = this.mainModel.serialize();
     entry.date = belle.utils.getSaveDate();
     entry.name = name;
 
@@ -327,16 +327,16 @@
     return {name: entry.name, date: entry.date};
   }
 
-  Game.prototype._loadSlot = function(scene) {
+  Game.prototype._loadSlot = function(data) {
     if (!data || ! data.scene || ! data.scene.name) {
       alert("Couldn't load game data");
       return false;
     }
 
-    var scene = this.getScene(data.scene.name);
+    var scene = this.mainModel.getScene(data.scene.name);
     if (scene) {
       scene.load(data.scene);
-      this.setCurrentScene(scene);
+      this.mainModel.setScene(scene);
     }
 
     this.variables = data.variables || {};
@@ -350,7 +350,7 @@
   }
 
   Game.prototype.loadSlot = function(id) {
-    var title = this.title,
+    var title = this.properties.title,
       savedGames = this.getSavedGames(),
       entry = null,
       ok = false;
@@ -377,7 +377,7 @@
     if (entry) {
       ok = this._loadSlot(entry);
       if (ok) {
-        this.models["main"].resume();
+        this.mainModel.resume();
       }
     }
     else
