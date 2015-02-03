@@ -35,6 +35,8 @@
 #define WIDTH 640
 #define HEIGHT 480
 #define GAME_FILENAME "game_data.js"
+#define VERSION_STR "0.5a"
+#define VERSION 0x000500
 
 class Belle : public QMainWindow
 {
@@ -135,6 +137,7 @@ private:
         bool confirmQuit(const QString&, const QString&);
         bool loadDefaultGame();
         void clearProject();
+        void _fixSync(const QList<Scene*>&);
 };
 
 #endif

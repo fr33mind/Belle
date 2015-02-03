@@ -925,7 +925,6 @@ void Belle::openFileOrProject(QString filepath)
             mCurrentSceneManager = mPauseSceneManager;
             importScenes(scenes, mPauseSceneManager);
             mPauseSceneManager->setCurrentSceneIndex(0);
-            //scenesWidget(mPauseSceneManager)->setE
         }
     }
 
@@ -934,10 +933,29 @@ void Belle::openFileOrProject(QString filepath)
         mCurrentSceneManager = mDefaultSceneManager;
         importScenes(scenes, mDefaultSceneManager);
         mDefaultSceneManager->setCurrentSceneIndex(0);
-        AssetManager::instance()->setLoadPath("");
         updateActions();
     }
 
+    AssetManager::instance()->setLoadPath("");
+
+    //Fix new object sync property
+    if (! object.contains("version") || object.value("version").toInt() < (int) VERSION) {
+        _fixSync(mDefaultSceneManager->scenes());
+        _fixSync(mPauseSceneManager->scenes());
+    }
+
+}
+
+//Temporary function that will fix new sync property in old projects
+void Belle::_fixSync(const QList<Scene*>& scenes)
+{
+    QList<Object*> objects;
+    for(int i=0; i < scenes.size(); i++) {
+        objects = scenes[i]->objects();
+        for(int j=0; j < objects.size(); j++) {
+            objects[j]->setSync(false);
+        }
+    }
 }
 
 void Belle::importScenes(const QVariantList& scenes, SceneManager* sceneManager)
@@ -967,6 +985,7 @@ QVariantMap Belle::createGameFile() const
     jsonFile.insert("font", font);
     jsonFile.remove("fontSize");
     jsonFile.remove("fontFamily");
+    jsonFile.insert("version", VERSION);
 
     QVariantMap resourcesData = ResourceManager::instance()->exportResources();
     jsonFile.insert("resources", resourcesData);
