@@ -125,6 +125,9 @@ Action.prototype.reload = function ()
     this.elapsedTime = 0;
     if (this.wait)
       this.wait.reload();
+
+    this.object = null;
+    this.object = this.getObject();
 }
 
 Action.prototype.reset = function ()

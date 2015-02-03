@@ -118,19 +118,16 @@ Scene.prototype.loadActions = function(data)
 
 Scene.prototype.loadObjects = function(data) 
 {
+  this.objects = [];
 
-  if (this.objects.length) {
-    this.reloadObjects(data);
-    return;
-  }
   //instanciate objects
   if (data.objects && data.objects.length > 0) {
-      for(var j=0; j !== data.objects.length; j++) {
-	  var object = data.objects[j];
-	  obj = this.getGame().createObject(object, this);
-	  if (obj) 
-	      this.objects.push(obj);
-      }
+    for(var j=0; j !== data.objects.length; j++) {
+      var object = data.objects[j];
+      obj = this.getGame().createObject(object, this);
+      if (obj)
+        this.objects.push(obj);
+    }
   }
 }
 
