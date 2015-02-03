@@ -231,6 +231,9 @@ void ObjectEditorWidget::updateData(Object *currObj)
             mClonesComboBox->addItem(name);
         }
     }
+    else {
+        this->setFilters(QStringList() << "Resource" << "Clones");
+    }
 
     ////mChooseObjectComboBox->clear();
     mObjectsHierarchy.clear();
