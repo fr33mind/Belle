@@ -85,7 +85,7 @@ QVariantMap ShowMenu::toJsonObject()
     QVariantMap object = Action::toJsonObject();
 
     if (sceneObject())
-        object.insert("object", sceneObject()->toJsonObject());
+        object.insert("object", sceneObject()->toJsonObject(false));
 
     return object;
 }
