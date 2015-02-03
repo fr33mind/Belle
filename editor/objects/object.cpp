@@ -682,7 +682,6 @@ QVariantMap Object::toJsonObject(bool internal)
     if (jsonActions.size() || internal)
         object.insert("onMouseMove", jsonActions);
 
-
     object.insert("visible", mVisible);
     if (! mPadding.isEmpty())
         object.insert("padding", mPadding.toJsonObject());
@@ -705,13 +704,13 @@ void Object::filterResourceData(QVariantMap& objectData)
         return;
 
     objectData.insert("resource", mResource->objectName());
-    QVariantMap resourceData = mResource->toJsonObject();
+    QVariantMap resourceData = mResource->toJsonObject(false);
+
     QStringList keys = objectData.keys();
     foreach(const QString& key, keys) {
         if (resourceData.contains(key) && resourceData.value(key) == objectData.value(key))
             objectData.remove(key);
     }
-
 }
 
 void Object::resize(int pointIndex, int x, int y)
@@ -1026,8 +1025,10 @@ void Object::setResource(Object* resource)
     if (! resource || mResource == resource)
         return;
 
-    if (mResource)
+    if (mResource) {
         mResource->disconnect(this);
+        mResource->removeClone(this);
+    }
 
     mResource = resource;
     mResource->addClone(this);
@@ -1117,10 +1118,6 @@ void Object::_load(const QVariantMap &data)
         return;
 
     blockNotifications(true);
-
-    if (data.contains("resource") && data.value("resource").type() == QVariant::String) {
-        this->setResource(ResourceManager::instance()->resource(data.value("resource").toString()));
-    }
 
     if (data.contains("name") && data.value("name").type() == QVariant::String)
         setObjectName(data.value("name").toString());
@@ -1255,6 +1252,7 @@ void Object::load(const QVariantMap &data)
     _data.remove("y");
     _data.remove("name");
     _data.remove("visible");
+    _data.remove("sync");
     this->_load(_data);
 }
 
