@@ -440,8 +440,14 @@ GameView.prototype._render = function () {
                 if (objects[j].redraw || i == j)
                     continue;
 
-                if (obj.overlaped(objects[j]))
+                if (obj.isPainted()) {
+                  if (obj.overlaped(objects[j]))
                     objects[j].redraw = true;
+                }
+                else {
+                  if (obj.overlaps(objects[j]))
+                    objects[j].redraw = true;
+                }
             }
           }
       }

@@ -316,6 +316,11 @@
     this.redraw = true;
   }
 
+  Frame.prototype.isPainted = function()
+  {
+    return (this.paintX !== false || this.paintY !== false);
+  }
+
   belle.Frame = Frame;
 
 }(belle));
