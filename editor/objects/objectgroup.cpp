@@ -341,6 +341,7 @@ Object* ObjectGroup::objectAt(qreal x, qreal y)
 
 void ObjectGroup::setX(int x)
 {
+    //FIXME: Only works for vertical layouts.
     for(int i=mObjects.size()-1; i >=0; --i) {
         mObjects[i]->setX(x);
     }
@@ -350,10 +351,9 @@ void ObjectGroup::setX(int x)
 
 void ObjectGroup::setY(int y)
 {
-    int h = 0;
+    int move = y - this->y();
     for(int i=0; i < mObjects.size(); i++) {
-        mObjects[i]->setY(y+h);
-        h += mObjects[i]->height();
+        mObjects[i]->setY(mObjects[i]->y()+move);
     }
 
     Object::setY(y);
