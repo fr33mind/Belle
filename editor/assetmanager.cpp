@@ -211,9 +211,9 @@ void AssetManager::load(const QDir & dir)
         return;
 
     QVariantMap subdirs = data.value("subdirs").toMap();
-    mTypeToPath[Asset::Image] = subdirs.value("image", "").toString();
-    mTypeToPath[Asset::Audio] = subdirs.value("audio", "").toString();
-    mTypeToPath[Asset::Font] = subdirs.value("font", "").toString();
+    mTypeToPath[Asset::Image] = subdirs.value("images", "").toString();
+    mTypeToPath[Asset::Audio] = subdirs.value("sounds", "").toString();
+    mTypeToPath[Asset::Font] = subdirs.value("fonts", "").toString();
 
     QVariantMap item;
 
@@ -223,7 +223,7 @@ void AssetManager::load(const QDir & dir)
         loadAsset(item.value("name", "").toString(), Asset::Image);
     }
 
-    QVariantList audioData = data.value("audios").toList();
+    QVariantList audioData = data.value("sounds").toList();
     for(int i=0; i < audioData.size(); i++) {
         item = audioData[i].toMap();
         loadAsset(item.value("name", "").toString(), Asset::Audio);
@@ -249,9 +249,10 @@ void AssetManager::save(const QDir & dir)
         return;
 
     QVariantMap subdirs;
-    subdirs.insert("image", mTypeToPath.value(Asset::Image));
-    subdirs.insert("audio", mTypeToPath.value(Asset::Audio));
-    subdirs.insert("font", mTypeToPath.value(Asset::Font));
+    subdirs.insert("images", mTypeToPath.value(Asset::Image));
+    subdirs.insert("sounds", mTypeToPath.value(Asset::Audio));
+    subdirs.insert("fonts", mTypeToPath.value(Asset::Font));
+    data.insert("subdirs", subdirs);
 
     QList<Asset*> images = this->assets(Asset::Image);
     QVariantList imagesData;
@@ -274,10 +275,9 @@ void AssetManager::save(const QDir & dir)
         fonts[i]->save(dir);
     }
 
-    data.insert("subdirs", subdirs);
-    data.insert("image", imagesData);
-    data.insert("audio", soundsData);
-    data.insert("font", fontsData);
+    data.insert("images", imagesData);
+    data.insert("sounds", soundsData);
+    data.insert("fonts", fontsData);
 
     file.write("game.assets = ");
     file.write(QtJson::Json::serialize(data));
@@ -292,10 +292,6 @@ void AssetManager::saveFontFaces(const QList<Asset*>& fonts, const QDir& dir)
         return;
 
     QString fontfaces(FONTFACES_FILE);
-    QString fontPath = mTypeToPath.value(Asset::Font, "") + fontfaces;
-    if (! fontPath.isEmpty())
-        fontfaces = QDir::cleanPath(fontPath + QDir::separator() + fontfaces);
-
     QFile file(dir.absoluteFilePath(fontfaces));
     if (! file.open(QFile::WriteOnly | QFile::Text))
         return;

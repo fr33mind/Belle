@@ -36,11 +36,11 @@
 
   AssetManager.prototype.load = function (data)
   {
-    this.subdirs = {
-      "image" : "",
-      "audio" : "",
-      "video" : "",
-      "font" : ""
+    this.typeToPath = {
+      "Image" : "",
+      "Audio" : "",
+      "Video" : "",
+      "Font" : ""
     };
 
     if (! data) {
@@ -48,16 +48,20 @@
       return;
     }
 
-    this.subdirs = data["subdirs"];
-    var images = data["image"];
-    var audio = data["audio"];
+    var subdirs = data["subdirs"];
+    this.typeToPath["Image"] = subdirs["images"];
+    this.typeToPath["Audio"] = subdirs["sounds"];
+    this.typeToPath["Font"] = subdirs["fonts"];
+
+    var images = data["images"] || [];
+    var sounds = data["sounds"] || [];
 
     for(var i=0; i < images.length; i++) {
       this.loadAsset(images[i], "Image");
     }
 
-    for(var i=0; i < audio.length; i++) {
-      this.loadAsset(audio[i], "Audio");
+    for(var i=0; i < sounds.length; i++) {
+      this.loadAsset(sounds[i], "Audio");
     }
   }
 
@@ -211,7 +215,7 @@
     if (! type)
       type = guessType(name);
     type = type.toLowerCase();
-    var path = this.subdirs[type] ? this.subdirs[type] : "";
+    var path = this.typeToPath[type] ? this.typeToPath[type] : "";
     path = path.length ? path + "/" : path;
     return path + name;
   }
