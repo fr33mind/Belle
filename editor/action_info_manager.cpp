@@ -52,7 +52,6 @@ void ActionInfoManager::initEditorWidgets()
     Action::setActionEditorWidget(new ActionEditorWidget);
     Show::setShowEditorWidget(new ShowEditorWidget());
     Hide::setHideEditorWidget(new HideEditorWidget());
-    //ChangeVisibility::setChangeVisibilityEditorWidget(new ChangeVisibilityEditorWidget(ResourceManager::instance()));
     Wait::setWaitEditorWidget(new WaitEditorWidget());
     Dialogue::setDialogueEditorWidget(new DialogueEditorWidget());
     Slide::setSlideEditorWidget(new SlideEditorWidget());

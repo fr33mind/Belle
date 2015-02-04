@@ -31,7 +31,6 @@ class SlideEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    ResourceManager * mResources;
     QDoubleSpinBox*  mDurationSpinBox;
     QComboBox* mObjectChooser;
     QComboBox* mDestXChooser;

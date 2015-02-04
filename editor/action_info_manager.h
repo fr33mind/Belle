@@ -25,7 +25,6 @@
 #include "interaction.h"
 
 class ActionEditorWidget;
-class ResourceManager;
 class Action;
 
 
