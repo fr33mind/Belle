@@ -49,7 +49,7 @@
 
   function AnimatedImage(frames, loadCallback)
   {
-    Object.call(this);
+    CoreObject.call(this);
 
     this.frames = [];
     this._interval = null;
