@@ -17,11 +17,14 @@
 (function(belle){
 
   var GameObject = belle.GameObject,
-      CoreObject = belle.core.Object;
+      CoreObject = belle.core.Object,
+      Asset = belle.core.Asset;
 
-  function Image(src, loadCallback)
+  /*** Image ***/
+
+  function Image(path, loadCallback)
   {
-    CoreObject.call(this);
+    Asset.call(this, path);
 
     this._image = new window.Image();
     if (loadCallback && typeof loadCallback == "function") {
@@ -30,10 +33,10 @@
         loadCallback.call(self);
       };
     }
-    this._image.src = src;
+    this._image.src = path;
   }
 
-  belle.extend(Image, CoreObject);
+  belle.extend(Image, Asset);
 
   Image.prototype.isAnimated = function()
   {
@@ -47,9 +50,9 @@
 
   /*** AnimatedImage ***/
 
-  function AnimatedImage(frames, loadCallback)
+  function AnimatedImage(path, frames, loadCallback)
   {
-    CoreObject.call(this);
+    Asset.call(this, path);
 
     this.frames = [];
     this._interval = null;
