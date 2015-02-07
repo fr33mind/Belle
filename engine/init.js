@@ -44,7 +44,7 @@ belle.serialize = function(obj)
   else if (obj instanceof Array) {
     prop = [];
     for(var i=0; i < obj.length; i++)
-      prop[i] = belle.serialize(obj[i]);
+      prop.push(belle.serialize(obj[i]));
   }
   else if (typeof obj == "object") {
     prop = {};
