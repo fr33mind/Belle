@@ -20,19 +20,18 @@
   var AudioFormats = ["mp3", "aac", "ogg", "oga", "webm", "wav", "flac", "m4a"];
   var VideoFormats = ["mp4", "m4v", "webm", "ogv"];
   var FontFormats = ["ttf", "otf", "eot", "woff"];
-  var Object = belle.core.Objet,
-      Image = belle.graphics.Image;
+  var CoreObject = belle.core.Object;
 
   function AssetManager(data)
   {
-    belle.core.Object.call(this);
+    CoreObject.call(this);
     this.loadedAssets = [];
     this.assets = {};
     this.assetsRefCount = {};
     this.load(data);
   }
 
-  belle.extend(AssetManager, belle.core.Object);
+  belle.extend(AssetManager, CoreObject);
 
   AssetManager.prototype.load = function (data)
   {
@@ -57,65 +56,68 @@
     var sounds = data["sounds"] || [];
 
     for(var i=0; i < images.length; i++) {
-      this.loadAsset(images[i], "Image");
+      this._loadAsset(images[i], "Image");
     }
 
     for(var i=0; i < sounds.length; i++) {
-      this.loadAsset(sounds[i], "Audio");
+      this._loadAsset(sounds[i], "Audio");
     }
   }
 
-  AssetManager.prototype.loadAsset = function(data, type)
+  AssetManager.prototype.loadAsset = function(name, type)
   {
-    var data = typeof data == "string" ? {name: data} : data,
-        name = data.name,
-        filepath = "",
+    var data = {
+          name: name,
+          path: name,
+        },
         asset = null;
 
-    filepath = this.getFilePath(name, type);
+    if (typeof type == "string")
+      data.path = this.getFilePath(name, type);
 
-    if (filepath in this.assets) {
-       this.assetsRefCount[filepath] += 1;
-       return this.assets[filepath];
+    if (data.path in this.assets) {
+       this.assetsRefCount[data.path] += 1;
+       return this.assets[data.path];
     }
 
-    data.filepath = filepath;
-    asset = this._loadAsset(data, type);
-    this.assets[filepath] = asset;
-    this.assetsRefCount[filepath] = 1;
-    return asset;
+    return this._loadAsset(data, type);
   }
 
   AssetManager.prototype._loadAsset = function(data, type)
   {
-    var self = this;
-    if (! type)
-      type = "";
-    type = type.toLowerCase();
+    var self = this,
+        asset = null,
+        path = data.path ? data.path : data.name ? data.name : "";
+
+    type = typeof type == "string" ?  type.toLowerCase() : "";
 
     if (type == "image") {
       if ("frames" in data) {
-        return new belle.graphics.AnimatedImage(data.frames, function(){
+        asset = new belle.graphics.AnimatedImage(path, data.frames, function(){
                                                       self.assetLoaded(this);
                                                   });
       }
-      else if ("name" in data) {
-        return new belle.graphics.Image(data.filepath, function(){
+      else if (path) {
+        asset = new belle.graphics.Image(path, function(){
                                       self.assetLoaded(this);
                                     });
       }
     }
     else if (type == "audio" || type == "sound" || type == "music") {
-      var sound = new buzz.sound(data.filepath);
-      sound.bind('canplay', function() {
+      asset = new buzz.sound(path);
+      asset.bind('canplay', function() {
         self.assetLoaded(this);
       });
       if (! buzz.isSupported())
-        this.assetLoaded(sound);
-      return sound;
+        this.assetLoaded(asset);
     }
 
-    return null;
+    if (asset) {
+      this.assets[path] = asset;
+      this.assetsRefCount[path] = 1;
+    }
+
+    return asset;
   }
 
   AssetManager.prototype.releaseAsset = function(asset)
