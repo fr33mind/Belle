@@ -99,10 +99,7 @@ Scene.prototype.reloadActions = function()
 
 Scene.prototype.loadActions = function(data) 
 {
-  if (this.actions.length) {
-    this.reloadActions();
-    return;
-  }
+  this.actions = [];
   
   //instanciate actions
   if (data.actions && data.actions.length > 0) {
@@ -284,19 +281,8 @@ Scene.prototype.scale = function(widthFactor, heightFactor)
 
 Scene.prototype.serialize = function()
 {
-  var data = {};
-  var serialize = belle.serialize;
-  
-  data["name"] = this.name;
-  data["objects"] = serialize(this.objects);
-  if (this.backgroundImage)
-    data["backgroundImage"] = serialize(this.background.image);
-  if (this.backgroundColor)
-    data["backgroundColor"] = serialize(this.background.color);
-  data["width"] = this.width;
-  data["height"] = this.height;
-  data["index"] = this.indexOf(this.getCurrentAction());
-  
+  var data = Frame.prototype.serialize.call(this);
+  data["objects"] = belle.serialize(this.objects);
   return data;
 }
 

@@ -87,7 +87,10 @@
 
   GameObject.prototype.serialize = function()
   {
-    return {};
+    var data = {}
+    data["name"] = this.name;
+    data["type"] = this.type;
+    return data;
   }
 
   belle.GameObject = GameObject;

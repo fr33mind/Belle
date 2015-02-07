@@ -18,6 +18,7 @@
 
 var Color = belle.graphics.Color,
   Frame = belle.Frame,
+  GameObject = belle.GameObject,
   GraphicImage = belle.graphics.Image,
   AnimatedImage = belle.graphics.AnimatedImage,
   objects = belle.objects;
@@ -394,23 +395,12 @@ Object.prototype.initElement = function()
 
 Object.prototype.serialize = function()
 {
-  var data = {};
-  var serialize = belle.serialize;
-
-  data["name"] = this.name;
-  data["x"] = this.x;
-  data["y"] = this.y;
-  data["width"] = this.width;
-  data["height"] = this.height;
-  if (this.backgroundImage)
-    data["backgroundImage"] = serialize(this.background.image);
-
-  data["backgroundColor"] = serialize(this.background.color);
+  var data = Frame.prototype.serialize.call(this);
   data["cornerRadius"] = this.cornerRadius;
   if (this.borderWidth)
     data["borderWidth"] = this.borderWidth;
   if (this.borderColor)
-    data["borderColor"] = serialize(this.borderColor);
+    data["borderColor"] = belle.serialize(this.borderColor);
   data["opacity"] = this.opacity;
   data["visible"] = this.visible;
 
@@ -424,14 +414,24 @@ function Image (data, parent, initElement)
     this.interval = null;
     this.currentFrame = 0;
     this.image = null;
-    if ("image" in data)
-        this.setImage(data["image"]);
 
     if(initElement || initElement === undefined)
       this.initElement();
+
+    this.load(data);
 }
 
 belle.extend(Image, Object);
+
+Image.prototype.load = function(data)
+{
+  Object.prototype.load.call(this, data);
+
+  this.image = null;
+
+  if ("image" in data)
+    this.setImage(data["image"]);
+}
 
 Image.prototype.setImage = function(img)
 {
@@ -448,6 +448,7 @@ Image.prototype.setImage = function(img)
     if (! this.image || this.image.img.src != img)
       this.image = assetManager.loadAsset(img, "Image");
     this._bindImage(this.image);
+        console.log("setImage", this.image);
   }
   else if (belle.isInstance(img, GraphicImage)) {
     this.image = img;
@@ -496,6 +497,15 @@ Image.prototype.setVisible = function(visible)
     else
       this.image.stop();
   }
+}
+
+Image.prototype.serialize = function()
+{
+  var data = Object.prototype.serialize.call(this);
+  if (this.image)
+    data["image"] = this.image.path;
+
+  return data;
 }
 
 /*********** CHARACTER ***********/
@@ -780,6 +790,7 @@ TextBox.prototype.serialize = function()
     data["text"] = this.text;
     if (this.textColor)
       data["textColor"] = this.textColor.serialize();
+    data["textAlignment"] = this.textAlignment.join("|");
 
     return data;
 }
@@ -829,15 +840,17 @@ ObjectGroup.prototype.load = function(data) {
             objects = data["objects"],
             game = this.getGame();
 
+        this.objects =  [];
+
         for (var i=0; i !== objects.length; i++) {
-            obj = this.getObject(objects[i].name);
+            /*obj = this.getObject(objects[i].name);
             if (obj) {
               obj.load(objects[i]);
               //fix x,y coords
               obj.setX(obj.x - this.x);
               obj.setY(obj.y - this.y);
               continue;
-            }
+            }*/
 
             obj = game.createObject(objects[i], this);
 
@@ -848,11 +861,13 @@ ObjectGroup.prototype.load = function(data) {
             var left = parseInt(this.element.style.left);
             var elemLeft = parseInt(obj.element.style.left);
             //TODO: position should be relative to parent or global?
-            obj.setX(obj.x - this.x);
+            //obj.setX(obj.x - this.x);
+
+
 
             var top = parseInt(this.element.style.top);
             var elemTop = parseInt(obj.element.style.top);
-            obj.setY(obj.y - this.y);
+            //obj.setY(obj.y - this.y);
 
             //if (belle.display.DOM) {
                 obj.element.style.display = "block";

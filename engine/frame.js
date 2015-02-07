@@ -120,7 +120,11 @@
     }
 
     if (belle.isNumber(x)) {
-      this.x = parseInt(x);
+      x = parseInt(x);
+      //FIXME: Use relative positions, not global
+      if (this.parent && belle.isNumber(this.parent.x))
+        x -= this.parent.x;
+      this.x = x;
       this.update();
     }
   }
@@ -132,7 +136,11 @@
     }
 
     if (belle.isNumber(y)) {
-      this.y = parseInt(y);
+      y = parseInt(y);
+      //FIXME: Use relative positions, not global
+      if (this.parent && belle.isNumber(this.parent.y))
+        y -= this.parent.y;
+      this.y = y;
       this.update();
     }
   }
@@ -319,6 +327,21 @@
   Frame.prototype.isPainted = function()
   {
     return (this.paintX !== false || this.paintY !== false);
+  }
+
+  Frame.prototype.serialize = function()
+  {
+    var data = GameObject.prototype.serialize.call(this);
+
+    data["x"] = this.globalX();
+    data["y"] = this.globalY();
+    if (this.background.image)
+      data["backgroundImage"] = this.background.image.getPath();
+    if (this.background.color)
+      data["backgroundColor"] = belle.serialize(this.background.color);
+    data["width"] = this.width;
+    data["height"] = this.height;
+    return data;
   }
 
   belle.Frame = Frame;
