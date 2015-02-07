@@ -121,7 +121,34 @@
     return Math.sqrt(Math.pow(point.x-this.x, 2) + Math.pow(point.y-this.y, 2));
   }
 
+  /*** Asset ***/
+
+  function Asset(path)
+  {
+    Object.call(this);
+
+    this.path = path;
+    this.name = "";
+    if (this.path) {
+      var parts = path.split("/");
+      this.name = parts[parts.length-1];
+    }
+  }
+
+  belle.extend(Asset, Object);
+
+  Asset.prototype.getPath = function()
+  {
+    return this.path;
+  }
+
+  Asset.prototype.getName = function()
+  {
+    return this.name;
+  }
+
   belle.core.Object = Object;
   belle.core.Point = Point;
+  belle.core.Asset = Asset;
 
 }(belle));
