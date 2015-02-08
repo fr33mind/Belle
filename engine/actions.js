@@ -1238,7 +1238,7 @@ ShowMenu.prototype.execute = function()
     var object = this.getObject();
     if (object && scene) {
       object.setVisible(true);
-      scene.addObject(object);
+      scene.addObject(object, true);
     }
 }
 
