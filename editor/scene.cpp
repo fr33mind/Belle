@@ -369,7 +369,7 @@ void Scene::setTemporaryBackgroundImage(ImageFile* image)
         }
 
         if (image && image->isAnimated()) {
-            AnimatedImage* anim = dynamic_cast<AnimatedImage*>(mTemporaryBackgroundImage);
+            AnimatedImage* anim = dynamic_cast<AnimatedImage*>(image);
             connect(anim->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
             image->movie()->setScaledSize(Scene::size());
             anim->movie()->start();

@@ -94,7 +94,9 @@ ImageFile* ChangeBackground::background() const
 
 QString ChangeBackground::backgroundPath()
 {
-    return mBackgroundImage->path();
+    if (mBackgroundImage)
+        return mBackgroundImage->path();
+    return "";
 }
 
 void ChangeBackground::setBackgroundColor(const QColor& color)
