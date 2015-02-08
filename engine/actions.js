@@ -1295,16 +1295,10 @@ GetUserInput.prototype.execute = function()
       var value = prompt(self.message, self.defaultValue);
       if (! value)
         value = self.defaultValue;
-      game.addVariable(self.variable, value);
+      self.getGame().addVariable(self.variable, value);
     
       self.setFinished(true);
     }, 1);
-}
-
-GetUserInput.prototype.reset = function()
-{
-    Action.prototype.reset.call(this);
-    this.value = null;
 }
 
 /************* Change Game Variable *****************/
