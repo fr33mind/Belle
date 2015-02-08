@@ -112,7 +112,7 @@
     return -1;
   }
 
-  GameModel.prototype.setScene = function(scene) {
+  GameModel.prototype.setScene = function(scene, reload) {
     var scene = this.getScene(scene),
         currScene = this.getScene(),
         self = this;
@@ -124,7 +124,8 @@
         currScene.hide();
       }
 
-      scene.reload();
+      if (reload || typeof reload == "undefined")
+        scene.reload();
       scene.bind("finished", this, function(){
         this.nextScene();
       }, true);
@@ -235,14 +236,14 @@
       this.action.setFinished(true);
     }
 
-    var nextAction = this.getNextAction();
-    if (! nextAction) {
+    this.action = this.getNextAction();
+    this._nextAction = null;
+
+    if (! this.action) {
       this.nextScene();
       return;
     }
 
-    this._nextAction = null;
-    this.action = nextAction;
     this.action.bind("finished", this, function() {
       this.nextAction();
     }, true);
@@ -293,10 +294,32 @@
     this.resume();
   }
 
-  GameModel.prototype.serialize = function() {
-    var data = {};
-    data.scene = this.scene.serialize();
+  GameModel.prototype.getState = function() {
+    var data = {
+      scene: null,
+      index: -1
+    };
+
+    if (this.scene) {
+      data.scene = this.scene.serialize();
+      data.index = this.scene.indexOf(this.action);
+    }
+
     return data;
+  }
+
+  GameModel.prototype.loadState = function(state) {
+    var scene = this.getScene(state.scene.name);
+    if (scene) {
+      var data = $.extend({}, scene.data, state.scene);
+      scene.load(data);
+      this.action = null;
+      this._nextAction = scene.getAction(state.index);
+      this.setScene(scene, false);
+      return true;
+    }
+
+    return false;
   }
 
   belle.GameModel = GameModel;

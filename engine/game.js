@@ -217,9 +217,9 @@
   }
 
   Game.prototype.addVariable = function (variable, value) {
-    if (this.getVariableValue(variable) != value) {
+    if (this.variables[variable] != value) {
       this.variables[variable] = value;
-      this.triggerEvent("variableChanged");
+      this.trigger("variableChanged");
     }
   }
 
@@ -270,8 +270,9 @@
     return text;
   }
 
-  Game.prototype.serialize = function() {
-    var data = this.mainModel.serialize();
+  Game.prototype.getState = function()
+  {
+    var data = this.mainModel.getState();
     data.variables = this.variables;
     var sounds = this.soundManager.getPlayingSounds();
     data.sounds = [];
@@ -286,6 +287,23 @@
     }
 
     return data;
+  }
+
+  Game.prototype.loadState = function(state)
+  {
+    if (!state || ! state.scene || ! state.scene.name) {
+      return false;
+    }
+
+    this.variables = state.variables || {};
+    if (state.sounds) {
+      var sounds = state.sounds;
+      for(var i=0; i < sounds.length; i++)
+        this.soundManager.play(sounds[i].src, "sound", sounds[i]);
+    }
+    this.mainModel.loadState(state);
+
+    return true;
   }
 
   Game.prototype.saveSlot = function(id) {
@@ -311,7 +329,7 @@
         id = i;
     }
 
-    var entry = this.mainModel.serialize();
+    var entry = this.getState();
     entry.date = belle.utils.getSaveDate();
     entry.name = name;
 
@@ -325,28 +343,6 @@
     $.jStorage.set(title, gameData, {TTL: 0});
 
     return {name: entry.name, date: entry.date};
-  }
-
-  Game.prototype._loadSlot = function(data) {
-    if (!data || ! data.scene || ! data.scene.name) {
-      alert("Couldn't load game data");
-      return false;
-    }
-
-    var scene = this.mainModel.getScene(data.scene.name);
-    if (scene) {
-      scene.load(data.scene);
-      this.mainModel.setScene(scene);
-    }
-
-    this.variables = data.variables || {};
-    if (data.sounds) {
-      var sounds = data.sounds;
-      for(var i=0; i < sounds.length; i++)
-        this.soundManager.play(sounds[i].src, "sound", sounds[i]);
-    }
-
-    return true;
   }
 
   Game.prototype.loadSlot = function(id) {
@@ -375,7 +371,7 @@
     }
 
     if (entry) {
-      ok = this._loadSlot(entry);
+      ok = this.loadState(entry);
       if (ok) {
         this.mainModel.resume();
       }
