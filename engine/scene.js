@@ -168,9 +168,11 @@ Scene.prototype.isFinished = function() {
   return this.finished;
 }
 
-Scene.prototype.addObject = function(object) {
+Scene.prototype.addObject = function(object, temp) {
   if (object.visible)
     object.redraw = true;
+  if (! temp)
+    object.parent = this;
   this.objects.push(object);
   this.trigger("objectAdded", {object: object});
 }
@@ -282,7 +284,13 @@ Scene.prototype.scale = function(widthFactor, heightFactor)
 Scene.prototype.serialize = function()
 {
   var data = Frame.prototype.serialize.call(this);
-  data["objects"] = belle.serialize(this.objects);
+  var objects = [];
+  //only serialize objects belonging to the scene (not temporary)
+  for(var i=0; i < this.objects.length; i++) {
+    if (this.objects[i].parent == this)
+      objects.push(this.objects[i]);
+  }
+  data["objects"] = belle.serialize(objects);
   return data;
 }
 
