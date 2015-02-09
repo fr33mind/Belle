@@ -18,6 +18,11 @@ Background::~Background()
         AssetManager::instance()->releaseAsset(mImage);
 }
 
+qreal Background::opacityF() const
+{
+    return mOpacity / 255.0;
+}
+
 int Background::opacity() const
 {
     return mOpacity;
@@ -36,11 +41,8 @@ QColor Background::color() const
 
 void Background::setColor(const QColor& color)
 {
-    if (color.isValid()) {
-        mColor = color;
-        //for backwards compatibility
-        setOpacity(color.alpha());
-    }
+    mColor = color;
+    mColor.setAlpha(mOpacity);
 }
 
 ImageTransform::TransformType Background::positioning() const
@@ -84,7 +86,11 @@ void Background::paint(QPainter &p, const QRect &rect, int radius, float opacity
 {
     p.save();
 
-    p.setOpacity(mColor.alphaF()*opacity);
+    if (mImage || mColor.isValid())
+        p.setOpacity(opacityF()*opacity);
+    else
+        p.setOpacity(0.0);
+
     p.setPen(Qt::NoPen); //don't add border
     if (mColor.isValid())
         p.setBrush(mColor);

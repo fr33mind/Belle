@@ -25,6 +25,7 @@ public:
     void setImage(ImageFile*);
 
     int opacity() const;
+    qreal opacityF() const;
     void setOpacity(int);
 
     QColor color() const;

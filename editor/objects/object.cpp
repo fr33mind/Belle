@@ -228,7 +228,7 @@ QColor Object::backgroundColor() const
 void Object::setBackgroundColor(const QColor & color)
 {
     mBackground.setColor(color);
-    notify("backgroundColor", Utils::colorToList(color), Utils::colorToList(mBackground.color()));
+    notify("backgroundColor", Utils::colorToList(mBackground.color()));
 }
 
 int Object::backgroundOpacity() const
