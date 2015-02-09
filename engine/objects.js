@@ -214,18 +214,18 @@ Object.prototype.paint = function(context)
     if (! this.visible)
       return;
 
-    var x = this.globalX();
-    var y = this.globalY();
+    var x = this.globalX(),
+        y = this.globalY(),
+        border = this.hasBorder();
 
     context.globalAlpha = this.getOpacityF();
 
-    if (this.borderWidth > 0) {
+    if (border) {
         context.lineWidth = this.borderWidth;
-        context.strokeStyle = this.borderColor ? this.borderColor.toString() : 'black';
+        context.strokeStyle = this.borderColor.toString();
     }
 
     if (this.roundedRect) {
-
         var width = this.width;
         var height = this.height;
         var xradius = this.cornerRadius;
@@ -254,14 +254,16 @@ Object.prototype.paint = function(context)
         context.arcTo(x, y, x+xradius, y, xradius);
 
         context.closePath();
-
+        if (border)
+          context.stroke();
         context.clip();
     }
-    else if (this.borderWidth > 0) {
+    else {
         context.beginPath();
         context.rect(x, y, this.width, this.height);
-        context.stroke();
         context.closePath();
+        if (border)
+          context.stroke();
     }
 
     //draw background
@@ -271,6 +273,11 @@ Object.prototype.paint = function(context)
     this.paintY = this.globalOuterY();
     this.paintWidth = this.outerWidth();
     this.paintHeight = this.outerHeight();
+}
+
+Object.prototype.hasBorder = function()
+{
+  return (this.borderWidth > 0 && this.borderColor);
 }
 
 Object.prototype.mouseLeaveEvent = function(ev)
@@ -448,7 +455,6 @@ Image.prototype.setImage = function(img)
     if (! this.image || this.image.img.src != img)
       this.image = assetManager.loadAsset(img, "Image");
     this._bindImage(this.image);
-        console.log("setImage", this.image);
   }
   else if (belle.isInstance(img, GraphicImage)) {
     this.image = img;
