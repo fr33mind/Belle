@@ -28,7 +28,7 @@ namespace Utils
 
 inline QColor listToColor(const QVariantList& color)
 {
-    if (color.size() != 4)
+    if (color.size() < 3)
         return QColor();
 
     bool ok = true;
@@ -45,16 +45,20 @@ inline QColor listToColor(const QVariantList& color)
     if (! ok)
         return QColor();
 
-    int alpha = color.at(3).toInt(&ok);
-    if (! ok)
-        return QColor(red, green, blue, 255);
+    if (color.size() == 4) {
+        int alpha = color.at(3).toInt(&ok);
+        if (ok)
+            return QColor(red, green, blue, alpha);
+    }
 
-    return QColor(red, green, blue, alpha);
+    return QColor(red, green, blue, 255);
 }
 
 inline QVariantList colorToList(const QColor& color)
 {
     QVariantList _color;
+    if (! color.isValid())
+        return _color;
     _color << color.red() << color.green() << color.blue()
              << color.alpha();
     return _color;
@@ -62,10 +66,14 @@ inline QVariantList colorToList(const QColor& color)
 
 inline QString colorToString(const QColor& color)
 {
-    return QString("(%1, %2, %3, %4)").arg(color.red())
+    if (color.isValid()) {
+        return QString("(%1, %2, %3, %4)").arg(color.red())
                                         .arg(color.green())
                                         .arg(color.blue())
                                         .arg(color.alpha());
+    }
+
+    return "()";
 }
 
 inline QString incrementLastNumber(const QString& text)
