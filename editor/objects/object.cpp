@@ -1130,7 +1130,7 @@ void Object::_load(const QVariantMap &data)
         setBackgroundColor(color);
     }
 
-    if (data.contains("backgroundOpacity") && data.value("backgroundOpacity").type() == QVariant::Int) {
+    if (data.contains("backgroundOpacity") && data.value("backgroundOpacity").canConvert(QVariant::Int)) {
         setBackgroundOpacity(data.value("backgroundOpacity").toInt());
     }
 
