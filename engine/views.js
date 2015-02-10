@@ -249,7 +249,7 @@ function GameView(container, parent)
     this.bgcontext = this.bgcanvas[0].getContext('2d');
     this.context = this.canvas[0].getContext('2d');
     this.pressedObject = this.hoveredObject = null;
-    this._fullredraw = false;
+    this._cleared = false;
 }
 
 belle.extend(GameView, AbstractView);
@@ -262,12 +262,10 @@ GameView.prototype.setModel = function(model)
 
   this.model.bind("sceneChanged", this, function() {
     this.clear();
-    this._fullredraw = true;
   });
 
   this.model.bind("objectRemoved", this, function(data) {
     this.clear();
-    this._fullredraw = true;
   });
 
   this.model.bind("resumed", this, function(data) {
@@ -280,6 +278,7 @@ GameView.prototype.clear = function(all)
   if (all)
     this.bgcontext.clearRect(0, 0, this.bgcanvas.attr("width"), this.bgcanvas.attr("height"));
   this.context.clearRect(0, 0, this.canvas.attr("width"), this.canvas.attr("height"));
+  this._cleared = true;
 }
 
 GameView.prototype.setWidth = function(width)
@@ -413,7 +412,7 @@ GameView.prototype._render = function () {
     var i, j, redraw=false;
 
     this.context.font = this.model.properties.font;
-    if (this._fullredraw) {
+    if (this._cleared) {
       scene.paint(this.bgcontext);
 
       for(j=0; j != objects.length; j++) {
@@ -424,7 +423,7 @@ GameView.prototype._render = function () {
           obj.redraw = false;
           this.context.restore();
       }
-      this._fullredraw = false;
+      this._cleared = false;
     }
     else {
       if (scene.redraw) {

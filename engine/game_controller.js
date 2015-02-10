@@ -151,6 +151,14 @@
     $(window).resize(function(ev){
       controller.view.resize(ev);
     });
+
+    $(window).bind('load', function(e){
+      if (controller.view) {
+        //force complete redraw
+        controller.view.clear();
+      }
+    });
+
   }
 
   GameController.prototype.pauseTriggered = function()
