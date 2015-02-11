@@ -65,7 +65,7 @@ void Object::init(const QString& name)
     mKeepAspectRatio = false;
     mAspectRatio = 1;
     mScaledBackgroundImage = 0;
-    mSync = true;
+    mSync = false;
     mEventToActions.insert(Interaction::MouseMove, QList<Action*>());
     mEventToActions.insert(Interaction::MousePress, QList<Action*>());
     mEventToActions.insert(Interaction::MouseRelease, QList<Action*>());
@@ -1048,6 +1048,8 @@ void Object::addClone(Object* object)
         return;
 
     mClones.append(object);
+    //if this object is a resource with clones, set sync active
+    mSync = true;
     connect(object, SIGNAL(destroyed(Object*)), this, SLOT(cloneDestroyed(Object*)));
     if (object->isSynced())
         this->addObserver(object);
