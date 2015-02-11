@@ -232,17 +232,17 @@ inline QString font(int fontSize, const QString& fontFamily) {
     return QString("%1px %2").arg(fontSize).arg(fontFamily);
 }
 
-inline QString fontFace(const QString& name)
+inline QString fontFace(const QString& filename, const QString& family)
 {
     QStringList lines;
 
     lines << "@font-face {"
-          << QString("font-family: '%1';").arg(name)
-          << QString("src: url('%1.eot?#iefix') format('embedded-opentype'),").arg(name)
-          << QString("url('%1.ttf') format('truetype'),").arg(name)
-          << QString("url('%1.oft') format('opentype'),").arg(name)
-          << QString("url('%1.woff') format('woff'),").arg(name)
-          << QString("url('%1.svg#%1') format('svg');").arg(name)
+          << QString("font-family: '%1';").arg(family)
+          << QString("src: url('%1.eot?#iefix') format('embedded-opentype'),").arg(filename)
+          << QString("url('%1.ttf') format('truetype'),").arg(filename)
+          << QString("url('%1.otf') format('opentype'),").arg(filename)
+          << QString("url('%1.woff') format('woff'),").arg(filename)
+          << QString("url('%1.svg#%1') format('svg');").arg(filename)
           << QString("font-weight: normal;")
           << QString("font-style: normal;")
           << "}";

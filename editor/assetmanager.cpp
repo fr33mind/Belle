@@ -301,12 +301,13 @@ void AssetManager::saveFontFaces(const QList<Asset*>& fonts, const QDir& dir)
     for(int i=0; i < fonts.size(); i++) {
         font = dynamic_cast<FontFile*>(fonts[i]);
         if (! font) continue;
+        QString basename = QFileInfo(font->path()).baseName();
 
         //determine font's family name.
         QStringList families = QFontDatabase::applicationFontFamilies(font->id());
         for(int j=0; j < families.size(); j++) {
             //write css for font
-            file.write(Utils::fontFace(families[j]).toAscii() + "\n");
+            file.write(Utils::fontFace(basename, families[j]).toAscii() + "\n");
         }
     }
 
