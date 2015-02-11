@@ -751,7 +751,7 @@ TextBox.prototype.setText = function(text)
         var game = this.getGame();
         this.textElement.innerHTML = game ? game.replaceVariables(text.replace("\n", "<br/>")) : text;
         this.alignText();
-        this.redraw = true;
+        this.update();
     }
 }
 
@@ -767,6 +767,8 @@ TextBox.prototype.setTextColor = function(color)
     if (this.textElement) {
         this.textElement.style.color = color.toHex();
     }
+
+    this.update();
 }
 
 TextBox.prototype.activateDefaultTextColor = function()
