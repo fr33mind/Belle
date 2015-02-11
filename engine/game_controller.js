@@ -69,7 +69,9 @@
     });
 
     this.game.bind("finished", this, function() {
-      alert("Game finished.\nRefresh page to play again.");
+      setTimeout(function() {
+        alert("Game finished.\nRefresh page to play again.");
+      }, 500);
     });
   }
 
