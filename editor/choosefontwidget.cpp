@@ -22,11 +22,9 @@ ChooseFontWidget::ChooseFontWidget(QWidget *parent) :
 
 void ChooseFontWidget::setCurrentFontFamily(const QString& family)
 {
-    if (mFontFamilies.contains(family)) {
-        mCurrentFamily = family;
-        setCurrentIndex(mFontFamilies.indexOf(family));
-        mCurrentIndex = currentIndex();
-    }
+    mCurrentIndex = mFontFamilies.indexOf(family);
+    mCurrentFamily = family;
+    setCurrentIndex(mCurrentIndex);
 }
 
 void ChooseFontWidget::loadFonts()
