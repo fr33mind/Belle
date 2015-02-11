@@ -909,7 +909,7 @@ void Belle::openFileOrProject(QString filepath)
     AssetManager::instance()->load(QDir(mSavePath));
     ResourceManager::instance()->importResources(object);
     //FIXME: For backwards compatibility, remove at some point
-    if (object.contains("customFonts")) {
+    if (object.contains("customFonts") && object.value("customFonts").type() == QVariant::List) {
         QVariantList customFonts = object["customFonts"].toList();
         if (! customFonts.isEmpty()) {
             for(int i=0; i < customFonts.size(); i++)
