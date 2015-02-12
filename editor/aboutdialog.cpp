@@ -25,9 +25,11 @@ AboutDialog::AboutDialog(QWidget *parent) :
 {
     mUi.setupUi(this);
 
-    QString desc = tr("Belle is a cross-platform visual novel maker,<br/>using Qt4 for the editor and HTML5 for the engine.");
-    QString copyright = "Copyright &copy; 2012-2014 Carlos Pais";
-    QString version = "Belle 0.4.2 alpha";
+    QString desc = tr("Belle is a cross-platform and easy-to-use visual novel maker,<br/>"
+                      "that deploys games for the web.<br/>"
+                      "It uses Qt4 for the editor and HTML5 for the engine.");
+    QString copyright = "Copyright &copy; 2012-2015 Carlos Pais";
+    QString version = "Belle 0.5 alpha";
 
     QString fullDesc = QString("<p><b>%1</b></p><p>%2</p><p>%3</p>").arg(version).arg(desc).arg(copyright);
 
