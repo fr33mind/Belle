@@ -41,6 +41,7 @@ public:
 
 private:
     int widgetIndex(QObject*);
+    void setNumberOfOptions(int);
 
 signals:
 

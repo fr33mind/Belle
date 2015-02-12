@@ -88,6 +88,7 @@ void ShowMenuEditorWidget::updateData(Action * action)
 
     int index = menu->objects().size() >= 2 ? menu->objects().size()-2 : 0;
     mChooseNumberOfOptions->setCurrentIndex(index);
+    setNumberOfOptions(menu->objects().size());
 
     for(int i=0; i < objects.size(); i++) {
         if (i < mTextEdits.size())
@@ -204,14 +205,7 @@ void ShowMenuEditorWidget::onNumberOfOptionsChanged(int index)
     if (! ok)
         return;
 
-    for(int i=1; i < number+1; i++) {
-        this->setRowHidden(i, model()->index(i, 0).parent(), false);
-    }
-
-    for(int i=number+1; i < model()->rowCount(); i++) {
-        this->setRowHidden(i, model()->index(i, 0).parent(), true);
-    }
-
+    this->setNumberOfOptions(number);
     menu->setNumberOfOptions(number);
 }
 
@@ -226,5 +220,16 @@ void ShowMenuEditorWidget::onConditionChanged()
     if (index != -1) {
         Menu* menu = static_cast<Menu*>(mAction->sceneObject());
         menu->setCondition(index, textEdit->toPlainText());
+    }
+}
+
+void ShowMenuEditorWidget::setNumberOfOptions(int number)
+{
+    for(int i=1; i < number+1; i++) {
+        this->setRowHidden(i, model()->index(i, 0).parent(), false);
+    }
+
+    for(int i=number+1; i < model()->rowCount(); i++) {
+        this->setRowHidden(i, model()->index(i, 0).parent(), true);
     }
 }
