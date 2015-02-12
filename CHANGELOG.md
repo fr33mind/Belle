@@ -1,3 +1,36 @@
+## Belle 0.5a | 13/02/2015
+
+#### [Editor]
+- Added "New Project" option.
+- Added synchronization between resources and cloned objects on scene(s). (not active by default)
+- Assets are now exported to a separate file (assets.js).
+- Improved usability of condition's text edit.
+- Implemented character state in Show action.
+- Fixed ChangeState action not loading correctly.
+- Set proper detection of animated images.
+- Fixed images not showing in add character dialog.
+- Fixed issues in Show Action.
+- Improved editing of Slide action.
+- Fixed object z-order when importing project.
+- Fixed opacity in ObjectGroup objects.
+- Fixed crash when switching character states.
+- Fixed crash when switching to a ChangeBackground action.
+- Improved ObjectGroup editing.
+- Fixed many (other) bugs.
+
+#### [Engine]
+- Major redesign and rewrite.
+- Improved pause screen.
+- Improved load screen.
+- Added support for animated images in canvas.
+- Fixed strange behaviour with text baseline due to floating point coordinates.
+- Removed stroke when drawing the object's background.
+- Fixed drawing bug when hovering a button.
+- Added meta tag to force IE to use the correct document mode.
+- Improved overall event detection.
+- Improved Slide animation.
+- Fixed many (other) bugs.
+
 ## Belle 0.4.2a | 12/09/2014
 
 #### [General]

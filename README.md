@@ -1,4 +1,8 @@
 Belle
 =====
 
-A cross-platform visual novel maker focused on being user friendly. It uses C++ with Qt4 for the editor and HTML5, CSS and Javascript for the engine.
+A cross-platform and easy-to-use visual novel maker that deploys games for the web.
+
+The editor is written in C++ using the Qt4 framework and the engine is written in Javascript using HTML5 technologies.
+
+[Read more](http://fr33mind.github.io/Belle/)
