@@ -97,7 +97,7 @@ utils.splitText = function(text, font, maxWidth) {
       textSplit = text.split("\n");
       for(var i=0; i < textSplit.length; i++) {
           
-          text = utils.splitText(textSplit[i], maxWidth);
+          text = utils.splitText(textSplit[i], font, maxWidth);
           textSplit.splice(i, 1);
           for(var j=0; j < text.length; j++) {
             textSplit.splice(i+j, 0, text[j]);
