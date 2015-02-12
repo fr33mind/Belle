@@ -513,7 +513,7 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
         action->setParent(this);
         mEventToActions.insert(event, actions);
 
-        if (mSync) {
+        /*if (mSync) {
             if (mResource)
                 action->setParent(mResource);
 
@@ -523,7 +523,7 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
             }
 
             this->notify(Interaction::toString(event), actionsVariant);
-        }
+        }*/
     }
 }
 
@@ -536,14 +536,14 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
             action->deleteLater();
        mEventToActions.insert(event, actions);
 
-       if (mSync) {
+       /*if (mSync) {
            QVariantList actionsVariant;
            for(int i=0; i < actions.size(); i++) {
                actionsVariant.append(qVariantFromValue((QObject*)actions[i]));
            }
 
            this->notify(Interaction::toString(event), actionsVariant);
-       }
+       }*/
    }
 }
 
@@ -641,43 +641,40 @@ QVariantMap Object::toJsonObject(bool internal)
 
     QVariantList jsonActions;
     QList<Action*> actions = mEventToActions.value(Interaction::MousePress);
-    if (internal) {
+    /*if (internal) {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(qVariantFromValue((QObject*)actions[i]));
-    }
-    else {
-        for(int i=0; i < actions.size(); i++)
-            jsonActions.append(actions[i]->toJsonObject());
-    }
+    }*/
+
+    for(int i=0; i < actions.size(); i++)
+        jsonActions.append(actions[i]->toJsonObject());
 
     if (jsonActions.size() || internal)
         object.insert("onMousePress", jsonActions);
 
     jsonActions.clear();
     actions = mEventToActions.value(Interaction::MouseRelease);
-    if (internal) {
+    /*if (internal) {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(qVariantFromValue((QObject*)actions[i]));
-    }
-    else {
-        for(int i=0; i < actions.size(); i++)
-            jsonActions.append(actions[i]->toJsonObject());
-    }
+    }*/
+
+    for(int i=0; i < actions.size(); i++)
+        jsonActions.append(actions[i]->toJsonObject());
 
     if (jsonActions.size() || internal)
         object.insert("onMouseRelease", jsonActions);
 
-
     jsonActions.clear();
     actions = mEventToActions.value(Interaction::MouseMove);
-    if (internal) {
+
+    /*if (internal) {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(qVariantFromValue((QObject*)actions[i]));
-    }
-    else {
-        for(int i=0; i < actions.size(); i++)
-            jsonActions.append(actions[i]->toJsonObject());
-    }
+    }*/
+
+    for(int i=0; i < actions.size(); i++)
+        jsonActions.append(actions[i]->toJsonObject());
 
     if (jsonActions.size() || internal)
         object.insert("onMouseMove", jsonActions);
