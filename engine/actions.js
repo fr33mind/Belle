@@ -805,7 +805,7 @@ GoToScene.prototype.goto = function(target)
    if (this.targetType == this.TargetType.Position) {
      target = target.toLowerCase();
      if(target == "next")
-       gameModel.setNextScene(gameModel.getNextScene());
+       gameModel.setNextScene(gameModel.indexOf(gameModel.getScene())+1);
      else if(target  == "previous")
        gameModel.setNextScene(gameModel.indexOf(gameModel.getScene())-1);
      else if (target == "first")
