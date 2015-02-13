@@ -16,48 +16,52 @@
 
 /*********** ACTION ***********/
 
-var belle = belle ||  {};
-belle.actions = {};
-
 (function(actions) {
     
-var Color = belle.objects.Color;
-var Point = belle.objects.Point;
+var GameObject = belle.GameObject,
+    Color = belle.graphics.Color,
+    Point = belle.core.Point;
  
-function Action(data)
+function Action(data, parent)
 {
+    GameObject.call(this, data, parent);
+
     this.finished = false;
-    this._finished = false;
     this.interval = null;
     this.wait = null;
     this.needsRedraw = true;
     this.skippable = true;
+    this.waiting = false;
     this.type = "Action";
     this.valid = true;
     this.elapsedTime = 0;
     this.eventListeners = {};
-    var scene = data["__scene"];
+    this.objectName = "";
+    this.object = null;
+    var game = this.getGame();
     
     if (data) {
         if ("object" in data) {
-            if (scene && typeof data["object"] == "string")
-                this.object = scene.getObject(data["object"]);
-            else if (typeof data["object"] == "object") {
-                if (scene && data["object"].name)
-                    this.object = scene.getObject(data["object"].name);
+          var scene = this.getScene();
+          if (typeof data["object"] == "string") {
 
-                if (! this.object && belle.objects[data["object"].type])  {
-		    this.object = belle.createObject(data["object"]);
-                }
-            }
+              if (scene)
+                this.object = scene.getObject(data["object"]);
+              this.objectName = data["object"];
+          }
+          else if (typeof data["object"] == "object") {
+            this.objectName = data["object"].name;
+            this.object = game.createObject(data["object"], this);
+          }
         }
             
         if ("skippable" in data)
             this.skippable = data["skippable"];
         
-        if ("wait" in data)
-            this.wait = new Wait(data["wait"]);
-        
+        if ("wait" in data) {
+            this.setWait(new Wait(data["wait"]));
+        }
+
         if ("name" in data)
             this.name = data["name"];
         
@@ -65,6 +69,8 @@ function Action(data)
             this.type = data["type"];
     }
 }
+
+belle.extend(Action, GameObject);
 
 Action.prototype.getInterval = function() {
     return this.interval;
@@ -78,54 +84,54 @@ Action.prototype.isFinished = function() {
     return this.finished;
 }
 
-Action.prototype._isFinished = function() {
-    return this.finished || this._finished;
-}
-
 Action.prototype.setFinished = function(finished) {
-    if (finished && this.wait && ! this._isFinished()) {
-        this.finished = false;
-        this._finished = true;
-        var that = this;
-        this.wait.addEventListener("onFinished", function() {
-            that.setFinished(true);
-        });
-        
-        this.wait.execute();
+    if (finished == this.finished)
+      return;
+
+    if (finished && this.wait && !this.wait.isFinished()) {
+      this.wait.execute();
+      this.waiting = true;
+      return;
     }
-    else {
-        if (finished && this.eventListeners.hasOwnProperty("onFinished")) {
-            var listeners = this.eventListeners["onFinished"];
-            for(var i=0; i < listeners.length; i++)
-                listeners[i].call(this);
-        }
-        this.finished = finished;
-    }
+
+    if (this.wait)
+      this.wait.setFinished(finished);
+    this.waiting = false;
+    this.finished = finished;
+    if (this.finished)
+      this.trigger("finished");
 }
 
 Action.prototype.skip = function() 
 {
     if (! this.skippable)
-        return;
-    
-    if (this._isFinished() && this.wait) {
-        this.wait.skip();
+        return false;
+
+    if (this.wait && this.waiting) {
+      return this.wait.skip();
     }
-    else {
-        this.setFinished(true);
-    }
+
+    this.setFinished(true);
+    return true;
 }
 
-Action.prototype.reset = function ()
+Action.prototype.reload = function ()
 {
-    this.finished = this._finished = false;
+    this.setFinished(false);
     if (this.interval) {
-        clearInterval(this.interval)
+        clearInterval(this.interval);
         this.interval = null;
     }
     this.elapsedTime = 0;
     if (this.wait)
-        this.wait.reset();
+      this.wait.reload();
+
+    this.object = null;
+    this.object = this.getObject();
+}
+
+Action.prototype.reset = function ()
+{
 }
 
 Action.prototype.execute = function() 
@@ -133,31 +139,31 @@ Action.prototype.execute = function()
     this.setFinished(true);
 }
 
-Action.prototype.receive = function(event) 
+Action.prototype.getObject = function()
 {
+  if (this.object)
+    return this.object;
+  else if (this.objectName) {
+    var scene = this.getScene();
+    if (scene)
+      return scene.getObject(this.objectName);
+  }
+  return null;
 }
 
-Action.prototype.isReady = function()
+Action.prototype.setWait = function(wait)
 {
-    return true;
-}
-
-Action.prototype.scale = function(widthFactor, heightFactor)
-{
-}
-
-Action.prototype.addEventListener = function(ev, listener)
-{
-    if (! this.eventListeners.hasOwnProperty(ev))
-        this.eventListeners[ev] = [];
-    this.eventListeners[ev].push(listener);
+  this.wait = wait;
+  this.wait.bind("finished", this, function() {
+    this.setFinished(true);
+  }, true);
 }
 
 /*********** FADE ACTION ***********/
 
-function Fade(data) 
+function Fade(data, parent) 
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     if ("fadeType" in data)
         this.fadeType = data["fadeType"];
@@ -185,16 +191,22 @@ function Fade(data)
     }
 }
 
-belle.utils.extend(Action, Fade);
+belle.extend(Fade, Action);
 
 Fade.prototype.execute = function () {
     var t = this;
-    
+
+    var object = this.getObject();
+    if (! object) {
+      this.setFinished(true);
+      return;
+    }
+
     this.prevTime = new Date().getTime();
     this.timePassed = 0;
      
     this.interval = setInterval(function() {t.fade();}, this.intervalDuration);        
-    this.object.redraw = true;
+    this.getObject().redraw = true;
 }
 
 Fade.prototype.fade = function () {
@@ -205,18 +217,19 @@ Fade.prototype.fade = function () {
     var passed = now - this.prevTime;
     this.timePassed += passed;
     this.prevTime = now;
+    var object = this.getObject();
    
     if (this.timePassed >= this.duration) {
-        this.object.setOpacity(this.target);
+        object.setOpacity(this.target);
     }
     
-    var opacity = this.object.getOpacity();
+    var opacity = object.getOpacity();
   
     if ((this.fadeType == "in" && opacity >= this.target) ||
        (this.fadeType == "out" && opacity <= this.target)) {
         clearInterval(this.interval);
         this.interval = null;
-        this.finished = true;
+        this.setFinished(true);
         this.timePassed = 0;
         return;
     }
@@ -228,150 +241,166 @@ Fade.prototype.fade = function () {
     
     if (this.fadeType == "in") {
       if (opacity < this.target)
-          this.object.setOpacity(opacity + increment);
+          object.setOpacity(opacity + increment);
     }
     else {
       if (opacity > this.target)
-          this.object.setOpacity(opacity + increment);
+          object.setOpacity(opacity + increment);
     }
       
-    this.object.redraw = true;
+    object.redraw = true;
 }
 
 Fade.prototype.skip = function () {
-    clearInterval(this.interval);
-    Action.prototype.skip.call(this);
-    this.object.setOpacity(this.target);
+    var skipped = Action.prototype.skip.call(this);
+    if (skipped) {
+      clearInterval(this.interval);
+      this.getObject().setOpacity(this.target);
+    }
+    return skipped;
 }
 
 Fade.prototype.reset = function () {
     Action.prototype.reset.call(this);
-    this.object.setOpacity(this.target);
-    this.object.setBackgroundOpacity(this.bgTarget);
+    var object = this.getObject();
+    object.setOpacity(this.target);
+    object.setBackgroundOpacity(this.bgTarget);
 }
 
 /*********** SLIDE ACTION ***********/
 
-function Slide(data)
+function Slide(data, parent)
 {
-    Action.call(this, data);
-    this.startPoint = new Point(data["startX"], data["startY"]);
-    this.endPoint = new Point(data["endX"], data["endY"]);
+    Action.call(this, data, parent);
+    this.destX = data["destX"];
+    this.destY = data["destY"];
+    this.slideType = data["slideType"];
+    this.startX = 0;
+    this.startY = 0;
     this.duration = 0;
     this.timePassed = 0;
     this.intervalDuration = 0;
-    this.prevTime = 0;
-    this.objectOriginalPosition = null;
+    this.prevTime = null;
     
     if ("duration" in data)
         this.duration = data["duration"];
     
     this.duration *= 1000;
-    this.incX = 2;
-    this.incY = 2;
 
-    if (this.startPoint.x > this.endPoint.x)
-        this.incX *= -1;
+    if (! belle.utils.isNumber(this.destX))
+      this.destX += this.slideType;
+    else
+      this.destX = parseInt(this.destX);
 
-    if (this.startPoint.y > this.endPoint.y)
-        this.incY *= -1;
+    if (! belle.utils.isNumber(this.destY))
+      this.destY += this.slideType;
+    else
+      this.destY = parseInt(this.destY);
 }
 
-belle.utils.extend(Action, Slide);
+belle.extend(Slide, Action);
 
-Slide.prototype.execute = function () 
+Slide.prototype.execute = function ()
 {
     var t = this;
-    this.reset();
+    var object = this.getObject();
+
+    if (! object) {
+      this.setFinished(true);
+      return;
+    }
+
+    var destX = parseInt(this.destX),
+        destY = parseInt(this.destY);
+    if (! belle.utils.isNumber(this.destX))
+
+        belle.utils.isNumber(this.destX) ? parseInt(this.destX) : this.destX + this.slideType;
+
+    this.startX = object.x;
+    this.startY = object.y;
+    this.endX = typeof this.destX == "string" ? object.mapXFromName(this.destX) : this.destX;
+    this.endY = typeof this.destY == "string" ? object.mapYFromName(this.destY) : this.destY;
+    this.endX = this.endX !== null ? this.endX : this.startX;
+    this.endY = this.endY !== null ? this.endY : this.startY;
     this.timePassed = 0;
-    this.prevTime = new Date().getTime();
-    this.intervalDuration = Math.round(this.duration / this.startPoint.distance(this.endPoint));
-    
-    this.object.setX(this.startPoint.x);
-    this.object.setY(this.startPoint.y);
-    
-    this.object.redraw = true;
-    this.interval = setInterval(function() { t.slide(); }, this.intervalDuration);
+    this.incXPerMs = this.incYPerMs = 0;
+    this.incX = this.incY = 0;
+
+    if (this.duration) {
+      this.incXPerMs = belle.utils.distance(this.startX, 1, this.endX, 1) / this.duration;
+      this.incYPerMs = belle.utils.distance(1, this.endY, 1, this.startY) / this.duration;
+    }
+
+    if (this.endX < this.startX)
+      this.incXPerMs *= -1;
+    if (this.endY < this.startY)
+      this.incYPerMs *= -1;
+
+    if (this.endX != this.startX)
+      this.incX = parseInt(this.incXPerMs * 10);
+
+    if (this.endY != this.startY)
+      this.incY = parseInt(this.incYPerMs * 10);
+
+    this.prevTime = new Date;
+    this.interval = setInterval(function() { t.slide(); }, 10);
 }
 
-Slide.prototype.slide = function () 
-{   
-    var now = new Date().getTime();
+Slide.prototype.slide = function ()
+{
+    var now = new Date;
     var passed = now - this.prevTime;
-    this.timePassed += passed;
     this.prevTime = now;
-
-    if (this.timePassed >= this.duration) {
-        this.object.setX(this.endPoint.x);
-        this.object.setY(this.endPoint.y);
-    }
-    
-    passed = passed > this.intervalDuration ? passed : this.intervalDuration;
+    this.timePassed += passed;
+    var object = this.getObject();
+    var x = object.x, y = object.y;
     var incX = this.incX;
     var incY = this.incY;
-    
-    if (this.intervalDuration) {
-      incX = parseInt(passed * this.incX / this.intervalDuration);
-      incY = parseInt(passed * this.incY / this.intervalDuration);
+
+    if (this.incXPerMs) {
+      var xdif = parseInt((this.startX + this.timePassed * this.incXPerMs) - (x + incX));
+      incX = Math.round(incX + xdif);
     }
-    
-    var x = this.object.x, y = this.object.y;
-    
-    if ((incX > 0 && this.object.x < this.endPoint.x) ||
-        (incX < 0 && this.object.x > this.endPoint.x))
-        x += incX;
-    
-    if ((incY > 0 && this.object.y < this.endPoint.y) ||
-        (incY < 0 && this.object.y > this.endPoint.y))
-        y += incY;
-    
-    //if x and y have NOT been modified, set action finished
-    if (x === this.object.x && y === this.object.y) {
+
+    if (this.incYPerMs) {
+      var ydif = parseInt((this.startY + this.timePassed * this.incYPerMs) - (y + incY));
+      incY = Math.round(incY + ydif);
+    }
+
+    x += incX;
+    y += incY;
+
+    if (incX > 0 && object.x > this.endX || incX < 0 && object.x < this.endX)
+        x = this.endX;
+    if (incY > 0 && object.y > this.endY || incY < 0 && object.y < this.endY)
+        y = this.endY;
+
+    object.moveTo(x, y);
+
+    if (x == this.endX && y == this.endY) {
         clearInterval(this.interval);
         this.setFinished(true);
-        return;
     }
-  
-    this.object.moveTo(x, y);
-    this.object.redraw = true;
 }
 
 Slide.prototype.skip = function () {
-    clearInterval(this.interval);
-    this.object.setX(this.endPoint.x);
-    this.object.setY(this.endPoint.y);
-    this.setFinished(true);
-}
-
-Slide.prototype.reset = function () {
-    this.timePassed = 0;
-    Action.prototype.reset.call(this);
-    
-    if (this.objectOriginalPosition) {
-        this.object.setX(this.objectOriginalPosition.x);
-        this.object.setY(this.objectOriginalPosition.y);
+    var skipped = Action.prototype.skip.call(this);
+    if (skipped) {
+      clearInterval(this.interval);
+      var object = this.getObject();
+      if (object) {
+        object.setX(this.endX);
+        object.setY(this.endY);
+      }
     }
-    
-    this.setFinished(false);
 }
-
-Slide.prototype.scale = function(widthFactor, heightFactor)
-{
-    Action.prototype.scale.call(this, widthFactor, heightFactor);
-    
-    this.startPoint.x *= widthFactor;
-    this.startPoint.y *= heightFactor;
-    this.endPoint.x *= widthFactor;
-    this.endPoint.y *= heightFactor;
-}
-
 
 /*********** DIALOGUE ACTION ***********/
 
-function Dialogue(data)
+function Dialogue(data, parent)
 {
-    Action.call(this, data);
-    
+    Action.call(this, data, parent);
+
     this.character = null;
     this.speakerName = "";
     this.text = "";
@@ -382,7 +411,7 @@ function Dialogue(data)
     if (data) {
         if ("character" in data) {
             this.speakerName = data["character"];
-            this.character = belle.getObject(data["character"]);
+            this.character = this.getScene().getObject(data["character"]);
         }
         
         if ("text" in data) {
@@ -393,76 +422,76 @@ function Dialogue(data)
     this.rawText = this.text;
 }
 
-belle.utils.extend(Action, Dialogue);
+belle.extend(Dialogue, Action);
 
 Dialogue.prototype.execute = function () {
-    var t = this;
-    this.reset();
-    
-    if (! this.object) {
+    var t = this,
+        game = this.getGame();
+    this.index = 0;
+    var object = this.getObject();
+    if (! object) {
         this.setFinished(true);
         return;
     }
     
-    if (typeof this.object.setSpeakerName == "function") {
-        if (this.character) //in case character's name changed since the beginning
-            this.object.setSpeakerName(this.character.name);
-        else
-            this.object.setSpeakerName(this.speakerName);
+    object.activateDefaultTextColor();
+
+    if (typeof object.setSpeakerName == "function")
+      object.setSpeakerName(this.character ? this.character.name : this.speakerName);
+
+    if (this.character) {
+      object.setTextColor(this.character.textColor);
+
+      if (typeof object.setNameColor == "function")
+        object.setNameColor(this.character.nameColor);
     }
-    this.object.setText("");
+
+    object.setText("");
+
     this.text = game.replaceVariables(this.text);
-    
-    
-    //this.lines = splitText(context.font, this.text, this.object.rect.width-this.object.leftPadding);
-    if (this.character)
-        this.object.color = this.character.textColor;
-    
-    this.object.redraw = true;
-    this.interval = setInterval(function() { t.updateText(); }, game.textDelay);
+    this.interval = setInterval(function() { t.updateText(); }, game.getProperty("textDelay"));
 }
 
 Dialogue.prototype.updateText = function() {
- 
-    
+
     if (this.index == this.text.length) {
         clearInterval(this.interval);
         this.interval = null;
         this.setFinished(true);
-        this.object.setText(this.rawText);
         return;
     }
-    
-    
-    this.object.appendText(this.text.charAt(this.index));
+
+    this.getObject().appendText(this.text.charAt(this.index));
     this.index += 1;
 }
 
 Dialogue.prototype.skip = function () {
-    if (this.skippable && ! this._isFinished()) {
-        clearInterval(this.interval);
-        this.object.appendText(this.text.slice(this.index));
-        this.index = this.text.length;
-        this.object.redraw = true;
-    }
-    Action.prototype.skip.call(this);
+  var skipped = Action.prototype.skip.call(this);
+  if (skipped) {
+      clearInterval(this.interval);
+      var object = this.getObject();
+      object.appendText(this.text.slice(this.index));
+      this.index = this.text.length;
+      object.redraw = true;
+  }
 }
 
 Dialogue.prototype.reset = function () 
 {
     Action.prototype.reset.call(this);
     this.index = 0;
-    if (this.object)
-        this.object.text = "";
-    if (this.object && this.object.speakerName !== undefined)
-        this.object.speakerName = "";
+    var object = this.getObject();
+    if (object)
+        object.text = "";
+    if (object && object.speakerName !== undefined)
+        object.speakerName = "";
 }
 
 /*********** WAIT ACTION ***********/
 
-function Wait(data)
+function Wait(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     if ( "time" in data)
         this.time = data["time"] * 1000;
@@ -476,7 +505,7 @@ function Wait(data)
     this.needsRedraw = false;
 }
 
-belle.utils.extend(Action, Wait);
+belle.extend(Wait, Action);
 
 Wait.prototype.execute = function ()
 {
@@ -492,9 +521,9 @@ Wait.prototype.execute = function ()
 
 /*********** CHANGE VISIBILITY Action ***********/
 
-function ChangeVisibility(data)
+function ChangeVisibility(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.transitions = [];
     this.duration = 0;
     this.show = null;
@@ -504,42 +533,41 @@ function ChangeVisibility(data)
 
     if ("transitions" in data) {
         var transitions = data["transitions"];
-        for(var i=0; i !== transitions.length; i++) {
-            if (! belle.getActionPrototype(transitions[i].type)) {
-                belle.log("TypeError: Action '" + transitions[i].type + "' is not a valid Action"); 
-                continue;
-            }
-            
-            transitions[i].__scene = data.__scene;
-            var transitionAction = belle.getActionPrototype([transitions[i].type]);
-            var action = new transitionAction(transitions[i]);
-	    action.skippable = this.skippable;
-            this.transitions.push(action);
+        for(var i=0; i !== transitions.length; i++) {             
+            var action = belle.createAction(transitions[i], this);
+            if (action) {
+              action.skippable = this.skippable;
+              this.transitions.push(action);
 
-            if (transitions[i].duration && transitions[i].duration > this.duration )
-                this.duration = transitions[i].duration;
+              if (transitions[i].duration && transitions[i].duration > this.duration )
+                  this.duration = transitions[i].duration;
+            }
         }
     }
     
     this.duration *= 1000;
 }
 
-belle.utils.extend(Action, ChangeVisibility);
+belle.extend(ChangeVisibility, Action);
 
 ChangeVisibility.prototype.execute = function () 
 {
     if (this.isFinished()) {
-      return;
+      //return;
     }
+    var object = this.getObject();
     
-    if (! this.object || this.object.visible == this.show) {
+    if (! object || object.visible == this.show) {
       this.setFinished(true);
       return;
     }
     
+    if (object instanceof belle.objects.Character && this.characterState)
+      object.setState(this.characterState);
+      
     this.initObjectForTransitions();
     if (this.show)
-      this.object.show();
+      object.show();
     
     var that = this;
     for (var i=0; i < this.transitions.length; i++) {
@@ -547,7 +575,7 @@ ChangeVisibility.prototype.execute = function ()
     }
     
     if (this.transitions.length === 0) {
-	this.object.setVisible(this.show);
+        object.setVisible(this.show);
         this.setFinished(true);
     }
     else
@@ -560,15 +588,17 @@ ChangeVisibility.prototype.check = function ()
       return;
     
     var finish = true;
+    var object = this.getObject();
+    
     for (var i=0; i < this.transitions.length; i++) {
         if (! this.transitions[i].isFinished()) {
             finish = false;
-	    break;
-	}
+            break;
+        }
     }
     
     if (finish) {
-      this.object.setVisible(this.show);
+      object.setVisible(this.show);
       this.setFinished(true);
     }
     else {
@@ -586,83 +616,82 @@ ChangeVisibility.prototype.skip = function ()
     this.check();
 }
 
-ChangeVisibility.prototype.reset = function () 
+ChangeVisibility.prototype.reload = function ()
 {
-    Action.prototype.reset.call(this);
+    Action.prototype.reload.call(this);
 
     for (var i=0; i !== this.transitions.length; i++)
-        this.transitions[i].setFinished(false);
-}
-
-ChangeVisibility.prototype.scale = function (widthFactor, heightFactor) 
-{
-    //Action.prototype.scale.call(this, widthFactor, heightFactor);
-        
-    for (var i=0; i < this.transitions.length; i++) 
-        this.transitions[i].scale(widthFactor, heightFactor);
+      this.transitions[i].reload();
 }
 
 ChangeVisibility.prototype.initObjectForTransitions = function () 
 {
+    var object = this.getObject();
     for (var i=0; i < this.transitions.length; i++) {
-	if (belle.isInstance(this.transitions[i], Fade)) {
-	  if (this.show && ! this.object.isVisible())
-	    this.object.setOpacity(0);
-	}
+        if (belle.isInstance(this.transitions[i], Fade)) {
+          if (this.show && ! object.isVisible())
+            object.setOpacity(0);
+        }
     }
 }
 ChangeVisibility.prototype.setFinished = function(finished) {
       Action.prototype.setFinished.call(this, finished);
       for (var i=0; i !== this.transitions.length; i++)
-	this.transitions[i].setFinished(finished);
+        this.transitions[i].setFinished(finished);
 }
 
 /*********** Show Action ***********/
 
-function Show(data)
+function Show(data, parent)
 {
     data.show = true;
-    ChangeVisibility.call(this, data);
+    ChangeVisibility.call(this, data, parent);
     this.characterState = "";
+    if ("state" in data)
+      this.characterState = data["state"];
 }
 
-belle.utils.extend(ChangeVisibility, Show);
+belle.extend(Show, ChangeVisibility);
 
 /*********** HIDE CHARACTER ACTION ***********/
 
-function Hide(data)
+function Hide(data, parent)
 {
     data.show = false;
-    ChangeVisibility.call(this, data);
+    ChangeVisibility.call(this, data, parent);
 }
 
-belle.utils.extend(ChangeVisibility, Hide);
+belle.extend(Hide, ChangeVisibility);
 
 
 /************* Change Background *****************/
 
-function ChangeBackground(data)
+function ChangeBackground(data, parent)
 {
-    Action.call(this, data);
-    
+    Action.call(this, data, parent);
+    var game = this.getGame(),
+    assetManager = game ? game.getAssetManager() : null;
+
+    if (! assetManager)
+      return;
+
     this.backgroundImage = null;
     this.backgroundColor = null;
 
     if ("backgroundImage" in data){
-         this.backgroundImage = new belle.objects.AnimationImage(data["backgroundImage"]);
+         this.backgroundImage = assetManager.loadAsset(data["backgroundImage"], "Image");
     }
     
     if ("backgroundColor" in data)
         this.backgroundColor = data["backgroundColor"];
 }
 
-belle.utils.extend(Action, ChangeBackground);
+belle.extend(ChangeBackground, Action);
 
 ChangeBackground.prototype.execute = function () 
 {
     this.reset();
-    var scene = game.getScene();
-    
+    var scene = this.getScene();
     if (scene) {
         if (this.backgroundImage)
             scene.setBackgroundImage(this.backgroundImage);
@@ -673,60 +702,72 @@ ChangeBackground.prototype.execute = function ()
     this.setFinished(true);
 }
 
+/************* Change State *****************/
+
+function ChangeState(data, parent)
+{
+    Action.call(this, data, parent);
+    this.state = data["state"];
+}
+
+belle.extend(ChangeState, Action);
+
+ChangeState.prototype.execute = function () 
+{
+    var object = this.getObject();
+    if (object && typeof object.setState == "function")
+      object.setState(this.state);
+    
+    this.setFinished(true);
+}
+
 /************* LABEL *****************/
 
-function Label (data)
+function Label (data, parent)
 {
-    Action.call(this, data);
-    this.needsRedraw = false;
-    //since this action is just a checkpoint, we can mark it as finished already
-    this.finished = true;
+    Action.call(this, data, parent);
 }
 
-belle.utils.extend (Action, Label);
-
-Label.prototype.reset = function()
-{
-  this.setFinished(true);
-}
-
+belle.extend (Label, Action);
 
 /************* Go TO LABEL *****************/
 
-function GoToLabel(data)
+function GoToLabel(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     if ("label" in data)
         this.label = data["label"];
     this.needsRedraw = false;
 }
 
-belle.utils.extend(Action, GoToLabel);
+belle.extend(GoToLabel, Action);
 
 GoToLabel.prototype.execute = function()
 {
    this.reset();
-   var scene = game.getScene();
+   var gameModel = this.getGameModel();
    
-   if (! scene || ! scene.getActions()) {
+   if (! gameModel) {
         this.setFinished(true);
         return;
    }
    
    if (this.label instanceof String || typeof this.label === 'string') {
-      scene.setCurrentAction(this.label);
+      gameModel.setNextAction(this.label);
    }
    else if (belle.isInstance(this.label, Label)){
-      scene.setCurrentAction(this.label.name);
+      gameModel.setNextAction(this.label.name);
    }
+
+   this.setFinished(true);
 }
 
 GoToLabel.prototype.resetActions = function(from, to)
 {
     var scene = game.getScene();
-    if (! scene) 
+    if (! scene)
       return;
-    
+
     var actions =  scene.getActions();
     for(var i=from; i < to && i < actions.length; i++) {
         actions[i].reset();
@@ -735,9 +776,9 @@ GoToLabel.prototype.resetActions = function(from, to)
 
 /************* Go To Scene *****************/
 
-function GoToScene(data)
+function GoToScene(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.TargetType = {
       "Name" : 0,
@@ -755,24 +796,30 @@ function GoToScene(data)
     this.needsRedraw = false;
 }
 
-belle.utils.extend(Action, GoToScene);
+belle.extend(GoToScene, Action);
 
 GoToScene.prototype.goto = function(target)
 {
+   var gameModel = this.getGameModel();
+
    if (this.targetType == this.TargetType.Position) {
      target = target.toLowerCase();
      if(target == "next")
-       game.nextScene();
+       gameModel.setNextScene(gameModel.getNextScene());
      else if(target  == "previous")
-       game.goto(game.indexOf(game.getCurrentScene())-1);
+       gameModel.setNextScene(gameModel.indexOf(gameModel.getScene())-1);
      else if (target == "first")
-       game.goto(0);
+       gameModel.setNextScene(0);
      else if (target == "last")
-       game.goto(game.getSize()-1);
+       gameModel.setNextScene(gameModel.getSize()-1);
+     else
+       return;
    }
    else {
-     game.goto(target);
+     gameModel.setNextScene(target);
    }
+
+   gameModel.nextScene();
 }
 
 GoToScene.prototype.execute = function()
@@ -785,33 +832,41 @@ GoToScene.prototype.execute = function()
 
 /************* Branch *****************/
 
-function Branch(data)
+function Branch(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.condition = "";
     this.trueActions = [];
     this.falseActions = [];
-    
+    this.actions = [];
+    this.result = null;
+    var branch = this;
     var action;
     var actions;
-    var _Action;
    
     if ( "trueActions" in data) {
         actions = data["trueActions"];
         for(var i=0; i < actions.length; i++) {
-          _Action = belle.getActionPrototype([actions[i].type]);
-          if (Action)
-            this.trueActions.push(new _Action(actions[i]));
+          action = belle.createAction(actions[i], this);
+          if (action)
+            this.trueActions.push(action);
         }
     }
     
     if ( "falseActions" in data) {
         actions = data["falseActions"];
         for(var i=0; i < actions.length; i++) {
-          _Action = belle.getActionPrototype([actions[i].type]);
-          if (Action)
-            this.falseActions.push(new _Action(actions[i]));
+          action = belle.createAction(actions[i], this);
+          if (action)
+            this.trueActions.push(action);
         }
+    }
+    
+    actions = this.trueActions.concat(this.falseActions);
+    for(var i=0; i < actions.length; i++) {
+      actions[i].bind("finished", this, function(){
+        this.actionFinished(this);
+      });
     }
     
     if ("condition" in data)
@@ -844,23 +899,53 @@ function Branch(data)
     }*/
 }
 
-belle.utils.extend(Action, Branch);
+belle.extend(Branch, Action);
 
 Branch.prototype.execute = function()
 {
-  var result = eval(this.condition);
-  if (result) {
-    for(var i=0; i < this.trueActions.length; i++) {
-      this.trueActions[i].execute();
+  this.result = eval(this.condition);
+  this.actions = (this.result === true) ? this.trueActions : this.falseActions;
+  this.actions = this.actions.slice(0);
+  if (this.actions.length)
+    this.actions[0].execute();
+  else
+    this.setFinished(true);
+}
+
+Branch.prototype.actionFinished = function(action)
+{  
+  if (this.isFinished())
+    return;
+  
+  if (this.actions.length)
+    this.actions.shift();
+  
+  if (this.actions.length)
+    this.actions[0].execute();
+  else
+    this.setFinished(true);
+}
+
+Branch.prototype.setFinished = function(finished)
+{
+  if (! finished) {
+    var actions = this.trueActions.concat(this.falseActions);
+    for(var i=0; i < actions.length; i++) {
+      actions[i].setFinished(finished);
     }
-    
-  }
-  else {
-    for(var i=0; i < this.falseActions.length; i++)
-      this.falseActions[i].execute();
   }
   
-  this.setFinished(true);
+  Action.prototype.setFinished.call(this, finished);
+}
+
+Branch.prototype.skip = function(finished)
+{
+  if (this.actions.length) {
+    this.actions[0].skip();
+    return;
+  }
+  
+  Action.prototype.skip.call(this);
 }
 
 Branch.prototype.loadCondition = function(condition)
@@ -973,9 +1058,9 @@ Branch.prototype.loadCondition = function(condition)
 
 /************* Change Color *****************/
 
-function ChangeColor(data)
+function ChangeColor(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.color = new Color([255, 255, 255, 255]);
     this.previousObjectColor = null;
     this.previousObjectBackgroundColor = null;
@@ -995,21 +1080,22 @@ function ChangeColor(data)
     }
 }
 
-belle.utils.extend(Action, ChangeColor);
+belle.extend(ChangeColor, Action);
 
 ChangeColor.prototype.execute = function()
 {    
-    if (! this.object) {
+    var object = this.getObject();
+    if (! object) {
         this.setFinished(true);
         return;
     }
     
     if (this.changeObjectColor) {
-        this.object.color = this.color;
+        object.color = this.color;
     }
     
     if (this.changeObjectBackgroundColor) {
-        this.object.setBackgroundColor(this.color);
+        object.setBackgroundColor(this.color);
     }
     
     this.setFinished(true);
@@ -1018,26 +1104,27 @@ ChangeColor.prototype.execute = function()
 ChangeColor.prototype.reset = function()
 {
     Action.prototype.reset.call(this);
-        
+    var object = this.getObject();
+    
     if (this.changeObjectColor && this.previousObjectColor) {
-        this.object.setColor(this.previousObjectColor);
+        object.setColor(this.previousObjectColor);
     }
     
     if (this.changeObjectBackgroundColor && this.previousObjectBackgroundColor) {
-        this.object.setBackgroundColor(this.previousObjectBackgroundColor);
+        object.setBackgroundColor(this.previousObjectBackgroundColor);
     }
     
     if (this.changeObjectColor || this.changeObjectBackgroundColor)
-        this.object.redraw = true;
+        object.redraw = true;
     
     this.setFinished(false);
 }
 
 /************* Play Sound *****************/
 
-function PlaySound(data)
+function PlaySound(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.soundPath = "";
     this.soundName = "";
@@ -1071,7 +1158,7 @@ function PlaySound(data)
         
 }
 
-belle.utils.extend(Action, PlaySound);
+belle.extend(PlaySound, Action);
 
 PlaySound.prototype.execute = function()
 {   
@@ -1085,16 +1172,16 @@ PlaySound.prototype.execute = function()
         "volume" : this.volume
     }
     
-    game.playSound(this.soundPath, options);
+    this.getGame().playSound(this.soundPath, options);
     
     this.setFinished(true);
 }
 
 /************* Stop Sound *****************/
 
-function StopSound(data)
+function StopSound(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.fade = 0;
     this.sound = null;
@@ -1108,7 +1195,7 @@ function StopSound(data)
         
 }
 
-belle.utils.extend(Action, StopSound);
+belle.extend(StopSound, Action);
 
 StopSound.prototype.execute = function()
 {
@@ -1120,67 +1207,61 @@ StopSound.prototype.execute = function()
 
 /************* Show Menu *****************/
 
-function ShowMenu(data)
+function ShowMenu(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.options = 0;
     this.skippable = false;
+    var object = this.getObject();
    
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
     
-    if (this.object && this.object.objects.length) {
-      var self = this;
-      var buttons = this.object.objects;
+    if (object && object.objects.length) {
+      var buttons = object.objects;
       for(var i=0; i < buttons.length; i++) {
-	buttons[i].addEventListener("mouserelease", function() {
-	    var scene = game.getScene();
-	    scene.removeObject(self.object);
-	    self.setFinished(true);
-	});
+        buttons[i].bind("mouseUp", this, function() {
+            var scene = this.getScene();
+            scene.removeObject(this.object);
+            this.setFinished(true);
+        }, true);
       }
     }
 }
 
-belle.utils.extend(Action, ShowMenu);
+belle.extend(ShowMenu, Action);
 
 ShowMenu.prototype.execute = function()
 {
     this.reset();
-    var scene = game.getScene();
-    if (this.object && scene) {
-        scene.addObject(this.object);
+    var scene = this.getScene();
+    var object = this.getObject();
+    if (object && scene) {
+      object.setVisible(true);
+      scene.addObject(object, true);
     }
-}
-
-ShowMenu.prototype.scale = function(widthFactor, heightFactor)
-{
-    Action.prototype.scale.call(this, widthFactor, heightFactor);
-    
-    if (this.object)
-        this.object.scale(widthFactor, heightFactor);
 }
 
 /************* End Novel *****************/
 
-function End(data)
+function End(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
 }
 
-belle.utils.extend(Action, End);
+belle.extend(End, Action);
 
 End.prototype.execute = function()
 {
-    game.setFinished(true);
+    this.getGame().setFinished(true);
     this.setFinished(true);
 }
 
 /************* Get user input *****************/
 
-function GetUserInput(data)
+function GetUserInput(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     this.variable = null;
     this.defaultValue = "";
     this.message = "Insert value here:";
@@ -1199,7 +1280,7 @@ function GetUserInput(data)
     
 }
 
-belle.utils.extend(Action, GetUserInput);
+belle.extend(GetUserInput, Action);
 
 GetUserInput.prototype.execute = function()
 {
@@ -1213,24 +1294,18 @@ GetUserInput.prototype.execute = function()
     setTimeout(function() {
       var value = prompt(self.message, self.defaultValue);
       if (! value)
-	value = self.defaultValue;
-      game.addVariable(self.variable, value);
+        value = self.defaultValue;
+      self.getGame().addVariable(self.variable, value);
     
       self.setFinished(true);
     }, 1);
 }
 
-GetUserInput.prototype.reset = function()
-{
-    Action.prototype.reset.call(this);
-    this.value = null;
-}
-
 /************* Change Game Variable *****************/
 
-function ChangeGameVariable(data)
+function ChangeGameVariable(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.variable = "";
     this.operation = "";
@@ -1252,7 +1327,7 @@ function ChangeGameVariable(data)
 
 }
 
-belle.utils.extend(Action, ChangeGameVariable);
+belle.extend(ChangeGameVariable, Action);
 
 ChangeGameVariable.prototype.execute = function()
 {   
@@ -1305,9 +1380,9 @@ ChangeGameVariable.prototype.execute = function()
 
 /************* Run Script *****************/
 
-function RunScript(data)
+function RunScript(data, parent)
 {
-    Action.call(this, data);
+    Action.call(this, data, parent);
     
     this.code = "";
     
@@ -1315,7 +1390,7 @@ function RunScript(data)
         this.code = data["script"];
 }
 
-belle.utils.extend(Action, RunScript);
+belle.extend(RunScript, Action);
 
 RunScript.prototype.execute = function()
 {   
@@ -1332,6 +1407,7 @@ actions.Wait = Wait;
 actions.Show = Show;
 actions.Hide = Hide;
 actions.ChangeBackground = ChangeBackground;
+actions.ChangeState = ChangeState;
 actions.Label = Label;
 actions.GoToLabel = GoToLabel;
 actions.GoToScene = GoToScene;

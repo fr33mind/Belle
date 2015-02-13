@@ -14,69 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-var belle = belle || {};
-
 (function(belle) {
 
-var timeout = 50; //50 ms
-var display = belle.display;
 var objects = belle.objects;
 var actions = belle.actions;
-var stateMachine = belle.stateMachine;
-var loaded = false;
-
-belle.extend = function (sub, base) 
-{
-    // Copy the prototype from the base to setup inheritance
-    surrogateCtor.prototype = base.prototype;
-    // Tricky huh?
-    sub.prototype = new surrogateCtor();
-    // Remember the constructor property was set wrong, let's fix it
-    sub.prototype.constructor = sub;
-}
-
-belle.isInstance = function(object, constructor) {
-  
-  while (object != null) {
-    if (object == constructor.prototype)
-      return true;
-    object = Object.getPrototypeOf(object);
-  }
-  return false;
-}
-
-belle.serialize = function(obj)
-{
-  var prop;
-  
-  if (! obj)
-    return null;
-  
-  if (typeof obj == "number" || typeof obj == "string" || typeof value == "boolean")
-    return obj;
-  else if (obj instanceof Array) {
-    prop = [];
-    for(var i=0; i < obj.length; i++)
-      prop[i] = belle.serialize(obj[i]);
-  }
-  else if (typeof obj == "object") {
-    prop = {};
-    //if derived from Belle's Object, use its serialize function
-    if (typeof obj.serialize == "function"){
-      prop = obj.serialize();
-    }
-    else {
-      for(key in obj) {
-	if (obj.hasOwnProperty(key)) {
-	  prop[key] = belle.serialize(obj[key]);
-	}
-      }
-    }
-  }
-  
-  return prop;
-}
 
 var addObject = function (object)
 {
@@ -84,39 +25,17 @@ var addObject = function (object)
         game.currentScene.addObject(object);
 }
 
-var createObject = function (data)
+function createAction(data, parent)
 {
     var type = data["type"];
-    if (! type) {
-        var resource = data["resource"];
-        if ("resource" in data && resource in game.resources) {
-            type = game.resources[resource].data.type;
-        }
-        else
-            return null;
-    }
-
-    var _Object = belle.objects[type];
+    var _Action = belle.actions[type];
     
-    if (! _Object) {
-        belle.log("'" + type + "' is not a valid object type.");
+    if (! _Action) {
+        belle.log("'" + type + "' is not a valid action type.");
         return null;
     }
-
-    var obj = new _Object(data);
-    if (belle.display.DOM)
-      obj.initElement();
-    return obj;
-}
-
-function getObjectPrototype(type)
-{
-    return objects[type];
-}
-
-function getActionPrototype(type)
-{
-    return actions[type];
+    
+    return new _Action(data, parent);
 }
 
 function getObject(name, scene) {
@@ -129,14 +48,6 @@ function getObject(name, scene) {
        }
     }
     
-    return null;
-}
-
-function getResource(name)
-{
-    if (name && name in game.resources)
-        return game.resources[name];
-        
     return null;
 }
 
@@ -154,9 +65,8 @@ function setGameDirectory(dir)
 
 function load()
 {
-    if (game.data) {
-      display.loading(); 
-      initializeData(game.data)
+    if (game && game.data) {
+      controller = new belle.GameController(game);
     }
     else
       alert("No game data found!");
@@ -359,37 +269,11 @@ function gameLoop ()
     display.draw(scene);
 }
 
-function pause()
-{
-    if (! game.hasPauseScreen())
-      return;
-  
-    if (game.paused) {
-	game.resume();
-    }
-    else {
-	game.pause();
-    }
-}
-
-function getGame()
-{
-    if (game.paused)
-        return game.pauseScreen;
-    return game;
-}
-
 //Expose public properties
 belle.setGameFile = setGameFile;
 belle.setGameDirectory = setGameDirectory;
 belle.load = load;
 belle.addObject = addObject;
-belle.createObject = createObject;
-belle.getObject = getObject;
-belle.getResource = getResource;
-belle.game = game;
-belle.getObjectPrototype = getObjectPrototype;
-belle.getActionPrototype = getActionPrototype;
-belle.pause = pause;
+belle.createAction = createAction;
 
 }(belle));

@@ -122,6 +122,20 @@ ul#faq > li {
   margin-top: 20px;
 }
 
+.demo #game-frame {
+  background: none;
+  border: none;
+  max-height: 600px;
+  max-width: 800px;
+  overflow: hidden;
+  width: 100%;
+  height: 600px;
+}
+
+.demo #game-frame-container {
+  text-align: center;
+}
+
 /* Small Devices, Tablets */
 @media only screen and (min-width : 768px) {
 

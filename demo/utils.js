@@ -17,7 +17,6 @@
 (function(utils) {
 
 var dummy = null;
-function surrogateCtor() {}
  
 function getBody()
 {
@@ -56,16 +55,6 @@ utils.isObjectEmpty = function(object)
                 return false;
     }
     return true;
-}
-
-utils.extend = function (base, sub) 
-{
-    // Copy the prototype from the base to setup inheritance
-    surrogateCtor.prototype = base.prototype;
-    // Tricky huh?
-    sub.prototype = new surrogateCtor();
-    // Remember the constructor property was set wrong, let's fix it
-    sub.prototype.constructor = sub;
 }
 
 utils.textSize = function(text, font) 
@@ -108,7 +97,7 @@ utils.splitText = function(text, font, maxWidth) {
       textSplit = text.split("\n");
       for(var i=0; i < textSplit.length; i++) {
           
-          text = utils.splitText(textSplit[i], maxWidth);
+          text = utils.splitText(textSplit[i], font, maxWidth);
           textSplit.splice(i, 1);
           for(var j=0; j < text.length; j++) {
             textSplit.splice(i+j, 0, text[j]);
@@ -158,8 +147,14 @@ utils.isPercentSize = function(value)
     return value.search(/[0-9]+\%/g) != -1;
 }
 
+utils.isNaN = function(value)
+{
+  //NaN value is never equal to itself
+  return (value !== value);
+}
+
 utils.isNumber = function(n) {
-  return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
+  return ! utils.isNaN(parseInt(n));
 }
 
 utils.initElement = function (element, info)
@@ -277,6 +272,11 @@ utils.setBorderRadius = function(elem, radius) {
     elem.style.borderRadius = radius + "px"; // standard
     elem.style.MozBorderRadius = radius + "px"; // Mozilla
     elem.style.WebkitBorderRadius = radius + "px";; // WebKit
+}
+
+utils.distance = function(x1, y1, x2, y2)
+{
+  return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
 }
 
 }(belle.utils));
