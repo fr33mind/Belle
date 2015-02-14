@@ -105,7 +105,7 @@
     }
     else if (type == "audio" || type == "sound" || type == "music") {
       asset = new buzz.sound(path);
-      asset.bind('canplay', function() {
+      asset.bind('loadeddata error canplay canplaythrough', function() {
         self.assetLoaded(this);
       });
       if (! buzz.isSupported())
