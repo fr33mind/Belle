@@ -1,4 +1,5 @@
 belle = {};
+game = {};
 belle.log = console.log || function() {};
 belle.actions = {};
 belle.objects = {};
