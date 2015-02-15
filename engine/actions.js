@@ -407,6 +407,7 @@ function Dialogue(data, parent)
     this.index = 0;
     this.lines = [];
     this.rawText = "";
+    this.append = false;
     
     if (data) {
         if ("character" in data) {
@@ -416,6 +417,10 @@ function Dialogue(data, parent)
         
         if ("text" in data) {
             this.text = data["text"];
+        }
+
+        if ("append" in data) {
+            this.append = data["append"];
         }
     }
 
@@ -446,7 +451,8 @@ Dialogue.prototype.execute = function () {
         object.setNameColor(this.character.nameColor);
     }
 
-    object.setText("");
+    if (! this.append)
+      object.setText("");
 
     this.text = game.replaceVariables(this.text);
     this.interval = setInterval(function() { t.updateText(); }, game.getProperty("textDelay"));

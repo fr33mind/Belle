@@ -29,12 +29,14 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     mChooseCharacterWidget->setEditable(true);
     mTextEdit = new QTextEdit(this);
     mWaitCheckBox = new QCheckBox(this);
+    mAppendCheckbox = new QCheckBox(this);
 
     beginGroup("Dialogue Action");
     appendRow(tr("Character"), mChooseCharacterWidget);
     appendRow(tr("Text Box/Dialogue Box"), mChooseTextBoxWidget);
     appendRow(tr("Phrase"), mTextEdit);
     appendRow(tr("Wait on Finished"), mWaitCheckBox);
+    appendRow(tr("Append"), mAppendCheckbox);
     endGroup();
 
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
@@ -46,6 +48,7 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     connect(mChooseCharacterWidget, SIGNAL(highlighted(int)), this, SLOT(onCharacterHighlighted(int)));
     connect(mChooseCharacterWidget, SIGNAL(editTextChanged(const QString&)), this, SLOT(onCharacterNameChanged(const QString&)));
     connect(mWaitCheckBox, SIGNAL(clicked(bool)), this, SLOT(onWaitOnFinishedChanged(bool)));
+    connect(mAppendCheckbox, SIGNAL(toggled(bool)), this, SLOT(appendToggled(bool)));
 
     if (mChooseTextBoxWidget->view())
         mChooseTextBoxWidget->view()->installEventFilter(this);
@@ -123,6 +126,7 @@ void DialogueEditorWidget::updateData(Action * action)
         mChooseCharacterWidget->setEditText(dialogue->characterName());
 
     mWaitCheckBox->setChecked(dialogue->mouseClickOnFinish());
+    mAppendCheckbox->setChecked(dialogue->append());
 
     //only set currentAction after updating all the widgets
     //otherwise updating the widgets would mess up the currentAction's data.
@@ -248,4 +252,11 @@ void DialogueEditorWidget::onWaitOnFinishedChanged(bool state)
 {
     if (mAction)
         mAction->setMouseClickOnFinish(state);
+}
+
+void DialogueEditorWidget::appendToggled(bool append)
+{
+    Dialogue* dialogue = qobject_cast<Dialogue*> (mAction);
+    if (dialogue)
+        dialogue->setAppend(append);
 }

@@ -35,6 +35,7 @@ class Dialogue : public Action
     Character* mCharacter;
     QString mCharacterName;
     QString mText;
+    bool mAppend;
 
 public:
     static ActionInfo Info;
@@ -66,6 +67,9 @@ public:
     void activateTextBoxDefaultTextColor();
     void activateCharacterColors();
     void setSceneObject(Object*);
+
+    bool append() const;
+    void setAppend(bool);
 
 signals:
 

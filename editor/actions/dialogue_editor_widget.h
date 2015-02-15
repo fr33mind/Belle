@@ -35,6 +35,7 @@ class DialogueEditorWidget : public ActionEditorWidget
 
     QComboBox* mChooseCharacterWidget;
     QComboBox* mChooseTextBoxWidget;
+    QCheckBox* mAppendCheckbox;
     QTextEdit* mTextEdit;
     QList<Object*> mOutputBoxes;
     QList<Character*> mCharacters;
@@ -57,6 +58,7 @@ private slots:
     void onCharacterHighlighted(int);
     void onCharacterNameChanged(const QString&);
     void onWaitOnFinishedChanged(bool);
+    void appendToggled(bool);
 
 private:
     bool isValidOutputBox(Object*);

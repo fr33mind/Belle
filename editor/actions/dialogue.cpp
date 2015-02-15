@@ -48,6 +48,10 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
         setText(data.value("text").toString());
     }
 
+    if (data.contains("append") && data.value("append").type() == QVariant::Bool) {
+        setAppend(data.value("append").toBool());
+    }
+
     setMouseClickOnFinish(data.contains("wait"));
 }
 
@@ -58,6 +62,7 @@ void Dialogue::init()
     setIcon(Info.icon);
     mCharacter = 0;
     mText = "";
+    mAppend = false;
     setMouseClickOnFinish(true);
 }
 
@@ -156,6 +161,9 @@ QVariantMap Dialogue::toJsonObject()
     else if (! mCharacterName.isEmpty())
         object.insert("character", mCharacterName);
 
+    if (mAppend)
+        object.insert("append", mAppend);
+
     object.insert("text", mText);
     return object;
 }
@@ -239,4 +247,14 @@ void Dialogue::setSceneObject(Object * obj)
     restoreTextBox(); //restore old textbox
     Action::setSceneObject(obj);
     updateTextBox(); //update new one
+}
+
+bool Dialogue::append() const
+{
+    return mAppend;
+}
+
+void Dialogue::setAppend(bool append)
+{
+    mAppend = append;
 }
