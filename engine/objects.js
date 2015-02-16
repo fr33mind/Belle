@@ -673,7 +673,9 @@ TextBox.prototype.alignText = function(text, size)
         var sumHeight = 0;
 
         for (var i=0; i < this.textParts.length; i++) {
-            var size = belle.utils.textSize(this.textParts[i], this.font);
+            //empty text means it's just a new line, so we use <br/> to get the height
+            var text = this.textParts[i].length ? this.textParts[i] : "<br/>";
+            var size = belle.utils.textSize(text, this.font);
             var width = size[0];
             var height = Math.round(size[1] / 1.2);
             var leftPadding = 0;

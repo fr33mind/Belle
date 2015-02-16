@@ -86,25 +86,26 @@ utils.textWidth = function(text, font)
 
 utils.splitText = function(text, font, maxWidth) {
      if (! text)
-        return [];
+        return [""];
      
     var dummy = document.getElementById("dummy");
     dummy.style.font = font;
     dummy.innerHTML = text;
     var textSplit = [];
-    
+
     if (text.contains("\n")) {
       textSplit = text.split("\n");
+      var resultText = [],
+          subTextSplit;
+
       for(var i=0; i < textSplit.length; i++) {
-          
-          text = utils.splitText(textSplit[i], font, maxWidth);
-          textSplit.splice(i, 1);
-          for(var j=0; j < text.length; j++) {
-            textSplit.splice(i+j, 0, text[j]);
+          subTextSplit = utils.splitText(textSplit[i], font, maxWidth);
+          for(var j=0; j < subTextSplit.length; j++) {
+            resultText.push(subTextSplit[j]);
           }
       }
-      
-      return textSplit;
+
+      return resultText;
     }
     
     if (dummy.offsetWidth > maxWidth) {
