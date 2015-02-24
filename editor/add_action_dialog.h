@@ -37,9 +37,10 @@ class AddActionDialog : public QDialog
     Action* mCurrentAction;
     QDialogButtonBox* mButtonBox;
     bool mEditMode;
+    QObject* mActionParent;
 
 public:
-    AddActionDialog(Interaction::InputEvent event, QWidget *parent = 0);
+    AddActionDialog(QObject*, QWidget *parent = 0);
     AddActionDialog(Action*, QWidget *parent = 0);
     ~AddActionDialog();
     Action* selectedAction();

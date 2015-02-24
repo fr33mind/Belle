@@ -314,7 +314,7 @@ void ObjectEditorWidget::onAddItemActivated()
         return;
 
     Interaction::InputEvent event = mWidgetToEvent.value(sender());
-    AddActionDialog dialog(event);
+    AddActionDialog dialog(mCurrentObject);
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {

@@ -103,7 +103,7 @@ void BranchEditorWidget::onAddItemActivated()
     if (! branch)
         return;
 
-    AddActionDialog dialog(Interaction::MouseRelease);
+    AddActionDialog dialog(qobject_cast<QObject*>(mAction));
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {

@@ -26,11 +26,12 @@
 #include "scene_manager.h"
 #include "belle.h"
 
-AddActionDialog::AddActionDialog(Interaction::InputEvent event, QWidget *parent) :
+AddActionDialog::AddActionDialog(QObject* actionParent, QWidget *parent) :
     QDialog(parent)
 {
     init();
 
+    mActionParent = actionParent;
     mActionCatalogWidget = new ActionCatalogWidget(this);
     mButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
     setLayout(new QVBoxLayout(this));
@@ -66,6 +67,8 @@ AddActionDialog::AddActionDialog(Action* action, QWidget *parent) :
     QDialog(parent)
 {
     init();
+    if (action)
+        mActionParent = action->parent();
     setWindowTitle(tr("Edit Action"));
     resize(640, 320);
     mEditMode = true;
@@ -84,6 +87,7 @@ void AddActionDialog::init()
     setWindowTitle(tr("Choose Action"));
     resize(320, 240);
     mEditMode = false;
+    mActionParent = 0;
     mPreviousIndex = 0;
     mCurrentAction = 0;
     mActionsComboBox = 0;
@@ -206,7 +210,7 @@ void AddActionDialog::onNewAction(Action * action)
         action = _action;
     }
     else {
-        action->setParent(Belle::instance()->currentScene());
+        action->setParent(mActionParent);
         mActionsCatalog.append(action);
         //mActionsCatalog.insert(action, action->editorWidget()->copy());
     }

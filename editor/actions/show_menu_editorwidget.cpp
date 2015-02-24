@@ -129,7 +129,7 @@ void ShowMenuEditorWidget::onAddItemActivated()
 
     Menu* menu = static_cast<Menu*>(mAction->sceneObject());
 
-    AddActionDialog dialog(Interaction::MouseRelease, this);
+    AddActionDialog dialog(qobject_cast<QObject*>(mAction), this);
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
