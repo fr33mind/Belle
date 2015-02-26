@@ -20,6 +20,7 @@
 #include "fade.h"
 #include "resource_manager.h"
 #include "resources_combobox.h"
+#include "widgets/object_combobox.h"
 
 class Fade;
 
@@ -27,7 +28,7 @@ class FadeEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    QComboBox* mObjectChooser;
+    ObjectComboBox* mObjectChooser;
     QComboBox* mFadeTypeChooser;
     QDoubleSpinBox* mDurationSpin;
 
@@ -39,7 +40,7 @@ signals:
 
 private slots:
     void onCurrentFadeTypeChanged(int);
-    void onCurrentObjectChanged(int);
+    void onCurrentObjectChanged(Object*);
     void onDurationChanged(double);
 
 };

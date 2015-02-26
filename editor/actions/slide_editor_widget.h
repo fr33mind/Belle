@@ -24,6 +24,7 @@
 #include "action_editor_widget.h"
 #include "resource_manager.h"
 #include "slide.h"
+#include "object_combobox.h"
 
 class Slide;
 
@@ -32,7 +33,7 @@ class SlideEditorWidget : public ActionEditorWidget
     Q_OBJECT
 
     QDoubleSpinBox*  mDurationSpinBox;
-    QComboBox* mObjectChooser;
+    ObjectComboBox* mObjectChooser;
     QComboBox* mDestXChooser;
     QAbstractItemModel* mDestXChooserEmptyModel;
     QAbstractItemModel* mDestXChooserModel;
@@ -54,7 +55,7 @@ private:
 private slots:
     void onButtonClicked();
 //    void onSliderValueChanged(int);
-    void onResourceChanged(int);
+    void onObjectChanged(Object*);
     void onTypeChanged(int);
     void onDestXChanged(const QString&);
     void onDestYChanged(const QString&);

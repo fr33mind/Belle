@@ -27,7 +27,7 @@
 SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mObjectChooser = new QComboBox(this);
+    mObjectChooser = new ObjectComboBox(this);
     mTypeChooser = new QComboBox(this);
     mTypeChooser->addItems(QStringList() << tr("In") << tr("Out") << tr("Custom"));
     mDurationSpinBox = new QDoubleSpinBox(this);
@@ -53,7 +53,7 @@ SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
     appendRow(tr("Duration (sec)"),  mDurationSpinBox);
     endGroup();
 
-    connect(mObjectChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onResourceChanged(int)));
+    connect(mObjectChooser, SIGNAL(objectChanged(Object*)), this, SLOT(onObjectChanged(Object*)));
     connect(mTypeChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onTypeChanged(int)));
     connect(mDestXChooser, SIGNAL(editTextChanged(const QString &)), this, SLOT(onDestXChanged(const QString &)));
     connect(mDestYChooser, SIGNAL(editTextChanged(const QString &)), this, SLOT(onDestYChanged(const QString &)));
@@ -68,36 +68,14 @@ SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
 void SlideEditorWidget::updateData(Action * action)
 {
     Slide * slide  = qobject_cast<Slide*>(action);
-    if (! slide || ! slide->scene())
+    if (! slide)
         return;
 
     ActionEditorWidget::updateData(action);
     mAction = 0;
 
     mDurationSpinBox->setValue(slide->duration());
-
-    mObjectChooser->clear();
-
-    Object* currObj = slide->sceneObject();
-    QList<Object*> objects;
-    if (currObj) {
-        mObjectChooser->addItem(currObj->objectName());
-        objects.append(currObj);
-    }
-
-    QList<Object*> objs = slide->scene()->objects();
-    for (int i=0; i < objs.size(); i++) {
-        if (objs[i] && objs[i] != currObj) {
-            mObjectChooser->addItem(objs[i]->objectName());
-            objects.append(objs[i]);
-        }
-    }
-
-    this->setObjects(objects);
-
-    if (! currObj && ! objects.isEmpty())
-        slide->setSceneObject(objects[0]);
-
+    mObjectChooser->loadFromAction(action);
 
     mTypeChooser->setCurrentIndex(static_cast<int>(slide->slideType()));
     bool custom = (slide->slideType() == Slide::Custom);
@@ -154,19 +132,11 @@ void SlideEditorWidget::onDurationChanged(double dur) {
         slide->setDuration(dur);
 }
 
-void SlideEditorWidget::onResourceChanged(int index)
+void SlideEditorWidget::onObjectChanged(Object* obj)
 {
     Slide * slide  = qobject_cast<Slide*>(mAction);
-    if (! slide)
-        return;
-
-    if (index >= 0 && index < objects().size()) {
-        Object* obj = objects()[index];
-
-        if (slide->sceneObject() != obj) {
-            slide->setSceneObject(obj);
-        }
-    }
+    if (slide)
+        slide->setSceneObject(obj);
 }
 
 void SlideEditorWidget::onTypeChanged(int type)

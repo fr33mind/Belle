@@ -32,8 +32,8 @@ ChangeVisibilityEditorWidget::ChangeVisibilityEditorWidget(QWidget *parent) :
 
 void ChangeVisibilityEditorWidget::init()
 {
-    mObjectsWidget = new QComboBox(this);
-    connect(mObjectsWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(onObjectChanged(int)));
+    mObjectsWidget = new ObjectComboBox(this);
+    connect(mObjectsWidget, SIGNAL(objectChanged(Object*)), this, SLOT(onObjectChanged(Object*)));
 
     beginGroup(tr("Change Object's Visibility"));
     appendRow(tr("Object"), mObjectsWidget);
@@ -61,37 +61,27 @@ void ChangeVisibilityEditorWidget::updateData(Action * action)
 
     ActionEditorWidget::updateData(action);
 
-    mObjects = findObjects(! changeVisibility->toShow());
     mAction = 0;
     mFadeEditorWidget->updateData(changeVisibility->fadeAction());
     mSlideEditorWidget->updateData(changeVisibility->slideAction());
 
     setGroupName(changeVisibility->name());
 
-    mObjectsWidget->clear();
-    for (int i=0; i < mObjects.size(); i++)
-        mObjectsWidget->addItem(mObjects[i]->objectName());
-
-    mObjectsWidget->setCurrentIndex(0);
-    if (! changeVisibility->sceneObject() && mObjects.size()) {
-        changeVisibility->setSceneObject(mObjects[0]);
-        //if (lastChangeVisibilityActionForObject(mObjects[0]) == mCurrentAction)
-        //    mObjects[0]->setAvailable(! mObjects[0]->isAvailable());
-    }
+    mObjectsWidget->loadFromAction(action);
 
     mAction = action;
 }
 
-void ChangeVisibilityEditorWidget::onObjectChanged(int index)
+void ChangeVisibilityEditorWidget::onObjectChanged(Object* obj)
 {
-    if (! mAction || index >= mObjects.size() || index < 0)
+    if (! mAction)
         return;
 
     /*if (mCurrentAction->sceneObject() && lastChangeVisibilityActionForObject(mCurrentAction->character()) == mCurrentAction) {
         mCurrentAction->character()->setAvailable(! mCurrentAction->character()->isAvailable());
     }*/
 
-    mAction->setSceneObject(mObjects[index]);
+    mAction->setSceneObject(obj);
     /*if (lastChangeVisibilityActionForObject(mCurrentAction->sceneObject()) == mCurrentAction) {
         mCurrentAction->character()->setAvailable(! mCurrentAction->character()->isAvailable());
     }*/
@@ -124,26 +114,3 @@ ChangeVisibility* ChangeVisibilityEditorWidget::currentAction()
 {
     return qobject_cast<ChangeVisibility*>(mAction);
 }
-
-QList<Object*> ChangeVisibilityEditorWidget::findObjects(bool shown)
-{
-    Scene* scene = 0;
-    QList<Object*> objects;
-
-    if (! mAction)
-        return objects;
-
-    scene = mAction->scene();
-    if (! scene)
-        return objects;
-
-    objects = scene->objects();
-
-    if (mAction->sceneObject()) {
-        int index = objects.indexOf(mAction->sceneObject());
-        objects.swap(index, 0);
-    }
-
-   return objects;
-}
-

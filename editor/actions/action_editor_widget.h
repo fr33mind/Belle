@@ -37,9 +37,6 @@ public:
     virtual void updateData(Action*);
     Action* action();
     void setAction(Action*);
-
-    QList<Object*> objects();
-    void setObjects(QList<Object*>&);
     ActionEditorWidget* copy();
 
 signals:

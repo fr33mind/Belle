@@ -22,6 +22,7 @@
 #include "action_editor_widget.h"
 #include "resource_manager.h"
 #include "change_visibility.h"
+#include "object_combobox.h"
 
 class ChangeVisibility;
 class Fade;
@@ -36,7 +37,7 @@ class ChangeVisibilityEditorWidget : public ActionEditorWidget
 
 
 protected:
-    QComboBox * mObjectsWidget;
+    ObjectComboBox * mObjectsWidget;
     QList<Object*> mObjects;
     FadeEditorWidget* mFadeEditorWidget;
     SlideEditorWidget* mSlideEditorWidget;
@@ -45,7 +46,6 @@ public:
     explicit ChangeVisibilityEditorWidget(QWidget *parent = 0);
     ~ChangeVisibilityEditorWidget();
     virtual void updateData(Action*);
-    QList<Object*> findObjects(bool);
     ChangeVisibility* currentAction();
 
     QComboBox* charactersWidget();
@@ -54,7 +54,7 @@ public:
     void setCharacters(const QList<Character*>&);
 
 private slots:
-    void onObjectChanged(int);
+    void onObjectChanged(Object*);
 
 private:
     void init();

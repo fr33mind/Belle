@@ -68,16 +68,6 @@ void ActionEditorWidget::onNameEdited(const QString& name)
         mAction->setObjectName(name);
 }
 
-void ActionEditorWidget::setObjects(QList<Object *> & objs)
-{
-    mObjects = objs;
-}
-
-QList<Object *> ActionEditorWidget::objects()
-{
-    return mObjects;
-}
-
 ActionEditorWidget* ActionEditorWidget::copy()
 {
     ActionEditorWidget* awidget = new ActionEditorWidget();

@@ -24,8 +24,7 @@
 FadeEditorWidget::FadeEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    //ResourcesComboBox * resourcesChooser = new ResourcesComboBox(this);
-    mObjectChooser = new QComboBox(this);
+    mObjectChooser = new ObjectComboBox(this);
     mFadeTypeChooser = new QComboBox(this);
     mFadeTypeChooser->addItems(QStringList() << tr("In") << tr("Out"));
     mDurationSpin = new QDoubleSpinBox(this);
@@ -33,7 +32,7 @@ FadeEditorWidget::FadeEditorWidget(QWidget *parent) :
     mDurationSpin->setSingleStep(0.1);
 
     connect(mFadeTypeChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentFadeTypeChanged(int)));
-    connect(mObjectChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentObjectChanged(int)));
+    connect(mObjectChooser, SIGNAL(objectChanged(Object*)), this, SLOT(onCurrentObjectChanged(Object*)));
     connect(mDurationSpin, SIGNAL(valueChanged(double)), SLOT(onDurationChanged(double)));
 
     beginGroup(tr("Fade Action"));
@@ -52,29 +51,7 @@ void FadeEditorWidget::updateData(Action * action)
     ActionEditorWidget::updateData(action);
     mAction = 0;
 
-    QList<Object*> objects;
-    mObjectChooser->clear();
-    if (fade->sceneObject()) {
-        mObjectChooser->addItem(fade->sceneObject()->objectName());
-        objects.append(fade->sceneObject());
-    }
-
-    Scene* scene = fade->scene();
-    if (scene) {
-        QList<Object*> objs = scene->objects();
-        for (int i=0; i < objs.size(); i++) {
-            if (objs[i] && objs[i] != fade->sceneObject()) {
-                mObjectChooser->addItem(objs[i]->objectName());
-                objects.append(objs[i]);
-            }
-        }
-    }
-
-    setObjects(objects);
-
-    if (! fade->sceneObject() && ! objects.isEmpty())
-        fade->setSceneObject(objects[0]);
-
+    mObjectChooser->loadFromAction(action);
     mFadeTypeChooser->setCurrentIndex(fade->fadeType());
     mDurationSpin->setValue(fade->duration());
     mAction = action;
@@ -87,12 +64,12 @@ void FadeEditorWidget::onCurrentFadeTypeChanged(int type)
         type ? fade->setFadeType(Fade::Out) : fade->setFadeType(Fade::In);
 }
 
-void FadeEditorWidget::onCurrentObjectChanged(int index)
+void FadeEditorWidget::onCurrentObjectChanged(Object* object)
 {
-    if (!mAction || index < 0 || index >= objects().size())
+    if (!mAction)
         return;
 
-    mAction->setSceneObject(objects()[index]);
+    mAction->setSceneObject(object);
 }
 
 void FadeEditorWidget::onDurationChanged(double time)
