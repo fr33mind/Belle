@@ -524,6 +524,7 @@ function Character(data, parent, initElement)
     var image;
     var state = null;
     var currState = data["state"];
+    var assetManager = this.getGame().getAssetManager();
     this.states = {};
     this.nameColor = null;
     this.textColor = null;
@@ -531,7 +532,7 @@ function Character(data, parent, initElement)
     if ("states" in data) {
         for(state in data["states"]) {
             if (state != currState) {
-              image = new AnimationImage(data.states[state], this);
+              image = assetManager.loadAsset(data.states[state], "Image");
               this.states[state] = image;
             }
         }
