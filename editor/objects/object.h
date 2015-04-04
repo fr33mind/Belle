@@ -24,6 +24,7 @@
 #include <QString>
 #include <QHash>
 
+#include "gameobject.h"
 #include "action.h"
 #include "interaction.h"
 #include "object_editor_widget.h"
@@ -38,7 +39,7 @@ class Scene;
 class ObjectEditorWidget;
 class Action;
 
-class Object : public QObject
+class Object : public GameObject
 {
     Q_OBJECT
     
@@ -63,16 +64,12 @@ class Object : public QObject
         void stopResizing();
         int percentWidth() const;
         int percentHeight() const;
-        Scene* scene() const;
         bool isValidName(const QString&);
 
         int borderWidth();
         void setBorderWidth(int);
         QColor borderColor();
         void setBorderColor(const QColor&);
-
-        void setEditableName(bool);
-        bool editableName();
 
         virtual void show();
         virtual void hide();
@@ -113,16 +110,12 @@ class Object : public QObject
         bool visible();
         void setVisible(bool);
 
-        QString type();
-        void setType(const QString&);
         void update();
         void setEventActions(Interaction::InputEvent, const QList<Action*> &);
-        void appendEventAction(Interaction::InputEvent, Action*);
-        void insertEventAction(Interaction::InputEvent, int, Action*);
         void removeEventActionAt(Interaction::InputEvent, int, bool del=false);
-        void removeEventAction(Interaction::InputEvent, Action*, bool del=false);
         void removeEventActions(Interaction::InputEvent, bool del=false);
         QList<Action*> actionsForEvent(Interaction::InputEvent);
+        Action* eventAction(Interaction::InputEvent, const QString&);
         bool hasActionForEvent(Action*, Interaction::InputEvent);
         void moveSharedEventActions(Object*, Object*, Interaction::InputEvent);
         void moveAllSharedEventActions(Object*, Object*);
@@ -146,24 +139,7 @@ class Object : public QObject
         void filterResourceData(QVariantMap&);
         QVariantMap fillWithResourceData(QVariantMap);
 
-        void lock();
-        void unlock();
-
-        void setResource(Object*);
-        Object* resource() const;
-
-        void addClone(Object*);
-        void removeClone(Object*);
-        QList<Object*> clones() const;
-
-        void addObserver(Object*);
-        void removeObserver(Object*);
-
         bool isResource() const;
-        void blockNotifications(bool);
-
-        bool isSynced() const;
-        void setSync(bool);
 
         bool setName(const QString&);
         QString name();
@@ -183,15 +159,21 @@ class Object : public QObject
         void onResizeEvent(QResizeEvent*);
         virtual void load(const QVariantMap &);
         void onParentResized(int, int);
+        void appendEventAction(Interaction::InputEvent, Action*);
+        void insertEventAction(Interaction::InputEvent, int, Action*);
+        void removeEventAction(Interaction::InputEvent, Action *);
+
+//    private slots:
+//        void eventActionChanged();
 
     signals:
-        void dataChanged(const QVariantMap& data=QVariantMap());
         void eventActionAdded(Interaction::InputEvent, Action*);
         void eventActionRemoved(Interaction::InputEvent, Action*);
         void positionChanged(int, int);
         void resized(int, int);
         void destroyed(Object* object=0);
         void synced();
+        void eventActionInserted(Interaction::InputEvent, int, Action*);
 
     private:
         //void init(const QString &, int, int, QObject*);
@@ -220,13 +202,11 @@ class Object : public QObject
         Padding mPadding;
         QList<QRect> mPreviousSceneRects;
         QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
-        bool mEditableName;
-        Object* mResource;
         void notify(const QString&, const QVariant&, const QVariant& prev=QVariant());
         void updateAspectRatio();
+        virtual void connectToResource();
 
     private: //variables
-        QString mType;
         QList<QRect> mResizeRects;
         bool mVisible;
         int mOriginalResizePointIndex;
@@ -240,14 +220,6 @@ class Object : public QObject
         int mCornerRadius;
         QPixmap* mScaledBackgroundImage;
         Background mBackground;
-        QList<Object*> mClones;
-        bool mSync;
-        bool mLock;
-
-private slots:
-        void resourceDestroyed();
-        void cloneDestroyed(Object*);
-
 };
 
 

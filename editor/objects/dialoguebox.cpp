@@ -30,14 +30,14 @@ DialogueBox::DialogueBox(QObject *parent, const QString& name) :
     TextBox *speakerTextBox = new TextBox("", this);
     speakerTextBox->setPlaceholderText("Narrator");
     speakerTextBox->setObjectName("speakerTextBox");
-    speakerTextBox->setEditableName(false);
+    speakerTextBox->setNameEditable(false);
     speakerTextBox->setHeight(30);
     this->append(speakerTextBox);
 
     QString text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus.";
     TextBox *dialogueTextBox = new TextBox("", this);
     dialogueTextBox->setPlaceholderText(text);
-    dialogueTextBox->setEditableName(false);
+    dialogueTextBox->setNameEditable(false);
     dialogueTextBox->setObjectName("dialogueTextBox");
     dialogueTextBox->setHeight(Scene::height()/3);
     this->append(dialogueTextBox);

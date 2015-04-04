@@ -24,14 +24,13 @@
 
 #include "scene.h"
 #include "utils.h"
-#include "scene_manager.h"
 #include "resource_manager.h"
 
 static ObjectEditorWidget * mEditorWidget = 0;
 static QFont mDefaultFont;
 
 Object::Object(QObject* parent, const QString& name):
-    QObject(parent)
+    GameObject(parent)
 {
     init(name);
     updateResizeRects();
@@ -39,7 +38,7 @@ Object::Object(QObject* parent, const QString& name):
 }
 
 Object::Object(const QVariantMap& data, QObject* parent):
-    QObject(parent)
+    GameObject(data, parent)
 {
     init("Object");
     _load(data);
@@ -52,20 +51,16 @@ void Object::init(const QString& name)
     mOpacity = 255;
     mBackground.setColor(QColor(255, 255, 255, 0));
     mCornerRadius = 0;
-    mType = "Object";
     mOriginalResizePointIndex = -1;
     mVisible = true;
-    mEditableName = true;
     mPercentWidth = 0;
     mPercentHeight = 0;
-    mResource = 0;
     mBorderWidth = 0;
     mBorderColor = QColor();
     mSelectedObject = 0;
     mKeepAspectRatio = false;
     mAspectRatio = 1;
     mScaledBackgroundImage = 0;
-    mSync = false;
     mEventToActions.insert(Interaction::MouseMove, QList<Action*>());
     mEventToActions.insert(Interaction::MousePress, QList<Action*>());
     mEventToActions.insert(Interaction::MouseRelease, QList<Action*>());
@@ -73,7 +68,7 @@ void Object::init(const QString& name)
     //check if name is valid
     if (objectName().isEmpty()) {
         if (parent() == ResourceManager::instance())
-            setObjectName(ResourceManager::instance()->newName(name));
+            setName(ResourceManager::instance()->newName(name));
         else {
             Scene* scene = qobject_cast<Scene*>(parent());
             if (scene)
@@ -105,27 +100,6 @@ QVariantMap Object::fillWithResourceData(QVariantMap data)
             data.insert(key, resourceData.value(key));
 
     return data;
-}
-
-Scene * Object::scene() const
-{
-    if (! this->parent())
-        return 0;
-
-    Scene* scene = qobject_cast<Scene*>(this->parent());
-    if (scene)
-        return scene;
-
-    Object* object = qobject_cast<Object*>(this->parent());
-    if (object)
-        return object->scene();
-
-    //in case this object is inside an action
-    Action* action = qobject_cast<Action*>(this->parent());
-    if (action)
-        return action->scene();
-
-    return 0;
 }
 
 bool Object::isValidName(const QString& name)
@@ -430,16 +404,6 @@ int Object::cornerRadius()
     return mCornerRadius;
 }
 
-QString Object::type()
-{
-    return mType;
-}
-
-void Object::setType(const QString & type)
-{
-    mType = type;
-}
-
 void Object::paint(QPainter & painter)
 {
     QRect rect(mSceneRect.x(), mSceneRect.y(), contentWidth(), contentHeight());
@@ -484,7 +448,7 @@ void Object::replaceEventActions(Interaction::InputEvent event, const QList<Acti
     }
 
     for(int i=0; i < delActions.size(); i++) {
-        removeEventAction(event, delActions[i], true);
+        removeEventAction(event, delActions[i]);
     }
 
     mEventToActions.insert(event, actions);
@@ -504,14 +468,32 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
 {
     if (action) {
         QList<Action*> actions;
+        Action* newAction = 0;
         if (mEventToActions.contains(event))
             actions = mEventToActions.value(event);
 
-        if (index >= 0 && index <= actions.size())
-            actions.insert(index, action);
+        //copy action if it comes from the resource
+        if (resource() && action->parent() == resource()) {
+            newAction = ActionInfoManager::typeToAction(action->toJsonObject(), this);
+            newAction->setResource(action);
+            action = newAction;
+        }
 
-        action->setParent(this);
-        mEventToActions.insert(event, actions);
+        if (! action->parent() || action->parent() != this) {
+            action->setParent(this);
+        }
+
+        if (index > actions.size())
+            index = actions.size();
+
+        if (index >= 0 && index <= actions.size()) {
+            actions.insert(index, action);
+            mEventToActions.insert(event, actions);
+        }
+
+        if (isSynced() && isResource()) {
+            emit eventActionInserted(event, index, action);
+        }
 
         /*if (mSync) {
             if (mResource)
@@ -547,12 +529,12 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
    }
 }
 
-void Object::removeEventAction(Interaction::InputEvent event, Action* action, bool del)
+void Object::removeEventAction(Interaction::InputEvent event, Action* action)
 {
     if (! action)
         return;
     QList<Action*> actions = mEventToActions.value(event);
-    this->removeEventActionAt(event, actions.indexOf(action), del);
+    this->removeEventActionAt(event, actions.indexOf(action));
 }
 
 void Object::removeEventActions(Interaction::InputEvent event, bool del)
@@ -606,6 +588,17 @@ QList<Action*> Object::actionsForEvent(Interaction::InputEvent event)
     return mEventToActions.value(event, QList<Action*>());
 }
 
+Action* Object::eventAction(Interaction::InputEvent event, const QString& name)
+{
+    QList<Action*> actions = actionsForEvent(event);
+    for(int i=0; i < actions.size(); i++) {
+        if (actions[i]->name() == name)
+            return actions[i];
+    }
+
+    return 0;
+}
+
 bool Object::hasActionForEvent(Action* action, Interaction::InputEvent event)
 {
     return mEventToActions.value(event, QList<Action*>()).contains(action);
@@ -614,8 +607,8 @@ bool Object::hasActionForEvent(Action* action, Interaction::InputEvent event)
 QVariantMap Object::toJsonObject(bool internal)
 {
     QVariantMap object;
-    object.insert("name", objectName());
-    object.insert("type", mType);
+    object.insert("name", name());
+    object.insert("type", type());
     object.insert("x", mSceneRect.x());
     object.insert("y", mSceneRect.y());
     object.insert("opacity", mOpacity);
@@ -687,7 +680,7 @@ QVariantMap Object::toJsonObject(bool internal)
     if (mBorderColor.isValid() || internal)
         object.insert("borderColor", Utils::colorToList(mBorderColor));
 
-    object.insert("sync", mSync);
+    object.insert("sync", isSynced());
 
     //remove attributes that are the same in the resource
     filterResourceData(object);
@@ -697,11 +690,12 @@ QVariantMap Object::toJsonObject(bool internal)
 
 void Object::filterResourceData(QVariantMap& objectData)
 {
-    if (! mResource)
+    GameObject* res = resource();
+    if (! res)
         return;
 
-    objectData.insert("resource", mResource->objectName());
-    QVariantMap resourceData = mResource->toJsonObject(false);
+    objectData.insert("resource", res->name());
+    QVariantMap resourceData = res->toJsonObject(false);
 
     QStringList keys = objectData.keys();
     foreach(const QString& key, keys) {
@@ -970,16 +964,6 @@ Object* Object::selectedObject()
     return mSelectedObject;
 }
 
-void Object::setEditableName(bool editable)
-{
-    mEditableName = editable;
-}
-
-bool Object::editableName()
-{
-    return mEditableName;
-}
-
 Padding Object::padding()
 {
     return mPadding;
@@ -1015,64 +999,6 @@ void Object::setPadding(const Padding& padding)
 
     mPadding = padding;
     emit dataChanged();
-}
-
-void Object::setResource(Object* resource)
-{
-    if (! resource || mResource == resource)
-        return;
-
-    if (mResource) {
-        mResource->disconnect(this);
-        mResource->removeClone(this);
-    }
-
-    mResource = resource;
-    mResource->addClone(this);
-    if (isSynced())
-        this->addObserver(mResource);
-    connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()));
-}
-
-Object* Object::resource() const
-{
-    return mResource;
-}
-
-void Object::addClone(Object* object)
-{
-    if (! object)
-        return;
-
-    mClones.append(object);
-    //if this object is a resource with clones, set sync active
-    mSync = true;
-    connect(object, SIGNAL(destroyed(Object*)), this, SLOT(cloneDestroyed(Object*)));
-    if (object->isSynced())
-        this->addObserver(object);
-}
-
-void Object::removeClone(Object* object)
-{
-    if (object && mClones.contains(object)) {
-        moveAllSharedEventActions(object, this);
-        mClones.removeAt(mClones.indexOf(object));
-    }
-}
-
-QList<Object*> Object::clones() const
-{
-    return mClones;
-}
-
-void Object::resourceDestroyed()
-{
-    mResource = 0;
-}
-
-void Object::cloneDestroyed(Object* obj)
-{
-    this->removeClone(obj);
 }
 
 void Object::moveSharedEventActions(Object* src, Object* dest, Interaction::InputEvent ev)
@@ -1235,7 +1161,7 @@ void Object::_load(const QVariantMap &data)
         setBorderColor(Utils::listToColor(data.value("borderColor").toList()));
 
     if (data.contains("sync") && data.value("sync").type() == QVariant::Bool) {
-        mSync = data.value("sync").toBool();
+        setSync(data.value("sync").toBool());
     }
 
     mPadding = Padding(data.value("padding").toMap());
@@ -1255,15 +1181,6 @@ void Object::load(const QVariantMap &data)
     this->_load(_data);
 }
 
-void Object::blockNotifications(bool block)
-{
-    // don't block signals for resources
-    if (block && mClones.size())
-        return;
-
-    this->blockSignals(block);
-}
-
 void Object::notify(const QString & key, const QVariant & value, const QVariant & prev)
 {
     QVariantMap data;
@@ -1272,20 +1189,6 @@ void Object::notify(const QString & key, const QVariant & value, const QVariant 
         data.insert("previousValue", prev);
 
     emit dataChanged(data);
-}
-
-void Object::addObserver(Object * object)
-{
-    if (object && object->isSynced()) {
-        connect(this, SIGNAL(dataChanged(const QVariantMap&)), object, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
-    }
-}
-
-void Object::removeObserver(Object * object)
-{
-    if (object) {
-        disconnect(this, SIGNAL(dataChanged(const QVariantMap&)), object, SLOT(load(const QVariantMap&)));
-    }
 }
 
 bool Object::isResource() const
@@ -1308,44 +1211,6 @@ void Object::copyResourceActions(Interaction::InputEvent event)
     }
 
     mEventToActions.insert(event, copiedActions);
-}
-
-void Object::sync()
-{
-    if (mResource) {
-        this->load(mResource->toJsonObject(true));
-        this->addObserver(mResource);
-        mResource->addObserver(this);
-        emit synced();
-    }
-}
-
-void Object::unsync()
-{
-    if (mResource) {
-        this->removeObserver(mResource);
-        mResource->removeObserver(this);
-        copyResourceActions(Interaction::MouseMove);
-        copyResourceActions(Interaction::MousePress);
-        copyResourceActions(Interaction::MouseRelease);
-    }
-}
-
-void Object::setSync(bool sync)
-{
-    if (mSync == sync)
-        return;
-
-    mSync = sync;
-    if (mSync)
-        this->sync();
-    else
-        this->unsync();
-}
-
-bool Object::isSynced() const
-{
-    return mSync;
 }
 
 void Object::onParentResized(int w, int h)
@@ -1474,6 +1339,15 @@ QString Object::name()
 void Object::updateAspectRatio()
 {
     mAspectRatio = (float) width() / height();
+}
+
+void Object::connectToResource()
+{
+    GameObject::connectToResource();
+    Object * resource = qobject_cast<Object*>(this->resource());
+    if (resource) {
+        connect(resource, SIGNAL(eventActionInserted(Interaction::InputEvent,int,Action*)), this, SLOT(insertEventAction(Interaction::InputEvent,int,Action*)));
+    }
 }
 
 /*void Object::setEditorWidgetFilters(const QStringList& filters)

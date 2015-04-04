@@ -220,7 +220,7 @@ void ObjectEditorWidget::updateData(Object *currObj)
     }
     else if (currObj->isResource()) {
         this->setFilters(QStringList() << "Resource");
-        QList<Object*> clones = currObj->clones();
+        QList<GameObject*> clones = currObj->clones();
         QString name("");
         mClonesComboBox->clear();
 
@@ -240,7 +240,7 @@ void ObjectEditorWidget::updateData(Object *currObj)
 
     if (currObj->resource()) {
         //mChooseObjectComboBox->addItem(currObj->resource()->objectName() + tr("(resource)"));
-        mObjectsHierarchy.append(currObj->resource());
+        //mObjectsHierarchy.append(currObj->resource());
     }
 
     //mChooseObjectComboBox->addItem(currObj->objectName() + tr("(copy)"));
@@ -254,7 +254,7 @@ void ObjectEditorWidget::updateData(Object *currObj)
     mBackgroundOpacitySlider->setValue(currObj->backgroundOpacity());
     mNameEdit->setText(currObj->objectName());
     mNameEdit->setStyleSheet("");
-    mNameEdit->setEnabled(currObj->editableName());
+    mNameEdit->setEnabled(currObj->nameEditable());
     mXSpin->setRange(-currObj->width(), Scene::width());
     mXSpin->setValue(currObj->x());
     mYSpin->setRange(-currObj->height(), Scene::height());
