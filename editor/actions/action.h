@@ -21,9 +21,9 @@
 #include <QIcon>
 #include <QString>
 
-#include "interaction.h"
+#include "gameobject.h"
 #include "resource_manager.h"
-#include "objects/object.h"
+#include "interaction.h"
 #include "action_editor_widget.h"
 #include "action_info.h"
 
@@ -32,9 +32,8 @@ class Object;
 class ResourceManager;
 class Wait;
 class ActionInfo;
-class Scene;
 
-class Action : public QObject
+class Action : public GameObject
 {
     Q_OBJECT
 
@@ -50,7 +49,6 @@ public:
     virtual void setSceneObject(Object*);
     void setSceneObject(const QString&);
     static void setActionInfo(ActionInfo*);
-    Scene* scene() const;
     bool isActive();
 
     void setIcon(const QIcon&);
@@ -61,16 +59,8 @@ public:
 
     void setAllowSkipping(bool);
 
-    void setObjectName(const QString &);
-
     bool supportsEvent(Interaction::InputEvent);
     void setSupportedEvents(Interaction::InputEvents);
-
-    QString type() const;
-    void setType(const QString&);
-
-    QString name() const;
-    void setName(const QString&);
 
     void setDisplayText(const QString&);
     virtual QString displayText() const;
@@ -91,12 +81,7 @@ public:
 
     static ActionInfo Info;
 
-signals:
-    void dataChanged();
-    void objectNameChanged();
-
 public slots:
-    void onDataChanged();
     void onSceneObjectDestroyed();
 
 private:

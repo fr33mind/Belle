@@ -27,13 +27,13 @@ static ActionEditorWidget* mEditorWidget = 0;
 ActionInfo Action::Info;
 
 Action::Action(QObject *parent) :
-    QObject(parent)
+    GameObject(parent)
 {
     init();
 }
 
 Action::Action(const QVariantMap& data, QObject *parent) :
-    QObject(parent)
+    GameObject(data, parent)
 {
     init();
     if (parent && data.contains("object") && data.value("object").type() == QVariant::String) {
@@ -46,16 +46,8 @@ Action::Action(const QVariantMap& data, QObject *parent) :
         }
     }
 
-    if (data.contains("name") && data.value("name").type() == QVariant::String) {
-        setObjectName(data.value("name").toString());
-    }
-
     if (data.contains("skippable") && data.value("skippable").type() == QVariant::Bool) {
         mAllowSkipping = data.value("skippable").toBool();
-    }
-
-    if (data.contains("type") && data.value("type").type() == QVariant::String) {
-        setType(data.value("type").toString());
     }
 
     setMouseClickOnFinish(data.contains("wait"));
@@ -72,9 +64,7 @@ void Action::init()
     setType(Info.type);
     setName(Info.name);
     setIcon(Info.icon);
-    connect(this, SIGNAL(dataChanged()), this, SLOT(onDataChanged()));
 }
-
 
 void Action::setActionEditorWidget(ActionEditorWidget* widget)
 {
@@ -126,17 +116,6 @@ void Action::setDescription(const QString& desc)
     mDescription = desc;
 }
 
-QString Action::name() const
-{
-    return mName;
-}
-
-void Action::setName(const QString & name)
-{
-    mName = name;
-}
-
-
 Object* Action::sceneObject() const
 {
     if (mObject)
@@ -179,10 +158,6 @@ void Action::onSceneObjectDestroyed()
     mObjectName = "";
 }
 
-void Action::onDataChanged()
-{
-}
-
 void Action::paint(const QPainter & painter)
 {
 }
@@ -203,16 +178,6 @@ QString Action::displayText() const
 QString Action::toString() const
 {
     return QString("%1 [%2]").arg(displayText()).arg(mName);
-}
-
-QString Action::type() const
-{
-    return mType;
-}
-
-void Action::setType(const QString & type)
-{
-    mType = type;
 }
 
 bool Action::supportsEvent(Interaction::InputEvent ev)
@@ -243,11 +208,8 @@ void Action::initFrom(Action* action)
 
 QVariantMap Action::toJsonObject()
 {
-    QVariantMap action;
-    if (! objectName().isEmpty())
-        action.insert("name", objectName());
+    QVariantMap action = GameObject::toJsonObject();
 
-    action.insert("type", mType);
     if (! mAllowSkipping) //this property is true by default
         action.insert("skippable", mAllowSkipping);
     if (mMouseClickOnFinish) {
@@ -262,13 +224,6 @@ QVariantMap Action::toJsonObject()
     return action;
 }
 
-void Action::setObjectName(const QString &name)
-{
-    QObject::setObjectName(name);
-
-    emit objectNameChanged();
-}
-
 void Action::focusIn()
 {
     mActive = true;
@@ -277,34 +232,6 @@ void Action::focusIn()
 void Action::focusOut()
 {
     mActive = false;
-}
-
-Scene* Action::scene() const
-{
-    //shouldn't happen, but just in case
-    if (! this->parent())
-        return 0;
-
-    //usual case - action's parent is the scene
-    if (qobject_cast<Scene*>(this->parent()))
-        return qobject_cast<Scene*>(this->parent());
-
-    //in case this action is inside another action
-    if (qobject_cast<Action*>(this->parent())) {
-        Action* action = qobject_cast<Action*>(this->parent());
-        if (action->scene())
-            return action->scene();
-    }
-
-    //in case this action is inside an object
-    if (qobject_cast<Object*>(this->parent())) {
-        Object* obj = qobject_cast<Object*>(this->parent());
-        if (obj->scene())
-            return obj->scene();
-    }
-
-    //shouldn't happen either, but just in case
-    return 0;
 }
 
 bool Action::isActive()
