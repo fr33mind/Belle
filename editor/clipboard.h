@@ -20,18 +20,9 @@
 #include <QObject>
 #include <QHash>
 
-/*namespace Clipboard {
-    enum OperationType {
-        Copy,
-        Cut
-    };
-}*/
-
-#include "object.h"
-#include "scene.h"
-
 class Object;
 class Scene;
+class Action;
 
 class Clipboard : public QObject
 {

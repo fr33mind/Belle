@@ -17,6 +17,7 @@
 #include "gotoscene_editorwidget.h"
 
 #include "scene.h"
+#include "scene_manager.h"
 
 GoToSceneEditorWidget::GoToSceneEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)

@@ -18,6 +18,10 @@
 
 #include <QDebug>
 
+#include "action.h"
+#include "object.h"
+#include "scene.h"
+
 Clipboard::Clipboard(QObject *parent) :
     QObject(parent)
 {

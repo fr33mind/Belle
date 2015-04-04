@@ -20,6 +20,8 @@
 #include <QFile>
 #include <QtCore/qmath.h>
 
+#include "action.h"
+#include "object.h"
 #include "scene_manager.h"
 #include "textbox.h"
 #include "utils.h"

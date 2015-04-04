@@ -19,7 +19,7 @@
 #include <QDebug>
 
 #include "menu.h"
-#include "scene_manager.h"
+#include "scene.h"
 #include "resource_manager.h"
 
 static ShowMenuEditorWidget* mEditorWidget = 0;

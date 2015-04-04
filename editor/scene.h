@@ -24,14 +24,13 @@
 #include <QResizeEvent>
 #include <QSize>
 
-#include "object.h"
-#include "action.h"
 #include "scene_editor_widget.h"
 #include "imagefile.h"
-#include "scene_manager.h"
 
 class SceneManager;
 class SceneEditorWidget;
+class Object;
+class Action;
 
 class Scene : public QObject
 {
