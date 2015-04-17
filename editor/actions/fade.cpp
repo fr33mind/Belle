@@ -78,8 +78,10 @@ QString Fade::fadeTypeString() const
 void Fade::setFadeType(Fade::Type type)
 {
     mFadeType = type;
-    QString namepart("");
-    type ? namepart = tr("out") : namepart = tr("in");
+    QString namepart(tr("out"));
+
+    if (type == Fade::In)
+        namepart = tr("in");
 
     setName(QString("%1 %2").arg(tr("Fade")).arg(namepart));
     emit dataChanged();
@@ -88,9 +90,9 @@ void Fade::setFadeType(Fade::Type type)
 void Fade::setFadeType(const QString& type)
 {
     if (type == "in")
-        mFadeType = Fade::In;
+        setFadeType(Fade::In);
     else
-        mFadeType = Fade::Out;
+        setFadeType(Fade::Out);
 }
 
 QString Fade::fadeTypeToString(Fade::Type type) const
