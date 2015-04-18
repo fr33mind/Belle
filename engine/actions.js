@@ -210,9 +210,6 @@ Fade.prototype.execute = function () {
 }
 
 Fade.prototype.fade = function () {
-    if (this.isFinished())
-      return;
-    
     var now = new Date().getTime();
     var passed = now - this.prevTime;
     this.timePassed += passed;
@@ -558,9 +555,6 @@ belle.extend(ChangeVisibility, Action);
 
 ChangeVisibility.prototype.execute = function () 
 {
-    if (this.isFinished()) {
-      //return;
-    }
     var object = this.getObject();
     
     if (! object || object.visible == this.show) {
@@ -590,9 +584,6 @@ ChangeVisibility.prototype.execute = function ()
 
 ChangeVisibility.prototype.check = function () 
 {
-    if (this.isFinished())
-      return;
-    
     var finish = true;
     var object = this.getObject();
     
@@ -920,9 +911,6 @@ Branch.prototype.execute = function()
 
 Branch.prototype.actionFinished = function(action)
 {  
-  if (this.isFinished())
-    return;
-  
   if (this.actions.length)
     this.actions.shift();
   
