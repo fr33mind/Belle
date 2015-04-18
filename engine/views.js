@@ -278,6 +278,7 @@ GameView.prototype.clear = function(all)
   if (all)
     this.bgcontext.clearRect(0, 0, this.bgcanvas.attr("width"), this.bgcanvas.attr("height"));
   this.context.clearRect(0, 0, this.canvas.attr("width"), this.canvas.attr("height"));
+  this.hoveredObject = null;
   this._cleared = true;
 }
 
