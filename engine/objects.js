@@ -285,6 +285,11 @@ Object.prototype.mouseLeaveEvent = function(ev)
     if (! this.visible)
       return;
 
+    //make sure mousemove actions are stopped
+    var actions = this.mouseMoveActions;
+    for(var i =0; i !== actions.length; i++)
+        actions[i].skip();
+
     if (this.defaultState)
       this.load(this.defaultState);
 
