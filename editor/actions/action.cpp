@@ -36,13 +36,19 @@ Action::Action(const QVariantMap& data, QObject *parent) :
     GameObject(data, parent)
 {
     init();
-    if (parent && data.contains("object") && data.value("object").type() == QVariant::String) {
+    if (data.contains("object") && data.value("object").type() == QVariant::String) {
         mObjectName = data.value("object").toString();
-        Scene * scene = this->scene();
-        if (scene) {
-            Object* obj = scene->object(mObjectName);
-            if (obj)
-                mObject = obj;
+
+        //check if parent is the target object
+        Object* obj = qobject_cast<Object*>(parent);
+        if (obj && obj->name() == mObjectName) {
+            mObject = obj;
+        }
+
+        if (! mObject) {
+            Scene * scene = this->scene();
+            if (scene)
+                connect(scene, SIGNAL(loaded()), this, SLOT(sceneLoaded()));
         }
     }
 
@@ -120,7 +126,8 @@ Object* Action::sceneObject() const
 {
     if (mObject)
         return mObject;
-    else if (! mObjectName.isEmpty()) {
+
+    if (! mObjectName.isEmpty()) {
         Scene * scene = this->scene();
         if (scene)
           return scene->object(mObjectName);
@@ -218,8 +225,11 @@ QVariantMap Action::toJsonObject()
         action.insert("wait", wait.toJsonObject());
     }
 
-    if (mObject)
-        action.insert("object", mObject->objectName());
+    Object* object = sceneObject();
+    if (object)
+        action.insert("object", object->name());
+    else if (! mObjectName.isEmpty())
+        action.insert("object", mObjectName);
 
     return action;
 }
@@ -237,4 +247,15 @@ void Action::focusOut()
 bool Action::isActive()
 {
     return mActive;
+}
+
+void Action::sceneLoaded()
+{
+    if (mObject || mObjectName.isEmpty())
+        return;
+
+    Scene* scene = this->scene();
+    if (scene) {
+        setSceneObject(scene->object(mObjectName));
+    }
 }

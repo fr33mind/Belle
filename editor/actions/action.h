@@ -84,6 +84,9 @@ public:
 public slots:
     void onSceneObjectDestroyed();
 
+private slots:
+    void sceneLoaded();
+
 private:
     Object* mObject;
     QString mObjectName;
