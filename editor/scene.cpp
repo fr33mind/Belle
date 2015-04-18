@@ -77,6 +77,8 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
                 appendAction(action);
         }
     }
+
+    emit loaded();
 }
 
 
@@ -217,11 +219,10 @@ void Scene::appendObject(Object* object, bool select, bool temporarily)
 
     this->_appendObject(object, temporarily);
 
-    if (! temporarily)
+    if (! temporarily) {
         this->_reorderObject(object);
-
-    if (! temporarily)
         emit objectAdded(object);
+    }
 
     if (select)
         selectObject(object);

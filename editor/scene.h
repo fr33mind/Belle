@@ -137,6 +137,7 @@ class Scene : public QObject
        void actionRemoved(int);
        void objectAdded(Object*);
        void objectRemoved(Object*);
+       void loaded();
 
 private:
        void init(const QString&);
