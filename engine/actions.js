@@ -855,7 +855,7 @@ function Branch(data, parent)
         for(var i=0; i < actions.length; i++) {
           action = belle.createAction(actions[i], this);
           if (action)
-            this.trueActions.push(action);
+            this.falseActions.push(action);
         }
     }
     
@@ -1327,8 +1327,8 @@ ChangeGameVariable.prototype.execute = function()
 {   
     var currValue = "";
     var newValue = this.value;
-    if (game.hasVariable(this.variable))
-        currValue = game.getValue(this.variable);
+    if (this._game.hasVariable(this.variable))
+        currValue = this._game.getVariableValue(this.variable);
     
     //if arithmetic operation
     if (this.validOperators.slice(1,5).contains(this.operator)) {
@@ -1367,7 +1367,7 @@ ChangeGameVariable.prototype.execute = function()
             break;
     }
     
-    game.addVariable(this.variable, currValue);
+    this._game.addVariable(this.variable, currValue);
 
     this.setFinished(true);
 }
