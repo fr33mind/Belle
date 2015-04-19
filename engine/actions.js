@@ -761,7 +761,8 @@ GoToLabel.prototype.execute = function()
 
 GoToLabel.prototype.resetActions = function(from, to)
 {
-    var scene = game.getScene();
+    var game = this.getGame(),
+        scene = game.getScene();
     if (! scene)
       return;
 
@@ -900,6 +901,7 @@ belle.extend(Branch, Action);
 
 Branch.prototype.execute = function()
 {
+  var game = this.getGame();
   this.result = eval(this.condition);
   this.actions = (this.result === true) ? this.trueActions : this.falseActions;
   this.actions = this.actions.slice(0);
@@ -1006,7 +1008,7 @@ Branch.prototype.loadCondition = function(condition)
 
             if (name) {
                 if (name.search(variable_pattern) != -1)
-                  conditionParts.push("game.getValue('" + name + "')");
+                  conditionParts.push("game.getVariableValue('" + name + "')");
                 else
                   conditionParts.push(name);
                 name = "";
@@ -1042,7 +1044,7 @@ Branch.prototype.loadCondition = function(condition)
     
     if (name) {
         if (name.search(variable_pattern) != -1)
-          conditionParts.push("game.getValue('" + name + "')");
+          conditionParts.push("game.getVariableValue('" + name + "')");
         else
           conditionParts.push(name);
     }
@@ -1193,6 +1195,7 @@ belle.extend(StopSound, Action);
 
 StopSound.prototype.execute = function()
 {
+    var game = this.getGame();
     if (this.soundPath)
         game.stopSound(this.soundPath, this.fade);
     
