@@ -855,7 +855,7 @@ function Branch(data, parent)
         for(var i=0; i < actions.length; i++) {
           action = belle.createAction(actions[i], this);
           if (action)
-            this.trueActions.push(action);
+            this.falseActions.push(action);
         }
     }
     
