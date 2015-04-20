@@ -104,7 +104,9 @@
       }
     }
     else if (type == "audio" || type == "sound" || type == "music") {
-      asset = new buzz.sound(path);
+      asset = new buzz.sound(path, {
+                      preload: true
+                  });
       asset.bind('canplay', function() {
         self.assetLoaded(this);
       });
