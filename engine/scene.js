@@ -224,19 +224,25 @@ Scene.prototype.getCurrentAction = function() {
   return this.getAction();
 }
 
-Scene.prototype.getAction = function(id, type) {
-      
-    if (typeof id == "number") {
+Scene.prototype.getAction = function(action)
+{
+    var actions = this.getActions();
+
+    if (! action)
+      return null;
+
+    if (typeof action == "number") {
       if (id >= 0 && id < this.actions.length)
 	return this.actions[id];
     }
-    else if (typeof id == "string") {
+    else if (typeof action == "string") {
         for (var i=0; i < this.actions.length; i++)
-            if (this.actions[i].name == id && (! type || type == this.actions[i].type))
+            if (this.actions[i].name == action)
                 return this.actions[i];
     }
-    else if (id === undefined)
-        return this.action;
+    else if (belle.isInstance(action, belle.actions.Action) && actions.indexOf(action) !== -1) {
+      return action;
+    }
     
     return null;    
 }
