@@ -23,6 +23,7 @@
   function GameObject(data, parent)
   {
     CoreObject.call(this, parent);
+    data = data || {};
     this.name = data.name;
     this.type = data.type;
     this.data = data;
