@@ -756,6 +756,7 @@ GoToLabel.prototype.execute = function()
       gameModel.setNextAction(this.label.name);
    }
 
+   gameModel.nextAction();
    this.setFinished(true);
 }
 
@@ -818,6 +819,7 @@ GoToScene.prototype.goto = function(target)
    }
 
    gameModel.nextScene();
+   this.setFinished(true);
 }
 
 GoToScene.prototype.execute = function()
