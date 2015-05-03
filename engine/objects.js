@@ -329,11 +329,15 @@ Object.prototype.mouseMove = function(event)
 
 Object.prototype.processEvent = function(event, type)
 {
-    var x = event.canvasX;
-    var y = event.canvasY;
+    var x = event.canvasX,
+        y = event.canvasY,
+        gameModel = this.getGameModel();
 
     if (! this.contains(x, y))
-        return false;
+      return false;
+
+    if (! gameModel)
+      return false;
 
     var actions = [],
         triggered = false;
@@ -348,8 +352,7 @@ Object.prototype.processEvent = function(event, type)
         actions = this.mousePressActions;
     }
 
-    for(var i =0; i !== actions.length; i++)
-        actions[i].execute();
+    gameModel.executeActions(actions);
 
     triggered = this.trigger(type);
 
