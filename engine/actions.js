@@ -1397,6 +1397,91 @@ RunScript.prototype.execute = function()
     this.setFinished(true);
 }
 
+/*** ActionGroup ***/
+
+function ActionGroup(data, parent)
+{
+    Action.call(this, data, parent);
+    this.actions = [];
+    this._actions = [];
+}
+
+belle.extend(ActionGroup, Action);
+
+ActionGroup.prototype.execute = function()
+{
+    this._actions = this.actions.slice(0);
+    this._nextAction();
+}
+
+ActionGroup.prototype._executeAction = function(action)
+{
+    action.setFinished(false);
+    setTimeout(function() {
+      action.execute();
+    }, 0);
+}
+
+ActionGroup.prototype._actionFinished = function()
+{
+    if (this._actions.length) {
+      this._actions.shift();
+    }
+
+    this._nextAction();
+}
+
+ActionGroup.prototype._nextAction = function()
+{
+    if (this._actions.length)
+      this._executeAction(this._actions[0]);
+    else
+      this.setFinished(true);
+}
+
+ActionGroup.prototype.addAction = function(action)
+{
+  if (! action)
+    return;
+
+  action.bind("finished", this, this._actionFinished, true);
+  this.actions.push(action);
+}
+
+ActionGroup.prototype.addActions = function(actions)
+{
+  if (! actions)
+    return;
+
+  for(var i=0; i < actions.length; i++) {
+    this.addAction(actions[i]);
+  }
+}
+
+ActionGroup.prototype.clear = function()
+{
+  this.setFinished(true);
+  this.actions = [];
+}
+
+ActionGroup.prototype.setFinished = function(finished)
+{
+  Action.prototype.setFinished.call(this, finished);
+  if (finished) {
+    var action = this._actions[0];
+    this._actions = [];
+    if (action)
+      action.setFinished(true);
+  }
+}
+
+ActionGroup.prototype.skip = function()
+{
+  Action.prototype.skip.call(this);
+  if (this._actions.length)
+    this._actions[0].skip();
+}
+
 //Expose objects
 actions.Action = Action;
 actions.Fade = Fade;
@@ -1419,6 +1504,7 @@ actions.ShowMenu = ShowMenu;
 actions.GetUserInput = GetUserInput;
 actions.ChangeGameVariable = ChangeGameVariable;
 actions.RunScript = RunScript;
+actions.ActionGroup = ActionGroup;
 
 }(belle.actions));
 
