@@ -838,9 +838,8 @@ function Branch(data, parent)
     this.condition = "";
     this.trueActions = [];
     this.falseActions = [];
-    this.actions = [];
+    this._actionGroup = null;
     this.result = null;
-    var branch = this;
     var action;
     var actions;
    
@@ -862,41 +861,8 @@ function Branch(data, parent)
         }
     }
     
-    actions = this.trueActions.concat(this.falseActions);
-    for(var i=0; i < actions.length; i++) {
-      actions[i].bind("finished", this, function(){
-        this.actionFinished(this);
-      });
-    }
-    
     if ("condition" in data)
       this.loadCondition(data["condition"]);
-    
-    /*if ("condition" in data) {
-        var condition = data["condition"];
-        var parts = condition.split(" ");
-        var keywords = ["in", "true", "false", "defined", "undefined", "and", "or"];
-        var operators = ["==", "!=" , ">" , ">=", "<", "<="];
-        
-        for(var i=0; i < parts.length; i++) {
-            if (keywords.indexOf(parts[i]) !== -1 || parseInt(parts[i]) !== NaN || parts[i].indexOf('"') != -1)
-                continue;
-            parts[i] = "Novel.variables['" + parts[i] + "']";
-        }
-        
-        if (condition.indexOf(" contains ") !== -1) {
-            var index = 0;
-            while(parts.indexOf("contains") != -1) {
-                index = parts.indexOf("contains");
-                if (index+1 < parts.length && index-1 >= 0) {
-                    parts[index-1] = parts[index-1] + ".indexOf(" + parts[index+1] + ") !== -1";
-                    parts.splice(index, 2);
-                }
-            }
-        }
-        
-        condition = parts.join(" ");
-    }*/
 }
 
 belle.extend(Branch, Action);
@@ -905,44 +871,32 @@ Branch.prototype.execute = function()
 {
   var game = this.getGame();
   this.result = eval(this.condition);
-  this.actions = (this.result === true) ? this.trueActions : this.falseActions;
-  this.actions = this.actions.slice(0);
-  if (this.actions.length)
-    this.actions[0].execute();
-  else
-    this.setFinished(true);
-}
+  var actions = (this.result === true) ? this.trueActions : this.falseActions;
 
-Branch.prototype.actionFinished = function(action)
-{  
-  if (this.actions.length)
-    this.actions.shift();
-  
-  if (this.actions.length)
-    this.actions[0].execute();
-  else
+  if (this._actionGroup)
+    this._actionGroup.setFinished(true);
+  this._actionGroup = new ActionGroup();
+  this._actionGroup.addActions(actions);
+  this._actionGroup.bind("finished", this, function() {
     this.setFinished(true);
+  });
+  this._actionGroup.execute();
 }
 
 Branch.prototype.setFinished = function(finished)
 {
-  if (! finished) {
-    var actions = this.trueActions.concat(this.falseActions);
-    for(var i=0; i < actions.length; i++) {
-      actions[i].setFinished(finished);
-    }
-  }
-  
   Action.prototype.setFinished.call(this, finished);
+  if (this._actionGroup)
+    this._actionGroup.setFinished(finished);
 }
 
 Branch.prototype.skip = function(finished)
 {
-  if (this.actions.length) {
-    this.actions[0].skip();
+  if (this._actionGroup) {
+    this._actionGroup.skip();
     return;
   }
-  
+
   Action.prototype.skip.call(this);
 }
 
