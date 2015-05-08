@@ -38,8 +38,9 @@ function Action(data, parent)
     this.eventListeners = {};
     this.objectName = "";
     this.object = null;
+    this.running = false;
     var game = this.getGame();
-    
+
     if (data) {
         if ("object" in data) {
           var scene = this.getScene();
@@ -72,12 +73,8 @@ function Action(data, parent)
 
 belle.extend(Action, GameObject);
 
-Action.prototype.getInterval = function() {
-    return this.interval;
-}
-
-Action.prototype.setInterval = function(interval) {
-    this.interval = interval;
+Action.prototype.isRunning = function() {
+    return this.running;
 }
 
 Action.prototype.isFinished = function() {
@@ -105,14 +102,25 @@ Action.prototype.setFinished = function(finished) {
 Action.prototype.skip = function() 
 {
     if (! this.skippable)
-        return false;
+        return;
+
+    this.onSkip();
 
     if (this.wait && this.waiting) {
-      return this.wait.skip();
+      this.wait.skip();
+      return;
     }
 
     this.setFinished(true);
-    return true;
+}
+
+Action.prototype.isSkippable = function()
+{
+  return this.skippable;
+}
+
+Action.prototype.onSkip = function()
+{
 }
 
 Action.prototype.reload = function ()
@@ -204,7 +212,7 @@ Fade.prototype.execute = function () {
 
     this.prevTime = new Date().getTime();
     this.timePassed = 0;
-     
+
     this.interval = setInterval(function() {t.fade();}, this.intervalDuration);        
     this.getObject().redraw = true;
 }
@@ -248,20 +256,17 @@ Fade.prototype.fade = function () {
     object.redraw = true;
 }
 
-Fade.prototype.skip = function () {
-    var skipped = Action.prototype.skip.call(this);
-    if (skipped) {
-      clearInterval(this.interval);
-      this.getObject().setOpacity(this.target);
-    }
-    return skipped;
-}
-
 Fade.prototype.reset = function () {
     Action.prototype.reset.call(this);
     var object = this.getObject();
     object.setOpacity(this.target);
     object.setBackgroundOpacity(this.bgTarget);
+}
+
+Fade.prototype.onSkip = function () {
+  if (this.interval)
+    clearInterval(this.interval);
+  this.getObject().setOpacity(this.target);
 }
 
 /*********** SLIDE ACTION ***********/
@@ -380,15 +385,13 @@ Slide.prototype.slide = function ()
     }
 }
 
-Slide.prototype.skip = function () {
-    var skipped = Action.prototype.skip.call(this);
-    if (skipped) {
+Slide.prototype.onSkip = function () {
+    var object = this.getObject();
+    if (this.interval)
       clearInterval(this.interval);
-      var object = this.getObject();
-      if (object) {
-        object.setX(this.endX);
-        object.setY(this.endY);
-      }
+    if (object) {
+      object.setX(this.endX);
+      object.setY(this.endY);
     }
 }
 
@@ -468,17 +471,6 @@ Dialogue.prototype.updateText = function() {
     this.index += 1;
 }
 
-Dialogue.prototype.skip = function () {
-  var skipped = Action.prototype.skip.call(this);
-  if (skipped) {
-      clearInterval(this.interval);
-      var object = this.getObject();
-      object.appendText(this.text.slice(this.index));
-      this.index = this.text.length;
-      object.redraw = true;
-  }
-}
-
 Dialogue.prototype.reset = function () 
 {
     Action.prototype.reset.call(this);
@@ -488,6 +480,15 @@ Dialogue.prototype.reset = function ()
         object.text = "";
     if (object && object.speakerName !== undefined)
         object.speakerName = "";
+}
+
+Dialogue.prototype.onSkip = function () {
+  var object = this.getObject();
+  if (this.interval)
+    clearInterval(this.interval);
+  if (object)
+    object.appendText(this.text.slice(this.index));
+  this.index = this.text.length;
 }
 
 /*********** WAIT ACTION ***********/
@@ -604,15 +605,6 @@ ChangeVisibility.prototype.check = function ()
     }
 }
 
-ChangeVisibility.prototype.skip = function ()
-{
-    clearTimeout(this.interval);
-    for (var i=0; i !== this.transitions.length; i++)
-        this.transitions[i].skip();
-
-    this.check();
-}
-
 ChangeVisibility.prototype.reload = function ()
 {
     Action.prototype.reload.call(this);
@@ -635,6 +627,14 @@ ChangeVisibility.prototype.setFinished = function(finished) {
       Action.prototype.setFinished.call(this, finished);
       for (var i=0; i !== this.transitions.length; i++)
         this.transitions[i].setFinished(finished);
+}
+
+ChangeVisibility.prototype.onSkip = function () {
+  clearTimeout(this.interval);
+  for (var i=0; i !== this.transitions.length; i++)
+      this.transitions[i].skip();
+
+  this.check();
 }
 
 /*********** Show Action ***********/
@@ -791,7 +791,7 @@ function GoToScene(data, parent)
     this.targetType = this.TargetType.Name;
     if ("targetType" in data && parseInt(data["targetType"]) !== NaN)
         this.targetType = data["targetType"];
-    
+
     this.needsRedraw = false;
 }
 
@@ -890,7 +890,7 @@ Branch.prototype.setFinished = function(finished)
     this._actionGroup.setFinished(finished);
 }
 
-Branch.prototype.skip = function(finished)
+Branch.prototype.skip = function()
 {
   if (this._actionGroup) {
     this._actionGroup.skip();
@@ -1431,9 +1431,12 @@ ActionGroup.prototype.setFinished = function(finished)
 
 ActionGroup.prototype.skip = function()
 {
-  Action.prototype.skip.call(this);
-  if (this._actions.length)
+  if (this._actions.length) {
     this._actions[0].skip();
+    return;
+  }
+
+  Action.prototype.skip.call(this);
 }
 
 //Expose objects
