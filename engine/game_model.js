@@ -272,8 +272,7 @@
       return;
 
     if (this.action && !this.action.isFinished()) {
-      this.action.unbind("finished", this);
-      this.action.setFinished(true);
+      this.action.stop();
     }
 
     this._nextAction = null;
@@ -284,13 +283,23 @@
     }
   }
 
-  GameModel.prototype.executeAction = function(action)
+  GameModel.prototype._addActionToExec = function(action)
   {
-    if (! action)
+    var index = this.runningActions.indexOf(action);
+    if (index != -1)
       return;
 
-    this.runningActions.push(action);
-    action.setFinished(false);
+    var _action = null;
+
+    //stop same type actions that target the same object
+    for(var i=this.runningActions.length-1; i >= 0; --i) {
+      _action = this.runningActions[i];
+      if (_action.type == action.type && _action.getObject() == action.getObject()) {
+        _action.stop();
+        this.runningActions.splice(i, 1);
+      }
+    }
+
     action.bind("finished", this, function() {
       var index = this.runningActions.indexOf(action);
       if (index != -1)
@@ -298,6 +307,16 @@
       if (action == this.action)
         this.nextAction();
     }, true);
+
+    this.runningActions.push(action);
+  }
+
+  GameModel.prototype.executeAction = function(action)
+  {
+    if (! action)
+      return;
+
+    this._addActionToExec(action);
 
     setTimeout(function() {
       action.execute();
@@ -310,6 +329,7 @@
       return;
 
     var group = new belle.actions.ActionGroup();
+    group._gameModel = this;
     group.addActions(actions);
     this.executeAction(group);
   }
@@ -318,8 +338,7 @@
   {
     var actions = this.runningActions;
     for(var i=0; i < actions.length; i++) {
-      actions[i].unbind("finished", this);
-      actions[i].setFinished(true);
+      actions[i].stop();
     }
 
     this.runningActions.length = 0;
