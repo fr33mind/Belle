@@ -1362,10 +1362,9 @@ ActionGroup.prototype.onExecute = function()
 
 ActionGroup.prototype._executeAction = function(action)
 {
-    action.reset();
-    setTimeout(function() {
-      action.execute();
-    }, 0);
+    var gameModel = this.getGameModel();
+    if (gameModel)
+      gameModel.executeAction(action);
 }
 
 ActionGroup.prototype._actionFinished = function()
@@ -1402,12 +1401,6 @@ ActionGroup.prototype.addActions = function(actions)
   for(var i=0; i < actions.length; i++) {
     this.addAction(actions[i]);
   }
-}
-
-ActionGroup.prototype.clear = function()
-{
-  this.setFinished(true);
-  this.actions = [];
 }
 
 ActionGroup.prototype.stop = function()
