@@ -155,7 +155,14 @@ Action.prototype.reset = function ()
 
 Action.prototype.execute = function() 
 {
-    this.setFinished(true);
+  this.reset();
+  this.running = true;
+  this.onExecute();
+}
+
+Action.prototype.onExecute = function()
+{
+  this.setFinished(true);
 }
 
 Action.prototype.getObject = function()
@@ -231,7 +238,7 @@ function Fade(data, parent)
 
 belle.extend(Fade, Action);
 
-Fade.prototype.execute = function () {
+Fade.prototype.onExecute = function () {
     var t = this;
 
     var object = this.getObject();
@@ -313,7 +320,7 @@ function Slide(data, parent)
 
 belle.extend(Slide, Action);
 
-Slide.prototype.execute = function ()
+Slide.prototype.onExecute = function ()
 {
     var t = this;
     var object = this.getObject();
@@ -433,7 +440,7 @@ function Dialogue(data, parent)
 
 belle.extend(Dialogue, Action);
 
-Dialogue.prototype.execute = function () {
+Dialogue.prototype.onExecute = function () {
     var t = this,
         game = this.getGame();
     this.index = 0;
@@ -498,7 +505,7 @@ function Wait(data, parent)
 
 belle.extend(Wait, Action);
 
-Wait.prototype.execute = function ()
+Wait.prototype.onExecute = function ()
 {
     var t = this;
     
@@ -541,7 +548,7 @@ function ChangeVisibility(data, parent)
 
 belle.extend(ChangeVisibility, Action);
 
-ChangeVisibility.prototype.execute = function () 
+ChangeVisibility.prototype.onExecute = function ()
 {
     var object = this.getObject();
     
@@ -672,7 +679,7 @@ function ChangeBackground(data, parent)
 
 belle.extend(ChangeBackground, Action);
 
-ChangeBackground.prototype.execute = function () 
+ChangeBackground.prototype.onExecute = function ()
 {
     var scene = this.getScene();
     if (scene) {
@@ -695,7 +702,7 @@ function ChangeState(data, parent)
 
 belle.extend(ChangeState, Action);
 
-ChangeState.prototype.execute = function () 
+ChangeState.prototype.onExecute = function ()
 {
     var object = this.getObject();
     if (object && typeof object.setState == "function")
@@ -724,7 +731,7 @@ function GoToLabel(data, parent)
 
 belle.extend(GoToLabel, Action);
 
-GoToLabel.prototype.execute = function()
+GoToLabel.prototype.onExecute = function()
 {
    var gameModel = this.getGameModel();
    
@@ -804,7 +811,7 @@ GoToScene.prototype.goto = function(target)
    this.setFinished(true);
 }
 
-GoToScene.prototype.execute = function()
+GoToScene.prototype.onExecute = function()
 {
    this.goto(this.target);
    this.setFinished(true);
@@ -848,7 +855,7 @@ function Branch(data, parent)
 
 belle.extend(Branch, Action);
 
-Branch.prototype.execute = function()
+Branch.prototype.onExecute = function()
 {
   var game = this.getGame();
   this.result = eval(this.condition);
@@ -1022,7 +1029,7 @@ function ChangeColor(data, parent)
 
 belle.extend(ChangeColor, Action);
 
-ChangeColor.prototype.execute = function()
+ChangeColor.prototype.onExecute = function()
 {    
     var object = this.getObject();
     if (! object) {
@@ -1100,7 +1107,7 @@ function PlaySound(data, parent)
 
 belle.extend(PlaySound, Action);
 
-PlaySound.prototype.execute = function()
+PlaySound.prototype.onExecute = function()
 {   
     if (! this.soundPath) {
         this.setFinished(true);
@@ -1137,7 +1144,7 @@ function StopSound(data, parent)
 
 belle.extend(StopSound, Action);
 
-StopSound.prototype.execute = function()
+StopSound.prototype.onExecute = function()
 {
     var game = this.getGame();
     if (this.soundPath)
@@ -1172,7 +1179,7 @@ function ShowMenu(data, parent)
 
 belle.extend(ShowMenu, Action);
 
-ShowMenu.prototype.execute = function()
+ShowMenu.prototype.onExecute = function()
 {
     var scene = this.getScene();
     var object = this.getObject();
@@ -1191,7 +1198,7 @@ function End(data, parent)
 
 belle.extend(End, Action);
 
-End.prototype.execute = function()
+End.prototype.onExecute = function()
 {
     this.getGame().setFinished(true);
     this.setFinished(true);
@@ -1222,7 +1229,7 @@ function GetUserInput(data, parent)
 
 belle.extend(GetUserInput, Action);
 
-GetUserInput.prototype.execute = function()
+GetUserInput.prototype.onExecute = function()
 {
     if (! this.variable) {
         this.setFinished(true);
@@ -1267,7 +1274,7 @@ function ChangeGameVariable(data, parent)
 
 belle.extend(ChangeGameVariable, Action);
 
-ChangeGameVariable.prototype.execute = function()
+ChangeGameVariable.prototype.onExecute = function()
 {   
     var currValue = "";
     var newValue = this.value;
@@ -1330,7 +1337,7 @@ function RunScript(data, parent)
 
 belle.extend(RunScript, Action);
 
-RunScript.prototype.execute = function()
+RunScript.prototype.onExecute = function()
 {   
     eval(this.code);
     this.setFinished(true);
@@ -1347,7 +1354,7 @@ function ActionGroup(data, parent)
 
 belle.extend(ActionGroup, Action);
 
-ActionGroup.prototype.execute = function()
+ActionGroup.prototype.onExecute = function()
 {
     this._actions = this.actions.slice(0);
     this._nextAction();
