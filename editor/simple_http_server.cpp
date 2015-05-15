@@ -19,6 +19,9 @@ SimpleHttpServer::SimpleHttpServer(const QString& address, int port, const QStri
     mHttpPorts << 591 << 8008 << 8080 << 8081 << 8090; //common port alternatives for HTTP
 
     mMimetypes.insert("", "application/octet-stream");
+    mMimetypes.insert("ogg", "audio/ogg");
+    mMimetypes.insert("oga", "audio/ogg");
+    mMimetypes.insert("mp3", "audio/mp3");
     mMimetypes.insert("html", "text/html");
     mMimetypes.insert("htm", "text/html");
     mMimetypes.insert("js", "text/javascript");
@@ -59,8 +62,6 @@ void SimpleHttpServer::readClient()
             QString ctype = "text/plain";
             QString modified = "";
             QString charset("");
-            if (ctype.contains("text") || ctype.contains("json"))
-                charset = "; charset=\"utf-8\"";
 
             if (! path.isEmpty()) {
                 ctype = guessType(path);
@@ -70,12 +71,15 @@ void SimpleHttpServer::readClient()
                 data = readFile(path);
             }
 
+            if (ctype.contains("text") || ctype.contains("json"))
+                charset = "; charset=\"utf-8\"";
+
             if (file != "/" && data.size() <= 0) {
                 header << "HTTP/1.0 404 Not Found\r\n" << "\r\n";
             }
             else {
                  header << "HTTP/1.0 200 Ok\r\n"
-                 << QString("Content-Type: %1\r\n").arg(ctype)
+                 << QString("Content-Type: %1%2\r\n").arg(ctype).arg(charset)
                  << QString("Content-Length: %1\r\n").arg(data.size())
                  << QString("Last-Modified: %1\r\n").arg(modified)
                  << "\r\n";
@@ -168,14 +172,10 @@ QString SimpleHttpServer::fullPath(QString path)
     path = path.split('#')[0];
     path = QUrl::fromPercentEncoding(path.toAscii());
     path = QDir::cleanPath(path);
-    QStringList words = path.split('/', QString::SkipEmptyParts);
+    if (path.startsWith("/"))
+        path.remove(0, 1);
     QDir dir = mDirectory;
-    QFileInfo info = mDirectory.absolutePath();
-    foreach(QString word, words) {
-        info.setFile(dir, word);
-        if (info.isDir())
-            dir.cd(word);
-    }
+    QFileInfo info (mDirectory.absoluteFilePath(path));
 
     if (info.isDir()) {
         if (dir.exists("index.html"))
