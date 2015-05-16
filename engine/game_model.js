@@ -292,11 +292,13 @@
     var _action = null;
 
     //stop same type actions that target the same object
-    for(var i=this.runningActions.length-1; i >= 0; --i) {
-      _action = this.runningActions[i];
-      if (_action.type == action.type && _action.getObject() == action.getObject()) {
-        _action.stop();
-        this.runningActions.splice(i, 1);
+    if (action.type != "ActionGroup" && action.type != "Branch") {
+      for(var i=this.runningActions.length-1; i >= 0; --i) {
+        _action = this.runningActions[i];
+        if (_action.type == action.type && _action.getObject() == action.getObject()) {
+          _action.stop();
+          this.runningActions.splice(i, 1);
+        }
       }
     }
 
