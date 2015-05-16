@@ -165,7 +165,7 @@
   }
 
   GameModel.prototype.getScene = function(scene) {
-      if (scene === null || scene === undefined)
+      if (scene === undefined)
         return this.scene;
 
       var scenes = this.getScenes();
@@ -180,7 +180,7 @@
               }
           }
       }
-      else if (belle.isInstance(scene, belle.Scene) && scenes.indexOf(scene) !== -1){
+      else if (scene && belle.isInstance(scene, belle.Scene) && scenes.indexOf(scene) !== -1){
           return scene;
       }
 
@@ -249,7 +249,7 @@
   }
 
   GameModel.prototype.getAction = function(action) {
-    if (! action)
+    if (action === undefined)
       return this.action;
     if (this.getScene())
       return this.getScene().getAction(action);
