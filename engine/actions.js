@@ -248,13 +248,12 @@ Fade.prototype.onExecute = function () {
     }
 
     this.startTimer(this.fade.bind(this), this.intervalDuration, true);
-    this.getObject().redraw = true;
 }
 
 Fade.prototype.fade = function (timer) {
-    var elapsedTime = timer.getElapsedTime(),
+    var deltaTime = timer.getDeltaTime(),
+        elapsedTime = timer.getElapsedTime(),
         object = this.getObject();
-
 
     if (elapsedTime >= this.duration) {
         object.setOpacity(this.target);
@@ -268,10 +267,10 @@ Fade.prototype.fade = function (timer) {
         return;
     }
     
-    elapsedTime = elapsedTime > this.intervalDuration ? elapsedTime : this.intervalDuration;
+    deltaTime = deltaTime > this.intervalDuration ? deltaTime : this.intervalDuration;
     var increment = this.increment;
     if (this.intervalDuration)
-      increment = parseInt(elapsedTime * this.increment / this.intervalDuration) || 1;
+      increment = parseInt(deltaTime * this.increment / this.intervalDuration) || 1;
     
     if (this.fadeType == "in") {
       if (opacity < this.target)
