@@ -157,6 +157,7 @@
     this.repeat = repeat || false;
     this.startTime = null;
     this.stopTime = null;
+    this._lastCallTime = null;
     this._repeat = null;
   }
 
@@ -177,6 +178,8 @@
       this.callback(this);
       if (! this._repeat)
         this.onStop();
+      else
+        this._lastCallTime = new Date().getTime();
     }.bind(this);
 
     this.onStart();
@@ -208,6 +211,7 @@
       this.stop();
 
     this.startTime = new Date().getTime();
+    this._lastCallTime = this.startTime;
     this.stopTime = null;
   }
 
@@ -219,11 +223,26 @@
 
   Timer.prototype.getElapsedTime = function()
   {
+    if (! this.startTime)
+      return 0;
+
     if (this.stopTime !== null)
       return (this.stopTime - this.startTime);
 
     var now = new Date().getTime();
     return (now - this.startTime);
+  }
+
+  Timer.prototype.getDeltaTime = function()
+  {
+    if (! this._lastCallTime)
+        return 0;
+
+    if (this.stopTime !== null)
+      return (this.stopTime - this._lastCallTime);
+
+    var now = new Date().getTime();
+    return now - this._lastCallTime;
   }
 
   belle.core.Object = Object;
