@@ -58,7 +58,7 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
 void Dialogue::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
     mCharacter = 0;
     mText = "";

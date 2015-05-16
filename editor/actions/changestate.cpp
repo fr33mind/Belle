@@ -22,7 +22,7 @@ ChangeState::ChangeState(const QVariantMap& data, QObject *parent) :
 
 void ChangeState::init()
 {
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setType(Info.type);
     setIcon(Info.icon);
     mState = "";

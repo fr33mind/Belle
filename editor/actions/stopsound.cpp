@@ -44,7 +44,7 @@ StopSound::StopSound(const QVariantMap& data,QObject *parent) :
 void StopSound::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
     mSound = "";
     mFadeTime = 0;

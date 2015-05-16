@@ -68,7 +68,7 @@ void Action::init()
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
 }
 
@@ -115,6 +115,16 @@ Action* Action::newAction(QObject *parent)
 void Action::setIcon(const QIcon & icon)
 {
     mIcon = icon;
+}
+
+void Action::setTypeName(const QString & typeName)
+{
+    mTypeName = typeName;
+}
+
+QString Action::typeName() const
+{
+    return mTypeName;
 }
 
 void Action::setDescription(const QString& desc)
@@ -184,7 +194,7 @@ QString Action::displayText() const
 
 QString Action::toString() const
 {
-    return QString("%1 [%2]").arg(displayText()).arg(mName);
+    return QString("%1 [%2]").arg(displayText()).arg(typeName());
 }
 
 bool Action::supportsEvent(Interaction::InputEvent ev)

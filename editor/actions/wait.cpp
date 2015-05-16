@@ -52,7 +52,7 @@ Wait::Wait(const QVariantMap& data, QObject *parent) :
 void Wait::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
     setWaitType(Timed);
     setTime(1);

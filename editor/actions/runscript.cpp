@@ -26,7 +26,7 @@ RunScript::RunScript(const QVariantMap& data, QObject *parent) :
 void RunScript::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
 }
 

@@ -46,7 +46,7 @@ ChangeBackground::ChangeBackground(const QVariantMap & data, QObject *parent):
 void ChangeBackground::init()
 {
     setIcon(Info.icon);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setType(Info.type);
 
     mBackgroundImage = 0;

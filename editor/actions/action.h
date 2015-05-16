@@ -54,6 +54,9 @@ public:
     void setIcon(const QIcon&);
     QIcon icon() const;
 
+    void setTypeName(const QString&);
+    QString typeName() const;
+
     void setDescription(const QString&);
     QString description() const;
 
@@ -91,8 +94,7 @@ private:
     Object* mObject;
     QString mObjectName;
     QIcon mIcon;
-    QString mName;
-    QString mType;
+    QString mTypeName;
     QString mTitle;
     QString mDescription;
     QString mDisplayText;

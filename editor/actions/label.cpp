@@ -32,13 +32,13 @@ Label::Label(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-    setDisplayText(objectName());
+    setDisplayText(name());
 }
 
 void Label::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
 }
 

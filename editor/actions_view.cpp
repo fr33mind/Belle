@@ -112,7 +112,7 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
     action->icon().paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
 
     textRect.setX(textHeight+BORDER*2);
-    painter->drawText(textRect, action->name());
+    painter->drawText(textRect, action->typeName());
 
     if (! action->displayText().isEmpty()) {
         textRect.setY(textRect.y() + textHeight);

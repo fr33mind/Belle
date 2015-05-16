@@ -50,7 +50,7 @@ void LabelEditorWidget::onLabelEdited(const QString & text)
     if (! label)
         return;
 
-    Scene* scene = qobject_cast<Scene*>(label->parent());
+    Scene* scene = label->scene();
     if (! scene)
         return;
 

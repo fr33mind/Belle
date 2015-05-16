@@ -47,7 +47,7 @@ GoToScene::GoToScene(const QVariantMap& data, QObject *parent) :
 void GoToScene::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
     mTargetScene = "";

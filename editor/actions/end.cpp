@@ -22,6 +22,6 @@ End::End(QObject *parent) :
     Action(parent)
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
 }

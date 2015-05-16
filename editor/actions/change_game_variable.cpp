@@ -50,7 +50,7 @@ ChangeGameVariable::ChangeGameVariable(const QVariantMap& data, QObject *parent)
 void ChangeGameVariable::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
 
     mOperators.append("assign");

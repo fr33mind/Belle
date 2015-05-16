@@ -50,7 +50,7 @@ GetUserInput::GetUserInput(const QVariantMap& data, QObject *parent):
 void GetUserInput::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
 }
 

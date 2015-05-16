@@ -22,7 +22,7 @@
 
 class ActionInfo {
 public:
-    QString name;
+    QString typeName;
     QString type;
     QIcon icon;
 

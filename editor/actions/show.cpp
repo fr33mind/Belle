@@ -38,7 +38,7 @@ Show::Show(QObject *parent):
 void Show::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
     mCharacterState = "";
 }

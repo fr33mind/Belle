@@ -45,35 +45,35 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     this->setHeaderHidden(true);
 
     beginGroup(tr("Story"));
-    appendRow(Dialogue::Info.icon, Dialogue::Info.name);
-    appendRow(Wait::Info.icon, Wait::Info.name);
-    appendRow(Show::Info.icon, Show::Info.name);
-    appendRow(Hide::Info.icon, Hide::Info.name);
-    appendRow(ChangeBackground::Info.icon, ChangeBackground::Info.name);
-    appendRow(ChangeState::Info.icon, ChangeState::Info.name);
-    appendRow(Label::Info.icon, Label::Info.name);
-    appendRow(GoToLabel::Info.icon, GoToLabel::Info.name);
-    appendRow(GoToScene::Info.icon, GoToScene::Info.name);
-    appendRow(Branch::Info.icon, Branch::Info.name);
-    appendRow(ShowMenu::Info.icon, ShowMenu::Info.name);
-    appendRow(End::Info.icon, End::Info.name);
+    appendRow(Dialogue::Info.icon, Dialogue::Info.typeName);
+    appendRow(Wait::Info.icon, Wait::Info.typeName);
+    appendRow(Show::Info.icon, Show::Info.typeName);
+    appendRow(Hide::Info.icon, Hide::Info.typeName);
+    appendRow(ChangeBackground::Info.icon, ChangeBackground::Info.typeName);
+    appendRow(ChangeState::Info.icon, ChangeState::Info.typeName);
+    appendRow(Label::Info.icon, Label::Info.typeName);
+    appendRow(GoToLabel::Info.icon, GoToLabel::Info.typeName);
+    appendRow(GoToScene::Info.icon, GoToScene::Info.typeName);
+    appendRow(Branch::Info.icon, Branch::Info.typeName);
+    appendRow(ShowMenu::Info.icon, ShowMenu::Info.typeName);
+    appendRow(End::Info.icon, End::Info.typeName);
     endGroup();
 
     beginGroup(tr("Transform"));
-    appendRow(Slide::Info.icon, Slide::Info.name);
-    appendRow(Fade::Info.icon, Fade::Info.name);
-    appendRow(ChangeColor::Info.icon, ChangeColor::Info.name);
+    appendRow(Slide::Info.icon, Slide::Info.typeName);
+    appendRow(Fade::Info.icon, Fade::Info.typeName);
+    appendRow(ChangeColor::Info.icon, ChangeColor::Info.typeName);
     endGroup();
 
     beginGroup(tr("Audio"));
-    appendRow(PlaySound::Info.icon, PlaySound::Info.name);
-    appendRow(StopSound::Info.icon, StopSound::Info.name);
+    appendRow(PlaySound::Info.icon, PlaySound::Info.typeName);
+    appendRow(StopSound::Info.icon, StopSound::Info.typeName);
     endGroup();
 
     beginGroup(tr("Scripting"));
-    appendRow(GetUserInput::Info.icon, GetUserInput::Info.name);
-    appendRow(ChangeGameVariable::Info.icon, ChangeGameVariable::Info.name);
-    appendRow(RunScript::Info.icon, RunScript::Info.name);
+    appendRow(GetUserInput::Info.icon, GetUserInput::Info.typeName);
+    appendRow(ChangeGameVariable::Info.icon, ChangeGameVariable::Info.typeName);
+    appendRow(RunScript::Info.icon, RunScript::Info.typeName);
     endGroup();
 
     setIconSize(QSize(22, 22));

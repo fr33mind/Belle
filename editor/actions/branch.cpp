@@ -65,7 +65,7 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
 void Branch::init()
 {
     setType(Info.type);
-    setName(Info.name);
+    setTypeName(Info.typeName);
     setIcon(Info.icon);
     mCondition = "";
 }

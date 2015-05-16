@@ -20,12 +20,12 @@ ActionInfo::ActionInfo(QObject *parent)
 {
     icon = QIcon();
     type = QString();
-    name = QString();
+    typeName = QString();
 }
 
-ActionInfo::ActionInfo(const QIcon &_icon, const QString &_type, const QString &_name, QObject *parent)
+ActionInfo::ActionInfo(const QIcon &_icon, const QString &_type, const QString &_typename, QObject *parent)
 {
     icon = _icon;
     type = _type;
-    name = _name;
+    typeName = _typename;
 }
