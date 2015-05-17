@@ -482,7 +482,7 @@ Dialogue.prototype.updateText = function(timer) {
 Dialogue.prototype.onSkip = function () {
   var object = this.getObject();
   if (object)
-    object.appendText(this.text.slice(this.index));
+    object.setText(this.text);
 }
 
 /*********** WAIT ACTION ***********/
