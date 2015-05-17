@@ -1347,6 +1347,7 @@ RunScript.prototype.onExecute = function()
 function ActionGroup(data, parent)
 {
     Action.call(this, data, parent);
+    this.type = "ActionGroup";
     this.actions = [];
     this._actions = [];
 }
