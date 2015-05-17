@@ -417,8 +417,9 @@ void Object::paint(QPainter & painter)
         return;
     }
 
-    painter.setOpacity(opacityF());
-    mBackground.paint(painter, rect, mCornerRadius, opacityF());
+    qreal opacity =  opacityF() * painter.opacity();
+    painter.setOpacity(opacity);
+    mBackground.paint(painter, rect, mCornerRadius, opacity);
 
     if (mBorderColor.isValid()) {
         if (mBorderWidth)

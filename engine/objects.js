@@ -218,7 +218,7 @@ Object.prototype.paint = function(context)
         y = this.globalY(),
         border = this.hasBorder();
 
-    context.globalAlpha = this.getOpacityF();
+    context.globalAlpha = this.getOpacityF() * context.globalAlpha;
 
     if (border) {
         context.lineWidth = this.borderWidth;

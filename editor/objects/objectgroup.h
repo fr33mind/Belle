@@ -52,7 +52,6 @@ public:
     void removeAllObjects(bool del=false);
     int calcSpacing() const;
     int minHeight() const;
-    virtual void setOpacity(int);
 
     void setWidth(int, bool percent=false);
     void setHeight(int, bool percent=false);
