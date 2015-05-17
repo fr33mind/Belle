@@ -51,11 +51,7 @@ public:
     bool loop();
 
     QVariantMap toJsonObject();
-
-signals:
-
-public slots:
-    void onObjectNameChanged();
+    virtual QString displayText() const;
 
 private:
    void init();

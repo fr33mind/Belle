@@ -51,7 +51,6 @@ void PlaySound::init()
     mVolume = 100;
     mSound = 0;
     mLoop = false;
-    connect(this, SIGNAL(objectNameChanged()), this, SLOT(onObjectNameChanged()));
 }
 
 void PlaySound::setPlaySoundEditorWidget(PlaySoundEditorWidget * widget)
@@ -71,17 +70,10 @@ ActionEditorWidget* PlaySound::editorWidget()
 
 void PlaySound::setSoundPath(const QString & path)
 {
-    mSound = AssetManager::instance()->loadAsset(path, Asset::Audio);
-    if (! mSound)
+    if (mSound && mSound->path() == path)
         return;
 
-    if (! path.isEmpty()) {
-        QString name = "";
-        if (! objectName().isEmpty())
-            name += objectName() + ": ";
-
-        setDisplayText(name + mSound->name());
-    }
+    mSound = AssetManager::instance()->loadAsset(path, Asset::Audio);
 }
 
 QString PlaySound::soundPath()
@@ -118,17 +110,6 @@ bool PlaySound::loop()
     return mLoop;
 }
 
-void PlaySound::onObjectNameChanged()
-{
-    if (! mSound)
-        return;
-    QString name = "";
-    if (! objectName().isEmpty())
-        name += objectName() + ": ";
-
-    setDisplayText(name + mSound->name());
-}
-
 QVariantMap PlaySound::toJsonObject()
 {
     QVariantMap action = Action::toJsonObject();
@@ -138,3 +119,15 @@ QVariantMap PlaySound::toJsonObject()
     return action;
 }
 
+QString PlaySound::displayText() const
+{
+    if (! mSound)
+        return "";
+
+    QString displayText = objectName();
+    if (! displayText.isEmpty())
+        displayText += ": ";
+    displayText += mSound->name();
+
+    return displayText;
+}
