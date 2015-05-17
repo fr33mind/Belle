@@ -956,9 +956,8 @@ ObjectGroup.prototype.processEvent = function(event, type)
     if (! this.visible || ! this.contains(x, y))
         return false;
 
-    var result = Object.prototype.processEvent.call(this, event);
+    var result = false;
     var object = this.objectAt(x, y);
-
 
     if (this.hoveredObject != object) {
       if (this.hoveredObject)
@@ -972,6 +971,10 @@ ObjectGroup.prototype.processEvent = function(event, type)
 
     if (object) {
       result = object.processEvent(event, type);
+    }
+
+    if (! result) {
+      result = Object.prototype.processEvent.call(this, event, type);
     }
 
     return result;
