@@ -1,3 +1,26 @@
+## Belle 0.5.1a | 18/05/2015
+
+### [General]
+- Added append option to Dialogue actions.
+
+#### [Editor]
+- Set fade type correctly.
+- Fixed action not loading target object in some cases.
+- Improved target object selection in action's editor.
+- Improved Resource and clones synchronization.
+- Minor improvements on simple http server.
+
+#### [Engine]
+- Fixed empty lines not being rendered in TextBox.
+- Init game variable properly.
+- Fixed initialization of Character states.
+- Stop any mouse move actions when a mouse leave event occurs.
+- Fixed audio preloading.
+- Fixed and improved some actions.
+- Added ActionGroup.
+- Fixed some hovering issues.
+- Overall improvements.
+
 ## Belle 0.5a | 13/02/2015
 
 #### [Editor]
