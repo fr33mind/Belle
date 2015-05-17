@@ -65,7 +65,7 @@ void ActionEditorWidget::setAction(Action* action)
 void ActionEditorWidget::onNameEdited(const QString& name)
 {
     if (mAction)
-        mAction->setObjectName(name);
+        mAction->setName(name);
 }
 
 ActionEditorWidget* ActionEditorWidget::copy()
