@@ -943,8 +943,12 @@ void Belle::openFileOrProject(QString filepath)
         QMessageBox::warning(this,
                              tr("Old project"),
                              tr("The project file you are opening is old and may not load correctly."));
-        _fixSync(mDefaultSceneManager->scenes());
-        _fixSync(mPauseSceneManager->scenes());
+
+        int version = object.value("version", 0).toInt();
+        if (version < (int) 0x000500) {
+            _fixSync(mDefaultSceneManager->scenes());
+            _fixSync(mPauseSceneManager->scenes());
+        }
     }
 
 }
