@@ -74,6 +74,7 @@ void PlaySound::setSoundPath(const QString & path)
         return;
 
     mSound = AssetManager::instance()->loadAsset(path, Asset::Audio);
+    emit dataChanged();
 }
 
 QString PlaySound::soundPath()
