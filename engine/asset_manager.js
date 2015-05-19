@@ -107,9 +107,10 @@
       asset = new buzz.sound(path, {
                       preload: true
                   });
-      asset.bind('canplay', function() {
+      asset.bind('canplay error', function() {
         self.assetLoaded(this);
       });
+      
       if (! buzz.isSupported())
         this.assetLoaded(asset);
     }
@@ -179,6 +180,9 @@
 
   AssetManager.prototype.assetLoaded = function(asset)
   {
+    if (this.loadedAssets.indexOf(asset) != -1)
+      return;
+
     this.loadedAssets.push(asset);
     this.trigger("assetLoaded", {
       asset: asset,
