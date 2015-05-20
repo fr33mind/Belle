@@ -1141,4 +1141,3 @@ objects.Menu = Menu;
 
 }(belle));
 
-belle.log("Objects module loaded!");

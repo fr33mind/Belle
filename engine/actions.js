@@ -1448,6 +1448,3 @@ actions.RunScript = RunScript;
 actions.ActionGroup = ActionGroup;
 
 }(belle.actions));
-
-belle.log("Actions module loaded!");
-

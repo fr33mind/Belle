@@ -281,5 +281,3 @@ utils.distance = function(x1, y1, x2, y2)
 }
 
 }(belle.utils));
-
-belle.log("Utils module loaded!");
