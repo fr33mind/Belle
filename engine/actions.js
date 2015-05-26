@@ -1047,25 +1047,6 @@ ChangeColor.prototype.onExecute = function()
     this.setFinished(true);
 }
 
-ChangeColor.prototype.reset = function()
-{
-    Action.prototype.reset.call(this);
-    var object = this.getObject();
-    
-    if (this.changeObjectColor && this.previousObjectColor) {
-        object.setColor(this.previousObjectColor);
-    }
-    
-    if (this.changeObjectBackgroundColor && this.previousObjectBackgroundColor) {
-        object.setBackgroundColor(this.previousObjectBackgroundColor);
-    }
-    
-    if (this.changeObjectColor || this.changeObjectBackgroundColor)
-        object.redraw = true;
-    
-    this.setFinished(false);
-}
-
 /************* Play Sound *****************/
 
 function PlaySound(data, parent)
