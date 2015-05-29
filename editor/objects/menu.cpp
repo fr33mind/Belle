@@ -16,8 +16,6 @@
 
 #include "menu.h"
 
-#include <QDebug>
-
 #include "button.h"
 #include "resource_manager.h"
 
@@ -46,12 +44,16 @@ Menu::Menu(const QVariantMap& data, QObject *parent) :
     ObjectGroup(data, parent)
 {
     init();
+    Object* obj = this->object(0);
+    if (obj)
+        mResourceButton = qobject_cast<Object*>(obj->resource());
 }
 
 
 void Menu::init()
 {
     setType("Menu");
+    mResourceButton = 0;
 }
 
 QString Menu::optionText(int index)
