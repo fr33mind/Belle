@@ -34,10 +34,10 @@ function Object(info, parent, initElement)
     this.element.appendChild(this.backgroundElement);
 
     this.roundedRect = false;
-    this.mousePressActions = [];
-    this.mouseReleaseActions = [];
-    this.mouseMoveActions = [];
-    this.mouseLeaveActions = [];
+    this.mousePressActionGroup = null;
+    this.mouseReleaseActionGroup = null;
+    this.mouseMoveActionGroup = null;
+    this.mouseLeaveActionGroup = null;
     this.defaultState = null;
     this.redrawing = false;
     this.hovering = false;
@@ -50,24 +50,24 @@ function Object(info, parent, initElement)
         "mousemove" : []
     };
 
-    var actions;
-    var action;
-    var actionObject;
+    var actions,
+        action,
+        actionGroup;
 
     if ("onMousePress" in info) {
-        this.mousePressActions = this.initActions(info["onMousePress"]);
+        this.mousePressActionGroup = this.initActionGroup(info["onMousePress"]);
     }
 
     if ("onMouseRelease" in info) {
-        this.mouseReleaseActions = this.initActions(info["onMouseRelease"]);
+        this.mouseReleaseActionGroup = this.initActionGroup(info["onMouseRelease"]);
     }
 
     if ("onMouseMove" in info) {
-        this.mouseMoveActions = this.initActions(info["onMouseMove"]);
+        this.mouseMoveActionGroup = this.initActionGroup(info["onMouseMove"]);
     }
 
     if ("onMouseLeave" in info) {
-        this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
+        this.mouseLeaveActionGroup = this.initActionGroup(info["onMouseLeave"]);
     }
 
     Object.prototype.load.call(this, info);
@@ -282,31 +282,31 @@ Object.prototype.hasBorder = function()
 
 Object.prototype.mouseLeaveEvent = function(ev)
 {
-    if (! this.visible)
-      return;
+    if (! this.visible || ! this.hovering)
+      return false;
 
     //make sure mousemove actions are stopped
-    var actions = this.mouseMoveActions;
-    for(var i =0; i !== actions.length; i++)
-        actions[i].skip();
+    if (this.mouseMoveActionGroup)
+      this._gameModel.stopAction(this.mouseMoveActionGroup);
 
-    if (this.defaultState)
+    if (this.defaultState) {
       this.load(this.defaultState);
+    }
 
     this.hovering = false;
+    return true;
 }
 
 Object.prototype.mouseEnterEvent = function(ev)
 {
-    if (! this.visible)
-      return;
+    if (! this.visible || this.hovering)
+      return false;
 
-    if (this.mouseMoveActions && this.mouseMoveActions.length ||
-      this.eventListeners["mousemove"] && this.eventListeners["mousemove"].length)
+    if (this.mouseMoveActionGroup || this.eventListeners["mousemove"].length)
       this.defaultState = this.serialize();
 
-    this.processEvent(ev, "mouseMove");
     this.hovering = true;
+    return this.processEvent(ev, "mouseMove");
 }
 
 Object.prototype.mouseDown = function(event)
@@ -333,30 +333,28 @@ Object.prototype.processEvent = function(event, type)
         y = event.canvasY,
         gameModel = this.getGameModel();
 
-    if (! this.contains(x, y))
+    if (! gameModel || ! this.contains(x, y))
       return false;
 
-    if (! gameModel)
-      return false;
-
-    var actions = [],
+    var actionGroup = null,
         triggered = false;
 
     if (type == "mouseMove") {
-        actions = this.mouseMoveActions;
+        actionGroup = this.mouseMoveActionGroup;
     }
     else if (type == "mouseUp") {
-        actions = this.mouseReleaseActions;
+        actionGroup = this.mouseReleaseActionGroup;
     }
     else if (type == "mouseDown") {
-        actions = this.mousePressActions;
+        actionGroup = this.mousePressActionGroup;
     }
 
-    gameModel.executeActions(actions);
+    if (actionGroup)
+      gameModel.executeAction(actionGroup);
 
     triggered = this.trigger(type);
 
-    if (actions.length || triggered)
+    if (actionGroup || triggered)
       return true;
     return false;
 }
@@ -383,10 +381,27 @@ Object.prototype.initActions = function(actions)
 
     for(var i=0; i !== actions.length; i++) {
         action = belle.createAction(actions[i], this);
-        actionInstances.push(action);
+        if (action) {
+          if (! action.object && ! action.objectName)
+            action.object = this;
+          actionInstances.push(action);
+        }
     }
 
     return actionInstances;
+}
+
+Object.prototype.initActionGroup = function(actions)
+{
+    if (! actions || ! actions.length)
+      return null;
+
+    var actions = this.initActions(actions),
+        actionGroup = new belle.actions.ActionGroup();
+
+    actionGroup._gameModel = this._gameModel;
+    actionGroup.addActions(actions);
+    return actionGroup;
 }
 
 Object.prototype.initElement = function()
@@ -940,44 +955,58 @@ ObjectGroup.prototype.paint = function(context)
 
 ObjectGroup.prototype.mouseLeaveEvent = function(event)
 {
-  Object.prototype.mouseLeaveEvent.call(this, event);
-
   if (this.hoveredObject) {
     this.hoveredObject.mouseLeaveEvent(event);
     this.hoveredObject = null;
   }
+
+  return Object.prototype.mouseLeaveEvent.call(this, event);
 }
 
-ObjectGroup.prototype.processEvent = function(event, type)
+ObjectGroup.prototype.mouseMove = function(event)
 {
-    var x = event.canvasX;
-    var y = event.canvasY;
+  var object = this.objectAt(event.canvasX, event.canvasY);
 
-    if (! this.visible || ! this.contains(x, y))
-        return false;
-
-    var result = false;
-    var object = this.objectAt(x, y);
-
-    if (this.hoveredObject != object) {
-      if (this.hoveredObject)
+  if (this.hoveredObject != object) {
+    if (this.hoveredObject)
         this.hoveredObject.mouseLeaveEvent(event);
 
-      if (object)
-        object.mouseEnterEvent(event);
-    }
+    if (object)
+      object.mouseEnterEvent(event);
+  }
+  else if (object) {
+    object.mouseMove(event);
+  }
 
-    this.hoveredObject = object;
+  this.hoveredObject = object;
+  return Object.prototype.mouseMove.call(this, event);
+}
 
-    if (object) {
-      result = object.processEvent(event, type);
-    }
+ObjectGroup.prototype.mouseEnterEvent = function(event)
+{
+  this.hoveredObject = this.objectAt(event.canvasX, event.canvasY);
+  if (this.hoveredObject)
+    this.hoveredObject.mouseEnterEvent(event);
 
-    if (! result) {
-      result = Object.prototype.processEvent.call(this, event, type);
-    }
+  return Object.prototype.mouseEnterEvent.call(this, event);
+}
 
-    return result;
+ObjectGroup.prototype.mouseDown = function(event)
+{
+  if (! this.hoveredObject)
+    this.hoveredObject = this.objectAt(event.canvasX, event.canvasY);
+  if (this.hoveredObject)
+    this.hoveredObject.mouseDown(event);
+  return Object.prototype.mouseDown.call(this, event);
+}
+
+ObjectGroup.prototype.mouseUp = function(event)
+{
+  if (! this.hoveredObject)
+    this.hoveredObject = this.objectAt(event.canvasX, event.canvasY);
+  if (this.hoveredObject)
+    this.hoveredObject.mouseUp(event);
+  return Object.prototype.mouseUp.call(this, event);
 }
 
 ObjectGroup.prototype.clear = function (context)
@@ -988,7 +1017,6 @@ ObjectGroup.prototype.clear = function (context)
       this.objects[i].clear(context);
   }
 }
-
 
 ObjectGroup.prototype.needsRedraw = function()
 {
