@@ -928,7 +928,7 @@ ObjectGroup.prototype.serialize = function()
 
 ObjectGroup.prototype.getObjectAt = function(x, y)
 {
-    for(var i=0; i !== this.objects.length; i++) {
+    for(var i=this.objects.length-1; i != -1; i--) {
         if (this.objects[i].contains(x, y)) {
             return this.objects[i];
         }
