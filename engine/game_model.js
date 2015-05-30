@@ -30,6 +30,7 @@
     this.game = this.parent;
     this.data = null;
     this.runningActions = [];
+    this.queuedActions = [];
     
     this.load(data);
   }
@@ -283,10 +284,24 @@
     }
   }
 
-  GameModel.prototype._addActionToExec = function(action)
+  GameModel.prototype.stopAction = function(action)
   {
-    var index = this.runningActions.indexOf(action);
-    if (index != -1)
+    var index = this.queuedActions.indexOf(action);
+    if (index != -1) {
+      this.queuedActions.splice(index, 1);
+      return;
+    }
+
+    index = this.runningActions.indexOf(action);
+    if (index != -1) {
+      action.stop();
+      this.runningActions.splice(index, 1);
+    }
+  }
+
+  GameModel.prototype._executeAction = function(action)
+  {
+    if (this.runningActions.indexOf(action) != -1)
       return;
 
     var _action = null;
@@ -311,18 +326,24 @@
     }, true);
 
     this.runningActions.push(action);
+    action.execute();
   }
 
   GameModel.prototype.executeAction = function(action)
   {
-    if (! action)
+    if (! action || this.queuedActions.indexOf(action) != -1)
       return;
 
-    this._addActionToExec(action);
+    this.queuedActions.push(action);
 
     setTimeout(function() {
-      action.execute();
-    }, 0);
+      //check to see if action is still in queue
+      var index = this.queuedActions.indexOf(action);
+      if (index != -1) {
+          this.queuedActions.splice(index, 1);
+          this._executeAction(action);
+      }
+    }.bind(this), 0);
   }
 
   GameModel.prototype.executeActions = function(actions)
@@ -344,6 +365,7 @@
     }
 
     this.runningActions.length = 0;
+    this.queuedActions.length = 0;
     this.action = this._nextAction = null;
   }
 
