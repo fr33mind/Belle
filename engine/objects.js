@@ -926,7 +926,7 @@ ObjectGroup.prototype.serialize = function()
     return data;
 }
 
-ObjectGroup.prototype.objectAt = function(x, y)
+ObjectGroup.prototype.getObjectAt = function(x, y)
 {
     for(var i=0; i !== this.objects.length; i++) {
         if (this.objects[i].contains(x, y)) {
@@ -965,7 +965,7 @@ ObjectGroup.prototype.mouseLeaveEvent = function(event)
 
 ObjectGroup.prototype.mouseMove = function(event)
 {
-  var object = this.objectAt(event.canvasX, event.canvasY);
+  var object = this.getObjectAt(event.canvasX, event.canvasY);
 
   if (this.hoveredObject != object) {
     if (this.hoveredObject)
@@ -984,7 +984,7 @@ ObjectGroup.prototype.mouseMove = function(event)
 
 ObjectGroup.prototype.mouseEnterEvent = function(event)
 {
-  this.hoveredObject = this.objectAt(event.canvasX, event.canvasY);
+  this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
   if (this.hoveredObject)
     this.hoveredObject.mouseEnterEvent(event);
 
@@ -994,7 +994,7 @@ ObjectGroup.prototype.mouseEnterEvent = function(event)
 ObjectGroup.prototype.mouseDown = function(event)
 {
   if (! this.hoveredObject)
-    this.hoveredObject = this.objectAt(event.canvasX, event.canvasY);
+    this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
   if (this.hoveredObject)
     this.hoveredObject.mouseDown(event);
   return Object.prototype.mouseDown.call(this, event);
@@ -1003,7 +1003,7 @@ ObjectGroup.prototype.mouseDown = function(event)
 ObjectGroup.prototype.mouseUp = function(event)
 {
   if (! this.hoveredObject)
-    this.hoveredObject = this.objectAt(event.canvasX, event.canvasY);
+    this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
   if (this.hoveredObject)
     this.hoveredObject.mouseUp(event);
   return Object.prototype.mouseUp.call(this, event);
