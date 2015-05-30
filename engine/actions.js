@@ -1388,9 +1388,13 @@ ActionGroup.prototype.stop = function()
 {
   Action.prototype.stop.call(this);
 
-  var action = this._actions[0];
-  if (action)
-    action.stop();
+  var action = this._actions[0],
+      gameModel = this.getGameModel();
+
+  if (action && gameModel) {
+      gameModel.stopAction(action);
+  }
+  
   this._actions = [];
 }
 
