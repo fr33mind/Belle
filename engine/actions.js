@@ -1319,7 +1319,10 @@ belle.extend(RunScript, Action);
 
 RunScript.prototype.onExecute = function()
 {   
-    eval(this.code);
+    if (typeof this.code == "string")
+      eval(this.code);
+    else if (typeof this.code == "function")
+      this.code();
     this.setFinished(true);
 }
 
