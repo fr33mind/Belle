@@ -40,7 +40,7 @@ public:
     Object* object(int);
     Object* object(const QString&);
     Object* object(const QPoint&);
-    QList<Object*> objects();
+    QList<Object*> objects() const;
     QVariantList variantObjects() const;
     virtual void paint(QPainter&);
     virtual void move(int x, int y);

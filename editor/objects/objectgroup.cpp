@@ -311,7 +311,7 @@ void ObjectGroup::paint(QPainter & painter)
        mObjects[i]->paint(painter);
 }
 
-QList<Object*> ObjectGroup::objects()
+QList<Object*> ObjectGroup::objects() const
 {
     return mObjects;
 }
