@@ -109,6 +109,25 @@ Object.prototype.load = function(data)
     return true;
 }
 
+Object.prototype.addEventAction = function(event, action)
+{
+  if (event == "mouseMove") {
+    if (! this.mouseMoveActionGroup)
+      this.mouseMoveActionGroup = new belle.actions.ActionGroup({}, this);
+    this.mouseMoveActionGroup.addAction(action);
+  }
+  else if (event == "mouseUp") {
+    if (! this.mouseReleaseActionGroup)
+      this.mouseReleaseActionGroup = new belle.actions.ActionGroup({}, this);
+    this.mouseReleaseActionGroup.addAction(action);
+  }
+  else if (event == "mouseDown") {
+    if (! this.mousePressActionGroup)
+      this.mousePressActionGroup = new belle.actions.ActionGroup({}, this);
+    this.mousePressActionGroup.addAction(action);
+  }
+}
+
 Object.prototype.setCornerRadius = function(radius) {
     this.cornerRadius = radius;
     belle.utils.setBorderRadius(this.element, radius);
@@ -397,9 +416,8 @@ Object.prototype.initActionGroup = function(actions)
       return null;
 
     var actions = this.initActions(actions),
-        actionGroup = new belle.actions.ActionGroup();
+        actionGroup = new belle.actions.ActionGroup({}, this);
 
-    actionGroup._gameModel = this._gameModel;
     actionGroup.addActions(actions);
     return actionGroup;
 }
