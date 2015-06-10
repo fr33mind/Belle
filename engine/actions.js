@@ -1139,21 +1139,16 @@ function ShowMenu(data, parent)
 {
     Action.call(this, data, parent);
     this.options = 0;
-    this.skippable = false;
+    this.selectedOption = null;
     var object = this.getObject();
-   
+
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
     
-    if (object && object.objects.length) {
-      var buttons = object.objects;
-      for(var i=0; i < buttons.length; i++) {
-        buttons[i].bind("mouseUp", this, function() {
-            var scene = this.getScene();
-            scene.removeObject(this.object);
-            this.setFinished(true);
-        }, true);
-      }
+    if (object) {
+      object.bind("optionSelected", this, function(option) {
+        this._onOptionSelected(option);
+      });
     }
 }
 
@@ -1167,6 +1162,29 @@ ShowMenu.prototype.onExecute = function()
       object.setVisible(true);
       scene.addObject(object, true);
     }
+}
+
+ShowMenu.prototype._onOptionSelected = function(option)
+{
+  this.selectedOption = option;
+  if (this.selectedOption && this.selectedOption.actionGroup) {
+    this.selectedOption.actionGroup.bind("finished", this, function() {
+      this.setFinished(true);
+    });
+
+    if (this.selectedOption.actionGroup.isFinished())
+      this.setFinished(true);
+  }
+  else {
+    this.setFinished(true);
+  }
+}
+
+ShowMenu.prototype.skip = function()
+{
+  if (this.selectedOption && this.selectedOption.actionGroup) {
+    this.selectedOption.actionGroup.skip();
+  }
 }
 
 /************* End Novel *****************/
