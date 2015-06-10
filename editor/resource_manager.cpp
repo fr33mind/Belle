@@ -114,6 +114,8 @@ Object * ResourceManager::typeToObject(const QString& type, QVariantMap& data, Q
         return new ObjectGroup(data, parent);
     else if (_type == "menu")
         return new Menu(data, parent);
+    else if (_type == "menuoption")
+        return new MenuOption(data, parent);
     return 0;
 
 }
