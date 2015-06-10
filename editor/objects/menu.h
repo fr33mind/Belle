@@ -18,6 +18,9 @@
 #define MENU_H
 
 #include "objectgroup.h"
+#include "menuoption.h"
+
+class MenuOption;
 
 class Menu : public ObjectGroup
 {
@@ -25,21 +28,16 @@ class Menu : public ObjectGroup
 
     int size;
     Object* mResourceButton;
-    QStringList mConditions;
 
 public:
     explicit Menu(QObject *parent = 0);
     Menu(const QVariantMap&, QObject* parent=0);
 
-    QString optionText(int);
-    void setOptionText(int, const QString&);
-    QList<Action*> optionActions(int);
-    void appendActionToOption(int, Action*);
-    void removeActionFromOption(int, int, bool del=false);
+    QList<MenuOption*> options() const;
+    MenuOption* optionAt(int) const;
+    void removeOptionAt(int);
     void setNumberOfOptions(int);
-    void appendOption(const QString&);
-    QString condition(int);
-    void setCondition(int, const QString&);
+    void addOption(const QString&, const QList<Action*>& actions=QList<Action*>(), const QString& condition="");
     
 signals:
     

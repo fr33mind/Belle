@@ -25,6 +25,7 @@
 #define NUMBER_OF_OPTIONS 8
 
 class ShowMenu;
+class Menu;
 
 class ShowMenuEditorWidget : public ActionEditorWidget
 {
@@ -42,6 +43,7 @@ public:
 private:
     int widgetIndex(QObject*);
     void setNumberOfOptions(int);
+    void _updateTexts(Menu*);
 
 signals:
 

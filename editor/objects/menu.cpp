@@ -28,17 +28,9 @@ Menu::Menu(QObject *parent) :
     mResourceButton->setObjectName("menuButton");
     ResourceManager::instance()->addResource(mResourceButton);
 
-    Button* button = new Button(this);
-    button->setResource(mResourceButton);
-    button->setWidth(this->width());
-    this->append(button);
-
-    button = new Button(this);
-    button->setResource(mResourceButton);
-    button->setWidth(this->width());
-    this->append(button, 10);
+    addOption("Button 1");
+    addOption("Button 2");
 }
-
 
 Menu::Menu(const QVariantMap& data, QObject *parent) :
     ObjectGroup(data, parent)
@@ -56,86 +48,51 @@ void Menu::init()
     mResourceButton = 0;
 }
 
-QString Menu::optionText(int index)
+QList<MenuOption*> Menu::options() const
 {
-    Object *obj = object(index);
-    if (obj) {
-        Button* btn = static_cast<Button*>(obj);
-        return btn->text();
+    QList<MenuOption*> options;
+    QList<Object*> objects = this->objects();
+    MenuOption* option = 0;
+    for(int i=0; i < objects.size(); i++) {
+        option = qobject_cast<MenuOption*>(objects.at(i));
+        if (option)
+            options.append(option);
     }
-    return "";
+
+    return options;
 }
 
-void Menu::setOptionText(int index, const QString& text)
+MenuOption* Menu::optionAt(int index) const
 {
-    Object *obj = object(index);
-    if (obj) {
-        Button* btn = static_cast<Button*>(obj);
-        btn->setText(text);
-        emit dataChanged();
-    }
+    QList<Object*> objects = this->objects();
+    if (index >=0 && index < objects.size())
+        return qobject_cast<MenuOption*>(objects.at(index));
+
+    return 0;
 }
 
-QList<Action*> Menu::optionActions(int index)
+void Menu::removeOptionAt(int index)
 {
-    Object *obj = object(index);
-    QList<Action*> actions;
-    if (obj) {
-        Button* btn = static_cast<Button*>(obj);
-        return btn->actionsForEvent(Interaction::MouseRelease);
-    }
-    return actions;
+    this->removeObjectAt(index, true);
 }
 
-
-void Menu::appendActionToOption(int index, Action* action)
+void Menu::addOption(const QString& text, const QList<Action*>& actions, const QString& condition)
 {
-    Object* obj = object(index);
-
-    if (obj)
-        obj->appendEventAction(Interaction::MouseRelease, action);
-}
-
-void Menu::removeActionFromOption(int optIndex, int actionIndex, bool del)
-{
-    Object* obj = object(optIndex);
-
-    if (obj)
-        obj->removeEventActionAt(Interaction::MouseRelease, actionIndex, del);
+    MenuOption* option = new MenuOption(text, actions, condition, this);
+    int spacing = objects().size() > 0 ? 10 : 0;
+    option->setWidth(this->width());
+    option->setResource(mResourceButton);
+    append(option, spacing);
 }
 
 void Menu::setNumberOfOptions(int number)
 {
-    if (number == objects().size())
+    if (number == options().size())
         return;
 
-    for(int i=objects().size()-1; i < number; i++)
-        appendOption(QString::number(i+1));
+    for(int i=objects().size(); i < number; i++)
+        addOption(QString("%1 %2").arg("Button").arg(QString::number(i+1)));
 
-    for(int i=objects().size()-1; i >= number; i--)
-        removeObjectAt(i);
-}
-
-void Menu::appendOption(const QString& text)
-{
-    Button* button = new Button(text, this);
-    button->setWidth(this->width());
-    button->setResource(mResourceButton);
-    append(button, 10);
-    mConditions.append("");
-}
-
-QString Menu::condition(int index)
-{
-    if (index < mConditions.size())
-        return mConditions[index];
-    return "";
-}
-
-void Menu::setCondition(int index, const QString& condition)
-{
-    if (index < mConditions.size())
-        mConditions.insert(index, condition);
-    else
-        mConditions.insert(mConditions.size(), condition);
+    for(int i=options().size()-1; i >= number; i--)
+        removeOptionAt(i);
 }

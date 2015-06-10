@@ -16,8 +16,6 @@
 
 #include "show_menu_editorwidget.h"
 
-#include <QtDebug>
-
 #include "condition_text_edit.h"
 #include "scene_manager.h"
 #include "menu.h"
@@ -83,21 +81,26 @@ void ShowMenuEditorWidget::updateData(Action * action)
 
 
     Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
+    MenuOption* option = 0;
     QList<Object*> objects = menu->objects();
     QList<Action*> actions;
 
     int index = menu->objects().size() >= 2 ? menu->objects().size()-2 : 0;
     mChooseNumberOfOptions->setCurrentIndex(index);
-    setNumberOfOptions(menu->objects().size());
+    setNumberOfOptions(menu->options().size());
 
     for(int i=0; i < objects.size(); i++) {
+        option = menu->optionAt(i);
+        if (! option)
+            continue;
+
         if (i < mTextEdits.size())
-            mTextEdits[i]->setText(menu->optionText(i));
+            mTextEdits[i]->setText(option->text());
 
         if (i < mConditionEdits.size())
-            mConditionEdits[i]->setPlainText(menu->condition(i));
+            mConditionEdits[i]->setPlainText(option->condition());
 
-        actions = menu->optionActions(i);
+        actions = option->actions();
         if (i < mEventChoosers.size()) {
             for(int j=0; j < actions.size(); j++)
                 mEventChoosers[i]->addItem(actions[j]->icon(), actions[j]->toString());
@@ -119,7 +122,11 @@ void ShowMenuEditorWidget::onTextEdited(const QString & text)
         return;
 
     Menu* menu = static_cast<Menu*>(mAction->sceneObject());
-    menu->setOptionText(index, text);
+    if (menu) {
+        MenuOption* option = menu->optionAt(index);
+        if (option)
+            option->setText(text);
+    }
 }
 
 void ShowMenuEditorWidget::onAddItemActivated()
@@ -139,7 +146,9 @@ void ShowMenuEditorWidget::onAddItemActivated()
         if(comboBox && action) {
             comboBox->addItem(action->icon(), action->toString());
             int index = mEventChoosers.indexOf(comboBox);
-            menu->appendActionToOption(index, action);
+            MenuOption* option = menu->optionAt(index);
+            if (option)
+                option->addAction(action);
         }
     }
 }
@@ -155,8 +164,9 @@ void ShowMenuEditorWidget::onItemRemoved(int actionIndex)
         return;
 
     int optIndex = mEventChoosers.indexOf(comboBox);
-    menu->removeActionFromOption(optIndex, actionIndex, true);
-
+    MenuOption* option = menu->optionAt(optIndex);
+    if (option)
+        option->removeActionAt(actionIndex);
 }
 
 void ShowMenuEditorWidget::onItemActivated(int actionIndex)
@@ -169,11 +179,11 @@ void ShowMenuEditorWidget::onItemActivated(int actionIndex)
         return;
 
     int optIndex = widgetIndex(sender());
-    Object* object = menu->object(optIndex);
-    if (! object)
+    MenuOption* option = menu->optionAt(optIndex);
+    if (! option)
         return;
 
-    QList<Action*> actions = object->actionsForEvent(Interaction::MouseRelease);
+    QList<Action*> actions = option->actions();
     if (actionIndex < 0 || actionIndex >= actions.size())
         return;
 
@@ -207,6 +217,17 @@ void ShowMenuEditorWidget::onNumberOfOptionsChanged(int index)
 
     this->setNumberOfOptions(number);
     menu->setNumberOfOptions(number);
+    _updateTexts(menu);
+}
+
+void ShowMenuEditorWidget::_updateTexts(Menu* menu)
+{
+    MenuOption* option = 0;
+    for(int i=0; i < mTextEdits.size(); i++) {
+        option = menu->optionAt(i);
+        if (option)
+            mTextEdits.at(i)->setText(option->text());
+    }
 }
 
 void ShowMenuEditorWidget::onConditionChanged()
@@ -219,7 +240,9 @@ void ShowMenuEditorWidget::onConditionChanged()
 
     if (index != -1) {
         Menu* menu = static_cast<Menu*>(mAction->sceneObject());
-        menu->setCondition(index, textEdit->toPlainText());
+        MenuOption* option = menu->optionAt(index);
+        if (option)
+            option->setCondition(textEdit->toPlainText());
     }
 }
 
