@@ -427,7 +427,7 @@ void ObjectGroup::removeAllObjects(bool del)
     //instead emit a signal with empty list
     if (! signalsAlreadyBlocked)
         this->blockSignals(true);
-    for(int i=0; i < mObjects.size(); i++) {
+    for(int i=mObjects.size()-1; i >= 0; i--) {
         this->removeObjectAt(i, del);
     }
     this->blockSignals(signalsAlreadyBlocked);
