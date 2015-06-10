@@ -370,13 +370,11 @@ GameView.prototype.mouseUp = function(ev) {
     if (ev.type == "mouseup" && this._detectButton(ev) != "left")
       return;
 
-    var processed = false;
     if (! this.mapToScene(ev))
         return;
 
     if (this.pressedObject && this.hoveredObject == this.pressedObject) {
-        if (this.hoveredObject.mouseUp(ev))
-            processed = true;
+        this.hoveredObject.mouseUp(ev);
         this.pressedObject = null;
         if (ev.type == "touchend") {
           this.hoveredObject.mouseLeaveEvent(ev);
@@ -384,7 +382,7 @@ GameView.prototype.mouseUp = function(ev) {
         }
     }
 
-    if (! processed) {
+    if (! ev.processed) {
       var a = this.model.getAction();
       if (a)
         a.skip();

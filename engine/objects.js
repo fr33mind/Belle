@@ -302,7 +302,7 @@ Object.prototype.hasBorder = function()
 Object.prototype.mouseLeaveEvent = function(ev)
 {
     if (! this.visible || ! this.hovering)
-      return false;
+      return;
 
     //make sure mousemove actions are stopped
     if (this.mouseMoveActionGroup)
@@ -313,37 +313,36 @@ Object.prototype.mouseLeaveEvent = function(ev)
     }
 
     this.hovering = false;
-    return true;
 }
 
 Object.prototype.mouseEnterEvent = function(ev)
 {
     if (! this.visible || this.hovering)
-      return false;
+      return;
 
     if (this.mouseMoveActionGroup || this.eventListeners["mousemove"].length)
       this.defaultState = this.serialize();
 
     this.hovering = true;
-    return this.processEvent(ev, "mouseMove");
+    this.processEvent(ev, "mouseMove");
 }
 
 Object.prototype.mouseDown = function(event)
 {
-  return this.processEvent(event, "mouseDown");
+  this.processEvent(event, "mouseDown");
 }
 
 Object.prototype.mouseUp = function(event)
 {
-  return this.processEvent(event, "mouseUp");
+  this.processEvent(event, "mouseUp");
 }
 
 Object.prototype.mouseMove = function(event)
 {
     if (this.hovering)
-      return false;
+      return;
 
-    return this.processEvent(event, "mouseMove");
+    this.processEvent(event, "mouseMove");
 }
 
 Object.prototype.processEvent = function(event, type)
@@ -353,7 +352,7 @@ Object.prototype.processEvent = function(event, type)
         gameModel = this.getGameModel();
 
     if (! gameModel || ! this.contains(x, y))
-      return false;
+      return;
 
     var actionGroup = null,
         triggered = false;
@@ -374,8 +373,7 @@ Object.prototype.processEvent = function(event, type)
     triggered = this.trigger(type);
 
     if (actionGroup || triggered)
-      return true;
-    return false;
+      event.processed = true;
 }
 
 Object.prototype.needsRedraw = function()
@@ -978,7 +976,7 @@ ObjectGroup.prototype.mouseLeaveEvent = function(event)
     this.hoveredObject = null;
   }
 
-  return Object.prototype.mouseLeaveEvent.call(this, event);
+  Object.prototype.mouseLeaveEvent.call(this, event);
 }
 
 ObjectGroup.prototype.mouseMove = function(event)
@@ -997,7 +995,7 @@ ObjectGroup.prototype.mouseMove = function(event)
   }
 
   this.hoveredObject = object;
-  return Object.prototype.mouseMove.call(this, event);
+  Object.prototype.mouseMove.call(this, event);
 }
 
 ObjectGroup.prototype.mouseEnterEvent = function(event)
@@ -1006,7 +1004,7 @@ ObjectGroup.prototype.mouseEnterEvent = function(event)
   if (this.hoveredObject)
     this.hoveredObject.mouseEnterEvent(event);
 
-  return Object.prototype.mouseEnterEvent.call(this, event);
+  Object.prototype.mouseEnterEvent.call(this, event);
 }
 
 ObjectGroup.prototype.mouseDown = function(event)
@@ -1015,7 +1013,7 @@ ObjectGroup.prototype.mouseDown = function(event)
     this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
   if (this.hoveredObject)
     this.hoveredObject.mouseDown(event);
-  return Object.prototype.mouseDown.call(this, event);
+  Object.prototype.mouseDown.call(this, event);
 }
 
 ObjectGroup.prototype.mouseUp = function(event)
@@ -1024,7 +1022,7 @@ ObjectGroup.prototype.mouseUp = function(event)
     this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
   if (this.hoveredObject)
     this.hoveredObject.mouseUp(event);
-  return Object.prototype.mouseUp.call(this, event);
+  Object.prototype.mouseUp.call(this, event);
 }
 
 ObjectGroup.prototype.clear = function (context)
