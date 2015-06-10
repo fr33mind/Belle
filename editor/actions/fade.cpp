@@ -83,7 +83,7 @@ void Fade::setFadeType(Fade::Type type)
     if (type == Fade::In)
         namepart = tr("in");
 
-    setName(QString("%1 %2").arg(tr("Fade")).arg(namepart));
+    setTypeName(QString("%1 %2").arg(tr("Fade")).arg(namepart));
     emit dataChanged();
 }
 
