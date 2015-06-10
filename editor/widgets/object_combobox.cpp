@@ -18,6 +18,7 @@ void ObjectComboBox::clear()
 void ObjectComboBox::loadFromScene(Scene * scene)
 {
     this->clear();
+
     if (scene)
         this->setObjects(scene->objects());
 }
@@ -29,24 +30,16 @@ void ObjectComboBox::loadFromAction(Action * action)
 
     this->blockSignals(true);
     this->clear();
-    int currIndex = 0, pindex = 0;
+    int currIndex = -1, pindex = -1;
 
     this->loadFromScene(action->scene());
-
-    if (action->sceneObject()) {
-        currIndex = mObjects.indexOf(action->sceneObject());
-        if (currIndex == -1) {
-            insertObject(0, action->sceneObject());
-            currIndex = 0;
-        }
-    }
 
     Object* parent = qobject_cast<Object*>(action->parent());
     if (parent) {
         pindex = mObjects.indexOf(parent);
         if (pindex == -1) {
             insertObject(0, parent);
-            pindex = currIndex = 0;
+            pindex = 0;
         }
 
         if (pindex != -1) {
@@ -55,11 +48,22 @@ void ObjectComboBox::loadFromAction(Action * action)
         }
     }
 
+    if (action->sceneObject()) {
+        currIndex = mObjects.indexOf(action->sceneObject());
+        if (currIndex == -1) {
+            insertObject(pindex+1, action->sceneObject());
+            currIndex = pindex + 1;
+        }
+    }
+
     this->blockSignals(false);
 
-    setCurrentIndex(currIndex);
-    if (! action->sceneObject() && ! mObjects.isEmpty())
+    if (! action->sceneObject() && ! mObjects.isEmpty()) {
         action->setSceneObject(mObjects.first());
+        currIndex = 0;
+    }
+
+    setCurrentIndex(currIndex);
 }
 
 void ObjectComboBox::setObjects(const QList<Object*>& objects)
@@ -75,7 +79,7 @@ void ObjectComboBox::insertObject(int index, Object* object)
     if (! object)
         return;
 
-    addItem(object->objectName());
+    insertItem(index, object->name());
     mObjects.insert(index, object);
     connect(object, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)), Qt::UniqueConnection);
 }
