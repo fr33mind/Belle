@@ -1151,16 +1151,6 @@ DialogueBox.prototype.activateDefaultTextColor = function()
       this.dialogueTextBox.activateDefaultTextColor();
 }
 
-/************** MENU ************/
-
-function Menu(data, parent, initElement)
-{
-    ObjectGroup.call(this, data, parent, initElement);
-}
-
-belle.extend(Menu, ObjectGroup);
-
-
 /************** BUTTON ************/
 
 function Button(data, parent, initElement)
@@ -1174,6 +1164,59 @@ function Button(data, parent, initElement)
 
 belle.extend(Button, TextBox);
 
+/************** MENU OPTION ************/
+
+function MenuOption(data, parent)
+{
+  Button.call(this, data, parent);
+  this.actionGroup = null;
+  this.condition = "";
+
+  if ("actions" in data) {
+    var actions = data["actions"];
+    this.actionGroup = new belle.actions.ActionGroup({}, this);
+    for(var i=0; i < actions.length; i++) {
+      this.actionGroup.addAction(belle.createAction(actions[i], this));
+    }
+
+    this.bind("mouseUp", function() {
+      this.actionGroup.execute();
+    });
+  }
+
+  if ("condition" in data) {
+    this.condition = data["condition"];
+  }
+}
+
+belle.extend(MenuOption, Button);
+
+/************** MENU ************/
+
+function Menu(data, parent, initElement)
+{
+    ObjectGroup.call(this, data, parent, initElement);
+
+    if (this.objects) {
+      var self = this;
+      for(var i=0; i < this.objects.length; i++) {
+        this.objects[i].bind("mouseUp", function() {
+          self.trigger("optionSelected", this);
+          this.getScene().removeObject(self);
+        });
+      }
+    }
+}
+
+belle.extend(Menu, ObjectGroup);
+
+Menu.prototype.getOptionAt = function(index)
+{
+  if (index >= 0 && index < this.objects.length)
+    return this.objects[index];
+  return null;
+}
+
 // Expose the public methods
 
 objects.Object = Object;
@@ -1183,6 +1226,7 @@ objects.Character = Character;
 objects.ObjectGroup = ObjectGroup;
 objects.DialogueBox = DialogueBox;
 objects.Button = Button;
+objects.MenuOption = MenuOption;
 objects.Menu = Menu;
 
 }(belle));
