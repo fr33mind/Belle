@@ -45,6 +45,7 @@ public slots:
 
 private:
     void init();
+    void _fixButtons();
     
 };
 

@@ -36,6 +36,8 @@ Menu::Menu(const QVariantMap& data, QObject *parent) :
     ObjectGroup(data, parent)
 {
     init();
+    _fixButtons();
+
     Object* obj = this->object(0);
     if (obj)
         mResourceButton = qobject_cast<Object*>(obj->resource());
@@ -46,6 +48,33 @@ void Menu::init()
 {
     setType("Menu");
     mResourceButton = 0;
+}
+
+//fix buttons for old versions
+void Menu::_fixButtons()
+{
+    QList<Object*> objects = this->objects();
+    if (objects.isEmpty() || qobject_cast<MenuOption*>(objects.first()))
+        return;
+
+    QList<Object*> new_objects;
+    QVariantMap data;
+
+    for(int i=0; i < objects.size(); i++) {
+        data = objects.at(i)->toJsonObject();
+        data.insert("type", "MenuOption");
+        if (data.contains("onMouseRelease")) {
+            data.insert("actions", data.value("onMouseRelease").toList());
+            data.remove("onMouseRelease");
+        }
+        new_objects.append(ResourceManager::instance()->createObject(data, this));
+    }
+
+    removeAllObjects(true);
+
+    for(int i=0; i < new_objects.size(); i++) {
+        _append(new_objects.at(i));
+    }
 }
 
 QList<MenuOption*> Menu::options() const

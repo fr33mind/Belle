@@ -70,6 +70,9 @@ private slots:
     void objectDestroyed(Object*);
     void objectChanged(const QVariantMap&);
 
+protected:
+    void _append(Object*);
+
 private:
     QList<Object*> mObjects;
     QList<Object*> mStickyObjects;
@@ -82,7 +85,6 @@ private:
     void alignObjectsVertically();
     void checkStickyObjects();
     void addStickyObject(Object*);
-    void _append(Object*);
 };
 
 #endif // OBJECTGROUP_H
