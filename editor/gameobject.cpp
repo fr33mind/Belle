@@ -15,6 +15,11 @@ GameObject::GameObject(const QVariantMap & data, QObject *parent) :
     _load(data);
 }
 
+GameObject::~GameObject()
+{
+    emit destroyed(this);
+}
+
 void GameObject::init()
 {
     mNameEditable = true;
@@ -86,8 +91,7 @@ void GameObject::setResource(GameObject * resource)
 
     mResource = resource;
     mResource->addClone(this);
-    if (mSynced)
-        connectToResource();
+    connectToResource();
 }
 
 GameObject* GameObject::resource() const
@@ -102,7 +106,7 @@ void GameObject::resourceDestroyed()
 
 void GameObject::addClone(GameObject * clone)
 {
-    if (hasClone(clone))
+    if (! clone || hasClone(clone))
         return;
 
     mClones.append(clone);
@@ -115,7 +119,7 @@ bool GameObject::hasClone(GameObject * clone)
 
 void GameObject::removeClone(GameObject * clone)
 {
-    if (hasClone(clone)) {
+    if (clone && hasClone(clone)) {
         disconnect(clone);
         clone->disconnect(this);
         mClones.removeOne(clone);
@@ -141,12 +145,12 @@ void GameObject::setSync(bool sync)
     if (! mResource || sync == mSynced)
         return;
 
+    mSynced = sync;
+
     if (sync)
         connectToResource();
     else
         disconnectFromResource();
-
-    mSynced = sync;
 }
 
 void GameObject::sync()
@@ -162,9 +166,12 @@ bool GameObject::isSynced()
 void GameObject::connectToResource()
 {
     if (mResource) {
-        connect(mResource, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
+        if (mSynced) {
+            connect(mResource, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
+            connect(this, SIGNAL(dataChanged(const QVariantMap&)), mResource, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
+        }
+
         connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()), Qt::UniqueConnection);
-        connect(this, SIGNAL(dataChanged(const QVariantMap&)), mResource, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
         connect(this, SIGNAL(destroyed(GameObject*)), mResource, SLOT(removeClone(GameObject*)), Qt::UniqueConnection);
     }
 }

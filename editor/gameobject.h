@@ -13,6 +13,7 @@ class GameObject : public QObject
 public:
     explicit GameObject(QObject *parent = 0);
     GameObject(const QVariantMap&, QObject *parent = 0);
+    virtual ~GameObject();
 
     virtual QVariantMap toJsonObject(bool internal=false) const;
 
