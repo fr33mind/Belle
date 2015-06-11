@@ -21,7 +21,7 @@
 ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mObjectsComboBox = new QComboBox(this);
+    mObjectsComboBox = new ObjectComboBox(this);
     mColorButton = new ColorPushButton(this);
     mOpacitySlider = new QSlider(Qt::Horizontal, this);
     mChangeObjectColorCheckBox = new QCheckBox(this);
@@ -40,7 +40,7 @@ ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
     endGroup();
     resizeColumnToContents(0);
 
-    connect(mObjectsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onObjectChanged(int)));
+    connect(mObjectsComboBox, SIGNAL(objectChanged(Object*)), this, SLOT(onCurrentObjectChanged(Object*)));
     connect(mChangeObjectColorCheckBox, SIGNAL(toggled(bool)), this, SLOT(onChangeObjectColorToggled(bool)));
     connect(mChangeObjectBackgroundColorCheckBox, SIGNAL(toggled(bool)), this, SLOT(onChangeObjectBackgroundColorToggled(bool)));
     connect(mColorButton, SIGNAL(colorChosen(const QColor&)), this, SLOT(onColorChosen(const QColor&)));
@@ -60,28 +60,7 @@ void ChangeColorEditorWidget::updateData(Action * action)
     ActionEditorWidget::updateData(action);
     mAction = 0;
 
-    mObjectsComboBox->clear();
-
-    if (changeColor->sceneObject()) {
-        mObjectsComboBox->addItem(changeColor->sceneObject()->objectName());
-        mObjects.append(changeColor->sceneObject());
-    }
-
-    QList<Object*> objects = ResourceManager::resources();
-
-    foreach(Object* obj, objects) {
-        if (obj == changeColor->sceneObject())
-            continue;
-
-        if (obj) {
-            mObjectsComboBox->addItem(obj->objectName());
-            mObjects.append(obj);
-        }
-    }
-
-    if (! changeColor->sceneObject() && ! mObjects.isEmpty())
-        changeColor->setSceneObject(mObjects[0]);
-
+    mObjectsComboBox->loadFromAction(action);
     mColorButton->setColor(changeColor->color());
     mOpacitySlider->setValue(changeColor->opacity());
 
@@ -96,14 +75,13 @@ void ChangeColorEditorWidget::onColorChosen(const QColor & color)
     }
 }
 
-void ChangeColorEditorWidget::onObjectChanged(int index)
+void ChangeColorEditorWidget::onCurrentObjectChanged(Object* object)
 {
     ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
-    if (! changeColor || index < 0 || index >= mObjects.size())
+    if (! changeColor)
         return;
 
-    changeColor->setSceneObject(mObjects[index]);
-
+    changeColor->setSceneObject(object);
 }
 
 void ChangeColorEditorWidget::onChangeObjectColorToggled(bool checked)

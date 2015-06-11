@@ -18,6 +18,7 @@
 #define CHANGECOLOR_EDITOR_WIDGET_H
 
 #include "action_editor_widget.h"
+#include "widgets/object_combobox.h"
 
 class ChangeColor;
 
@@ -31,7 +32,7 @@ public:
 signals:
     
 private slots:
-    void onObjectChanged(int);
+    void onCurrentObjectChanged(Object*);
     void onChangeObjectColorToggled(bool);
     void onChangeObjectBackgroundColorToggled(bool);
     void onColorChosen(const QColor&);
@@ -39,7 +40,7 @@ private slots:
 
 
 private:
-    QComboBox *mObjectsComboBox;
+    ObjectComboBox* mObjectsComboBox;
     ColorPushButton* mColorButton;
     QSlider * mOpacitySlider;
     QCheckBox * mChangeObjectColorCheckBox;
