@@ -114,7 +114,7 @@
     return -1;
   }
 
-  GameModel.prototype.setScene = function(scene, reload)
+  GameModel.prototype.setScene = function(scene, action, reload)
   {
     var scene = this.getScene(scene),
         currScene = this.getScene(),
@@ -122,7 +122,7 @@
 
     if (this.isPaused()) {
       this.queue.push(function(){
-        this.setScene(scene, reload);
+        this.setScene(scene, action, reload);
       });
       return;
     }
@@ -157,6 +157,8 @@
       this.trigger("sceneChanged");
       //TODO: In the future use event for when scene is ready
       // (in case it has some transition animation)
+      if (typeof action == "number")
+        this._nextAction = this.scene.getAction(action);
       this.nextAction();
     }
   }
@@ -424,9 +426,7 @@
     if (scene) {
       var data = $.extend({}, scene.data, state.scene);
       scene.load(data);
-      this.action = null;
-      this._nextAction = scene.getAction(state.index);
-      this.setScene(scene, false);
+      this.setScene(scene, state.index, false);
       return true;
     }
 
