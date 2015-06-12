@@ -232,8 +232,8 @@ Scene.prototype.getAction = function(action)
       return null;
 
     if (typeof action == "number") {
-      if (id >= 0 && id < this.actions.length)
-	return this.actions[id];
+      if (action >= 0 && action < this.actions.length)
+	return this.actions[action];
     }
     else if (typeof action == "string") {
         for (var i=0; i < this.actions.length; i++)
