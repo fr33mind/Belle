@@ -37,9 +37,9 @@ public:
     virtual ObjectEditorWidget* editorWidget();
 
     void append(Object*, int spacing=0);
-    Object* object(int);
-    Object* object(const QString&);
-    Object* object(const QPoint&);
+    Object* object(int) const;
+    Object* object(const QString&) const;
+    Object* object(const QPoint&) const;
     QList<Object*> objects() const;
     QVariantList variantObjects() const;
     virtual void paint(QPainter&);

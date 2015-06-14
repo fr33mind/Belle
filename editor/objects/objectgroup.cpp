@@ -261,7 +261,7 @@ void ObjectGroup::adaptSize()
     Object::setHeight(h);
 }
 
-Object * ObjectGroup::object(int index)
+Object * ObjectGroup::object(int index) const
 {
     if (index >= 0 && index < mObjects.size())
         return mObjects[index];
@@ -269,7 +269,7 @@ Object * ObjectGroup::object(int index)
     return 0;
 }
 
-Object * ObjectGroup::object(const QString& name)
+Object * ObjectGroup::object(const QString& name) const
 {
     for(int i=0; i < mObjects.size(); i++)
         if (mObjects[i]->objectName() == name)
@@ -278,7 +278,7 @@ Object * ObjectGroup::object(const QString& name)
     return 0;
 }
 
-Object * ObjectGroup::object(const QPoint& point)
+Object * ObjectGroup::object(const QPoint& point) const
 {
     for(int i=mObjects.size()-1; i >=0; --i)
         if (mObjects[i]->contains(point.x(), point.y()))
