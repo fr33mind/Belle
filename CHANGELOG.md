@@ -1,7 +1,8 @@
-## Belle 0.5.1a | 18/05/2015
+## Belle 0.6a | 14/06/2015
 
 ### [General]
 - Added append option to Dialogue actions.
+- Improved Menu object.
 
 #### [Editor]
 - Set fade type correctly.
@@ -9,6 +10,9 @@
 - Improved target object selection in action's editor.
 - Improved Resource and clones synchronization.
 - Minor improvements on simple http server.
+- Fixed object combobox in ChangeColor editor.
+- Fixed crash when adding new option to menu.
+- Other minor fixes.
 
 #### [Engine]
 - Fixed empty lines not being rendered in TextBox.
@@ -19,6 +23,8 @@
 - Fixed and improved some actions.
 - Added ActionGroup.
 - Fixed some hovering issues.
+- Improved event handling in objects.
+- Improved management of executed actions in GameModel.
 - Overall improvements.
 
 ## Belle 0.5a | 13/02/2015

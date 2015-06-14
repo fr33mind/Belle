@@ -29,7 +29,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
                       "that deploys games for the web.<br/>"
                       "It uses Qt4 for the editor and HTML5 for the engine.");
     QString copyright = "Copyright &copy; 2012-2015 Carlos Pais";
-    QString version = "Belle 0.5.1 alpha";
+    QString version = "Belle 0.6 alpha";
 
     QString fullDesc = QString("<p><b>%1</b></p><p>%2</p><p>%3</p>").arg(version).arg(desc).arg(copyright);
 
