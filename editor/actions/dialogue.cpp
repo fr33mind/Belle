@@ -192,21 +192,13 @@ void Dialogue::updateTextBox()
     if (dialogueBox) {
         dialogueBox->setSpeakerName(name);
         dialogueBox->setText(mText);
-
-        if (!textColor.isValid() && !nameColor.isValid())
-            dialogueBox->activateDefaultTextColor();
-        else {
-            dialogueBox->setTextColor(textColor);
-            dialogueBox->setSpeakerNameColor(nameColor);
-        }
+        dialogueBox->setTextColor(textColor);
+        dialogueBox->setSpeakerNameColor(nameColor);
     }
     else {
         TextBox* textBox = qobject_cast<TextBox*>(object);
         if (textBox) {
-            if(textColor.isValid())
-                textBox->setTextColor(textColor);
-            else
-                textBox->activateDefaultTextColor();
+            textBox->setPlaceholderTextColor(textColor);
             textBox->setPlaceholderText(mText);
         }
     }
@@ -220,13 +212,11 @@ void Dialogue::restoreTextBox()
 
     DialogueBox* dialogueBox = qobject_cast<DialogueBox*>(object);
     if (dialogueBox) {
-       dialogueBox->activateDefaultTextColor();
        dialogueBox->setText("", "");
     }
     else {
         TextBox* textBox = qobject_cast<TextBox*>(object);
         if (textBox) {
-            textBox->activateDefaultTextColor();
             textBox->setPlaceholderText("");
         }
     }

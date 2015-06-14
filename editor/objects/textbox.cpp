@@ -62,7 +62,7 @@ void TextBox::_load(const QVariantMap& data)
     }
 
     if (data.contains("textColor") && data.value("textColor").type() == QVariant::List)
-        setDefaultTextColor(Utils::listToColor(data.value("textColor").toList()));
+        setTextColor(Utils::listToColor(data.value("textColor").toList()));
 
     if (data.contains("textAlignment") && data.value("textAlignment").type() == QVariant::String) {
         QString align = data.value("textAlignment").toString();
@@ -94,6 +94,9 @@ void TextBox::_load(const QVariantMap& data)
     if (data.contains("placeholderText") && data.value("placeholderText").type() == QVariant::String)
         this->setPlaceholderText(data.value("placeholderText").toString());
 
+    if (data.contains("placeholderTextColor") && data.value("placeholderTextColor").type() == QVariant::List)
+        setPlaceholderTextColor(Utils::listToColor(data.value("placeholderTextColor").toList()));
+
     this->blockNotifications(false);
 }
 
@@ -106,7 +109,7 @@ void TextBox::load(const QVariantMap& data)
 void TextBox::init(const QString& text)
 {
     mText = text;
-    setDefaultTextColor(QColor(Qt::black));
+    setTextColor(QColor(Qt::black));
     mTextRect = sceneRect();
     mPlaceholderText = "";
     mTextAlignment = Qt::AlignLeft | Qt::AlignTop;
@@ -176,17 +179,6 @@ void TextBox::setTextColor(const QColor& color)
     this->notify("textColor", Utils::colorToList(color));
 }
 
-void TextBox::setDefaultTextColor(const QColor& color)
-{
-    mDefaultTextColor = color;
-    setTextColor(color);
-}
-
-void TextBox::activateDefaultTextColor()
-{
-    setTextColor(mDefaultTextColor);
-}
-
 void TextBox::move(int x, int y)
 {
     mTextRect.moveTo(x, y);
@@ -245,6 +237,17 @@ void TextBox::alignText()
 
 }
 
+QColor TextBox::placeholderTextColor() const {
+    return mPlaceholderTextColor;
+}
+
+void TextBox::setPlaceholderTextColor(const QColor& color)
+{
+    if (mPlaceholderTextColor != color)  {
+        mPlaceholderTextColor = color;
+    }
+}
+
 QString TextBox::placeholderText() const {
     return mPlaceholderText;
 }
@@ -267,7 +270,7 @@ void TextBox::paint(QPainter & painter)
     QRect rect(sceneRect());
     rect.setWidth(contentWidth());
     rect.setHeight(contentHeight());
-    QPen pen(mTextColor);
+    QPen pen(currentColor());
     painter.save();
     painter.setFont(mFont);
     painter.setPen(pen);
@@ -279,7 +282,7 @@ QVariantMap TextBox::toJsonObject(bool internal)
 {
     QVariantMap object = Object::toJsonObject(internal);
 
-    object.insert("textColor", Utils::colorToList(mDefaultTextColor));
+    object.insert("textColor", Utils::colorToList(textColor()));
     object.insert("text", mText);
     object.insert("textAlignment", textAlignmentAsString());
     if (mFont != Object::defaultFont())
@@ -288,6 +291,8 @@ QVariantMap TextBox::toJsonObject(bool internal)
     if (internal) {
         if (! placeholderText().isEmpty())
             object.insert("placeholderText", placeholderText());
+        if (placeholderTextColor().isValid())
+            object.insert("placeholderTextColor", placeholderTextColor());
     }
 
     filterResourceData(object);
@@ -301,6 +306,13 @@ QString TextBox::currentText()
     if (! mPlaceholderText.isEmpty())
         return mPlaceholderText;
     return mText;
+}
+
+QColor TextBox::currentColor() const
+{
+    if (! mPlaceholderText.isEmpty() && mPlaceholderTextColor.isValid())
+        return mPlaceholderTextColor;
+    return mTextColor;
 }
 
 Qt::Alignment TextBox::textAlignment()

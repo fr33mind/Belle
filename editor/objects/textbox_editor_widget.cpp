@@ -72,7 +72,7 @@ void TextPropertiesWidget::onColorChosen(const QColor& color)
 {
     TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
     if (textbox)
-        textbox->setDefaultTextColor(color);
+        textbox->setTextColor(color);
 }
 
 void TextPropertiesWidget::updateData(Object *obj)
@@ -84,8 +84,6 @@ void TextPropertiesWidget::updateData(Object *obj)
 
     if (! textbox->text().isEmpty())
         textbox->setPlaceholderText("");
-
-    textbox->activateDefaultTextColor();
 
     ObjectEditorWidget::updateData(obj);
     mCurrentObject = 0;

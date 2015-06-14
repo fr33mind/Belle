@@ -33,7 +33,8 @@ class DialogueBox : public ObjectGroup
         void setText(const QString &, const QString &);
         void setText(const QString &);
         void setSpeakerName(const QString&);
-        void activateDefaultTextColor();
+        TextBox* speakerNameTextBox() const;
+        TextBox* dialogueTextBox() const;
 
         virtual void paint(QPainter &);
         virtual void move(int , int);
@@ -43,7 +44,7 @@ class DialogueBox : public ObjectGroup
         virtual ObjectEditorWidget* editorWidget();*/
 
 protected:
-        TextBox* textBox(const QString&);
+        TextBox* textBox(const QString&) const;
 
     private:
         void init();

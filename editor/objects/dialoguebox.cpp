@@ -113,9 +113,9 @@ void DialogueBox::move(int x, int y)
 
 void DialogueBox::setSpeakerNameColor(const QColor & color)
 {
-    TextBox *textBox = this->textBox("speakerTextBox");
+    TextBox *textBox = this->speakerNameTextBox();
     if (textBox) {
-        textBox->setTextColor(color);
+        textBox->setPlaceholderTextColor(color);
         emit dataChanged();
     }
 }
@@ -125,7 +125,7 @@ QVariantMap DialogueBox::toJsonObject(bool internal)
     return ObjectGroup::toJsonObject(internal);
 }
 
-TextBox* DialogueBox::textBox(const QString& name)
+TextBox* DialogueBox::textBox(const QString& name) const
 {
     Object * obj = this->object(name);
     if (obj)
@@ -135,19 +135,19 @@ TextBox* DialogueBox::textBox(const QString& name)
 
 void DialogueBox::setTextColor(const QColor & color)
 {
-    TextBox *textBox = this->textBox("dialogueTextBox");
+    TextBox *textBox = this->dialogueTextBox();
     if (textBox)
-        textBox->setTextColor(color);
+        textBox->setPlaceholderTextColor(color);
 }
 
-void DialogueBox::activateDefaultTextColor()
+TextBox* DialogueBox::speakerNameTextBox() const
 {
-    TextBox *textBox = this->textBox("dialogueTextBox");
-    if (textBox)
-        textBox->activateDefaultTextColor();
-    textBox = this->textBox("speakerTextBox");
-    if (textBox)
-        textBox->activateDefaultTextColor();
+    return textBox("speakerTextBox");
+}
+
+TextBox* DialogueBox::dialogueTextBox() const
+{
+    return textBox("dialogueTextBox");
 }
 
 /*DialogueEditorWidget* DialogueBox::dialogueEditorWidget()
