@@ -147,8 +147,107 @@
     return this.name;
   }
 
+  /*** Timer - Wrapper object for setTimeout/setInterval ***/
+
+  function Timer(callback, timeout, repeat)
+  {
+    this.timerId = -1;
+    this.callback = callback;
+    this.timeout = timeout || 0;
+    this.repeat = repeat || false;
+    this.startTime = null;
+    this.stopTime = null;
+    this._lastCallTime = null;
+    this._repeat = null;
+  }
+
+  Timer.prototype.isActive = function()
+  {
+    if (this.timerId != -1)
+      return true;
+    return false;
+  }
+
+  Timer.prototype.start = function()
+  {
+    if (typeof this.callback != "function")
+      return null;
+
+    //pass this timer object to callback
+    var callback = function() {
+      this.callback(this);
+      if (! this._repeat)
+        this.onStop();
+      else
+        this._lastCallTime = new Date().getTime();
+    }.bind(this);
+
+    this.onStart();
+
+    this._repeat = this.repeat;
+
+    if (this._repeat)
+      this.timerId = window.setInterval(callback, this.timeout);
+    else
+      this.timerId = window.setTimeout(callback, this.timeout);
+  }
+
+  Timer.prototype.stop = function()
+  {
+    if (this.timerId == -1)
+      return;
+
+    if (this._repeat)
+      window.clearInterval(this.timerId);
+    else
+      window.clearTimeout(this.timerId);
+
+    this.onStop();
+  }
+
+  Timer.prototype.onStart = function()
+  {
+    if (this.isActive())
+      this.stop();
+
+    this.startTime = new Date().getTime();
+    this._lastCallTime = this.startTime;
+    this.stopTime = null;
+  }
+
+  Timer.prototype.onStop = function()
+  {
+    this.timerId = -1;
+    this.stopTime = new Date().getTime();
+  }
+
+  Timer.prototype.getElapsedTime = function()
+  {
+    if (! this.startTime)
+      return 0;
+
+    if (this.stopTime !== null)
+      return (this.stopTime - this.startTime);
+
+    var now = new Date().getTime();
+    return (now - this.startTime);
+  }
+
+  Timer.prototype.getDeltaTime = function()
+  {
+    if (! this._lastCallTime)
+        return 0;
+
+    if (this.stopTime !== null)
+      return (this.stopTime - this._lastCallTime);
+
+    var now = new Date().getTime();
+    return now - this._lastCallTime;
+  }
+
   belle.core.Object = Object;
   belle.core.Point = Point;
   belle.core.Asset = Asset;
+  belle.core.Timer = Timer;
 
 }(belle));

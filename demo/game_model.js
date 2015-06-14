@@ -29,6 +29,8 @@
     this.queue = [];
     this.game = this.parent;
     this.data = null;
+    this.runningActions = [];
+    this.queuedActions = [];
     
     this.load(data);
   }
@@ -112,20 +114,31 @@
     return -1;
   }
 
-  GameModel.prototype.setScene = function(scene, reload) {
+  GameModel.prototype.setScene = function(scene, action, reload)
+  {
     var scene = this.getScene(scene),
         currScene = this.getScene(),
         self = this;
 
-    if (scene) {
-      //hide current scene
-      if (currScene && currScene != scene) {
-        currScene.unbind("finished", this);
-        currScene.hide();
-      }
+    if (this.isPaused()) {
+      this.queue.push(function(){
+        this.setScene(scene, action, reload);
+      });
+      return;
+    }
 
+    this._stopRunningActions();
+
+    //hide current scene
+    if (currScene && currScene != scene) {
+      currScene.unbind("finished", this);
+      currScene.hide();
+    }
+
+    if (scene) {
       if (reload || typeof reload == "undefined")
         scene.reload();
+
       scene.bind("finished", this, function(){
         this.nextScene();
       }, true);
@@ -139,10 +152,13 @@
       }, true);
 
       this.scene = scene;
+      this._nextScene = null;
       this.scene.show();
       this.trigger("sceneChanged");
       //TODO: In the future use event for when scene is ready
       // (in case it has some transition animation)
+      if (typeof action == "number")
+        this._nextAction = this.scene.getAction(action);
       this.nextAction();
     }
   }
@@ -152,7 +168,7 @@
   }
 
   GameModel.prototype.getScene = function(scene) {
-      if (scene === null || scene === undefined)
+      if (scene === undefined)
         return this.scene;
 
       var scenes = this.getScenes();
@@ -167,7 +183,7 @@
               }
           }
       }
-      else if (belle.isInstance(scene, belle.Scene) && scenes.indexOf(scene) !== -1){
+      else if (scene && belle.isInstance(scene, belle.Scene) && scenes.indexOf(scene) !== -1){
           return scene;
       }
 
@@ -187,7 +203,8 @@
     return null;
   }
 
-  GameModel.prototype.nextScene = function() {
+  GameModel.prototype.nextScene = function()
+  {
     if (this.isFinished())
       return;
 
@@ -198,19 +215,12 @@
       return;
     }
 
-    if (this.action && !this.action.isFinished()) {
-      this.action.unbind("finished", this);
-      this.action.setFinished(true);
-    }
-
-    var scene = this.getNextScene();
+    var nextScene = this.getNextScene();
     this._nextScene = null;
-    if (scene) {
-      this.setScene(scene);
-    }
-    else {
+    this.setScene(nextScene);
+
+    if (! nextScene)
       this.setFinished(true);
-    }
   }
 
   GameModel.prototype.setNextAction = function(action) {
@@ -223,7 +233,8 @@
     return this.getScene().getNextAction(this.action);
   }
 
-  GameModel.prototype.nextAction = function() {
+  GameModel.prototype.nextAction = function()
+  {
     if (this.isPaused()) {
       this.queue.push(function(){
         this.nextAction();
@@ -231,31 +242,133 @@
       return;
     }
 
-    if (this.action && !this.action.isFinished()) {
-      this.action.unbind("finished", this);
-      this.action.setFinished(true);
-    }
-
-    this.action = this.getNextAction();
+    var nextAction = this.getNextAction();
     this._nextAction = null;
 
-    if (! this.action) {
+    if (nextAction)
+      this.setAction(nextAction);
+    else
       this.nextScene();
-      return;
-    }
-
-    this.action.bind("finished", this, function() {
-      this.nextAction();
-    }, true);
-    this.action.execute();
   }
 
   GameModel.prototype.getAction = function(action) {
-    if (! action)
+    if (action === undefined)
       return this.action;
     if (this.getScene())
       return this.getScene().getAction(action);
     return null;
+  }
+
+  GameModel.prototype.setAction = function(action)
+  {
+    if (this.isPaused()) {
+      this.queue.push(function(){
+        this.setAction(action);
+      });
+      return;
+    }
+
+    var scene = this.getScene(),
+        self = this;
+
+    if (! scene)
+      return;
+
+    if (this.action && !this.action.isFinished()) {
+      this.action.stop();
+    }
+
+    this._nextAction = null;
+    this.action = scene.getAction(action);
+
+    if (this.action) {
+      this.executeAction(this.action);
+    }
+  }
+
+  GameModel.prototype.stopAction = function(action)
+  {
+    var index = this.queuedActions.indexOf(action);
+    if (index != -1) {
+      this.queuedActions.splice(index, 1);
+      return;
+    }
+
+    index = this.runningActions.indexOf(action);
+    if (index != -1) {
+      action.stop();
+      this.runningActions.splice(index, 1);
+    }
+  }
+
+  GameModel.prototype._executeAction = function(action)
+  {
+    if (this.runningActions.indexOf(action) != -1)
+      return;
+
+    var _action = null;
+
+    //stop same type actions that target the same object
+    if (action.type != "ActionGroup" && action.type != "Branch") {
+      for(var i=this.runningActions.length-1; i >= 0; --i) {
+        _action = this.runningActions[i];
+        if (_action.type == action.type && _action.getObject() == action.getObject()) {
+          _action.stop();
+          this.runningActions.splice(i, 1);
+        }
+      }
+    }
+
+    action.bind("finished", this, function() {
+      var index = this.runningActions.indexOf(action);
+      if (index != -1)
+        this.runningActions.splice(index, 1);
+      if (action == this.action)
+        this.nextAction();
+    }, true);
+
+    this.runningActions.push(action);
+    action.execute();
+  }
+
+  GameModel.prototype.executeAction = function(action)
+  {
+    if (! action || this.queuedActions.indexOf(action) != -1)
+      return;
+
+    this.queuedActions.push(action);
+
+    setTimeout(function() {
+      //check to see if action is still in queue
+      var index = this.queuedActions.indexOf(action);
+      if (index != -1) {
+          this.queuedActions.splice(index, 1);
+          this._executeAction(action);
+      }
+    }.bind(this), 0);
+  }
+
+  GameModel.prototype.executeActions = function(actions)
+  {
+    if (! actions || ! actions.length)
+      return;
+
+    var group = new belle.actions.ActionGroup();
+    group._gameModel = this;
+    group.addActions(actions);
+    this.executeAction(group);
+  }
+
+  GameModel.prototype._stopRunningActions = function()
+  {
+    var actions = this.runningActions;
+    for(var i=0; i < actions.length; i++) {
+      actions[i].stop();
+    }
+
+    this.runningActions.length = 0;
+    this.queuedActions.length = 0;
+    this.action = this._nextAction = null;
   }
 
   GameModel.prototype.isPaused = function() {
@@ -313,9 +426,7 @@
     if (scene) {
       var data = $.extend({}, scene.data, state.scene);
       scene.load(data);
-      this.action = null;
-      this._nextAction = scene.getAction(state.index);
-      this.setScene(scene, false);
+      this.setScene(scene, state.index, false);
       return true;
     }
 

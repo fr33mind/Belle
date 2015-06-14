@@ -34,10 +34,10 @@ function Object(info, parent, initElement)
     this.element.appendChild(this.backgroundElement);
 
     this.roundedRect = false;
-    this.mousePressActions = [];
-    this.mouseReleaseActions = [];
-    this.mouseMoveActions = [];
-    this.mouseLeaveActions = [];
+    this.mousePressActionGroup = null;
+    this.mouseReleaseActionGroup = null;
+    this.mouseMoveActionGroup = null;
+    this.mouseLeaveActionGroup = null;
     this.defaultState = null;
     this.redrawing = false;
     this.hovering = false;
@@ -50,24 +50,24 @@ function Object(info, parent, initElement)
         "mousemove" : []
     };
 
-    var actions;
-    var action;
-    var actionObject;
+    var actions,
+        action,
+        actionGroup;
 
     if ("onMousePress" in info) {
-        this.mousePressActions = this.initActions(info["onMousePress"]);
+        this.mousePressActionGroup = this.initActionGroup(info["onMousePress"]);
     }
 
     if ("onMouseRelease" in info) {
-        this.mouseReleaseActions = this.initActions(info["onMouseRelease"]);
+        this.mouseReleaseActionGroup = this.initActionGroup(info["onMouseRelease"]);
     }
 
     if ("onMouseMove" in info) {
-        this.mouseMoveActions = this.initActions(info["onMouseMove"]);
+        this.mouseMoveActionGroup = this.initActionGroup(info["onMouseMove"]);
     }
 
     if ("onMouseLeave" in info) {
-        this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
+        this.mouseLeaveActionGroup = this.initActionGroup(info["onMouseLeave"]);
     }
 
     Object.prototype.load.call(this, info);
@@ -107,6 +107,25 @@ Object.prototype.load = function(data)
     }
 
     return true;
+}
+
+Object.prototype.addEventAction = function(event, action)
+{
+  if (event == "mouseMove") {
+    if (! this.mouseMoveActionGroup)
+      this.mouseMoveActionGroup = new belle.actions.ActionGroup({}, this);
+    this.mouseMoveActionGroup.addAction(action);
+  }
+  else if (event == "mouseUp") {
+    if (! this.mouseReleaseActionGroup)
+      this.mouseReleaseActionGroup = new belle.actions.ActionGroup({}, this);
+    this.mouseReleaseActionGroup.addAction(action);
+  }
+  else if (event == "mouseDown") {
+    if (! this.mousePressActionGroup)
+      this.mousePressActionGroup = new belle.actions.ActionGroup({}, this);
+    this.mousePressActionGroup.addAction(action);
+  }
 }
 
 Object.prototype.setCornerRadius = function(radius) {
@@ -218,7 +237,7 @@ Object.prototype.paint = function(context)
         y = this.globalY(),
         border = this.hasBorder();
 
-    context.globalAlpha = this.getOpacityF();
+    context.globalAlpha = this.getOpacityF() * context.globalAlpha;
 
     if (border) {
         context.lineWidth = this.borderWidth;
@@ -282,75 +301,79 @@ Object.prototype.hasBorder = function()
 
 Object.prototype.mouseLeaveEvent = function(ev)
 {
-    if (! this.visible)
+    if (! this.visible || ! this.hovering)
       return;
 
-    if (this.defaultState)
+    //make sure mousemove actions are stopped
+    if (this.mouseMoveActionGroup)
+      this._gameModel.stopAction(this.mouseMoveActionGroup);
+
+    if (this.defaultState) {
       this.load(this.defaultState);
+    }
 
     this.hovering = false;
 }
 
 Object.prototype.mouseEnterEvent = function(ev)
 {
-    if (! this.visible)
+    if (! this.visible || this.hovering)
       return;
 
-    if (this.mouseMoveActions && this.mouseMoveActions.length ||
-      this.eventListeners["mousemove"] && this.eventListeners["mousemove"].length)
+    if (this.mouseMoveActionGroup || this.eventListeners["mousemove"].length)
       this.defaultState = this.serialize();
 
-    this.processEvent(ev, "mouseMove");
     this.hovering = true;
+    this.processEvent(ev, "mouseMove");
 }
 
 Object.prototype.mouseDown = function(event)
 {
-  return this.processEvent(event, "mouseDown");
+  this.processEvent(event, "mouseDown");
 }
 
 Object.prototype.mouseUp = function(event)
 {
-  return this.processEvent(event, "mouseUp");
+  this.processEvent(event, "mouseUp");
 }
 
 Object.prototype.mouseMove = function(event)
 {
     if (this.hovering)
-      return false;
+      return;
 
-    return this.processEvent(event, "mouseMove");
+    this.processEvent(event, "mouseMove");
 }
 
 Object.prototype.processEvent = function(event, type)
 {
-    var x = event.canvasX;
-    var y = event.canvasY;
+    var x = event.canvasX,
+        y = event.canvasY,
+        gameModel = this.getGameModel();
 
-    if (! this.contains(x, y))
-        return false;
+    if (! gameModel || ! this.contains(x, y))
+      return;
 
-    var actions = [],
+    var actionGroup = null,
         triggered = false;
 
     if (type == "mouseMove") {
-        actions = this.mouseMoveActions;
+        actionGroup = this.mouseMoveActionGroup;
     }
     else if (type == "mouseUp") {
-        actions = this.mouseReleaseActions;
+        actionGroup = this.mouseReleaseActionGroup;
     }
     else if (type == "mouseDown") {
-        actions = this.mousePressActions;
+        actionGroup = this.mousePressActionGroup;
     }
 
-    for(var i =0; i !== actions.length; i++)
-        actions[i].execute();
+    if (actionGroup)
+      gameModel.executeAction(actionGroup);
 
     triggered = this.trigger(type);
 
-    if (actions.length || triggered)
-      return true;
-    return false;
+    if (actionGroup || triggered)
+      event.processed = true;
 }
 
 Object.prototype.needsRedraw = function()
@@ -375,10 +398,26 @@ Object.prototype.initActions = function(actions)
 
     for(var i=0; i !== actions.length; i++) {
         action = belle.createAction(actions[i], this);
-        actionInstances.push(action);
+        if (action) {
+          if (! action.object && ! action.objectName)
+            action.object = this;
+          actionInstances.push(action);
+        }
     }
 
     return actionInstances;
+}
+
+Object.prototype.initActionGroup = function(actions)
+{
+    if (! actions || ! actions.length)
+      return null;
+
+    var actions = this.initActions(actions),
+        actionGroup = new belle.actions.ActionGroup({}, this);
+
+    actionGroup.addActions(actions);
+    return actionGroup;
 }
 
 Object.prototype.initElement = function()
@@ -524,6 +563,7 @@ function Character(data, parent, initElement)
     var image;
     var state = null;
     var currState = data["state"];
+    var assetManager = this.getGame().getAssetManager();
     this.states = {};
     this.nameColor = null;
     this.textColor = null;
@@ -531,7 +571,7 @@ function Character(data, parent, initElement)
     if ("states" in data) {
         for(state in data["states"]) {
             if (state != currState) {
-              image = new AnimationImage(data.states[state], this);
+              image = assetManager.loadAsset(data.states[state], "Image");
               this.states[state] = image;
             }
         }
@@ -673,7 +713,9 @@ TextBox.prototype.alignText = function(text, size)
         var sumHeight = 0;
 
         for (var i=0; i < this.textParts.length; i++) {
-            var size = belle.utils.textSize(this.textParts[i], this.font);
+            //empty text means it's just a new line, so we use <br/> to get the height
+            var text = this.textParts[i].length ? this.textParts[i] : "<br/>";
+            var size = belle.utils.textSize(text, this.font);
             var width = size[0];
             var height = Math.round(size[1] / 1.2);
             var leftPadding = 0;
@@ -900,9 +942,9 @@ ObjectGroup.prototype.serialize = function()
     return data;
 }
 
-ObjectGroup.prototype.objectAt = function(x, y)
+ObjectGroup.prototype.getObjectAt = function(x, y)
 {
-    for(var i=0; i !== this.objects.length; i++) {
+    for(var i=this.objects.length-1; i != -1; i--) {
         if (this.objects[i].contains(x, y)) {
             return this.objects[i];
         }
@@ -929,41 +971,58 @@ ObjectGroup.prototype.paint = function(context)
 
 ObjectGroup.prototype.mouseLeaveEvent = function(event)
 {
-  Object.prototype.mouseLeaveEvent.call(this, event);
-
   if (this.hoveredObject) {
     this.hoveredObject.mouseLeaveEvent(event);
     this.hoveredObject = null;
   }
+
+  Object.prototype.mouseLeaveEvent.call(this, event);
 }
 
-ObjectGroup.prototype.processEvent = function(event, type)
+ObjectGroup.prototype.mouseMove = function(event)
 {
-    var x = event.canvasX;
-    var y = event.canvasY;
+  var object = this.getObjectAt(event.canvasX, event.canvasY);
 
-    if (! this.visible || ! this.contains(x, y))
-        return false;
-
-    var result = Object.prototype.processEvent.call(this, event);
-    var object = this.objectAt(x, y);
-
-
-    if (this.hoveredObject != object) {
-      if (this.hoveredObject)
+  if (this.hoveredObject != object) {
+    if (this.hoveredObject)
         this.hoveredObject.mouseLeaveEvent(event);
 
-      if (object)
-        object.mouseEnterEvent(event);
-    }
+    if (object)
+      object.mouseEnterEvent(event);
+  }
+  else if (object) {
+    object.mouseMove(event);
+  }
 
-    this.hoveredObject = object;
+  this.hoveredObject = object;
+  Object.prototype.mouseMove.call(this, event);
+}
 
-    if (object) {
-      result = object.processEvent(event, type);
-    }
+ObjectGroup.prototype.mouseEnterEvent = function(event)
+{
+  this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
+  if (this.hoveredObject)
+    this.hoveredObject.mouseEnterEvent(event);
 
-    return result;
+  Object.prototype.mouseEnterEvent.call(this, event);
+}
+
+ObjectGroup.prototype.mouseDown = function(event)
+{
+  if (! this.hoveredObject)
+    this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
+  if (this.hoveredObject)
+    this.hoveredObject.mouseDown(event);
+  Object.prototype.mouseDown.call(this, event);
+}
+
+ObjectGroup.prototype.mouseUp = function(event)
+{
+  if (! this.hoveredObject)
+    this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
+  if (this.hoveredObject)
+    this.hoveredObject.mouseUp(event);
+  Object.prototype.mouseUp.call(this, event);
 }
 
 ObjectGroup.prototype.clear = function (context)
@@ -974,7 +1033,6 @@ ObjectGroup.prototype.clear = function (context)
       this.objects[i].clear(context);
   }
 }
-
 
 ObjectGroup.prototype.needsRedraw = function()
 {
@@ -1091,16 +1149,6 @@ DialogueBox.prototype.activateDefaultTextColor = function()
       this.dialogueTextBox.activateDefaultTextColor();
 }
 
-/************** MENU ************/
-
-function Menu(data, parent, initElement)
-{
-    ObjectGroup.call(this, data, parent, initElement);
-}
-
-belle.extend(Menu, ObjectGroup);
-
-
 /************** BUTTON ************/
 
 function Button(data, parent, initElement)
@@ -1114,6 +1162,59 @@ function Button(data, parent, initElement)
 
 belle.extend(Button, TextBox);
 
+/************** MENU OPTION ************/
+
+function MenuOption(data, parent)
+{
+  Button.call(this, data, parent);
+  this.actionGroup = null;
+  this.condition = "";
+
+  if ("actions" in data) {
+    var actions = data["actions"];
+    this.actionGroup = new belle.actions.ActionGroup({}, this);
+    for(var i=0; i < actions.length; i++) {
+      this.actionGroup.addAction(belle.createAction(actions[i], this));
+    }
+
+    this.bind("mouseUp", function() {
+      this.actionGroup.execute();
+    });
+  }
+
+  if ("condition" in data) {
+    this.condition = data["condition"];
+  }
+}
+
+belle.extend(MenuOption, Button);
+
+/************** MENU ************/
+
+function Menu(data, parent, initElement)
+{
+    ObjectGroup.call(this, data, parent, initElement);
+
+    if (this.objects) {
+      var self = this;
+      for(var i=0; i < this.objects.length; i++) {
+        this.objects[i].bind("mouseUp", function() {
+          self.trigger("optionSelected", this);
+          this.getScene().removeObject(self);
+        });
+      }
+    }
+}
+
+belle.extend(Menu, ObjectGroup);
+
+Menu.prototype.getOptionAt = function(index)
+{
+  if (index >= 0 && index < this.objects.length)
+    return this.objects[index];
+  return null;
+}
+
 // Expose the public methods
 
 objects.Object = Object;
@@ -1123,8 +1224,8 @@ objects.Character = Character;
 objects.ObjectGroup = ObjectGroup;
 objects.DialogueBox = DialogueBox;
 objects.Button = Button;
+objects.MenuOption = MenuOption;
 objects.Menu = Menu;
 
 }(belle));
 
-belle.log("Objects module loaded!");

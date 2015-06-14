@@ -21,14 +21,14 @@ body, html
   margin: 0;
   padding: 0;
   color: blue;
-  background-color: none repeat scroll 0 0 #fff;
+  background-color: black;
 }
 
 #belle
 {
   /*margin: 0 auto;*/
   position: relative;
-  background-color: none repeat scroll 0 0 #fff;
+  background-color: #000000;
   color: #FFFFFF;
   overflow: hidden;
   width: 100%;
@@ -78,7 +78,6 @@ body, html
   top: 0;
   left: 0;
   display: none;
-  background: #000;
 }
 
 #load.view .loader {

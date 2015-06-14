@@ -1,6 +1,9 @@
 belle = {};
 game = {};
-belle.log = console.log || function() {};
+belle.log = function() {
+  if(window.console)
+    window.console.log( Array.prototype.slice.call(arguments) );
+};
 belle.actions = {};
 belle.objects = {};
 belle.utils = {};
