@@ -464,7 +464,7 @@ Dialogue.prototype.onExecute = function () {
     if (! this.append)
       object.setText("");
 
-    this.text = game.replaceVariables(this.text);
+    this.text = game.replaceVariables(this.rawText);
     this.startTimer(this.updateText.bind(this), game.getProperty("textDelay"), true);
 }
 
