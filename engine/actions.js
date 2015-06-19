@@ -862,7 +862,7 @@ Branch.prototype.onExecute = function()
 
   if (this._actionGroup)
     this._actionGroup.setFinished(true);
-  this._actionGroup = new ActionGroup();
+  this._actionGroup = new ActionGroup({}, this);
   this._actionGroup.addActions(actions);
   this._actionGroup.bind("finished", this, function() {
     this.setFinished(true);
