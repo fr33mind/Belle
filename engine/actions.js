@@ -117,6 +117,11 @@ Action.prototype.stop = function()
     this.wait.stop();
 
   this.running = false;
+  this.onStop();
+}
+
+Action.prototype.onStop = function()
+{
 }
 
 Action.prototype.skip = function()
@@ -1178,6 +1183,12 @@ ShowMenu.prototype._onOptionSelected = function(option)
   else {
     this.setFinished(true);
   }
+}
+
+ShowMenu.prototype.onStop = function()
+{
+	var scene = this.getScene();
+	scene.removeObject(this.getObject());
 }
 
 ShowMenu.prototype.skip = function()
