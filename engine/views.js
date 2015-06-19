@@ -261,7 +261,7 @@ GameView.prototype.setModel = function(model)
   this.setSize(this.model.properties.width, this.model.properties.height);
 
   this.model.bind("sceneChanged", this, function() {
-    this.clear();
+    this.reset();
   });
 
   this.model.bind("objectRemoved", this, function(data) {
@@ -278,8 +278,13 @@ GameView.prototype.clear = function(all)
   if (all)
     this.bgcontext.clearRect(0, 0, this.bgcanvas.attr("width"), this.bgcanvas.attr("height"));
   this.context.clearRect(0, 0, this.canvas.attr("width"), this.canvas.attr("height"));
-  this.hoveredObject = null;
   this._cleared = true;
+}
+
+GameView.prototype.reset = function()
+{
+  this.pressedObject = this.hoveredObject = null;
+  this.clear(true);
 }
 
 GameView.prototype.setWidth = function(width)
