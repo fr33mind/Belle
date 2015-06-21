@@ -275,7 +275,7 @@
       return;
 
     if (this.action && !this.action.isFinished()) {
-      this.action.stop();
+      this.stopAction(this.action);
     }
 
     this._nextAction = null;
@@ -305,16 +305,18 @@
   {
     if (this.runningActions.indexOf(action) != -1)
       return;
-
-    var _action = null;
+    var _action = null,
+        _object = null,
+        object = null;
 
     //stop same type actions that target the same object
-    if (action.type != "ActionGroup" && action.type != "Branch") {
+    object = action.getObject();
+     if (object) {
       for(var i=this.runningActions.length-1; i >= 0; --i) {
         _action = this.runningActions[i];
-        if (_action.type == action.type && _action.getObject() == action.getObject()) {
-          _action.stop();
-          this.runningActions.splice(i, 1);
+          _object = _action.getObject();
+        if (_action.type == action.type && object == _object) {
+          this.stopAction(_action);
         }
       }
     }
