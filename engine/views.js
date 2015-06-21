@@ -265,6 +265,12 @@ GameView.prototype.setModel = function(model)
   });
 
   this.model.bind("objectRemoved", this, function(data) {
+    if (data && data.object) {
+      if (data.object == this.hoveredObject)
+        this.hoveredObject = null;
+      if (data.object == this.pressedObject)
+        this.pressedObject = null;
+    }
     this.clear();
   });
 
