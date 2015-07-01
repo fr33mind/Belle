@@ -1,3 +1,12 @@
+## Belle 0.6.1a | 01/07/2015
+
+#### [Engine]
+- Minor improvement when executing simultaneous actions.
+- Fixed Menu not disappearing when stopping Show Menu action.
+- Fixed variables not being updated in Dialogue action.
+- Fixed bug when executing a Branch action.
+- Fixed small issue after removing an object from scene.
+
 ## Belle 0.6a | 14/06/2015
 
 ### [General]
