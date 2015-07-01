@@ -941,8 +941,9 @@ void Belle::openFileOrProject(QString filepath)
     //Fix new object sync property
     if (! object.contains("version") || object.value("version").toInt() < (int) VERSION) {
         QMessageBox::warning(this,
-                             tr("Old project"),
-                             tr("The project file you are opening is old and may not load correctly."));
+                             tr("Project warning"),
+                             tr("The project you are opening was created with an earlier version of Belle "
+                                "and it may not load correctly."));
 
         int version = object.value("version", 0).toInt();
         if (version < (int) 0x000500) {
