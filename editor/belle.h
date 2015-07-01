@@ -35,8 +35,8 @@
 #define WIDTH 640
 #define HEIGHT 480
 #define GAME_FILENAME "game_data.js"
-#define VERSION_STR "0.6a"
-#define VERSION 0x000600
+#define VERSION_STR "0.6.1a"
+#define VERSION 0x000601
 
 class Belle : public QMainWindow
 {
