@@ -17,7 +17,6 @@
 #include "properties_widget.h"
 
 #include <QDebug>
-#include <QApplication>
 #include <QHeaderView>
 #include <QAbstractItemModel>
 

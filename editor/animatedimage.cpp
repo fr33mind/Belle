@@ -146,7 +146,7 @@ QVariantMap AnimatedImage::toJsonObject()
         QByteArray arr;
         QBuffer buf(&arr);
         buf.open(QIODevice::WriteOnly);
-        image.save(&buf, format.toAscii());
+        image.save(&buf, format.toLatin1());
         buf.close();
         QByteArray imageData;
         imageData.append(QString("data:image/%1;base64,").arg(format.toLower()));

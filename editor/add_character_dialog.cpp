@@ -45,7 +45,7 @@ void AddCharacterDialog::init(Character* character)
     mPrevName = "";
     mUi.lImage->setAlignment(Qt::AlignCenter);
     mUi.browseImageButton->setFilter(ChooseFileButton::ImageFilter);
-    mUi.statusTreeWidget->header()->setResizeMode(0, QHeaderView::Stretch);
+    mUi.statusTreeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     mUi.statusTreeWidget->setIconSize(QSize(32, 32));
 
     if (character) {

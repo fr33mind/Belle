@@ -307,7 +307,7 @@ void AssetManager::saveFontFaces(const QList<Asset*>& fonts, const QDir& dir)
         QStringList families = QFontDatabase::applicationFontFamilies(font->id());
         for(int j=0; j < families.size(); j++) {
             //write css for font
-            file.write(Utils::fontFace(basename, families[j]).toAscii() + "\n");
+            file.write(Utils::fontFace(basename, families[j]).toLatin1() + "\n");
         }
     }
 

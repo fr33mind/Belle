@@ -58,7 +58,7 @@ void SimpleHttpServer::readClient()
             QStringList header;
             QString file = tokens[1];
             QString path = fullPath(file);
-            QByteArray data = QString("No index.html or index.htm found on \"%1\". :(").arg(mDirectory.absolutePath()).toAscii();
+            QByteArray data = QString("No index.html or index.htm found on \"%1\". :(").arg(mDirectory.absolutePath()).toLatin1();
             QString ctype = "text/plain";
             QString modified = "";
             QString charset("");
@@ -85,7 +85,7 @@ void SimpleHttpServer::readClient()
                  << "\r\n";
             }
 
-            socket->write(header.join("").toAscii());
+            socket->write(header.join("").toLatin1());
             if (data.size())
                 socket->write(data);
             socket->disconnectFromHost();
@@ -170,7 +170,7 @@ QString SimpleHttpServer::fullPath(QString path)
 {
     path = path.split('?')[0];
     path = path.split('#')[0];
-    path = QUrl::fromPercentEncoding(path.toAscii());
+    path = QUrl::fromPercentEncoding(path.toLatin1());
     path = QDir::cleanPath(path);
     if (path.startsWith("/"))
         path.remove(0, 1);

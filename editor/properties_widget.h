@@ -18,7 +18,7 @@
 #define CURTAIN_WIDGET_V2_H
 
 #include <QWidget>
-#include <QTreeView>
+#include <QtWidgets/QTreeView>
 #include <QStandardItemModel>
 #include <QStyledItemDelegate>
 #include <QPainter>

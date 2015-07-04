@@ -18,7 +18,7 @@
 
 #include <QFileDialog>
 #include <QDebug>
-#include <QDesktopServices>
+#include <QStandardPaths>
 #include <QFontDatabase>
 #include <QMessageBox>
 
@@ -141,7 +141,10 @@ void NovelPropertiesDialog::updateTextSpeedSliderTooltip(int val)
 void NovelPropertiesDialog::onBrowserSelect()
 {
     QString filter = "";
-    QString startPath = QDesktopServices::storageLocation(QDesktopServices::ApplicationsLocation);
+    QStringList paths = QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation);
+    QString startPath;
+    if (paths.size())
+        startPath = paths.first();
 
 #if defined(Q_WS_X11)
     if (startPath.isEmpty()) {

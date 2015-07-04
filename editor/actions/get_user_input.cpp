@@ -34,7 +34,7 @@ GetUserInput::GetUserInput(const QVariantMap& data, QObject *parent):
 
     QTextCodec * codec = QTextCodec::codecForName("utf-8");
     if (! codec)
-        codec = QTextCodec::codecForTr();
+        codec = QTextCodec::codecForLocale();
 
     if (data.contains("message") && data.value("message").type() == QVariant::String)
         mMessage = codec->toUnicode( data.value("message").toByteArray());
@@ -129,7 +129,7 @@ QVariantMap GetUserInput::toJsonObject()
 
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
     if (! codec)
-        codec = QTextCodec::codecForTr();
+        codec = QTextCodec::codecForLocale();
 
     object.insert("message", mMessage);
     object.insert("variable", mVariable);
