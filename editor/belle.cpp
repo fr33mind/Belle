@@ -31,6 +31,7 @@
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QProcess>
+#include <QJsonDocument>
 
 #include "object.h"
 #include "add_character_dialog.h"
@@ -45,7 +46,6 @@
 #include "image.h"
 
 #include "button.h"
-#include "json.h"
 #include "resources_view.h"
 #include "condition_dialog.h"
 #include "label.h"
@@ -850,7 +850,7 @@ QVariantMap Belle::readGameFile(const QString& filepath) const
     if (! file.open(QFile::ReadOnly))
         return dataMap;
 
-    QString contents = file.readAll();
+    QByteArray contents = file.readAll();
     file.close();
 
     //if new game file format, just remove start ("game.data =")
@@ -858,10 +858,12 @@ QVariantMap Belle::readGameFile(const QString& filepath) const
     for(i=0; i < contents.size() && contents[i] != '{'; i++);
     contents = contents.mid(i);
 
-    bool ok;
-    QVariant data = QtJson::Json::parse(contents, ok);
-    if (! ok)
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(contents, &error);
+    if (error.error != QJsonParseError::NoError)
         return dataMap;
+
+    QVariant data = doc.toVariant();
     if (data.type() != QVariant::Map)
         return dataMap;
 
@@ -1042,7 +1044,7 @@ void Belle::exportGameFile(const QString& path)
     QVariantMap jsonFile = createGameFile();
 
     file.write("game.data = ");
-    file.write(QtJson::Json::serialize(jsonFile));
+    file.write(QJsonDocument::fromVariant(jsonFile).toJson(QJsonDocument::Compact));
     file.close();
 }
 

@@ -2,10 +2,11 @@
 
 #include <QFile>
 #include <QFontDatabase>
+#include <QJsonDocument>
+#include <QJsonParseError>
 
 #include "utils.h"
 #include "fontfile.h"
-#include "json.h"
 
 static AssetManager* mInstance = new AssetManager();
 
@@ -187,17 +188,18 @@ QVariantMap AssetManager::readAssetsFile(const QString& filepath)
     if (! file.open(QFile::ReadOnly | QFile::Text))
         return QVariantMap();
 
-    QString contents = file.readAll();
+    QByteArray contents = file.readAll();
     //remove start "game.assets ="
     int i = 0;
     for(i=0; i < contents.size() && contents[i] != '{'; i++);
     contents = contents.mid(i);
 
-    bool ok;
-    QVariant data = QtJson::Json::parse(contents, ok);
-    if (! ok)
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(contents, &error);
+    if (error.error != QJsonParseError::NoError)
         return QVariantMap();
 
+    QVariant data = doc.toVariant();
     if (data.type() != QVariant::Map)
         return QVariantMap();
 
@@ -280,7 +282,7 @@ void AssetManager::save(const QDir & dir)
     data.insert("fonts", fontsData);
 
     file.write("game.assets = ");
-    file.write(QtJson::Json::serialize(data));
+    file.write(QJsonDocument::fromVariant(data).toJson(QJsonDocument::Compact));
     file.close();
 
     saveFontFaces(fonts, dir);
