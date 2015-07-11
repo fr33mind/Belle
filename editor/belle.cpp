@@ -253,15 +253,6 @@ Belle::Belle(QWidget *widget)
 
     restoreSettings();
     loadDefaultGame();
-
-//    QDir fonts("/usr/share/fonts/truetype/lao/");
-//    foreach(QFileInfo file, fonts.entryInfoList()) {
-//        qDebug() << file.absoluteFilePath();
-//        if (file.isFile()) {
-//        int id = QFontDatabase::addApplicationFont(file.absoluteFilePath());
-//        qDebug() << QFontDatabase::applicationFontFamilies(id);
-//        }
-//    }
 }
 
 void Belle::saveSettings()
