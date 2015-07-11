@@ -324,6 +324,11 @@ Belle::~Belle()
     ActionInfoManager::destroy();
     ResourceManager::destroy();
     AssetManager::instance()->removeAssets();
+    if (! mCurrentRunDirectory.isEmpty()) {
+        QDir tmpdir(mCurrentRunDirectory);
+        if (tmpdir.exists())
+            tmpdir.removeRecursively();
+    }
 
     saveSettings();
 }
