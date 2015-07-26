@@ -15,12 +15,8 @@
  */
 
 #include "gotoscene.h"
-
-#include <QDebug>
-
 #include "scene_manager.h"
 
-static GoToSceneEditorWidget* mEditorWidget = 0;
 ActionInfo GoToScene::Info;
 
 GoToScene::GoToScene(QObject *parent) :
@@ -52,21 +48,6 @@ void GoToScene::init()
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
     mTargetScene = "";
     mTargetType = Name;
-}
-
-void GoToScene::setGoToSceneEditorWidget(GoToSceneEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-GoToSceneEditorWidget* GoToScene::goToSceneEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* GoToScene::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void GoToScene::setTargetScene(const QString & name, TargetType type)

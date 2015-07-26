@@ -19,9 +19,6 @@
 
 #include "action.h"
 #include "label.h"
-#include "gotolabel_editor_widget.h"
-
-class GoToLabelEditorWidget;
 
 class GoToLabel : public Action
 {
@@ -36,9 +33,6 @@ public:
 public:
     explicit GoToLabel(const QString& name="", QObject *parent = 0);
     GoToLabel(const QVariantMap&, QObject *parent);
-    static GoToLabelEditorWidget* goToLabelEditorWidget();
-    static void setGoToLabelEditorWidget(GoToLabelEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     virtual QVariantMap toJsonObject();
     void setTargetLabel(Label*);
     void setTargetLabel(const QString&);

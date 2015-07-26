@@ -18,9 +18,6 @@
 #define SHOW_MENU_H
 
 #include "action.h"
-#include "show_menu_editorwidget.h"
-
-class ShowMenuEditorWidget;
 
 class ShowMenu : public Action
 {
@@ -31,10 +28,6 @@ public:
 public:
     explicit ShowMenu(QObject *parent = 0);
      ShowMenu(const QVariantMap&, QObject *parent = 0);
-
-     static ShowMenuEditorWidget* showMenuEditorWidget();
-     static void setShowMenuEditorWidget(ShowMenuEditorWidget*);
-     virtual ActionEditorWidget* editorWidget();
      virtual QVariantMap toJsonObject();
 
      void focusIn();

@@ -16,10 +16,7 @@
 
 #include "change_visibility.h"
 #include "show.h"
-
-#include <QDebug>
-
-static ChangeVisibilityEditorWidget* mEditorWidget = 0;
+#include "action_info_manager.h"
 
 ChangeVisibility::ChangeVisibility(bool show, QObject *parent) :
     Action(parent)
@@ -78,21 +75,6 @@ void ChangeVisibility::init(bool show)
     setDescription(name() + "...");
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |
     Interaction::MouseMove);
-}
-
-void ChangeVisibility::setChangeVisibilityEditorWidget(ChangeVisibilityEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-ChangeVisibilityEditorWidget* ChangeVisibility::changeVisibilityEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* ChangeVisibility::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QString ChangeVisibility::displayText() const

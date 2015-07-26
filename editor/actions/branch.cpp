@@ -15,10 +15,8 @@
  */
 
 #include "branch.h"
+#include "action_info_manager.h"
 
-#include <QDebug>
-
-static BranchEditorWidget* mEditorWidget = 0;
 ActionInfo Branch::Info;
 
 Branch::Branch(QObject *parent) :
@@ -68,21 +66,6 @@ void Branch::init()
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     mCondition = "";
-}
-
-void Branch::setBranchEditorWidget(BranchEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-BranchEditorWidget* Branch::branchEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* Branch::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QVariantMap Branch::toJsonObject()

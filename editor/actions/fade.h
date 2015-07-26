@@ -18,9 +18,6 @@
 #define FADE_H
 
 #include "action.h"
-#include "fade_editor_widget.h"
-
-class FadeEditorWidget;
 
 class Fade : public Action
 {
@@ -36,9 +33,6 @@ public:
 public:
     explicit Fade(QObject *parent = 0);
     Fade(const QVariantMap&, QObject *parent = 0);
-    static FadeEditorWidget* fadeEditorWidget();
-    static void setFadeEditorWidget(FadeEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
     virtual QVariantMap toJsonObject();
     QString displayText() const;

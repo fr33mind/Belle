@@ -16,7 +16,6 @@
 
 #include "objects/object.h"
 
-#include <QDebug>
 #include <QFile>
 #include <QColor>
 #include <QFont>
@@ -25,8 +24,8 @@
 #include "scene.h"
 #include "utils.h"
 #include "resource_manager.h"
+#include "action_info_manager.h"
 
-static ObjectEditorWidget * mEditorWidget = 0;
 static QFont mDefaultFont;
 
 Object::Object(QObject* parent, const QString& name):
@@ -89,7 +88,7 @@ QVariantMap Object::fillWithResourceData(QVariantMap data)
 {
     QString name = data.value("resource").toString();
 
-    Object* resource = ResourceManager::instance()->resource(name);
+    GameObject* resource = ResourceManager::instance()->resource(name);
     if (! resource)
         return data;
 
@@ -177,21 +176,6 @@ void Object::stopMove()
 QList<QRect> Object::previousSceneRects() const
 {
     return mPreviousSceneRects;
-}
-
-ObjectEditorWidget* Object::objectEditorWidget()
-{
-    return mEditorWidget;
-}
-
-void Object::setObjectEditorWidget(ObjectEditorWidget* widget)
-{
-    mEditorWidget = widget;
-}
-
-ObjectEditorWidget* Object::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QColor Object::backgroundColor() const

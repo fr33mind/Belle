@@ -20,9 +20,7 @@
 #include <QVariant>
 
 #include "action.h"
-#include "wait_editor_widget.h"
 
-class WaitEditorWidget;
 class Action;
 
 class Wait : public Action
@@ -42,9 +40,6 @@ public:
 
     explicit Wait(QObject *parent = 0);
     Wait(const QVariantMap&, QObject*);
-    static WaitEditorWidget* waitEditorWidget();
-    static void setWaitEditorWidget(WaitEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     void setTime(double);
     double time();
     WaitType waitType();

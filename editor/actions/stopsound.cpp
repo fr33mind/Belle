@@ -18,9 +18,6 @@
 
 #include "scene_manager.h"
 
-#include <QDebug>
-
-static StopSoundEditorWidget * mEditorWidget = 0;
 ActionInfo StopSound::Info;
 
 StopSound::StopSound(QObject *parent) :
@@ -48,21 +45,6 @@ void StopSound::init()
     setIcon(Info.icon);
     mSound = "";
     mFadeTime = 0;
-}
-
-void StopSound::setStopSoundEditorWidget(StopSoundEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-StopSoundEditorWidget* StopSound::stopSoundEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* StopSound::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void StopSound::setSound(const QString & sound)

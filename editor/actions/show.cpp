@@ -16,7 +16,6 @@
 
 #include "show.h"
 
-static ShowEditorWidget* mShowEditorWidget = 0;
 ActionInfo Show::Info;
 
 Show::Show(const QVariantMap &data, QObject *parent):
@@ -54,21 +53,6 @@ void Show::setCharacterState(const QString& state)
 QString Show::characterState() const
 {
     return mCharacterState;
-}
-
-void Show::setShowEditorWidget(ShowEditorWidget * widget)
-{
-   mShowEditorWidget = widget;
-}
-
-ShowEditorWidget* Show::showEditorWidget()
-{
-   return mShowEditorWidget;
-}
-
-ActionEditorWidget* Show::editorWidget()
-{
-    return mShowEditorWidget;
 }
 
 QVariantMap Show::toJsonObject()

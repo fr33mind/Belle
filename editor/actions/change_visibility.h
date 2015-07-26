@@ -19,7 +19,6 @@
 
 #include "action.h"
 #include "character.h"
-#include "change_visibility_editor_widget.h"
 #include "fade.h"
 #include "slide.h"
 
@@ -40,9 +39,6 @@ class ChangeVisibility : public Action
 public:
     ChangeVisibility(bool, QObject *parent = 0);
     ChangeVisibility(const QVariantMap& data, QObject *parent);
-    static ChangeVisibilityEditorWidget* changeVisibilityEditorWidget();
-    static void setChangeVisibilityEditorWidget(ChangeVisibilityEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     virtual QString displayText() const;
     void setCharacter(Character*);
     Character* character() const;

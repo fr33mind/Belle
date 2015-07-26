@@ -21,9 +21,7 @@
 
 #include "scene.h"
 #include "object.h"
-#include "textbox_editor_widget.h"
 
-class TextPropertiesWidget;
 class ObjectEditorWidget;
 
 class TextBox : public Object
@@ -67,9 +65,6 @@ public:
     void setTextRect(const QRect&);
     virtual void move(int, int);
     void init(const QString&);
-    static TextPropertiesWidget* textEditorWidget();
-    static void setTextEditorWidget(TextPropertiesWidget *);
-    virtual ObjectEditorWidget* editorWidget();
     virtual void paint(QPainter &);
     virtual QVariantMap toJsonObject(bool internal=true);
 

@@ -15,13 +15,9 @@
  */
 
 #include "gotolabel.h"
-
-#include <QDebug>
-
 #include "scene_manager.h"
 #include "scene.h"
 
-static GoToLabelEditorWidget* mEditorWidget = 0;
 ActionInfo GoToLabel::Info;
 
 GoToLabel::GoToLabel(const QString& name, QObject *parent) :
@@ -49,21 +45,6 @@ void GoToLabel::init()
     mTargetLabel = 0;
     mTargetLabelName = "";
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
-}
-
-void GoToLabel::setGoToLabelEditorWidget(GoToLabelEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-GoToLabelEditorWidget* GoToLabel::goToLabelEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* GoToLabel::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void GoToLabel::setTargetLabel(Label* label)

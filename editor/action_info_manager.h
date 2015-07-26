@@ -77,7 +77,6 @@ class ActionInfoManager : public QObject
 
 public:
     explicit ActionInfoManager(QObject *parent = 0);
-    static void initEditorWidgets();
     static void init();
     static void registerAction(const QIcon&, const QString&, const QString&, Interaction::InputEvents events, Action*);
     static void registerActions();

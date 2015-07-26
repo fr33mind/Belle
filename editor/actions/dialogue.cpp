@@ -17,9 +17,7 @@
 #include "dialogue.h"
 
 #include <QTextCodec>
-#include <QDebug>
 
-static DialogueEditorWidget *mEditorWidget = 0;
 ActionInfo Dialogue::Info;
 
 Dialogue::Dialogue(QObject *parent) :
@@ -64,21 +62,6 @@ void Dialogue::init()
     mText = "";
     mAppend = false;
     setMouseClickOnFinish(true);
-}
-
-void Dialogue::setDialogueEditorWidget(DialogueEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-DialogueEditorWidget* Dialogue::dialogueEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* Dialogue::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void Dialogue::setCharacter(Character *character)

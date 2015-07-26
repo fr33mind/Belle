@@ -17,9 +17,7 @@
 #include "playsound.h"
 
 #include <QFileInfo>
-#include <QDebug>
 
-static PlaySoundEditorWidget * mEditorWidget = 0;
 ActionInfo PlaySound::Info;
 
 PlaySound::PlaySound(QObject *parent) :
@@ -51,21 +49,6 @@ void PlaySound::init()
     mVolume = 100;
     mSound = 0;
     mLoop = false;
-}
-
-void PlaySound::setPlaySoundEditorWidget(PlaySoundEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-PlaySoundEditorWidget* PlaySound::playSoundEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* PlaySound::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void PlaySound::setSoundPath(const QString & path)

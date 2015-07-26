@@ -18,7 +18,6 @@
 #define GET_USER_INPUT_H
 
 #include "action.h"
-#include "get_user_input_editor_widget.h"
 
 class GetUserInput : public Action
 {
@@ -30,10 +29,6 @@ public:
 public:
     explicit GetUserInput(QObject *parent = 0);
     GetUserInput(const QVariantMap&, QObject *parent = 0);
-
-    static GetUserInputEditorWidget* getUserInputEditorWidget();
-    static void setGetUserInputEditorWidget(GetUserInputEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
     QString variable();
     void setVariable(const QString&);

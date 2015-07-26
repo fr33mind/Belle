@@ -39,9 +39,6 @@ class DialogueBox : public ObjectGroup
         virtual void paint(QPainter &);
         virtual void move(int , int);
         virtual QVariantMap toJsonObject(bool internal=true);
-        /*static DialogueEditorWidget* dialogueEditorWidget();
-        static void setDialogueEditorWidget(DialogueEditorWidget *);
-        virtual ObjectEditorWidget* editorWidget();*/
 
 protected:
         TextBox* textBox(const QString&) const;

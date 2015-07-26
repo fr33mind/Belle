@@ -2,9 +2,6 @@
 #define CHANGESTATE_H
 
 #include "action.h"
-#include "changestate_editorwidget.h"
-
-class ChangeStateEditorWidget;
 
 class ChangeState : public Action
 {
@@ -16,9 +13,6 @@ public:
 public:
     explicit ChangeState(QObject *parent = 0);
     ChangeState(const QVariantMap&, QObject *parent = 0);
-    static ChangeStateEditorWidget* changeStateEditorWidget();
-    static void setChangeStateEditorWidget(ChangeStateEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     virtual QString displayText() const;
     QList<Object*> availableObjects() const;
 

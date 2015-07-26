@@ -47,30 +47,6 @@ ActionInfoManager::ActionInfoManager(QObject *parent) :
 {
 }
 
-void ActionInfoManager::initEditorWidgets()
-{
-    Action::setActionEditorWidget(new ActionEditorWidget);
-    Show::setShowEditorWidget(new ShowEditorWidget());
-    Hide::setHideEditorWidget(new HideEditorWidget());
-    Wait::setWaitEditorWidget(new WaitEditorWidget());
-    Dialogue::setDialogueEditorWidget(new DialogueEditorWidget());
-    Slide::setSlideEditorWidget(new SlideEditorWidget());
-    Fade::setFadeEditorWidget(new FadeEditorWidget());
-    Label::setLabelEditorWidget(new LabelEditorWidget());
-    GoToLabel::setGoToLabelEditorWidget(new GoToLabelEditorWidget());
-    GoToScene::setGoToSceneEditorWidget(new GoToSceneEditorWidget());
-    Branch::setBranchEditorWidget(new BranchEditorWidget());
-    GetUserInput::setGetUserInputEditorWidget(new GetUserInputEditorWidget);
-    ShowMenu::setShowMenuEditorWidget(new ShowMenuEditorWidget());
-    ChangeColor::setChangeColorEditorWidget(new ChangeColorEditorWidget);
-    PlaySound::setPlaySoundEditorWidget(new PlaySoundEditorWidget());
-    StopSound::setStopSoundEditorWidget(new StopSoundEditorWidget());
-    ChangeGameVariable::setChangeGameVariableEditorWidget(new ChangeGameVariableEditorWidget);
-    ChangeBackground::setChangeBackgroundEditorWidget(new ChangeBackgroundEditorWidget);
-    RunScript::setRunScriptEditorWidget(new RunScriptEditorWidget);
-    ChangeState::setChangeStateEditorWidget(new ChangeStateEditorWidget);
-}
-
 void ActionInfoManager::init()
 {
     /*ActionInfo* info = new ActionInfo();
@@ -123,8 +99,6 @@ void ActionInfoManager::init()
     mTypeToIcon.insert("RunScript", QIcon(":/media/script.png"));
     mTypeToIcon.insert("ChangeState", QIcon(":/media/object-edit.png"));
 
-    initEditorWidgets();
-
     registerActions();
 }
 
@@ -141,7 +115,6 @@ void ActionInfoManager::registerAction(const QIcon& icon, const QString& name, c
 void ActionInfoManager::registerActions()
 {
 }
-
 
 QList<Action*> ActionInfoManager::actions()
 {
@@ -214,66 +187,6 @@ Action* ActionInfoManager::typeToAction(const QVariant& data, QObject* parent)
 
 void ActionInfoManager::destroy()
 {
-    if (Action::actionEditorWidget())
-        Action::actionEditorWidget()->deleteLater();
-
-    if (Show::showEditorWidget())
-        Show::showEditorWidget()->deleteLater();
-
-    if (Hide::hideEditorWidget())
-        Hide::hideEditorWidget()->deleteLater();
-
-    if (Dialogue::dialogueEditorWidget())
-        Dialogue::dialogueEditorWidget()->deleteLater();
-
-    if (Slide::slideEditorWidget())
-        Slide::slideEditorWidget()->deleteLater();
-
-    if (Fade::fadeEditorWidget())
-        Fade::fadeEditorWidget()->deleteLater();
-
-    if (Label::labelEditorWidget())
-        Label::labelEditorWidget()->deleteLater();
-
-    if (GoToLabel::goToLabelEditorWidget())
-        GoToLabel::goToLabelEditorWidget()->deleteLater();
-
-    if (GoToScene::goToSceneEditorWidget())
-        GoToScene::goToSceneEditorWidget()->deleteLater();
-
-    if (Branch::branchEditorWidget())
-        Branch::branchEditorWidget()->deleteLater();
-
-    if (GetUserInput::getUserInputEditorWidget())
-        GetUserInput::getUserInputEditorWidget()->deleteLater();
-
-    if (ShowMenu::showMenuEditorWidget())
-        ShowMenu::showMenuEditorWidget()->deleteLater();
-
-    if (ChangeColor::changeColorEditorWidget())
-        ChangeColor::changeColorEditorWidget()->deleteLater();
-
-    if (Wait::waitEditorWidget())
-        Wait::waitEditorWidget()->deleteLater();
-
-    if (PlaySound::playSoundEditorWidget())
-        PlaySound::playSoundEditorWidget()->deleteLater();
-
-    if (StopSound::stopSoundEditorWidget())
-        StopSound::stopSoundEditorWidget()->deleteLater();
-
-    if (ChangeGameVariable::changeGameVariableEditorWidget())
-        ChangeGameVariable::changeGameVariableEditorWidget()->deleteLater();
-
-    if (ChangeBackground::changeBackgroundEditorWidget())
-        ChangeBackground::changeBackgroundEditorWidget()->deleteLater();
-
-    if (RunScript::runScriptEditorWidget())
-        RunScript::runScriptEditorWidget()->deleteLater();
-
-    if (ChangeState::changeStateEditorWidget())
-        ChangeState::changeStateEditorWidget()->deleteLater();
-
     for(int i=0; i < mActionsCatalog.size(); i++)
         mActionsCatalog[i]->deleteLater();
     mActionsCatalog.clear();

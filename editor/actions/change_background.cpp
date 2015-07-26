@@ -22,7 +22,6 @@
 #include <QFileInfo>
 #include <QtDebug>
 
-static ChangeBackgroundEditorWidget* mEditorWidget = 0;
 ActionInfo ChangeBackground::Info;
 
 ChangeBackground::ChangeBackground(QObject *parent) :
@@ -50,21 +49,6 @@ void ChangeBackground::init()
     setType(Info.type);
 
     mBackgroundImage = 0;
-}
-
-void ChangeBackground::setChangeBackgroundEditorWidget(ChangeBackgroundEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-ChangeBackgroundEditorWidget* ChangeBackground::changeBackgroundEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* ChangeBackground::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void ChangeBackground::setBackgroundImage(const QString & background)

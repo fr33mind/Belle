@@ -16,14 +16,11 @@
 
 #include "character.h"
 
-#include <QDebug>
 #include <QFileInfo>
 
 #include "scene.h"
 #include "utils.h"
 #include "resource_manager.h"
-
-static CharacterPropertiesWidget* mEditorWidget = 0;
 
 Character::Character(QObject* parent) :
     Image(0, parent)
@@ -150,27 +147,6 @@ QString Character::defaultState() const
 {
     return mCurrentState;
 }*/
-
-CharacterPropertiesWidget* Character::characterEditorWidget()
-{
-    return mEditorWidget;
-}
-
-void Character::setCharacterEditorWidget(CharacterPropertiesWidget* widget)
-{
-    if (! widget)
-        return;
-
-    if (mEditorWidget)
-        mEditorWidget->deleteLater();
-
-    mEditorWidget = widget;
-}
-
-ObjectEditorWidget* Character::editorWidget()
-{
-    return mEditorWidget;
-}
 
 QHash <QString, QString> Character::statesToPaths()
 {

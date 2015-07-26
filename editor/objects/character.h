@@ -18,15 +18,11 @@
 #define CHARACTER_H
 
 #include "image.h"
-#include "character_properties_widget.h"
-
 
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QHash>
-
-class CharacterPropertiesWidget;
 
 class Character : public Image
 {
@@ -39,7 +35,6 @@ class Character : public Image
     QString mCurrentState;
     bool mAvailable;
 
-
     public:
         explicit Character(QObject* parent=0);
         Character(const QString& name, const QHash<QString, QString>& statesAndImagePaths, QObject* parent=0);
@@ -48,9 +43,6 @@ class Character : public Image
         void removeState(const QString&);
         //void setDefaulState(const QString&);
         //QString defaultState() const;
-        static CharacterPropertiesWidget* characterEditorWidget();
-        static void setCharacterEditorWidget(CharacterPropertiesWidget *);
-        virtual ObjectEditorWidget* editorWidget();
         QHash <QString, QString> statesToPaths();
         QHash <QString, ImageFile*> statesToImages();
         QStringList states() const;

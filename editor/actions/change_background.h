@@ -18,7 +18,6 @@
 #define CHANGE_BACKGROUND_H
 
 #include "action.h"
-#include "change_background_editorwidget.h"
 
 class ChangeBackgroundEditorWidget;
 
@@ -35,10 +34,6 @@ public:
 public:
     explicit ChangeBackground(QObject *parent = 0);
     ChangeBackground(const QVariantMap&, QObject *parent=0);
-
-    static ChangeBackgroundEditorWidget* changeBackgroundEditorWidget();
-    static void setChangeBackgroundEditorWidget(ChangeBackgroundEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     QVariantMap toJsonObject();
 
     void setBackgroundImage(const QString&);

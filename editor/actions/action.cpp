@@ -23,7 +23,6 @@
 #include "wait.h"
 #include "scene.h"
 
-static ActionEditorWidget* mEditorWidget = 0;
 ActionInfo Action::Info;
 
 Action::Action(QObject *parent) :
@@ -70,21 +69,6 @@ void Action::init()
     setType(Info.type);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
-}
-
-void Action::setActionEditorWidget(ActionEditorWidget* widget)
-{
-    mEditorWidget = widget;
-}
-
-ActionEditorWidget* Action::actionEditorWidget()
-{
-    return mEditorWidget;
-}
-
-ActionEditorWidget* Action::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QIcon Action::icon() const

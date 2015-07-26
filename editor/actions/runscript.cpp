@@ -1,6 +1,5 @@
 #include "runscript.h"
 
-static RunScriptEditorWidget* mEditorWidget = 0;
 ActionInfo RunScript::Info;
 
 RunScript::RunScript(QObject *parent) :
@@ -28,21 +27,6 @@ void RunScript::init()
     setType(Info.type);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
-}
-
-void RunScript::setRunScriptEditorWidget(RunScriptEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-RunScriptEditorWidget* RunScript::runScriptEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* RunScript::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QVariantMap RunScript::toJsonObject()

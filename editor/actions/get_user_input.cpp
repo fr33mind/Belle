@@ -18,7 +18,6 @@
 
 #include <QTextCodec>
 
-GetUserInputEditorWidget* mEditorWidget = 0;
 ActionInfo GetUserInput::Info;
 
 GetUserInput::GetUserInput(QObject *parent) :
@@ -52,21 +51,6 @@ void GetUserInput::init()
     setType(Info.type);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
-}
-
-void GetUserInput::setGetUserInputEditorWidget(GetUserInputEditorWidget* widget)
-{
-    mEditorWidget = widget;
-}
-
-GetUserInputEditorWidget* GetUserInput::getUserInputEditorWidget()
-{
-    return mEditorWidget;
-}
-
-ActionEditorWidget* GetUserInput::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QString GetUserInput::variable()

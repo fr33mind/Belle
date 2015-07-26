@@ -25,6 +25,7 @@
 #include "action_info_manager.h"
 #include "scene_manager.h"
 #include "belle.h"
+#include "editorwidgetfactory.h"
 
 AddActionDialog::AddActionDialog(QObject* actionParent, QWidget *parent) :
     QDialog(parent)
@@ -185,6 +186,7 @@ void AddActionDialog::onNewAction(Action * action)
     bool contains = false;
     Action* _action = 0;
     int index = 0;
+    GameObjectEditorWidget* editor = 0;
     /*QHashIterator<Action*, ActionEditorWidget*> it(mActionsCatalog);
     while(it.hasNext()) {
         it.next();
@@ -216,9 +218,10 @@ void AddActionDialog::onNewAction(Action * action)
     }
 
     mCurrentAction = action;
-    switchPropertyWidget(action->editorWidget());
-    if (action->editorWidget())
-        action->editorWidget()->updateData(action);
+    editor = EditorWidgetFactory::editorWidget(action->type());
+    switchPropertyWidget(editor);
+    if (editor)
+        editor->updateData(action);
     if (mActionCatalogWidget)
         resize(640, 480);
 }

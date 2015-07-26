@@ -16,12 +16,9 @@
 
 #include "textbox.h"
 
-#include <QDebug>
 #include <QTextCodec>
 
 #include "utils.h"
-
-static TextPropertiesWidget* mEditorWidget = 0;
 
 TextBox::TextBox(QObject *parent, const QString& name) :
     Object(parent, name)
@@ -144,28 +141,6 @@ void TextBox::setText(const QString & text)
         mText = text;
         emit dataChanged();
     }
-}
-
-
-TextPropertiesWidget* TextBox::textEditorWidget()
-{
-    return mEditorWidget;
-}
-
-ObjectEditorWidget* TextBox::editorWidget()
-{
-    return mEditorWidget;
-}
-
-void TextBox::setTextEditorWidget(TextPropertiesWidget* widget)
-{
-    if (! widget)
-        return;
-
-    if (mEditorWidget)
-        mEditorWidget->deleteLater();
-
-    mEditorWidget = widget;
 }
 
 QColor TextBox::textColor()

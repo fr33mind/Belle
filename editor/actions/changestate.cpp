@@ -2,7 +2,6 @@
 
 #include "scene.h"
 
-static ChangeStateEditorWidget * mEditorWidget = 0;
 ActionInfo ChangeState::Info;
 
 ChangeState::ChangeState(QObject *parent) :
@@ -26,21 +25,6 @@ void ChangeState::init()
     setType(Info.type);
     setIcon(Info.icon);
     mState = "";
-}
-
-void ChangeState::setChangeStateEditorWidget(ChangeStateEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-ChangeStateEditorWidget* ChangeState::changeStateEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* ChangeState::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QString ChangeState::displayText() const

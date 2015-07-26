@@ -24,15 +24,14 @@
 #include <QResizeEvent>
 #include <QSize>
 
-#include "scene_editor_widget.h"
 #include "imagefile.h"
+#include "gameobject.h"
 
 class SceneManager;
-class SceneEditorWidget;
 class Object;
 class Action;
 
-class Scene : public QObject
+class Scene : public GameObject
 {
     Q_OBJECT
     
@@ -66,8 +65,6 @@ class Scene : public QObject
         static void setSize(const QSize&);
         static QPoint point();
         static void setPoint(const QPoint&);
-        static void setEditorWidget(SceneEditorWidget*);
-        static SceneEditorWidget* editorWidget();
 
         void setTemporaryBackgroundImage(ImageFile*);
         ImageFile* temporaryBackgroundImage();

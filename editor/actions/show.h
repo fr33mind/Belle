@@ -18,7 +18,6 @@
 #define SHOW_H
 
 #include "change_visibility.h"
-#include "show_editor_widget.h"
 
 class ChangeVisibility;
 
@@ -35,9 +34,6 @@ public:
 public:
     explicit Show(QObject *parent = 0);
     explicit Show(const QVariantMap& data, QObject *parent = 0);
-    static ShowEditorWidget* showEditorWidget();
-    static void setShowEditorWidget(ShowEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     void setCharacterState(const QString&);
     QString characterState() const;
     QVariantMap toJsonObject();

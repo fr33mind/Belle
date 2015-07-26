@@ -16,7 +16,6 @@
 
 #include "dialoguebox.h"
 
-#include <QDebug>
 #include "scene.h"
 #include "resource_manager.h"
 
@@ -149,25 +148,3 @@ TextBox* DialogueBox::dialogueTextBox() const
 {
     return textBox("dialogueTextBox");
 }
-
-/*DialogueEditorWidget* DialogueBox::dialogueEditorWidget()
-{
-    return mEditorWidget;
-}
-
-ObjectEditorWidget* DialogueBox::editorWidget()
-{
-    return mEditorWidget;
-}
-
-void DialogueBox::setDialogueEditorWidget(DialogueEditorWidget* widget)
-{
-    if (! widget)
-        return;
-
-    if (mEditorWidget)
-        mEditorWidget->deleteLater();
-
-    mEditorWidget = widget;
-}
-*/

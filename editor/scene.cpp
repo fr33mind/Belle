@@ -27,20 +27,20 @@
 #include "utils.h"
 #include "drawing_surface_widget.h"
 #include "resource_manager.h"
+#include "action_info_manager.h"
 
 static QSize mSize;
 static QPoint mPoint;
-static SceneEditorWidget* mEditorWidget = 0;
 static QPixmap* mScenePixmap = 0;
 
 Scene::Scene(QObject *parent, const QString& name):
-    QObject(parent)
+    GameObject(parent)
 {
     init(name);
 }
 
 Scene::Scene(const QVariantMap& data, QObject *parent):
-    QObject(parent)
+    GameObject(data, parent)
 {
     init("");
     SceneManager *sceneManager = this->sceneManager();
@@ -113,16 +113,6 @@ SceneManager* Scene::sceneManager()
     return 0;
 }
 
-
-void Scene::setEditorWidget(SceneEditorWidget* editor)
-{
-    mEditorWidget = editor;
-}
-
-SceneEditorWidget* Scene::editorWidget()
-{
-    return mEditorWidget;
-}
 
 QList<Object*> Scene::objects(const QString& type)
 {

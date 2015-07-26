@@ -18,9 +18,6 @@
 #define GOTOSCENE_H
 
 #include "action.h"
-#include "gotoscene_editorwidget.h"
-
-class GoToSceneEditorWidget;
 
 class GoToScene : public Action
 {
@@ -37,10 +34,6 @@ public:
 public:
     explicit GoToScene(QObject *parent = 0);
     GoToScene(const QVariantMap&, QObject *parent);
-
-    static GoToSceneEditorWidget* goToSceneEditorWidget();
-    static void setGoToSceneEditorWidget(GoToSceneEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
     void setTargetScene(const QString&, TargetType type=Name);
     QString targetScene();

@@ -18,9 +18,6 @@
 
 #include "utils.h"
 
-#include <QDebug>
-
-static  ChangeGameVariableEditorWidget* mEditorWidget = 0;
 ActionInfo ChangeGameVariable::Info;
 
 ChangeGameVariable::ChangeGameVariable(QObject *parent) :
@@ -61,21 +58,6 @@ void ChangeGameVariable::init()
     mOperators.append("append");
 
     mOperatorIndex = 0;
-}
-
-void ChangeGameVariable::setChangeGameVariableEditorWidget(ChangeGameVariableEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-ChangeGameVariableEditorWidget* ChangeGameVariable::changeGameVariableEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* ChangeGameVariable::editorWidget()
-{
-    return mEditorWidget;
 }
 
 int ChangeGameVariable::operatorIndex()
@@ -125,11 +107,6 @@ QString ChangeGameVariable::displayText() const
         value = mValue;
         if (! Utils::isNumber(value))
             value = QString("\"%1\"").arg(value);
-    }
-    if (mEditorWidget){
-        QStringList items = mEditorWidget->operatorsText();
-        if (mOperatorIndex < items.size())
-            op = items[mOperatorIndex];
     }
 
     return QString("%1 %2 %3 %4").arg(op)

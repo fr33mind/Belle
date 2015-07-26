@@ -16,9 +16,6 @@
 
 #include "fade.h"
 
-#include <QDebug>
-
-static FadeEditorWidget * mEditorWidget = 0;
 ActionInfo Fade::Info;
 
 Fade::Fade(QObject *parent) :
@@ -48,21 +45,6 @@ void Fade::init()
     Interaction::MouseMove);
     setFadeType(Fade::Out);
     mDuration = 1;
-}
-
-void Fade::setFadeEditorWidget(FadeEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-FadeEditorWidget* Fade::fadeEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* Fade::editorWidget()
-{
-    return mEditorWidget;
 }
 
 Fade::Type Fade::fadeType()

@@ -20,9 +20,6 @@
 #include <QPoint>
 
 #include "action.h"
-#include "slide_editor_widget.h"
-
-class SlideEditorWidget;
 
 class Slide : public Action
 {
@@ -40,9 +37,6 @@ public:
 public:
     explicit Slide(QObject *parent = 0);
     Slide(const QVariantMap&, QObject* parent = 0);
-    static SlideEditorWidget* slideEditorWidget();
-    static void setSlideEditorWidget(SlideEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     virtual QString displayText() const;
     Type slideType() const;
     QString slideTypeAsString() const;

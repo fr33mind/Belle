@@ -18,9 +18,6 @@
 #define STOP_StopSound_H
 
 #include "action.h"
-#include "stopsound_editorwidget.h"
-
-class StopSoundEditorWidget;
 
 class StopSound : public Action
 {
@@ -35,10 +32,6 @@ public:
 public:
     explicit StopSound(QObject *parent = 0);
     StopSound(const QVariantMap&, QObject *parent = 0);
-
-    static StopSoundEditorWidget* stopSoundEditorWidget();
-    static void setStopSoundEditorWidget(StopSoundEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
     void setSound(const QString&);
     QString sound();

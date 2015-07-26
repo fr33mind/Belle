@@ -27,7 +27,6 @@
 #include "gameobject.h"
 #include "action.h"
 #include "interaction.h"
-#include "object_editor_widget.h"
 #include "padding.h"
 #include "animatedimage.h"
 #include "background.h"
@@ -36,7 +35,6 @@
 #define RESIZE_RECT_WIDTH 7
 
 class Scene;
-class ObjectEditorWidget;
 class Action;
 
 class Object : public GameObject
@@ -56,9 +54,6 @@ class Object : public GameObject
         void dragMove(int x, int y);
         void stopMove();
         QList<QRect> previousSceneRects() const;
-        static ObjectEditorWidget* objectEditorWidget();
-        static void setObjectEditorWidget(ObjectEditorWidget*);
-        virtual ObjectEditorWidget* editorWidget();
         QColor backgroundColor() const;
         void setBackgroundColor(const QColor&);
         void stopResizing();

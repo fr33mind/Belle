@@ -18,9 +18,6 @@
 #define CHANGECOLOR_H
 
 #include "action.h"
-#include "changecolor_editor_widget.h"
-
-class ChangeColorEditorWidget;
 
 class ChangeColor : public Action
 {
@@ -32,9 +29,6 @@ public:
 public:
     explicit ChangeColor(QObject *parent = 0);
     ChangeColor(const QVariantMap&, QObject *parent = 0);
-    static ChangeColorEditorWidget* changeColorEditorWidget();
-    static void setChangeColorEditorWidget(ChangeColorEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     QVariantMap toJsonObject();
     virtual QString displayText() const;
 

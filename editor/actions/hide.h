@@ -18,7 +18,6 @@
 #define HIDE_H
 
 #include "change_visibility.h"
-#include "hide_editor_widget.h"
 
 class Hide : public ChangeVisibility
 {
@@ -30,9 +29,6 @@ public:
 public:
     explicit Hide(QObject *parent = 0);
     Hide(const QVariantMap& data, QObject *parent = 0);
-    static HideEditorWidget* hideEditorWidget();
-    static void setHideEditorWidget(HideEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
 private:
     void init();

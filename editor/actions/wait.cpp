@@ -16,9 +16,6 @@
 
 #include "wait.h"
 
-#include <QDebug>
-
-static WaitEditorWidget *mEditorWidget = 0;
 ActionInfo Wait::Info;
 
 Wait::Wait(QObject *parent) :
@@ -57,22 +54,6 @@ void Wait::init()
     setWaitType(Timed);
     setTime(1);
 }
-
-void Wait::setWaitEditorWidget(WaitEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-WaitEditorWidget* Wait::waitEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* Wait::editorWidget()
-{
-    return mEditorWidget;
-}
-
 
 void Wait::setTime(double t)
 {

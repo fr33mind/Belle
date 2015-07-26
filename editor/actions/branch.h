@@ -18,7 +18,6 @@
 #define BRANCH_H
 
 #include "action.h"
-#include "branch_editor_widget.h"
 
 class Action;
 class BranchEditorWidget;
@@ -33,10 +32,7 @@ public:
 public:
     explicit Branch(QObject *parent = 0);
     Branch(const QVariantMap& data, QObject *parent);
-    static BranchEditorWidget* branchEditorWidget();
-    static void setBranchEditorWidget(BranchEditorWidget*);
     static void setBranchActionInfo(ActionInfo*);
-    virtual ActionEditorWidget* editorWidget();
     QString condition()const;
     void setCondition(const QString&);
     QVariantMap toJsonObject();

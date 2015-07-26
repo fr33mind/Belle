@@ -19,7 +19,6 @@
 #include "resource_manager.h"
 #include "utils.h"
 
-static ChangeColorEditorWidget * mEditorWidget = 0;
 ActionInfo ChangeColor::Info;
 
 ChangeColor::ChangeColor(QObject *parent) :
@@ -69,21 +68,6 @@ QVariantMap ChangeColor::toJsonObject()
     action.insert("changeObjectColor", mChangeObjectColor);
     action.insert("changeObjectBackgroundColor", mChangeObjectBackgroundColor);
     return action;
-}
-
-void ChangeColor::setChangeColorEditorWidget(ChangeColorEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-ChangeColorEditorWidget* ChangeColor::changeColorEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* ChangeColor::editorWidget()
-{
-    return mEditorWidget;
 }
 
 int ChangeColor::opacity() const

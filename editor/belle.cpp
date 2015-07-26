@@ -44,7 +44,6 @@
 #include "change_visibility.h"
 #include "wait.h"
 #include "image.h"
-
 #include "button.h"
 #include "resources_view.h"
 #include "condition_dialog.h"
@@ -58,6 +57,7 @@
 #include "save_project_dialog.h"
 #include "update_elements_dialog.h"
 #include "objectsview.h"
+#include "editorwidgetfactory.h"
 
 static Belle* mInstance = 0;
 
@@ -80,8 +80,6 @@ Belle::Belle(QWidget *widget)
     mDisableClick = false;
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
-    //setup scenes
-    Scene::setEditorWidget(new SceneEditorWidget);
     //init scene manager instance
     mDefaultSceneManager = new SceneManager(WIDTH, HEIGHT, this, "DefaultSceneManager");
     mPauseSceneManager = new SceneManager(WIDTH, HEIGHT, this, "PauseSceneManager");
@@ -117,10 +115,7 @@ Belle::Belle(QWidget *widget)
     mUi.pauseScenesWidget->setIconSize(QSize(64, 48));
 
     //create editors
-    Object::setObjectEditorWidget(new ObjectEditorWidget());
-    TextBox::setTextEditorWidget(new TextPropertiesWidget());
-    Character::setCharacterEditorWidget(new CharacterPropertiesWidget());
-    ObjectGroup::setObjectGroupEditorWidget(new ObjectGroupEditorWidget());
+    EditorWidgetFactory::load();
     ActionInfoManager::init();
 
     mActionsView = new ActionsView(this);
@@ -297,23 +292,9 @@ bool Belle::eventFilter(QObject *obj, QEvent *ev)
 
 Belle::~Belle()
 {
-    if (TextBox::textEditorWidget())
-        TextBox::textEditorWidget()->deleteLater();
-
-    if (Object::objectEditorWidget())
-        Object::objectEditorWidget()->deleteLater();
-
-    if (Character::characterEditorWidget())
-        Character::characterEditorWidget()->deleteLater();
-
-    if (ObjectGroup::objectGroupEditorWidget())
-        ObjectGroup::objectGroupEditorWidget()->deleteLater();
-
-    if (Scene::editorWidget())
-        Scene::editorWidget()->deleteLater();
-
     ActionInfoManager::destroy();
     ResourceManager::destroy();
+    EditorWidgetFactory::destroy();
     AssetManager::instance()->removeAssets();
     if (! mCurrentRunDirectory.isEmpty()) {
         QDir tmpdir(mCurrentRunDirectory);
@@ -324,43 +305,20 @@ Belle::~Belle()
     saveSettings();
 }
 
-void Belle::onEditResource(Object* object)
+void Belle::onEditResource(Object* obj)
 {
-    if (! object)
-        return;
-
-    mDrawingSurfaceWidget->setObject(object);
-
-    removeWidgetsInPropertiesWidget();
-    if(object->editorWidget()) {
-        object->editorWidget()->updateData(object);
-        addWidgetToPropertiesWidget(object->editorWidget());
-    }
-
-    /*if (mDisableClick) {
-        mDisableClick = false;
-        return;
-    }
-
-    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(index.model());
-    if (! model)
-        return;
-
-    QStandardItem* item = model->itemFromIndex(index);
-    if (! item)
-        return;
-
-    Object* obj = ResourceManager::resource(item->text());
     if (! obj)
         return;
 
-    mDrawingSurfaceWidget->setObject(obj);
+    if (object)
+        mDrawingSurfaceWidget->setObject(object);
 
     removeWidgetsInPropertiesWidget();
-    if(obj->editorWidget()) {
-        obj->editorWidget()->updateData(obj);
-        addWidgetToPropertiesWidget(obj->editorWidget());
-    }*/
+    GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget(obj->type());
+    if(editor) {
+        editor->updateData(object);
+        addWidgetToPropertiesWidget(editor);
+    }
 }
 
 void Belle::onResourcesDoubleClicked(const QModelIndex& index)
@@ -374,10 +332,14 @@ void Belle::onResourcesDoubleClicked(const QModelIndex& index)
     if (! model)
         return;
 
-    Object* resource = mResourcesView->object(index);
+    GameObject* _resource = mResourcesView->object(index);
+    if (! _resource)
+        return;
+
+    Object* resource = qobject_cast<Object*>(_resource);
     if (resource) {
         QVariantMap data(resource->toJsonObject(true));
-        Object * object = ResourceManager::instance()->createObject(data, scene);
+        Object* object = ResourceManager::instance()->createObject(data, scene);
         if (object) {
             if (! object->resource())
                 object->setResource(resource);
@@ -537,9 +499,10 @@ void Belle::updateSceneIcon(Scene* scene)
 void Belle::updateSceneEditorWidget(Scene* scene)
 {
     if (scene) {
-        switchWidgetInPropertiesWidget(Scene::editorWidget());
-        if (Scene::editorWidget()) {
-            Scene::editorWidget()->updateData(scene);
+        GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget("scene");
+        switchWidgetInPropertiesWidget(EditorWidgetFactory::editorWidget("scene"));
+        if (editor) {
+            editor->updateData(scene);
         }
     }
 }
@@ -550,11 +513,10 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     if (! scene)
         return;
 
-    Object *resource = 0;
-    Object *object = 0;
+    GameObject* resource = 0;
     int accepted = 0;
     QString startPath = QDir::currentPath();
-    QString filter = tr("Images(*.png *.xpm *.jpg *.jpeg *.gif)");
+    QString filter;
     QString path;
     AddCharacterDialog *dialog = 0;
 
@@ -578,8 +540,10 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
 
         //Image
     case 2:
+        filter = tr("Images(*.png *.xpm *.jpg *.jpeg *.gif)");
         if (QDir(RESOURCES_DEFAULT_PATH).exists())
             startPath = RESOURCES_DEFAULT_PATH;
+
         path = QFileDialog::getOpenFileName(this, tr("Choose Image"), startPath, filter);
         if (path.isEmpty())
             break;
@@ -628,13 +592,17 @@ void Belle::onTwObjectsClicked(QTreeWidgetItem *, int)
 
 void Belle::onSelectedObjectChanged(Object* obj)
 {
+    GameObjectEditorWidget* editor = 0;
     if (obj) {
-        switchWidgetInPropertiesWidget(obj->editorWidget());
-        if (obj->editorWidget())
-            obj->editorWidget()->updateData(obj);
+        editor = EditorWidgetFactory::editorWidget(obj->type());
+        switchWidgetInPropertiesWidget(editor);
+        if (editor)
+            editor->updateData(obj);
     }
-    else if (mCurrentSceneManager && mCurrentSceneManager->currentScene())
-        switchWidgetInPropertiesWidget(mCurrentSceneManager->currentScene()->editorWidget());
+    else if (mCurrentSceneManager && mCurrentSceneManager->currentScene()) {
+        editor = EditorWidgetFactory::editorWidget("scene");
+        switchWidgetInPropertiesWidget(editor);
+    }
     else
         switchWidgetInPropertiesWidget(0);
 }
@@ -652,11 +620,13 @@ void Belle::onActionsViewClicked(const QModelIndex& index)
     Action* action = model->actionForIndex(index);
     if (! action)
         return;
+    GameObjectEditorWidget* editor = 0;
 
     removeWidgetsInPropertiesWidget();
-    if (action->editorWidget()) {
-        action->editorWidget()->updateData(action);
-        addWidgetToPropertiesWidget(action->editorWidget());
+    editor = EditorWidgetFactory::editorWidget(action->type());
+    if (editor) {
+        editor->updateData(action);
+        addWidgetToPropertiesWidget(editor);
     }
 
 }

@@ -18,9 +18,6 @@
 #define PLAYSOUND_H
 
 #include "action.h"
-#include "playsound_editorwidget.h"
-
-class PlaySoundEditorWidget;
 
 class PlaySound : public Action
 {
@@ -36,9 +33,6 @@ public:
 public:
     explicit PlaySound(QObject *parent = 0);
     PlaySound(const QVariantMap&, QObject *parent = 0);
-    static PlaySoundEditorWidget* playSoundEditorWidget();
-    static void setPlaySoundEditorWidget(PlaySoundEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
     void setSoundPath(const QString&);
     QString soundPath();

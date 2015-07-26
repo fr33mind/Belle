@@ -17,16 +17,13 @@
 #ifndef DIALOGUE_H
 #define DIALOGUE_H
 
-#include "dialogue_editor_widget.h"
 #include "action.h"
 #include "dialoguebox.h"
 #include "character.h"
 
-class DialogueEditorWidget;
 class Action;
 class DialogueBox;
 class Character;
-
 
 class Dialogue : public Action
 {
@@ -43,9 +40,6 @@ public:
 public:
     explicit Dialogue(QObject *parent = 0);
     Dialogue(const QVariantMap&, QObject *parent = 0);
-    static DialogueEditorWidget* dialogueEditorWidget();
-    static void setDialogueEditorWidget(DialogueEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
     QString text();
     void setText(const QString&);

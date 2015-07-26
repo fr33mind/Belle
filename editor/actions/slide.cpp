@@ -16,9 +16,6 @@
 
 #include "slide.h"
 
-#include <QDebug>
-
-static SlideEditorWidget* mEditorWidget = 0;
 ActionInfo Slide::Info;
 
 Slide::Slide(QObject *parent) :
@@ -58,21 +55,6 @@ void Slide::init()
     mDestX = "";
     mDestY = "";
     mDuration = 1;
-}
-
-void Slide::setSlideEditorWidget(SlideEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-SlideEditorWidget* Slide::slideEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* Slide::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QString Slide::displayText() const

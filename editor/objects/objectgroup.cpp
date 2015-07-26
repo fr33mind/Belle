@@ -16,10 +16,6 @@
 
 #include "objectgroup.h"
 
-#include <QDebug>
-
-static ObjectGroupEditorWidget * mEditorWidget = 0;
-
 ObjectGroup::ObjectGroup(QObject *parent,  const QString& name) :
     Object(parent, name)
 {
@@ -84,21 +80,6 @@ void ObjectGroup::init()
     setType("ObjectGroup");
     mEditingMode = false;
     mSelectedObject = 0;
-}
-
-ObjectGroupEditorWidget* ObjectGroup::objectGroupEditorWidget()
-{
-    return mEditorWidget;
-}
-
-void ObjectGroup::setObjectGroupEditorWidget(ObjectGroupEditorWidget* widget)
-{
-    mEditorWidget = widget;
-}
-
-ObjectEditorWidget* ObjectGroup::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void ObjectGroup::_append(Object* obj)

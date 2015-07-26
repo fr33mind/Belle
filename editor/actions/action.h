@@ -41,9 +41,6 @@ public:
 
     explicit Action(QObject *parent = 0);
     Action(const QVariantMap&, QObject *parent = 0);
-    static ActionEditorWidget* actionEditorWidget();
-    static void setActionEditorWidget(ActionEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     virtual Action* newAction(QObject* parent=0);
     Object* sceneObject() const;
     virtual void setSceneObject(Object*);

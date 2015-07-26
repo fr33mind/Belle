@@ -16,13 +16,10 @@
 
 #include "show_menu.h"
 
-#include <QDebug>
-
 #include "menu.h"
 #include "scene.h"
 #include "resource_manager.h"
 
-static ShowMenuEditorWidget* mEditorWidget = 0;
 ActionInfo ShowMenu::Info;
 
 ShowMenu::ShowMenu(QObject *parent) :
@@ -63,21 +60,6 @@ void ShowMenu::init()
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
-}
-
-void ShowMenu::setShowMenuEditorWidget(ShowMenuEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-ShowMenuEditorWidget* ShowMenu::showMenuEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* ShowMenu::editorWidget()
-{
-    return mEditorWidget;
 }
 
 QVariantMap ShowMenu::toJsonObject()

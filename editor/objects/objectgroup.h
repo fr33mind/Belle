@@ -18,9 +18,6 @@
 #define OBJECTGROUP_H
 
 #include "object.h"
-#include "objectgroup_editor_widget.h"
-
-class ObjectGroupEditorWidget;
 
 class ObjectGroup : public Object
 {
@@ -31,11 +28,6 @@ class ObjectGroup : public Object
 public:
     explicit ObjectGroup(QObject *parent = 0, const QString& name="ObjectGroup");
     ObjectGroup(const QVariantMap& data, QObject *parent = 0);
-
-    static ObjectGroupEditorWidget* objectGroupEditorWidget();
-    static void setObjectGroupEditorWidget(ObjectGroupEditorWidget*);
-    virtual ObjectEditorWidget* editorWidget();
-
     void append(Object*, int spacing=0);
     Object* object(int) const;
     Object* object(const QString&) const;

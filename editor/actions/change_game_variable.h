@@ -18,7 +18,6 @@
 #define GAME_VARIABLE_H
 
 #include "action.h"
-#include "change_game_variable_editor_widget.h"
 
 class ChangeGameVariableEditorWidget;
 
@@ -37,10 +36,6 @@ public:
 public:
     explicit ChangeGameVariable(QObject *parent = 0);
     ChangeGameVariable(const QVariantMap& data, QObject *parent = 0);
-
-    static ChangeGameVariableEditorWidget* changeGameVariableEditorWidget();
-    static void setChangeGameVariableEditorWidget(ChangeGameVariableEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
 
     int operatorIndex();
     void setOperatorIndex(int);

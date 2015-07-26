@@ -18,9 +18,6 @@
 #define LABEL_H
 
 #include "action.h"
-#include "label_editor_widget.h"
-
-class LabelEditorWidget;
 
 class Label : public Action
 {
@@ -32,9 +29,6 @@ public:
 public:
     explicit Label(const QString&, QObject *parent = 0);
     Label(const QVariantMap&, QObject *parent);
-    static LabelEditorWidget* labelEditorWidget();
-    static void setLabelEditorWidget(LabelEditorWidget*);
-    virtual ActionEditorWidget* editorWidget();
     void setObjectName(const QString &);
     
 signals:

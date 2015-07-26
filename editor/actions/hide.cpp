@@ -16,7 +16,6 @@
 
 #include "hide.h"
 
-static HideEditorWidget* mHideEditorWidget = 0;
 ActionInfo Hide::Info;
 
 Hide::Hide(QObject *parent):
@@ -36,19 +35,4 @@ void Hide::init()
     setType(Info.type);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
-}
-
-void Hide::setHideEditorWidget(HideEditorWidget * widget)
-{
-   mHideEditorWidget = widget;
-}
-
-HideEditorWidget* Hide::hideEditorWidget()
-{
-   return mHideEditorWidget;
-}
-
-ActionEditorWidget* Hide::editorWidget()
-{
-    return mHideEditorWidget;
 }

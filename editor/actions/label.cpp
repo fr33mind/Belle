@@ -16,9 +16,6 @@
 
 #include "label.h"
 
-#include <QDebug>
-
-static LabelEditorWidget* mEditorWidget = 0;
 ActionInfo Label::Info;
 
 Label::Label(const QString& name, QObject *parent) :
@@ -40,21 +37,6 @@ void Label::init()
     setType(Info.type);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
-}
-
-void Label::setLabelEditorWidget(LabelEditorWidget * widget)
-{
-   mEditorWidget = widget;
-}
-
-LabelEditorWidget* Label::labelEditorWidget()
-{
-   return mEditorWidget;
-}
-
-ActionEditorWidget* Label::editorWidget()
-{
-    return mEditorWidget;
 }
 
 void Label::setObjectName(const QString & name)
