@@ -123,7 +123,8 @@ HEADERS      += belle.h\
     widgets/object_combobox.h \
     gameobject.h \
     objects/menuoption.h \
-    gameobject_editorwidget.h
+    gameobject_editorwidget.h \
+    editorwidgetfactory.h
                 
 
 SOURCES      += main.cpp\
@@ -229,6 +230,7 @@ SOURCES      += main.cpp\
     widgets/object_combobox.cpp \
     gameobject.cpp \
     objects/menuoption.cpp \
-    gameobject_editorwidget.cpp
+    gameobject_editorwidget.cpp \
+    editorwidgetfactory.cpp
 
 RESOURCES += media.qrc
