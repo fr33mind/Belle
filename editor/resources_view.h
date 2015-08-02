@@ -24,8 +24,8 @@ class ResourcesView : public PropertiesWidget
 {
     Q_OBJECT
 
-    QList<Object*> mObjects;
-    QHash<QStandardItem*, Object*> mItemToObject;
+    QList<GameObject*> mObjects;
+    QHash<QStandardItem*, GameObject*> mItemToObject;
     QAction* mEditResourceAction;
     QAction* mRenameAction;
     QAction* mRemoveAction;
@@ -33,29 +33,29 @@ class ResourcesView : public PropertiesWidget
 public:
     explicit ResourcesView(QWidget *parent = 0);
     void select(const QString&);
-    Object* object(const QModelIndex&);
+    GameObject* object(const QModelIndex&);
 protected:
     virtual void dataChanged(const QModelIndex &, const QModelIndex &);
-    QStandardItem* itemFromObject(Object*);
+    QStandardItem* itemFromObject(GameObject*);
 
 signals:
-    void editResource(Object*);
+    void editResource(GameObject*);
     
 public slots:
-    void addObject(Object*);
+    void addObject(GameObject*);
     void onRemoveResource();
     void onRenameActionTriggered();
     void onEditResource();
     //void onItemDoubleClicked(const QModelIndex&);
-    void onResourceRemoved(Object*);
+    void onResourceRemoved(GameObject*);
     void onObjectDataChanged(const QVariantMap&);
 
 private slots:
     void contextMenuRequested(const QPoint&);
 
 private:
-    void removeObject(Object*, bool del=false);
-    void removeItem(Object*, bool del=false);
+    void removeObject(GameObject*, bool del=false);
+    void removeItem(GameObject*, bool del=false);
 
     
 };

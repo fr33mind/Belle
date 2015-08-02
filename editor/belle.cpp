@@ -172,7 +172,7 @@ Belle::Belle(QWidget *widget)
         mResourcesView->setHeaderHidden(true);
         layout->addWidget(mResourcesView);
 
-        connect(mResourcesView, SIGNAL(editResource(Object*)), this, SLOT(onEditResource(Object*)));
+        connect(mResourcesView, SIGNAL(editResource(GameObject*)), this, SLOT(onEditResource(GameObject*)));
         connect(mResourcesView, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onResourcesDoubleClicked(const QModelIndex&)));
     }
 
@@ -305,11 +305,12 @@ Belle::~Belle()
     saveSettings();
 }
 
-void Belle::onEditResource(Object* obj)
+void Belle::onEditResource(GameObject* obj)
 {
     if (! obj)
         return;
 
+    Object* object = qobject_cast<Object*>(obj);
     if (object)
         mDrawingSurfaceWidget->setObject(object);
 

@@ -44,8 +44,8 @@ ResourcesView::ResourcesView(QWidget *parent) :
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuRequested(const QPoint&)));
     //connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onItemDoubleClicked(const QModelIndex&)));
-    connect(ResourceManager::instance(), SIGNAL(resourceAdded(Object*)), this, SLOT(addObject(Object*)));
-    connect(ResourceManager::instance(), SIGNAL(resourceRemoved(Object*)), this, SLOT(onResourceRemoved(Object*)));
+    connect(ResourceManager::instance(), SIGNAL(resourceAdded(GameObject*)), this, SLOT(addObject(GameObject*)));
+    connect(ResourceManager::instance(), SIGNAL(resourceRemoved(GameObject*)), this, SLOT(onResourceRemoved(GameObject*)));
     this->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::SelectedClicked);
 }
 
@@ -59,7 +59,7 @@ void ResourcesView::contextMenuRequested(const QPoint & point)
         menu.addAction(mEditResourceAction);
         menu.addAction(mRenameAction);
         menu.addSeparator();
-        Object* object = this->object(index);
+        GameObject* object = this->object(index);
         if (object && object->clones().isEmpty())
             menu.addAction(mRemoveAction);
     }
@@ -67,7 +67,7 @@ void ResourcesView::contextMenuRequested(const QPoint & point)
     menu.exec(mapToGlobal(point));
 }
 
-void ResourcesView::addObject(Object * object)
+void ResourcesView::addObject(GameObject * object)
 {
     if (! object)
         return;
@@ -108,7 +108,7 @@ void ResourcesView::select(const QString& name)
     }
 }
 
-void ResourcesView::removeItem(Object * object, bool del)
+void ResourcesView::removeItem(GameObject* object, bool del)
 {
     if (! object)
         return;
@@ -129,7 +129,7 @@ void ResourcesView::removeItem(Object * object, bool del)
     }
 }
 
-void ResourcesView::removeObject(Object * object, bool del)
+void ResourcesView::removeObject(GameObject * object, bool del)
 {
     if (ResourceManager::instance())
         ResourceManager::instance()->removeResource(object, del);
@@ -149,7 +149,7 @@ void ResourcesView::removeObject(Object * object, bool del)
         return;
 
     QStandardItem* item = model->itemFromIndex(index);
-    Object* obj = mItemToObject.value(item);
+    GameObject* obj = mItemToObject.value(item);
     scene->addCopyOfObject(obj);
 }*/
 
@@ -161,7 +161,7 @@ void ResourcesView::onRenameActionTriggered()
         this->edit(indexes.first());
 }
 
-void ResourcesView::onResourceRemoved(Object* resource)
+void ResourcesView::onResourceRemoved(GameObject* resource)
 {
     removeItem(resource);
 }
@@ -182,13 +182,13 @@ void ResourcesView::onRemoveResource()
 
 void ResourcesView::onEditResource()
 {
-    Object* object = this->object(currentIndex());
+    GameObject* object = this->object(currentIndex());
 
     if (object)
         emit editResource(object);
 }
 
-Object* ResourcesView::object(const QModelIndex & index)
+GameObject* ResourcesView::object(const QModelIndex & index)
 {
     QStandardItemModel* model = qobject_cast<QStandardItemModel*>(this->model());
 
@@ -198,12 +198,12 @@ Object* ResourcesView::object(const QModelIndex & index)
     return mItemToObject.value(model->itemFromIndex(index), 0);
 }
 
-QStandardItem* ResourcesView::itemFromObject(Object* object)
+QStandardItem* ResourcesView::itemFromObject(GameObject* object)
 {
     if (! object)
         return 0;
 
-    QHashIterator<QStandardItem*, Object*> it(mItemToObject);
+    QHashIterator<QStandardItem*, GameObject*> it(mItemToObject);
     QStandardItem *item = 0;
 
     while(it.hasNext()) {
@@ -220,11 +220,12 @@ QStandardItem* ResourcesView::itemFromObject(Object* object)
 
 void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight)
 {
-    Object* obj = object(topLeft);
+    GameObject* obj = object(topLeft);
+    QString name = topLeft.data().toString();
 
-    if (obj && obj->objectName() != topLeft.data().toString()) {
-        bool changed = obj->setName(topLeft.data().toString());
-        if (! changed) {
+    if (obj && obj->objectName() != name) {
+        if (ResourceManager::instance()->isValidName(name)) {
+            obj->setName(name);
             this->model()->setData(topLeft, obj->name(), Qt::DisplayRole);
             if (topLeft == bottomRight)
                 this->model()->setData(bottomRight, obj->name(), Qt::DisplayRole);

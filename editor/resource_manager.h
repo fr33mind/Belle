@@ -29,10 +29,12 @@
 #include <QList>
 #include <QDir>
 
+#include "gameobject.h"
 #include "objects/object.h"
 #include "imagefile.h"
 
 class Object;
+class GameObject;
 
 class ResourceManager : public QObject
 {
@@ -40,21 +42,22 @@ class ResourceManager : public QObject
 
 public:
     explicit ResourceManager(QObject *parent = 0);
-    void addResource(Object*);
+    void addResource(GameObject*);
     void addResource(const QVariantMap&);
+    GameObject* createGameObject(const QVariantMap&, QObject* parent=0);
     Object* createObject(const QVariantMap&, QObject* parent=0);
     bool contains(const QString&);
-    void removeResource(Object*, bool del=false);
-    static Object* resource(const QString&);
-    static Object* resource(int);
+    void removeResource(GameObject*, bool del=false);
+    static GameObject* resource(const QString&);
+    static GameObject* resource(int);
     static void fillWithResourceData(QVariantMap&);
-    Object* typeToObject(const QString&, QVariantMap& extraData, QObject* parent=0);
+    GameObject* typeToObject(const QString&, QVariantMap& extraData, QObject* parent=0);
     bool isValidName(const QString&);
     QString newName(QString);
-    QString newName(Object*);
+    QString newName(GameObject*);
     static void setRelativePath(const QString&);
     static ResourceManager* instance();
-    static QList<Object*> resources();
+    static QList<GameObject*> resources();
     static void importResources(const QVariantMap&);
     static QVariantMap exportResources();
 
@@ -62,8 +65,8 @@ public:
     void removeResources(bool del);
 
 signals:
-    void resourceAdded(Object*);
-    void resourceRemoved(Object*);
+    void resourceAdded(GameObject*);
+    void resourceRemoved(GameObject*);
     void resourceRemoved(int);
     void resourceChanged();
 

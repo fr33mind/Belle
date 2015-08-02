@@ -22,7 +22,7 @@
 ResourcesComboBox::ResourcesComboBox(QWidget *parent) :
     QComboBox(parent)
 {
-    foreach(Object* obj, ResourceManager::resources()) {
+    foreach(GameObject* obj, ResourceManager::resources()) {
         addItem(obj->objectName());
     }
 }

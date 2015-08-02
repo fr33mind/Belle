@@ -89,7 +89,7 @@ class Belle : public QMainWindow
         void updateObjects();
         void onResourcesDoubleClicked(const QModelIndex&);
         void showAboutDialog();
-        void onEditResource(Object*);
+        void onEditResource(GameObject*);
         void onScenesWidgetCustomContextMenuRequested(const QPoint&);
         void copyScene();
         void cutScene();
