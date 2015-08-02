@@ -19,13 +19,13 @@
 
 #include <QLineEdit>
 
-#include "properties_widget.h"
+#include "gameobject_editorwidget.h"
 #include "action.h"
 
 class Action;
 class Object;
 
-class ActionEditorWidget : public PropertiesWidget
+class ActionEditorWidget : public GameObjectEditorWidget
 {
     Q_OBJECT
 
@@ -34,7 +34,7 @@ class ActionEditorWidget : public PropertiesWidget
 
 public:
     explicit ActionEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
+    virtual void updateData(GameObject*);
     Action* action();
     void setAction(Action*);
     ActionEditorWidget* copy();

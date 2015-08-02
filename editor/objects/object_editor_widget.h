@@ -25,13 +25,13 @@
 //#include "action_info_manager.h"
 #include "combobox.h"
 #include "color_pushbutton.h"
-#include "properties_widget.h"
+#include "gameobject_editorwidget.h"
 #include "object.h"
 #include "choosefilebutton.h"
 
 class Object;
 
-class ObjectEditorWidget : public PropertiesWidget
+class ObjectEditorWidget : public GameObjectEditorWidget
 {
     Q_OBJECT
 
@@ -39,7 +39,7 @@ class ObjectEditorWidget : public PropertiesWidget
 
 public:
     explicit ObjectEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Object*);
+    virtual void updateData(GameObject*);
     //virtual bool eventFilter(QObject *, QEvent *);
     void setObjectSize(int w=-1, int h=-1);
 

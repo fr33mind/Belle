@@ -17,7 +17,7 @@
 #include "action_editor_widget.h"
 
 ActionEditorWidget::ActionEditorWidget(QWidget *parent) :
-    PropertiesWidget(parent)
+    GameObjectEditorWidget(parent)
 {
     mAction = 0;
     mNameEdit = new QLineEdit(this);
@@ -28,8 +28,9 @@ ActionEditorWidget::ActionEditorWidget(QWidget *parent) :
 
 }
 
-void ActionEditorWidget::updateData(Action * action)
+void ActionEditorWidget::updateData(GameObject* obj)
 {
+    Action* action = qobject_cast<Action*>(obj);
     if (action == mAction)
         return;
 

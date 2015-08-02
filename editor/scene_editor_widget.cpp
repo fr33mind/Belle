@@ -19,7 +19,7 @@
 #include <QDebug>
 
 SceneEditorWidget::SceneEditorWidget(QWidget *parent) :
-    PropertiesWidget(parent)
+    GameObjectEditorWidget(parent)
 {
     mCurrentScene = 0;
     mChooseBackgroundButton = new ChooseFileButton(ChooseFileButton::ImageFilter, this);
@@ -35,8 +35,9 @@ SceneEditorWidget::SceneEditorWidget(QWidget *parent) :
     resizeColumnToContents(0);
 }
 
-void SceneEditorWidget::updateData(Scene * scene)
+void SceneEditorWidget::updateData(GameObject* obj)
 {
+    Scene* scene = qobject_cast<Scene*>(obj);
     if (mCurrentScene == scene || ! scene)
         return;
 

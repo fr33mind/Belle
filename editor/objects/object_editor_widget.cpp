@@ -35,7 +35,7 @@
 QHash<QObject*, Interaction::InputEvent> mWidgetToEvent = QHash<QObject*, Interaction::InputEvent>();
 
 ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
-    PropertiesWidget(parent)
+    GameObjectEditorWidget(parent)
 {
     QStandardItem* lastItem = 0;
     QRegExpValidator * validator = new QRegExpValidator(QRegExp("^[0-9]+(%){0,1}$"), this);
@@ -196,8 +196,9 @@ void ObjectEditorWidget::onColorChosen(const QColor & color)
         mCurrentObject->setBackgroundColor(color);
 }
 
-void ObjectEditorWidget::updateData(Object *currObj)
+void ObjectEditorWidget::updateData(GameObject* obj)
 {
+    Object* currObj = qobject_cast<Object*>(obj);
     if (currObj == mCurrentObject)
         return;
 
@@ -211,7 +212,6 @@ void ObjectEditorWidget::updateData(Object *currObj)
 
     connect(currObj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
     connect(currObj, SIGNAL(synced()), this, SLOT(reload()));
-    connect(currObj, SIGNAL(destroyed()), this, SLOT(onCurrentObjectDestroyed()));
 
     if (currObj->resource()) {
        this->setFilters(QStringList() << "Clones");

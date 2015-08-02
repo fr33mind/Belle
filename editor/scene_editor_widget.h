@@ -17,14 +17,14 @@
 #ifndef SCENE_EDITOR_WIDGET_H
 #define SCENE_EDITOR_WIDGET_H
 
-#include "properties_widget.h"
+#include "gameobject_editorwidget.h"
 #include "choosefilebutton.h"
 #include "color_pushbutton.h"
 #include "scene.h"
 
 class Scene;
 
-class SceneEditorWidget : public PropertiesWidget
+class SceneEditorWidget : public GameObjectEditorWidget
 {
     Q_OBJECT
 
@@ -34,7 +34,7 @@ class SceneEditorWidget : public PropertiesWidget
 
 public:
     explicit SceneEditorWidget(QWidget *parent = 0);
-    void updateData(Scene*);
+    void updateData(GameObject*);
     
 signals:
     
