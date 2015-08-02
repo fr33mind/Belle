@@ -1,6 +1,8 @@
 #ifndef CHANGESTATE_EDITORWIDGET_H
 #define CHANGESTATE_EDITORWIDGET_H
 
+#include <QComboBox>
+
 #include "action_editor_widget.h"
 #include "changestate.h"
 

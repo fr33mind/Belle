@@ -21,6 +21,7 @@
 
 #include "action_editor_widget.h"
 #include "branch.h"
+#include "combobox.h"
 
 class Branch;
 

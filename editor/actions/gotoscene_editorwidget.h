@@ -17,6 +17,8 @@
 #ifndef GOTOSCENE_EDITORWIDGET_H
 #define GOTOSCENE_EDITORWIDGET_H
 
+#include <QComboBox>
+
 #include "action_editor_widget.h"
 #include "gotoscene.h"
 

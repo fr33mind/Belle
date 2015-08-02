@@ -17,6 +17,7 @@
 #ifndef FADE_EDITOR_WIDGET_H
 #define FADE_EDITOR_WIDGET_H
 
+#include <QDoubleSpinBox>
 #include "fade.h"
 #include "resource_manager.h"
 #include "resources_combobox.h"

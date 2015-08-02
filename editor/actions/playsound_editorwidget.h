@@ -18,6 +18,7 @@
 #define PLAYSOUND_EDITORWIDGET_H
 
 #include <QSlider>
+#include <QCheckBox>
 
 #include "action_editor_widget.h"
 #include "choosefilebutton.h"

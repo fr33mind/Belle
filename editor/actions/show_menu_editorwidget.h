@@ -18,9 +18,11 @@
 #define SHOW_MENU_EDITORWIDGET_H
 
 #include <QTextEdit>
+#include <QComboBox>
 
 #include "action_editor_widget.h"
 #include "show_menu.h"
+#include "combobox.h"
 
 #define NUMBER_OF_OPTIONS 8
 

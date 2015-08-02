@@ -19,6 +19,7 @@
 
 #include <QComboBox>
 #include <QTextEdit>
+#include <QCheckBox>
 
 #include "action_editor_widget.h"
 #include "dialogue.h"

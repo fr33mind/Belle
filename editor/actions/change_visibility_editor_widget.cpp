@@ -18,11 +18,9 @@
 
 #include <QHash>
 #include <QHashIterator>
-#include <QDebug>
 
-#include "scene.h"
-#include "fade.h"
-#include "slide.h"
+#include "fade_editor_widget.h"
+#include "slide_editor_widget.h"
 
 ChangeVisibilityEditorWidget::ChangeVisibilityEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)

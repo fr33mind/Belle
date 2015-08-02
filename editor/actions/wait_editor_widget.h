@@ -20,6 +20,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QLineEdit>
+#include <QDoubleSpinBox>
 
 #include "action_editor_widget.h"
 #include "wait.h"

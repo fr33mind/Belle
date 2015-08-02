@@ -17,8 +17,11 @@
 #ifndef CHANGECOLOR_EDITOR_WIDGET_H
 #define CHANGECOLOR_EDITOR_WIDGET_H
 
+#include <QCheckBox>
+
 #include "action_editor_widget.h"
 #include "widgets/object_combobox.h"
+#include "color_pushbutton.h"
 
 class ChangeColor;
 

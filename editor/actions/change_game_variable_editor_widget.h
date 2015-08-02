@@ -17,6 +17,8 @@
 #ifndef GAME_VARIABLE_EDITOR_WIDGET_H
 #define GAME_VARIABLE_EDITOR_WIDGET_H
 
+#include <QComboBox>
+
 #include "action_editor_widget.h"
 #include "change_game_variable.h"
 

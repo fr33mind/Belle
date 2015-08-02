@@ -17,6 +17,9 @@
 #ifndef STOPSOUND_EDITORWIDGET_H
 #define STOPSOUND_EDITORWIDGET_H
 
+#include <QComboBox>
+#include <QDoubleSpinBox>
+
 #include "action_editor_widget.h"
 #include "stopsound.h"
 
