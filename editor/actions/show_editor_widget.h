@@ -32,7 +32,10 @@ protected:
 
 public:
     explicit ShowEditorWidget(QWidget *parent = 0);
-    void updateData(Action *);
+    virtual void setGameObject(GameObject*);
+
+protected:
+    virtual void updateData(GameObject*);
 
 private slots:
     void onStateChanged(int);

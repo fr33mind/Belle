@@ -48,28 +48,21 @@ ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
 
 }
 
-void ChangeColorEditorWidget::updateData(Action * action)
+void ChangeColorEditorWidget::updateData(GameObject* action)
 {
-    if (action == mAction)
-        return;
-
+    ActionEditorWidget::updateData(action);
     ChangeColor* changeColor = qobject_cast<ChangeColor*>(action);
     if (! changeColor)
         return;
 
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
-
-    mObjectsComboBox->loadFromAction(action);
+    mObjectsComboBox->loadFromAction(changeColor);
     mColorButton->setColor(changeColor->color());
     mOpacitySlider->setValue(changeColor->opacity());
-
-    mAction = action;
 }
 
 void ChangeColorEditorWidget::onColorChosen(const QColor & color)
 {
-    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
     if (changeColor) {
         changeColor->setColor(color);
     }
@@ -77,7 +70,7 @@ void ChangeColorEditorWidget::onColorChosen(const QColor & color)
 
 void ChangeColorEditorWidget::onCurrentObjectChanged(Object* object)
 {
-    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
     if (! changeColor)
         return;
 
@@ -89,7 +82,7 @@ void ChangeColorEditorWidget::onChangeObjectColorToggled(bool checked)
     if (! checked && !mChangeObjectBackgroundColorCheckBox->isChecked())
         mChangeObjectColorCheckBox->setChecked(true);
 
-    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
     if(changeColor)
         changeColor->setChangeObjectColor(mChangeObjectColorCheckBox->isChecked());
 }
@@ -99,14 +92,14 @@ void ChangeColorEditorWidget::onChangeObjectBackgroundColorToggled(bool checked)
     if (! checked && ! mChangeObjectColorCheckBox->isChecked())
         mChangeObjectBackgroundColorCheckBox->setChecked(true);
 
-    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
     if(changeColor)
         changeColor->setChangeObjectBackgroundColor(mChangeObjectBackgroundColorCheckBox->isChecked());
 }
 
 void ChangeColorEditorWidget::onOpacityChanged(int value)
 {
-    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
     if(changeColor)
         changeColor->setOpacity(value);
 }

@@ -30,10 +30,10 @@ class BranchEditorWidget : public ActionEditorWidget
     Q_OBJECT
 public:
     explicit BranchEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
     bool eventFilter(QObject *, QEvent *);
 
 protected:
+    virtual void updateData(GameObject*);
 
 signals:
     

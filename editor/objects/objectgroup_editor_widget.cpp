@@ -22,21 +22,3 @@ ObjectGroupEditorWidget::ObjectGroupEditorWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {
 }
-
-void ObjectGroupEditorWidget::updateData(Object* obj)
-{
-    ObjectEditorWidget::updateData(obj);
-
-    /*ObjectGroup * prevObjectGroup = mCurrentObjectGroup;
-    mCurrentObjectGroup = qobject_cast<ObjectGroup*>(obj);
-    if (! mCurrentObjectGroup)
-        return;
-
-    if (mCurrentObjectGroup != prevObjectGroup) {
-        this->clear(1);
-        QList<Object*> objects = mCurrentObjectGroup->objects();
-        for(int i=0; i < objects.size(); i++) {
-            this->append(objects[i]->editorWidget());
-        }
-    }*/
-}

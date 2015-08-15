@@ -63,20 +63,21 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
 
 void TextPropertiesWidget::onTextEditDataChanged()
 {
-    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    TextBox* textbox = qobject_cast<TextBox*>(mGameObject);
     if (textbox)
         textbox->setText(mTextEdit->toPlainText());
 }
 
 void TextPropertiesWidget::onColorChosen(const QColor& color)
 {
-    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    TextBox* textbox = qobject_cast<TextBox*>(mGameObject);
     if (textbox)
         textbox->setTextColor(color);
 }
 
-void TextPropertiesWidget::updateData(Object *obj)
+void TextPropertiesWidget::updateData(GameObject* obj)
 {
+    ObjectEditorWidget::updateData(obj);
     TextBox* textbox = qobject_cast<TextBox*>(obj);
 
     if (! textbox)
@@ -84,9 +85,6 @@ void TextPropertiesWidget::updateData(Object *obj)
 
     if (! textbox->text().isEmpty())
         textbox->setPlaceholderText("");
-
-    ObjectEditorWidget::updateData(obj);
-    mCurrentObject = 0;
 
     mChooseFontWidget->loadFonts();
 
@@ -111,14 +109,12 @@ void TextPropertiesWidget::updateData(Object *obj)
     mColorButton->setColor(textbox->textColor());
     mChooseFontWidget->setCurrentFontFamily(textbox->fontFamily());
     mFontSizeSpin->setValue(textbox->fontSize());
-
-    mCurrentObject = obj;
 }
 
 void TextPropertiesWidget::onAlignmentChanged(int index)
 {
     QComboBox* senderCombo = static_cast<QComboBox*>(this->sender());
-    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    TextBox* textbox = qobject_cast<TextBox*>(mGameObject);
 
     if (index < 0 || index >= senderCombo->count() || ! textbox)
         return;
@@ -165,14 +161,14 @@ Qt::Alignment TextPropertiesWidget::verticalAlignment()
 
 void TextPropertiesWidget::onFontSizeChanged(int size)
 {
-    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    TextBox* textbox = qobject_cast<TextBox*>(mGameObject);
     if (textbox)
         textbox->setFontSize(size);
 }
 
 void TextPropertiesWidget::onFontChosen(const QString & family)
 {
-    TextBox* textbox = qobject_cast<TextBox*>(mCurrentObject);
+    TextBox* textbox = qobject_cast<TextBox*>(mGameObject);
     if (textbox)
         textbox->setFontFamily(family);
 }

@@ -17,36 +17,19 @@
 #ifndef ACTION_EDITOR_WIDGET_H
 #define ACTION_EDITOR_WIDGET_H
 
-#include <QLineEdit>
-
 #include "gameobject_editorwidget.h"
-#include "action.h"
-
-class Action;
-class Object;
 
 class ActionEditorWidget : public GameObjectEditorWidget
 {
     Q_OBJECT
 
-    QLineEdit* mNameEdit;
-    QList<Object*> mObjects;
-
 public:
     explicit ActionEditorWidget(QWidget *parent = 0);
-    virtual void updateData(GameObject*);
-    Action* action();
-    void setAction(Action*);
-    ActionEditorWidget* copy();
 
 signals:
 
 protected:
-    Action* mAction;
-
-private slots:
-    void onNameEdited(const QString& name);
-    void actionDestroyed();
+    virtual void updateData(GameObject*);
 
 };
 

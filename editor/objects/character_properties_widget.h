@@ -39,7 +39,9 @@ class CharacterPropertiesWidget : public ObjectEditorWidget
 
 public:
     explicit CharacterPropertiesWidget(QWidget *parent = 0);
-    virtual void updateData(Object *);
+
+protected:
+    virtual void updateData(GameObject*);
 
 private:
     void updateCharacterStates();

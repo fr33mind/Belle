@@ -28,7 +28,6 @@ class ObjectGroupEditorWidget : public ObjectEditorWidget
     Q_OBJECT
 public:
     explicit ObjectGroupEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Object*);
 
 signals:
 

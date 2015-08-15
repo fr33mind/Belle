@@ -12,21 +12,29 @@ class GameObjectEditorWidget : public PropertiesWidget
 {
     Q_OBJECT
 
+public:
+    explicit GameObjectEditorWidget(QWidget *parent = 0);
+    virtual void setGameObject(GameObject*);
+    GameObject* gameObject();
+
+protected:
     GameObject* mGameObject;
     QLineEdit* mNameEdit;
 
-public:
-    explicit GameObjectEditorWidget(QWidget *parent = 0);
+signals:
+    void gameObjectChanged(GameObject*);
+
+protected:
     virtual void updateData(GameObject*);
 
-signals:
-
 public slots:
-    void onNameEdit(const QString&);
+    void reload();
 
 protected slots:
-    void gameObjectDestroyed();
+    virtual void onGameObjectDestroyed();
 
+private slots:
+    void onNameEdited(const QString&);
 };
 
 #endif // GAMEOBJECT_EDITORWIDGET_H

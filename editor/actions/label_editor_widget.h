@@ -29,9 +29,11 @@ class LabelEditorWidget : public ActionEditorWidget
 
 public:
     explicit LabelEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
     
 signals:
+
+protected:
+    virtual void updateData(GameObject*);
     
 private slots:
     void onLabelEdited(const QString&);

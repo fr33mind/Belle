@@ -60,11 +60,9 @@ BranchEditorWidget::BranchEditorWidget(QWidget *parent) :
     resizeColumnToContents(0);
 }
 
-void BranchEditorWidget::updateData(Action * action)
+void BranchEditorWidget::updateData(GameObject* action)
 {
     ActionEditorWidget::updateData(action);
-    mAction = 0;
-
     Branch* branch = qobject_cast<Branch*>(action);
     if (! branch)
         return;
@@ -81,8 +79,6 @@ void BranchEditorWidget::updateData(Action * action)
     actions = branch->actions(false);
     foreach(Action* action,  actions)
         mFalseActionsChooser->addItem(action->icon(), action->toString());
-
-    mAction = action;
 }
 
 void BranchEditorWidget::onConditionsClicked()
@@ -99,11 +95,11 @@ bool BranchEditorWidget::eventFilter(QObject * obj, QEvent * event)
 
 void BranchEditorWidget::onAddItemActivated()
 {
-    Branch *branch = qobject_cast<Branch*>(mAction);
+    Branch *branch = qobject_cast<Branch*>(mGameObject);
     if (! branch)
         return;
 
-    AddActionDialog dialog(qobject_cast<QObject*>(mAction));
+    AddActionDialog dialog(qobject_cast<QObject*>(mGameObject));
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
@@ -123,7 +119,7 @@ void BranchEditorWidget::onAddItemActivated()
 void BranchEditorWidget::onItemActivated(int index)
 {
     Action* action = 0;
-    Branch *branch = qobject_cast<Branch*>(mAction);
+    Branch *branch = qobject_cast<Branch*>(mGameObject);
 
     if (! branch)
         return;
@@ -148,7 +144,7 @@ void BranchEditorWidget::onItemActivated(int index)
 
 void BranchEditorWidget::onItemRemoved(int index)
 {
-    Branch *branch = qobject_cast<Branch*>(mAction);
+    Branch *branch = qobject_cast<Branch*>(mGameObject);
     if (branch) {
         if (sender()->objectName() == "true")
             branch->removeAction(index, true, true);
@@ -159,7 +155,7 @@ void BranchEditorWidget::onItemRemoved(int index)
 
 void BranchEditorWidget::onConditionChanged()
 {
-    Branch *branch = qobject_cast<Branch*>(mAction);
+    Branch *branch = qobject_cast<Branch*>(mGameObject);
     if (branch)
         branch->setCondition(mConditionEdit->toPlainText());
 }

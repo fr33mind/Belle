@@ -45,24 +45,22 @@ WaitEditorWidget::WaitEditorWidget(QWidget *parent) :
     connect(mSkipBox, SIGNAL(clicked(bool)), this, SLOT(onSkipBoxClicked(bool)));
 }
 
-void WaitEditorWidget::updateData(Action * action)
+void WaitEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
     Wait* wait = qobject_cast<Wait*>(action);
     if (! wait)
         return;
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
 
     mWaitTypeWidget->setCurrentIndex(wait->waitType());
     updateWidgets(mWaitTypeWidget->currentIndex());
     mTimeSpin->setValue(wait->time());
     mSkipBox->setChecked(wait->allowSkipping());
-    mAction = action;
 }
 
 void WaitEditorWidget::onCurrentIndexChanged(int index)
 {
-    Wait* wait = qobject_cast<Wait*>(mAction);
+    Wait* wait = qobject_cast<Wait*>(mGameObject);
     if (! wait)
         return;
 
@@ -72,7 +70,7 @@ void WaitEditorWidget::onCurrentIndexChanged(int index)
 
 void WaitEditorWidget::onTimeChanged(double value)
 {
-    Wait* wait = qobject_cast<Wait*>(mAction);
+    Wait* wait = qobject_cast<Wait*>(mGameObject);
     if (wait)
         wait->setTime(value);
 }
@@ -87,6 +85,7 @@ void WaitEditorWidget::updateWidgets(int index)
 
 void WaitEditorWidget::onSkipBoxClicked(bool clicked)
 {
-    if (mAction)
-        mAction->setAllowSkipping(clicked);
+    Wait* wait = qobject_cast<Wait*>(mGameObject);
+    if (wait)
+        wait->setAllowSkipping(clicked);
 }

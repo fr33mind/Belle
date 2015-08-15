@@ -42,39 +42,38 @@ FadeEditorWidget::FadeEditorWidget(QWidget *parent) :
     endGroup();
 }
 
-
-void FadeEditorWidget::updateData(Action * action)
+void FadeEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
+
     Fade* fade = qobject_cast<Fade*>(action);
     if (! fade)
         return;
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
 
-    mObjectChooser->loadFromAction(action);
+    mObjectChooser->loadFromAction(fade);
     mFadeTypeChooser->setCurrentIndex(fade->fadeType());
     mDurationSpin->setValue(fade->duration());
-    mAction = action;
 }
 
 void FadeEditorWidget::onCurrentFadeTypeChanged(int type)
 {
-    Fade* fade = qobject_cast<Fade*>(mAction);
+    Fade* fade = qobject_cast<Fade*>(mGameObject);
     if (fade)
         type ? fade->setFadeType(Fade::Out) : fade->setFadeType(Fade::In);
 }
 
 void FadeEditorWidget::onCurrentObjectChanged(Object* object)
 {
-    if (!mAction)
+    Fade* fade = qobject_cast<Fade*>(mGameObject);
+    if (! fade)
         return;
 
-    mAction->setSceneObject(object);
+    fade->setSceneObject(object);
 }
 
 void FadeEditorWidget::onDurationChanged(double time)
 {
-    Fade* fade = qobject_cast<Fade*>(mAction);
+    Fade* fade = qobject_cast<Fade*>(mGameObject);
     if (fade)
         fade->setDuration(time);
 }

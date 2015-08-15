@@ -43,8 +43,10 @@ class SlideEditorWidget : public ActionEditorWidget
 
 public:
     explicit SlideEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action *);
     virtual bool eventFilter(QObject *, QEvent *);
+
+protected:
+    virtual void updateData(GameObject*);
 
 signals:
 

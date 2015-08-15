@@ -55,10 +55,9 @@ CharacterPropertiesWidget::CharacterPropertiesWidget(QWidget *parent) :
     connect(stateEditButton, SIGNAL(clicked()), this, SLOT(editCharacterStates()));
 }
 
-void CharacterPropertiesWidget::updateData(Object *obj)
+void CharacterPropertiesWidget::updateData(GameObject* obj)
 {
     ObjectEditorWidget::updateData(obj);
-
     Character* character = qobject_cast<Character*>(obj);
     if (! character)
         return;
@@ -71,28 +70,28 @@ void CharacterPropertiesWidget::updateData(Object *obj)
 
 void CharacterPropertiesWidget::onNameColorChosen(const QColor & color)
 {
-    Character* character = qobject_cast<Character*>(mCurrentObject);
+    Character* character = qobject_cast<Character*>(mGameObject);
     if (character)
         character->setNameColor(color);
 }
 
 void CharacterPropertiesWidget::onTextColorChosen(const QColor & color)
 {
-    Character* character = qobject_cast<Character*>(mCurrentObject);
+    Character* character = qobject_cast<Character*>(mGameObject);
     if (character)
         character->setTextColor(color);
 }
 
 void CharacterPropertiesWidget::onStateChanged(const QString & text)
 {
-    Character* character = qobject_cast<Character*>(mCurrentObject);
+    Character* character = qobject_cast<Character*>(mGameObject);
     if (character)
         character->setCurrentState(text);
 }
 
 void CharacterPropertiesWidget::updateCharacterStates()
 {
-    Character* character = qobject_cast<Character*>(mCurrentObject);
+    Character* character = qobject_cast<Character*>(mGameObject);
     if (! character)
         return;
 
@@ -112,7 +111,7 @@ void CharacterPropertiesWidget::updateCharacterStates()
 
 void CharacterPropertiesWidget::editCharacterStates()
 {
-    Character* character = qobject_cast<Character*>(mCurrentObject);
+    Character* character = qobject_cast<Character*>(mGameObject);
     if (! character)
         return;
 

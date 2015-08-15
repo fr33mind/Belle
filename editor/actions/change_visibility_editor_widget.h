@@ -34,8 +34,6 @@ class ChangeVisibilityEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-
-
 protected:
     ObjectComboBox * mObjectsWidget;
     QList<Object*> mObjects;
@@ -45,7 +43,7 @@ protected:
 public:
     explicit ChangeVisibilityEditorWidget(QWidget *parent = 0);
     ~ChangeVisibilityEditorWidget();
-    virtual void updateData(Action*);
+
     ChangeVisibility* currentAction();
 
     QComboBox* charactersWidget();
@@ -55,6 +53,9 @@ public:
 
 private slots:
     void onObjectChanged(Object*);
+
+protected:
+    virtual void updateData(GameObject*);
 
 private:
     void init();

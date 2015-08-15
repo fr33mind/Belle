@@ -30,9 +30,11 @@ class ChangeColorEditorWidget : public ActionEditorWidget
     Q_OBJECT
 public:
     explicit ChangeColorEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action *);
-    
+
 signals:
+
+protected:
+    virtual void updateData(GameObject*);
     
 private slots:
     void onCurrentObjectChanged(Object*);
@@ -40,7 +42,6 @@ private slots:
     void onChangeObjectBackgroundColorToggled(bool);
     void onColorChosen(const QColor&);
     void onOpacityChanged(int);
-
 
 private:
     ObjectComboBox* mObjectsComboBox;

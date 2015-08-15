@@ -35,10 +35,12 @@ class ChangeGameVariableEditorWidget : public ActionEditorWidget
 public:
     explicit ChangeGameVariableEditorWidget(ActionEditorWidget *parent = 0);
     QStringList operatorsText();
-    void updateData(Action *);
     
 signals:
     
+protected:
+    virtual void updateData(GameObject*);
+
 private slots:
     void onVariableEdited(const QString&);
     void onOperatorChanged(int);

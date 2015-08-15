@@ -44,12 +44,13 @@ class DialogueEditorWidget : public ActionEditorWidget
 
 public:
     explicit DialogueEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
     virtual bool eventFilter(QObject *, QEvent *);
+    virtual void setGameObject(GameObject*);
 
 signals:
 
-public slots:
+protected:
+    virtual void updateData(GameObject*);
 
 private slots:
     void onTextEdited();

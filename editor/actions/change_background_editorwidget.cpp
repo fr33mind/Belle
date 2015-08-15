@@ -34,33 +34,27 @@ ChangeBackgroundEditorWidget::ChangeBackgroundEditorWidget(QWidget *parent) :
    resizeColumnToContents(0);
 }
 
-void ChangeBackgroundEditorWidget::updateData(Action * action)
+void ChangeBackgroundEditorWidget::updateData(GameObject* action)
 {
-    if (action == mAction)
-        return;
-
+    ActionEditorWidget::updateData(action);
     ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(action);
     if (! changeBackground)
         return;
 
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
-
     mImageChooser->setFilePath(changeBackground->backgroundPath());
     mChooseBackgroundColorButton->setColor(changeBackground->backgroundColor());
-    mAction = action;
 }
 
 void ChangeBackgroundEditorWidget::onFileSelected(const QString & filepath)
 {
-    ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(mAction);
+    ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(mGameObject);
     if (changeBackground)
         changeBackground->setBackgroundImage(filepath);
 }
 
 void ChangeBackgroundEditorWidget::onBackgroundColorSelected(const QColor & color)
 {
-    ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(mAction);
+    ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(mGameObject);
     if (changeBackground)
         changeBackground->setBackgroundColor(color);
 }

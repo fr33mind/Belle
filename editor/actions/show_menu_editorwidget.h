@@ -40,7 +40,9 @@ class ShowMenuEditorWidget : public ActionEditorWidget
 
 public:
     explicit ShowMenuEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action *);
+
+protected:
+    virtual void updateData(GameObject*);
 
 private:
     int widgetIndex(QObject*);

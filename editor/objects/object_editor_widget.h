@@ -55,24 +55,16 @@ public slots:
     void onBorderWidthChanged(int);
     void onBorderColorChanged(const QColor&);
 
-
 private slots:
-    void onNameChanged(const QString&);
     void onSizeEdited(const QString&);
     void onEventItemRemoved(int);
-    void onCurrentWorkingObjectChanged(int);
     void onImageChosen(const QString&);
     void onXChanged(int);
     void onYChanged(int);
     void onCornerRadiusValueChanged(int);
     void onObjectDataChanged(const QVariantMap&);
-    void onCurrentObjectDestroyed();
     void onKeepAspectRatioToggled(bool);
     void syncToggled(bool);
-    void reload();
-
-protected:
-    Object *mCurrentObject;
 
 private:
     void updateEventActions(Object*);
@@ -83,7 +75,6 @@ private:
     QSlider* mOpacitySlider;
     Object *mResourceObject;
     QComboBox* mChooseObjectComboBox;
-    QLineEdit* mNameEdit;
     ComboBox * mMousePressComboBox;
     ComboBox * mMouseReleaseComboBox;
     ComboBox * mMouseMoveComboBox;

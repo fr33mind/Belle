@@ -26,14 +26,16 @@ class GoToLabelEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    GoToLabel * mCurrentGoToLabel;
     QLineEdit* mLabelEdit;
 
 public:
     explicit GoToLabelEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
+
 
 signals:
+
+protected:
+    virtual void updateData(GameObject*);
 
 private slots:
     void onLabelEdited(const QString&);

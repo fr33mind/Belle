@@ -20,10 +20,9 @@ ChangeStateEditorWidget::ChangeStateEditorWidget(QWidget *parent) :
     connect(mStateBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onStateChosen(const QString&)));
 }
 
-void ChangeStateEditorWidget::updateData(Action * action)
+void ChangeStateEditorWidget::updateData(GameObject* action)
 {
     ActionEditorWidget::updateData(action);
-    mAction = 0;
     ChangeState* changeStateAction = qobject_cast<ChangeState*>(action);
     if (! changeStateAction)
         return;
@@ -52,16 +51,24 @@ void ChangeStateEditorWidget::updateData(Action * action)
 
     if (! changeStateAction->state().isEmpty())
         mStateBox->setCurrentIndex(mStateBox->findText(changeStateAction->state()));
+}
 
-    mAction = action;
+void ChangeStateEditorWidget::setGameObject(GameObject* action)
+{
+    ActionEditorWidget::setGameObject(action);
 
+    ChangeState* changeStateAction = qobject_cast<ChangeState*>(action);
+    if (! changeStateAction)
+        return;
+
+    Object* currObject = changeStateAction->sceneObject();
     if (! currObject && mCharacterBox->count())
         mCharacterBox->setCurrentIndex(0);
 }
 
 void ChangeStateEditorWidget::onObjectChosen(const QString& name)
 {
-    ChangeState* action = qobject_cast<ChangeState*>(mAction);
+    ChangeState* action = qobject_cast<ChangeState*>(mGameObject);
     if (! action)
         return;
 
@@ -75,7 +82,7 @@ void ChangeStateEditorWidget::onObjectChosen(const QString& name)
 
 void ChangeStateEditorWidget::onStateChosen(const QString& state)
 {
-    ChangeState* action = qobject_cast<ChangeState*>(mAction);
+    ChangeState* action = qobject_cast<ChangeState*>(mGameObject);
     if (action)
         action->setState(state);
 }

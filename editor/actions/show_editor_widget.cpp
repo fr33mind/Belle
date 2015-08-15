@@ -29,15 +29,13 @@ ShowEditorWidget::ShowEditorWidget(QWidget *parent):
     connect(this, SIGNAL(objectChanged(Object*)), this , SLOT(onObjectChanged(Object*)));
 }
 
-void ShowEditorWidget::updateData(Action *action)
+void ShowEditorWidget::updateData(GameObject* action)
 {
     ChangeVisibilityEditorWidget::updateData(action);
-
     Show* show = qobject_cast<Show*>(action);
     if (! show)
         return;
 
-    mAction = 0;
     mObjectStateWidget->clear();
     Character* character = qobject_cast<Character*>(show->sceneObject());
     if (character) {
@@ -48,15 +46,20 @@ void ShowEditorWidget::updateData(Action *action)
         else
             mObjectStateWidget->setCurrentIndex(-1);
     }
+}
 
-    mAction = action;
-    if (character && show->characterState().isEmpty())
+void ShowEditorWidget::setGameObject(GameObject* action)
+{
+    ChangeVisibilityEditorWidget::setGameObject(action);
+
+    Show* show = qobject_cast<Show*>(action);
+    if (show && show->sceneObject() && show->characterState().isEmpty())
         mObjectStateWidget->setCurrentIndex(0);
 }
 
 void ShowEditorWidget::onStateChanged(int index)
 {
-    Show* show = qobject_cast<Show*>(mAction);
+    Show* show = qobject_cast<Show*>(mGameObject);
     if (show && show->sceneObject()) {
         Character *character = qobject_cast<Character*>(show->sceneObject());
         if (character)

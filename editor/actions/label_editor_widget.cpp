@@ -32,21 +32,19 @@ LabelEditorWidget::LabelEditorWidget(QWidget *parent) :
     endGroup();
 }
 
-void LabelEditorWidget::updateData(Action * action)
+void LabelEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
     Label* label = qobject_cast<Label*>(action);
     if (! label)
         return;
 
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
     mLabelEdit->setText(label->objectName());
-    mAction = action;
 }
 
 void LabelEditorWidget::onLabelEdited(const QString & text)
 {
-    Label* label = qobject_cast<Label*>(mAction);
+    Label* label = qobject_cast<Label*>(mGameObject);
     if (! label)
         return;
 

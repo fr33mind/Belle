@@ -38,14 +38,13 @@ GoToSceneEditorWidget::GoToSceneEditorWidget(QWidget *parent) :
     resizeColumnToContents(0);
 }
 
-void GoToSceneEditorWidget::updateData(Action * action)
+void GoToSceneEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
+
     GoToScene* goToScene = qobject_cast<GoToScene*>(action);
     if (! goToScene)
         return;
-
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
 
     //remove all scenes for update
     for(int i=mSceneEdit->count()-1; i > 4; i--)
@@ -68,13 +67,11 @@ void GoToSceneEditorWidget::updateData(Action * action)
 
     if (i >= 0 && i < mSceneEdit->count())
         mSceneEdit->setCurrentIndex(i);
-
-    mAction = action;
 }
 
 void GoToSceneEditorWidget::onSceneChanged(int index)
 {
-    GoToScene* goToScene = qobject_cast<GoToScene*>(mAction);
+    GoToScene* goToScene = qobject_cast<GoToScene*>(mGameObject);
     if (! goToScene)
         return;
 

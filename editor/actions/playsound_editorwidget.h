@@ -36,9 +36,11 @@ class PlaySoundEditorWidget : public ActionEditorWidget
 
 public:
     explicit PlaySoundEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action *);
 
 signals:
+
+protected:
+    virtual void updateData(GameObject*);
 
 private slots:
     void onFileSelected(const QString&);

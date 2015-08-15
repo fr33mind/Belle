@@ -59,14 +59,12 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
     resizeColumnToContents(0);
 }
 
-void ShowMenuEditorWidget::updateData(Action * action)
+void ShowMenuEditorWidget::updateData(GameObject * action)
 {
-    ShowMenu* showMenu = qobject_cast<ShowMenu*>(action);
+    ActionEditorWidget::updateData(action);
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
     if (! showMenu)
         return;
-
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
 
     //clear all data
     foreach(QLineEdit* lineEditor, mTextEdits)
@@ -78,7 +76,6 @@ void ShowMenuEditorWidget::updateData(Action * action)
 
     if (! showMenu->sceneObject())
         return;
-
 
     Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
     MenuOption* option = 0;
@@ -106,13 +103,12 @@ void ShowMenuEditorWidget::updateData(Action * action)
                 mEventChoosers[i]->addItem(actions[j]->icon(), actions[j]->toString());
         }
     }
-
-    mAction = action;
 }
 
 void ShowMenuEditorWidget::onTextEdited(const QString & text)
 {
-    if (!mAction || !mAction->sceneObject())
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (!showMenu || !showMenu->sceneObject())
         return;
 
     QLineEdit* lineEdit = static_cast<QLineEdit*>(sender());
@@ -121,7 +117,7 @@ void ShowMenuEditorWidget::onTextEdited(const QString & text)
     if (index == -1)
         return;
 
-    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
+    Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
     if (menu) {
         MenuOption* option = menu->optionAt(index);
         if (option)
@@ -131,12 +127,13 @@ void ShowMenuEditorWidget::onTextEdited(const QString & text)
 
 void ShowMenuEditorWidget::onAddItemActivated()
 {
-    if (! mAction || ! mAction->sceneObject())
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (! showMenu || ! showMenu->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
+    Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
 
-    AddActionDialog dialog(qobject_cast<QObject*>(mAction), this);
+    AddActionDialog dialog(qobject_cast<QObject*>(mGameObject), this);
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
@@ -155,10 +152,11 @@ void ShowMenuEditorWidget::onAddItemActivated()
 
 void ShowMenuEditorWidget::onItemRemoved(int actionIndex)
 {
-    if (! mAction || ! mAction->sceneObject())
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (! showMenu || ! showMenu->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
+    Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
     ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
     if (! menu || ! comboBox)
         return;
@@ -171,10 +169,11 @@ void ShowMenuEditorWidget::onItemRemoved(int actionIndex)
 
 void ShowMenuEditorWidget::onItemActivated(int actionIndex)
 {
-    if (! mAction || ! mAction->sceneObject())
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (! showMenu || ! showMenu->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
+    Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
     if (! menu)
         return;
 
@@ -204,10 +203,11 @@ int ShowMenuEditorWidget::widgetIndex(QObject* objectComboBox)
 
 void ShowMenuEditorWidget::onNumberOfOptionsChanged(int index)
 {
-    if (! sender() || ! mAction || ! mAction->sceneObject())
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (! sender() || ! showMenu || ! showMenu->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
+    Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
     QComboBox *comboBox = static_cast<QComboBox*>(sender());
 
     bool ok;
@@ -232,14 +232,15 @@ void ShowMenuEditorWidget::_updateTexts(Menu* menu)
 
 void ShowMenuEditorWidget::onConditionChanged()
 {
-    if (! sender() || ! mAction || ! mAction->sceneObject())
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (! sender() || ! showMenu || ! showMenu->sceneObject())
         return;
 
     QTextEdit* textEdit = static_cast<QTextEdit*>(sender());
     int index = mConditionEdits.indexOf(textEdit);
 
     if (index != -1) {
-        Menu* menu = static_cast<Menu*>(mAction->sceneObject());
+        Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
         MenuOption* option = menu->optionAt(index);
         if (option)
             option->setCondition(textEdit->toPlainText());

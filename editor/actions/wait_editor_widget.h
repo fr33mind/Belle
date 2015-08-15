@@ -38,7 +38,9 @@ class WaitEditorWidget : public ActionEditorWidget
 
 public:
     explicit WaitEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
+
+protected:
+    virtual void updateData(GameObject*);
 
 signals:
 

@@ -35,9 +35,11 @@ class FadeEditorWidget : public ActionEditorWidget
 
 public:
     explicit FadeEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
 
 signals:
+
+protected:
+    virtual void updateData(GameObject*);
 
 private slots:
     void onCurrentFadeTypeChanged(int);

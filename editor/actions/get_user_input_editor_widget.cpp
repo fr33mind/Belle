@@ -41,38 +41,35 @@ GetUserInputEditorWidget::GetUserInputEditorWidget(QWidget *parent) :
     resizeColumnToContents(0);
 }
 
-void GetUserInputEditorWidget::updateData(Action * action)
+void GetUserInputEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
     GetUserInput* userInput = qobject_cast<GetUserInput*>(action);
     if (! userInput)
         return;
 
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
-
     mMessageEdit->setText(userInput->message());
     mVariableEdit->setText(userInput->variable());
     mDefaultValueEdit->setText(userInput->defaultValue());
-    mAction = action;
 }
 
 void GetUserInputEditorWidget::onMessageChanged(const QString & value)
 {
-    GetUserInput* userInput = qobject_cast<GetUserInput*>(mAction);
+    GetUserInput* userInput = qobject_cast<GetUserInput*>(mGameObject);
     if (userInput)
         userInput->setMessage(value);
 }
 
 void GetUserInputEditorWidget::onVariableChanged(const QString & value)
 {
-    GetUserInput* userInput = qobject_cast<GetUserInput*>(mAction);
+    GetUserInput* userInput = qobject_cast<GetUserInput*>(mGameObject);
     if (userInput)
         userInput->setVariable(value);
 }
 
 void GetUserInputEditorWidget::onDefaultValueChanged(const QString & value)
 {
-    GetUserInput* userInput = qobject_cast<GetUserInput*>(mAction);
+    GetUserInput* userInput = qobject_cast<GetUserInput*>(mGameObject);
     if (userInput)
         userInput->setDefaultValue(value);
 }

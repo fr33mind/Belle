@@ -30,14 +30,15 @@ class SceneEditorWidget : public GameObjectEditorWidget
 
     ChooseFileButton* mChooseBackgroundButton;
     ColorPushButton* mChooseBackgroundColorButton;
-    Scene* mCurrentScene;
 
 public:
     explicit SceneEditorWidget(QWidget *parent = 0);
-    void updateData(GameObject*);
     
 signals:
-    
+
+protected:
+    virtual void updateData(GameObject*);
+
 private slots:
     void onBackgroundSelected(const QString&);
     void onBackgroundColorSelected(const QColor&);

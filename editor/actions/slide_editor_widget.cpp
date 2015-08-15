@@ -65,17 +65,15 @@ SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
     resizeColumnToContents(0);
 }
 
-void SlideEditorWidget::updateData(Action * action)
+void SlideEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
     Slide * slide  = qobject_cast<Slide*>(action);
     if (! slide)
         return;
 
-    ActionEditorWidget::updateData(action);
-    mAction = 0;
-
     mDurationSpinBox->setValue(slide->duration());
-    mObjectChooser->loadFromAction(action);
+    mObjectChooser->loadFromAction(slide);
 
     mTypeChooser->setCurrentIndex(static_cast<int>(slide->slideType()));
     bool custom = (slide->slideType() == Slide::Custom);
@@ -89,8 +87,6 @@ void SlideEditorWidget::updateData(Action * action)
         mDestXChooser->setCurrentIndex(mDestXChooser->findData(slide->destX()));
         mDestYChooser->setCurrentIndex(mDestYChooser->findData(slide->destY()));
     }
-
-    mAction = action;
 }
 
 void SlideEditorWidget::onButtonClicked()
@@ -127,21 +123,21 @@ bool SlideEditorWidget::eventFilter(QObject *obj, QEvent *event)
 }
 
 void SlideEditorWidget::onDurationChanged(double dur) {
-    Slide * slide  = qobject_cast<Slide*>(mAction);
+    Slide * slide  = qobject_cast<Slide*>(mGameObject);
     if (slide)
         slide->setDuration(dur);
 }
 
 void SlideEditorWidget::onObjectChanged(Object* obj)
 {
-    Slide * slide  = qobject_cast<Slide*>(mAction);
+    Slide * slide  = qobject_cast<Slide*>(mGameObject);
     if (slide)
         slide->setSceneObject(obj);
 }
 
 void SlideEditorWidget::onTypeChanged(int type)
 {
-    Slide * slide  = qobject_cast<Slide*>(mAction);
+    Slide * slide  = qobject_cast<Slide*>(mGameObject);
     if (slide) {
         slide->setSlideType(static_cast<Slide::Type>(type));
         setupDestChooser(slide->slideType());
@@ -150,28 +146,28 @@ void SlideEditorWidget::onTypeChanged(int type)
 
 void SlideEditorWidget::onDestXChanged(const QString & pos)
 {
-    Slide * slide  = qobject_cast<Slide*>(mAction);
+    Slide * slide  = qobject_cast<Slide*>(mGameObject);
     if (slide)
         slide->setDestX(pos.toInt());
 }
 
 void SlideEditorWidget::onDestYChanged(const QString & pos)
 {
-    Slide * slide  = qobject_cast<Slide*>(mAction);
+    Slide * slide  = qobject_cast<Slide*>(mGameObject);
     if (slide)
         slide->setDestY(pos.toInt());
 }
 
 void SlideEditorWidget::onDestXChanged(int index)
 {
-    Slide * slide  = qobject_cast<Slide*>(mAction);
+    Slide * slide  = qobject_cast<Slide*>(mGameObject);
     if (slide)
         slide->setDestX(mDestXChooser->itemData(index).toString());
 }
 
 void SlideEditorWidget::onDestYChanged(int index)
 {
-    Slide * slide  = qobject_cast<Slide*>(mAction);
+    Slide * slide  = qobject_cast<Slide*>(mGameObject);
     if (slide)
         slide->setDestY(mDestYChooser->itemData(index).toString());
 }

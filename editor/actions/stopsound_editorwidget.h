@@ -34,7 +34,9 @@ class StopSoundEditorWidget : public ActionEditorWidget
 
 public:
     explicit StopSoundEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action *);
+
+protected:
+    virtual void updateData(GameObject*);
 
 signals:
 

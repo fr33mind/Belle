@@ -32,10 +32,11 @@ class GoToSceneEditorWidget : public ActionEditorWidget
 
 public:
     explicit GoToSceneEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
 
 signals:
 
+protected:
+    virtual void updateData(GameObject*);
 public slots:
     void onSceneChanged(int);
 

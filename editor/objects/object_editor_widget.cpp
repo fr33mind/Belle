@@ -42,7 +42,6 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
 
     //mChooseObjectComboBox = new QComboBox(this);
     //mChooseObjectComboBox = 0;
-    mNameEdit = new QLineEdit(this);
     mVisibleCheckbox = new QCheckBox(this);
     mXSpin = new QSpinBox(this);
     mYSpin = new QSpinBox(this);
@@ -56,8 +55,6 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     mOpacitySlider = new QSlider(Qt::Horizontal, this);
     mOpacitySlider->setMaximum(255);
 
-    //connect(mChooseObjectComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentWorkingObjectChanged(int)));
-    connect(mNameEdit, SIGNAL(textEdited(const QString &)), this, SLOT(onNameChanged(const QString&)));
     connect(mVisibleCheckbox, SIGNAL(toggled(bool)), this, SLOT(onVisibilityChanged(bool)));
     connect(mXSpin, SIGNAL(valueChanged(int)), this, SLOT(onXChanged(int)));
     connect(mYSpin, SIGNAL(valueChanged(int)), this, SLOT(onYChanged(int)));
@@ -69,7 +66,6 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
 
     this->beginGroup(tr("Object"), "Object");
     //this->appendRow(tr("Current"), mChooseObjectComboBox);
-    this->appendRow(tr("Name"), mNameEdit);
     this->appendRow(tr("Visible"), mVisibleCheckbox);
     this->appendRow("x", mXSpin);
     this->appendRow("y", mYSpin);
@@ -155,58 +151,55 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     mWidgetToEvent.insert(mMouseMoveComboBox, Interaction::MouseMove);
     this->endGroup();
 
-    mCurrentObject = 0;
-
     resizeColumnToContents(0);
 }
 
 void ObjectEditorWidget::onXChanged(int x)
 {
-    if (mCurrentObject)
-        mCurrentObject->setX(x);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setX(x);
 }
 
 void ObjectEditorWidget::onYChanged(int y)
 {
-    if (mCurrentObject)
-        mCurrentObject->setY(y);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setY(y);
 }
 
 void ObjectEditorWidget::onCornerRadiusValueChanged(int v)
 {
-    if (mCurrentObject)
-        mCurrentObject->setCornerRadius(v);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setCornerRadius(v);
 }
 
 void ObjectEditorWidget::onSliderValueChanged(int value)
 {
-    if (mCurrentObject)
-        mCurrentObject->setBackgroundOpacity(value);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setBackgroundOpacity(value);
 }
 
 void ObjectEditorWidget::onOpacityChanged(int value)
 {
-    if (mCurrentObject)
-        mCurrentObject->setOpacity(value);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setOpacity(value);
 }
 
 void ObjectEditorWidget::onColorChosen(const QColor & color)
 {
-    if (mCurrentObject)
-        mCurrentObject->setBackgroundColor(color);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setBackgroundColor(color);
 }
 
 void ObjectEditorWidget::updateData(GameObject* obj)
 {
+    GameObjectEditorWidget::updateData(obj);
     Object* currObj = qobject_cast<Object*>(obj);
-    if (currObj == mCurrentObject)
-        return;
-
-    if (mCurrentObject)
-        mCurrentObject->disconnect(this);
-
-    mCurrentObject = 0;
-
     if (! currObj)
         return;
 
@@ -252,9 +245,6 @@ void ObjectEditorWidget::updateData(GameObject* obj)
     mColorButton->setColor(currObj->backgroundColor());
     mImageChooser->setImageFile(currObj->backgroundImage());
     mBackgroundOpacitySlider->setValue(currObj->backgroundOpacity());
-    mNameEdit->setText(currObj->objectName());
-    mNameEdit->setStyleSheet("");
-    mNameEdit->setEnabled(currObj->nameEditable());
     mXSpin->setRange(-currObj->width(), Scene::width());
     mXSpin->setValue(currObj->x());
     mYSpin->setRange(-currObj->height(), Scene::height());
@@ -273,8 +263,6 @@ void ObjectEditorWidget::updateData(GameObject* obj)
     mCornerRadiusSpinBox->setValue(currObj->cornerRadius());
     mVisibleCheckbox->setChecked(currObj->visible());
     mKeepAspectRatioCheckbox->setChecked(currObj->keepAspectRatio());
-
-    mCurrentObject = currObj;
 }
 
 void ObjectEditorWidget::updateEventActions(Object* object)
@@ -310,16 +298,17 @@ void ObjectEditorWidget::updateEventActions(Object* object)
 
 void ObjectEditorWidget::onAddItemActivated()
 {
-    if (! mCurrentObject)
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (! object)
         return;
 
     Interaction::InputEvent event = mWidgetToEvent.value(sender());
-    AddActionDialog dialog(mCurrentObject);
+    AddActionDialog dialog(object);
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
         Action* action = dialog.selectedAction();
-        mCurrentObject->appendEventAction(event, action);
+        object->appendEventAction(event, action);
         ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
         if(comboBox) {
             comboBox->addItem(action->icon(), action->toString(), qVariantFromValue(static_cast<QObject*>(action)));
@@ -329,11 +318,12 @@ void ObjectEditorWidget::onAddItemActivated()
 
 void ObjectEditorWidget::onItemActivated(int index)
 {
-    if (! mCurrentObject)
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (! object)
         return;
 
     Interaction::InputEvent event = mWidgetToEvent.value(sender());
-    QList<Action*> actions = mCurrentObject->actionsForEvent(event);
+    QList<Action*> actions = object->actionsForEvent(event);
     if (index >= actions.size())
         return;
 
@@ -347,26 +337,10 @@ void ObjectEditorWidget::onItemActivated(int index)
     }
 }
 
-
-void ObjectEditorWidget::onNameChanged(const QString & name)
-{
-    if (! mCurrentObject)
-        return;
-
-    if (mCurrentObject->setName(name)){
-        mNameEdit->setStyleSheet("background: rgba(0, 200, 0, 100);");
-        mNameEdit->setToolTip("");
-    }
-    else {
-        mNameEdit->setStyleSheet("background: rgba(200, 0, 0, 100);");
-        mNameEdit->setToolTip(tr("Another object already has this name. You can't have different objects with the same name."));
-    }
-}
-
-
 void ObjectEditorWidget::onSizeEdited(const QString & text)
 {
-    if (! mCurrentObject)
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (! object)
         return;
 
     bool ok;
@@ -381,9 +355,9 @@ void ObjectEditorWidget::onSizeEdited(const QString & text)
 
     if (ok) {
         if (sender()->objectName().contains("width"))
-            mCurrentObject->setWidth(size, percent);
+            object->setWidth(size, percent);
         else
-            mCurrentObject->setHeight(size, percent);
+            object->setHeight(size, percent);
     }
 }
 
@@ -405,56 +379,49 @@ void ObjectEditorWidget::onSizeEdited(const QString & text)
 
 void ObjectEditorWidget::onImageChosen(const QString & filepath)
 {
-    if (mCurrentObject)
-        mCurrentObject->setBackgroundImage(filepath);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setBackgroundImage(filepath);
 }
 
 void ObjectEditorWidget::onVisibilityChanged(bool visible)
 {
-    if (mCurrentObject) {
-        mCurrentObject->setVisible(visible);
-    }
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setVisible(visible);
 }
 
 void ObjectEditorWidget::onEventItemRemoved(int index)
 {
-    if (! mCurrentObject || index < 0)
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (! object || index < 0)
         return;
 
     QString name = sender()->objectName();
 
     if (name == "MousePressComboBox") {
-        mCurrentObject->removeEventActionAt(Interaction::MousePress, index);
+        object->removeEventActionAt(Interaction::MousePress, index);
     }
     else if (name == "MouseReleaseComboBox") {
-        mCurrentObject->removeEventActionAt(Interaction::MouseRelease, index);
+        object->removeEventActionAt(Interaction::MouseRelease, index);
     }
     else {
-        mCurrentObject->removeEventActionAt(Interaction::MouseMove, index);
+        object->removeEventActionAt(Interaction::MouseMove, index);
     }
-}
-
-void ObjectEditorWidget::onCurrentWorkingObjectChanged(int index)
-{
-    if (mObjectsHierarchy.isEmpty() || index < 0 || index >= mObjectsHierarchy.size() || index == mObjectsHierarchy.indexOf(mCurrentObject))
-        return;
-
-    mCurrentObject = mObjectsHierarchy[index];
-    updateData(mCurrentObject);
-    if (DrawingSurfaceWidget::instance())
-        DrawingSurfaceWidget::instance()->update();
 }
 
 void ObjectEditorWidget::onBorderWidthChanged(int w)
 {
-    if (mCurrentObject)
-        mCurrentObject->setBorderWidth(w);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setBorderWidth(w);
 }
 
 void ObjectEditorWidget::onBorderColorChanged(const QColor & color)
 {
-    if (mCurrentObject)
-        mCurrentObject->setBorderColor(color);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setBorderColor(color);
 }
 
 void ObjectEditorWidget::onObjectDataChanged(const QVariantMap & data)
@@ -481,22 +448,23 @@ void ObjectEditorWidget::onObjectDataChanged(const QVariantMap & data)
 
 void ObjectEditorWidget::setObjectSize(int w, int h)
 {
-    if (! mCurrentObject)
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (! object)
         return;
 
     mWidthEditor->blockSignals(true);
     mHeightEditor->blockSignals(true);
 
     if (w != -1) {
-        if(mCurrentObject->percentWidth())
-            mWidthEditor->setText(QString::number(mCurrentObject->percentWidth())+"%");
+        if(object->percentWidth())
+            mWidthEditor->setText(QString::number(object->percentWidth())+"%");
         else
             mWidthEditor->setText(QString::number(w));
     }
 
     if (h != -1) {
-        if(mCurrentObject->percentHeight())
-            mHeightEditor->setText(QString::number(mCurrentObject->percentHeight())+"%");
+        if(object->percentHeight())
+            mHeightEditor->setText(QString::number(object->percentHeight())+"%");
         else
             mHeightEditor->setText(QString::number(h));
     }
@@ -505,29 +473,16 @@ void ObjectEditorWidget::setObjectSize(int w, int h)
     mHeightEditor->blockSignals(false);
 }
 
-void ObjectEditorWidget::onCurrentObjectDestroyed()
-{
-    mCurrentObject = 0;
-}
-
 void ObjectEditorWidget::onKeepAspectRatioToggled(bool keep)
 {
-    if (mCurrentObject)
-        mCurrentObject->setKeepAspectRatio(keep);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setKeepAspectRatio(keep);
 }
 
 void ObjectEditorWidget::syncToggled(bool _sync)
 {
-    if (mCurrentObject) {
-        mCurrentObject->setSync(_sync);
-    }
-}
-
-void ObjectEditorWidget::reload()
-{
-    if (! mCurrentObject)
-        return;
-    Object* obj = mCurrentObject;
-    mCurrentObject = 0;
-    updateData(obj);
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setSync(_sync);
 }

@@ -14,7 +14,7 @@ class ChangeStateEditorWidget : public ActionEditorWidget
 
 public:
     explicit ChangeStateEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action*);
+    virtual void setGameObject(GameObject*);
 
 private:
     QComboBox* mCharacterBox;
@@ -22,7 +22,10 @@ private:
 
 signals:
 
-public slots:
+protected:
+    virtual void updateData(GameObject*);
+
+private slots:
     void onObjectChosen(const QString&);
     void onStateChosen(const QString&);
 

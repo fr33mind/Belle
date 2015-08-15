@@ -221,7 +221,7 @@ void AddActionDialog::onNewAction(Action * action)
     editor = EditorWidgetFactory::editorWidget(action->type());
     switchPropertyWidget(editor);
     if (editor)
-        editor->updateData(action);
+        editor->setGameObject(action);
     if (mActionCatalogWidget)
         resize(640, 480);
 }

@@ -43,7 +43,9 @@ class TextPropertiesWidget : public ObjectEditorWidget
 
 public:
     TextPropertiesWidget(QWidget *parent = 0);
-    virtual void updateData(Object*);
+
+protected:
+    virtual void updateData(GameObject*);
 
 signals:
 

@@ -33,8 +33,9 @@ class ChangeBackgroundEditorWidget : public ActionEditorWidget
 
 public:
     explicit ChangeBackgroundEditorWidget(QWidget *parent = 0);
-    void updateData(Action *);
-    
+
+protected:
+    virtual void updateData(GameObject*);
 signals:
     
 private slots:

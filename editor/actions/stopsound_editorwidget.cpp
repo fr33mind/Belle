@@ -41,14 +41,12 @@ StopSoundEditorWidget::StopSoundEditorWidget(QWidget *parent) :
     resizeColumnToContents(0);
 }
 
-void StopSoundEditorWidget::updateData(Action * action)
+void StopSoundEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
     StopSound * stopSound = qobject_cast<StopSound*>(action);
     if (! stopSound)
         return;
-
-    ActionEditorWidget::updateData(stopSound);
-    mAction = 0;
 
     QString currSound = stopSound->sound();
     QList<Asset*> sounds = AssetManager::instance()->assets(Asset::Audio);
@@ -66,14 +64,12 @@ void StopSoundEditorWidget::updateData(Action * action)
 
     if (stopSound->sound().isEmpty() && ! sounds.isEmpty())
         stopSound->setSound(sounds.first()->name());
-
-    mAction = action;
 }
 
 
 void StopSoundEditorWidget::onSoundChanged(const QString& text)
 {
-    StopSound * stopSound = qobject_cast<StopSound*>(mAction);
+    StopSound * stopSound = qobject_cast<StopSound*>(mGameObject);
     if (! stopSound)
         return;
 
@@ -83,7 +79,7 @@ void StopSoundEditorWidget::onSoundChanged(const QString& text)
 
 void StopSoundEditorWidget::onFadeChanged(double val)
 {
-    StopSound * stopSound = qobject_cast<StopSound*>(mAction);
+    StopSound * stopSound = qobject_cast<StopSound*>(mGameObject);
     if (stopSound)
         stopSound->setFadeTime(val);
 }

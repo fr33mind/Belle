@@ -39,8 +39,8 @@ void ChangeVisibilityEditorWidget::init()
 
     mFadeEditorWidget = new FadeEditorWidget();
     mSlideEditorWidget = new SlideEditorWidget;
-    append(mFadeEditorWidget, 0, QStringList() << "Action" << "Object");
-    append(mSlideEditorWidget, 0, QStringList() << "Action" << "Object");
+    append(mFadeEditorWidget, 0, QStringList() << "GameObject" << "Object");
+    append(mSlideEditorWidget, 0, QStringList() << "GameObject" << "Object");
 
     resizeColumnToContents(0);
 }
@@ -51,49 +51,46 @@ ChangeVisibilityEditorWidget::~ChangeVisibilityEditorWidget()
     mSlideEditorWidget->deleteLater();
 }
 
-void ChangeVisibilityEditorWidget::updateData(Action * action)
+void ChangeVisibilityEditorWidget::updateData(GameObject* action)
 {
+    ActionEditorWidget::updateData(action);
     ChangeVisibility* changeVisibility = qobject_cast<ChangeVisibility*>(action);
     if (! changeVisibility)
         return;
 
-    ActionEditorWidget::updateData(action);
+    mFadeEditorWidget->setGameObject(changeVisibility->fadeAction());
+    mSlideEditorWidget->setGameObject(changeVisibility->slideAction());
 
-    mAction = 0;
-    mFadeEditorWidget->updateData(changeVisibility->fadeAction());
-    mSlideEditorWidget->updateData(changeVisibility->slideAction());
+    setGroupName(changeVisibility->typeName());
 
-    setGroupName(changeVisibility->name());
-
-    mObjectsWidget->loadFromAction(action);
-
-    mAction = action;
+    mObjectsWidget->loadFromAction(changeVisibility);
 }
 
 void ChangeVisibilityEditorWidget::onObjectChanged(Object* obj)
 {
-    if (! mAction)
+    ChangeVisibility* changeVisibility = qobject_cast<ChangeVisibility*>(mGameObject);
+    if (! changeVisibility)
         return;
 
     /*if (mCurrentAction->sceneObject() && lastChangeVisibilityActionForObject(mCurrentAction->character()) == mCurrentAction) {
         mCurrentAction->character()->setAvailable(! mCurrentAction->character()->isAvailable());
     }*/
 
-    mAction->setSceneObject(obj);
+    changeVisibility->setSceneObject(obj);
     /*if (lastChangeVisibilityActionForObject(mCurrentAction->sceneObject()) == mCurrentAction) {
         mCurrentAction->character()->setAvailable(! mCurrentAction->character()->isAvailable());
     }*/
 
-    emit objectChanged(mAction->sceneObject());
+    emit objectChanged(changeVisibility->sceneObject());
 }
 
 
 Action* ChangeVisibilityEditorWidget::lastChangeVisibilityActionForObject(Object * obj)
 {
-    if (! mAction)
+    if (! mGameObject)
         return 0;
 
-    Scene *scene = qobject_cast<Scene*>(mAction->parent());
+    Scene *scene = qobject_cast<Scene*>(mGameObject->parent());
     if (! scene)
         return 0;
 
@@ -110,5 +107,5 @@ Action* ChangeVisibilityEditorWidget::lastChangeVisibilityActionForObject(Object
 
 ChangeVisibility* ChangeVisibilityEditorWidget::currentAction()
 {
-    return qobject_cast<ChangeVisibility*>(mAction);
+    return qobject_cast<ChangeVisibility*>(mGameObject);
 }

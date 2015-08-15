@@ -317,7 +317,7 @@ void Belle::onEditResource(GameObject* obj)
     removeWidgetsInPropertiesWidget();
     GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget(obj->type());
     if(editor) {
-        editor->updateData(object);
+        editor->setGameObject(object);
         addWidgetToPropertiesWidget(editor);
     }
 }
@@ -503,7 +503,7 @@ void Belle::updateSceneEditorWidget(Scene* scene)
         GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget("scene");
         switchWidgetInPropertiesWidget(EditorWidgetFactory::editorWidget("scene"));
         if (editor) {
-            editor->updateData(scene);
+            editor->setGameObject(scene);
         }
     }
 }
@@ -598,7 +598,7 @@ void Belle::onSelectedObjectChanged(Object* obj)
         editor = EditorWidgetFactory::editorWidget(obj->type());
         switchWidgetInPropertiesWidget(editor);
         if (editor)
-            editor->updateData(obj);
+            editor->setGameObject(obj);
     }
     else if (mCurrentSceneManager && mCurrentSceneManager->currentScene()) {
         editor = EditorWidgetFactory::editorWidget("scene");
@@ -626,7 +626,7 @@ void Belle::onActionsViewClicked(const QModelIndex& index)
     removeWidgetsInPropertiesWidget();
     editor = EditorWidgetFactory::editorWidget(action->type());
     if (editor) {
-        editor->updateData(action);
+        editor->setGameObject(action);
         addWidgetToPropertiesWidget(editor);
     }
 

@@ -19,59 +19,9 @@
 ActionEditorWidget::ActionEditorWidget(QWidget *parent) :
     GameObjectEditorWidget(parent)
 {
-    mAction = 0;
-    mNameEdit = new QLineEdit(this);
-    connect(mNameEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onNameEdited(const QString&)));
-    beginGroup(tr("Action"), "Action");
-    appendRow("Name", mNameEdit);
-    endGroup();
-
 }
 
 void ActionEditorWidget::updateData(GameObject* obj)
 {
-    Action* action = qobject_cast<Action*>(obj);
-    if (action == mAction)
-        return;
-
-    if (mAction)
-        mAction->disconnect(this);
-
-    if (action)
-        connect(action, SIGNAL(destroyed()), this, SLOT(actionDestroyed()));
-
-    mAction = action;
-    if (! mAction)
-        return;
-
-    mNameEdit->setText(mAction->objectName());
-
-}
-
-void ActionEditorWidget::actionDestroyed()
-{
-    mAction = 0;
-}
-
-Action* ActionEditorWidget::action()
-{
-    return 0;
-}
-
-void ActionEditorWidget::setAction(Action* action)
-{
-    mAction = action;
-}
-
-void ActionEditorWidget::onNameEdited(const QString& name)
-{
-    if (mAction)
-        mAction->setName(name);
-}
-
-ActionEditorWidget* ActionEditorWidget::copy()
-{
-    ActionEditorWidget* awidget = new ActionEditorWidget();
-    awidget->append(this);
-    return awidget;
+    GameObjectEditorWidget::updateData(obj);
 }

@@ -24,8 +24,6 @@
 GoToLabelEditorWidget::GoToLabelEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mCurrentGoToLabel = 0;
-
     mLabelEdit = new QLineEdit(this);
     connect(mLabelEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onLabelEdited(const QString&)));
 
@@ -34,15 +32,15 @@ GoToLabelEditorWidget::GoToLabelEditorWidget(QWidget *parent) :
     endGroup();
 }
 
-void GoToLabelEditorWidget::updateData(Action * action)
+void GoToLabelEditorWidget::updateData(GameObject* action)
 {
-    mCurrentGoToLabel = qobject_cast<GoToLabel*>(action);
-
-    if (! mCurrentGoToLabel)
+    ActionEditorWidget::updateData(action);
+    GoToLabel* gotolabel = qobject_cast<GoToLabel*>(action);
+    if (! gotolabel)
         return;
 
-    mLabelEdit->setText(mCurrentGoToLabel->targetLabelName());
-    if (mCurrentGoToLabel->hasValidLabel())
+    mLabelEdit->setText(gotolabel->targetLabelName());
+    if (gotolabel->hasValidLabel())
         mLabelEdit->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
     else
         mLabelEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
@@ -50,12 +48,13 @@ void GoToLabelEditorWidget::updateData(Action * action)
 
 void GoToLabelEditorWidget::onLabelEdited(const QString & text)
 {
-    if (! mCurrentGoToLabel)
+    GoToLabel* gotolabel = qobject_cast<GoToLabel*>(mGameObject);
+    if (! gotolabel)
         return;
 
-    mCurrentGoToLabel->setTargetLabel(text);
+    gotolabel->setTargetLabel(text);
 
-    if (mCurrentGoToLabel->hasValidLabel())
+    if (gotolabel->hasValidLabel())
         mLabelEdit->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
     else
         mLabelEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");

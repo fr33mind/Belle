@@ -25,12 +25,13 @@ class GetUserInputEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-
 public:
     explicit GetUserInputEditorWidget(QWidget *parent = 0);
-    virtual void updateData(Action *);
-    
+
 signals:
+
+protected:
+    virtual void updateData(GameObject*);
     
 private slots:
     void onMessageChanged(const QString&);

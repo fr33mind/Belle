@@ -16,12 +16,9 @@
 
 #include "scene_editor_widget.h"
 
-#include <QDebug>
-
 SceneEditorWidget::SceneEditorWidget(QWidget *parent) :
     GameObjectEditorWidget(parent)
 {
-    mCurrentScene = 0;
     mChooseBackgroundButton = new ChooseFileButton(ChooseFileButton::ImageFilter, this);
     connect(mChooseBackgroundButton, SIGNAL(fileSelected(const QString&)), this, SLOT(onBackgroundSelected(const QString&)));
     mChooseBackgroundColorButton = new ColorPushButton(this);
@@ -37,24 +34,24 @@ SceneEditorWidget::SceneEditorWidget(QWidget *parent) :
 
 void SceneEditorWidget::updateData(GameObject* obj)
 {
-    Scene* scene = qobject_cast<Scene*>(obj);
-    if (mCurrentScene == scene || ! scene)
-        return;
-
-    mCurrentScene = 0;
-    mChooseBackgroundButton->setFilePath(scene->backgroundPath());
-    mChooseBackgroundColorButton->setColor(scene->backgroundColor());
-    mCurrentScene = scene;
+    GameObjectEditorWidget::updateData(obj);
+    Scene* scene = qobject_cast<Scene*>(gameObject());
+    if (scene) {
+        mChooseBackgroundButton->setFilePath(scene->backgroundPath());
+        mChooseBackgroundColorButton->setColor(scene->backgroundColor());
+    }
 }
 
 void SceneEditorWidget::onBackgroundSelected(const QString & path)
 {
-    if (mCurrentScene)
-        mCurrentScene->setBackgroundImage(path);
+    Scene* scene = qobject_cast<Scene*>(mGameObject);
+    if (scene)
+        scene->setBackgroundImage(path);
 }
 
 void SceneEditorWidget::onBackgroundColorSelected(const QColor & color)
 {
-    if (mCurrentScene)
-        mCurrentScene->setBackgroundColor(color);
+    Scene* scene = qobject_cast<Scene*>(mGameObject);
+    if (scene)
+        scene->setBackgroundColor(color);
 }
