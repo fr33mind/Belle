@@ -62,12 +62,12 @@ void ChangeVisibility::init(bool show)
     connect(mSlideAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
 
     if (show) {
-        setName(tr("Show"));
+        setTypeName(tr("Show"));
         setType("Show");
         mFadeAction->setFadeType(Fade::In);
     }
     else {
-        setName(tr("Hide"));
+        setTypeName(tr("Hide"));
         setType("Hide");
         mFadeAction->setFadeType(Fade::Out);
     }
