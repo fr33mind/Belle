@@ -53,6 +53,7 @@ void EditorWidgetFactory::load()
     mEditorWidgets.insert("changebackground", new ChangeBackgroundEditorWidget);
     mEditorWidgets.insert("runscript", new RunScriptEditorWidget);
     mEditorWidgets.insert("changestate", new ChangeStateEditorWidget);
+    mEditorWidgets.insert("end", new GameObjectEditorWidget);
 
     //objects
     mEditorWidgets.insert("object", new ObjectEditorWidget);
