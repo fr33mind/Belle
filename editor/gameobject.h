@@ -5,6 +5,7 @@
 #include <QVariantMap>
 
 class Scene;
+class GameObjectManager;
 
 class GameObject : public QObject
 {
@@ -39,6 +40,9 @@ public:
 
     Scene* scene() const;
 
+    GameObjectManager* manager() const;
+    void setManager(GameObjectManager*);
+
 public slots:
     virtual void load(const QVariantMap&);
     void removeClone(GameObject*);
@@ -62,6 +66,7 @@ private:
     bool mSynced;
     QString mType;
     QList<GameObject*> mClones;
+    GameObjectManager* mManager;
 
 signals:
     void destroyed(GameObject*);

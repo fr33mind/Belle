@@ -26,6 +26,7 @@ void GameObject::init()
     mResource = 0;
     mSynced = true;
     mType = "GameObject";
+    mManager = 0;
 }
 
 void GameObject::_load(const QVariantMap & data)
@@ -65,6 +66,9 @@ QString GameObject::type() const
 
 void GameObject::setName(const QString & name)
 {
+    if (mManager && !mManager->isValidName(name))
+        return;
+
     setObjectName(name);
     notify("name", name);
 }
@@ -206,3 +210,14 @@ void GameObject::notify(const QString & property, const QVariant & value)
     data.insert(property, value);
     emit dataChanged(data);
 }
+
+GameObjectManager* GameObject::manager() const
+{
+    return mManager;
+}
+
+void GameObject::setManager(GameObjectManager* manager)
+{
+    mManager = manager;
+}
+
