@@ -59,7 +59,6 @@ class Object : public GameObject
         void stopResizing();
         int percentWidth() const;
         int percentHeight() const;
-        bool isValidName(const QString&);
 
         int borderWidth();
         void setBorderWidth(int);
@@ -136,9 +135,6 @@ class Object : public GameObject
 
         bool isResource() const;
 
-        bool setName(const QString&);
-        QString name();
-
         bool hasObjectAsParent();
         bool keepAspectRatio();
         void setKeepAspectRatio(bool);
@@ -172,7 +168,7 @@ class Object : public GameObject
 
     private:
         //void init(const QString &, int, int, QObject*);
-        void init(const QString&);
+        void init();
         void updateResizeRects();
         void movePoint(int, QPoint&);
         int parentWidth() const;

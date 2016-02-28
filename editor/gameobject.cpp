@@ -2,10 +2,11 @@
 
 #include "scene.h"
 
-GameObject::GameObject(QObject *parent) :
+GameObject::GameObject(QObject *parent, const QString& name) :
     QObject(parent)
 {
     init();
+    setName(name);
 }
 
 GameObject::GameObject(const QVariantMap & data, QObject *parent) :

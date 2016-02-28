@@ -29,9 +29,9 @@
 static QFont mDefaultFont;
 
 Object::Object(QObject* parent, const QString& name):
-    GameObject(parent)
+    GameObject(parent, name)
 {
-    init(name);
+    init();
     updateResizeRects();
     emit dataChanged();
 }
@@ -39,13 +39,13 @@ Object::Object(QObject* parent, const QString& name):
 Object::Object(const QVariantMap& data, QObject* parent):
     GameObject(data, parent)
 {
-    init("Object");
+    init();
     _load(data);
     updateResizeRects();
     emit dataChanged();
 }
 
-void Object::init(const QString& name)
+void Object::init()
 {
     mOpacity = 255;
     mBackground.setColor(QColor(255, 255, 255, 0));
@@ -63,17 +63,6 @@ void Object::init(const QString& name)
     mEventToActions.insert(Interaction::MouseMove, QList<Action*>());
     mEventToActions.insert(Interaction::MousePress, QList<Action*>());
     mEventToActions.insert(Interaction::MouseRelease, QList<Action*>());
-
-    //check if name is valid
-    if (objectName().isEmpty()) {
-        if (parent() == ResourceManager::instance())
-            setName(ResourceManager::instance()->newName(name));
-        else {
-            Scene* scene = qobject_cast<Scene*>(parent());
-            if (scene)
-                scene->newObjectName(name);
-        }
-    }
 }
 
 Object::~Object()
@@ -99,24 +88,6 @@ QVariantMap Object::fillWithResourceData(QVariantMap data)
             data.insert(key, resourceData.value(key));
 
     return data;
-}
-
-bool Object::isValidName(const QString& name)
-{
-    if (name.isEmpty())
-        return false;
-
-    //check if parent is the scene
-    Scene* scene = this->scene();
-    if (scene)
-        return scene->isValidObjectName(name);
-
-    //check if parent is the resource manager
-    ResourceManager* resourceManager = qobject_cast<ResourceManager*>(parent());
-    if (resourceManager)
-        return resourceManager->isValidName(name);
-
-    return true;
 }
 
 bool Object::contains(qreal x, qreal y)
@@ -1301,24 +1272,6 @@ void Object::setKeepAspectRatio(bool keep)
         mSceneRect.setHeight(h);
         updateResizeRects();
     }
-}
-
-bool Object::setName(const QString & name)
-{
-    if (this->isValidName(name)){
-        setObjectName(name);
-        QVariantMap data;
-        data.insert("name", name);
-        emit dataChanged(data);
-        return true;
-    }
-
-   return false;
-}
-
-QString Object::name()
-{
-    return objectName();
 }
 
 void Object::updateAspectRatio()
