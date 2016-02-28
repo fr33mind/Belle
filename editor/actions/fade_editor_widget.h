@@ -20,7 +20,6 @@
 #include <QDoubleSpinBox>
 #include "fade.h"
 #include "resource_manager.h"
-#include "resources_combobox.h"
 #include "widgets/object_combobox.h"
 
 class Fade;

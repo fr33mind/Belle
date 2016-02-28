@@ -131,7 +131,6 @@ class Object : public GameObject
         void setPadding(const QString&, int);
 
         void filterResourceData(QVariantMap&);
-        QVariantMap fillWithResourceData(QVariantMap);
 
         bool isResource() const;
 

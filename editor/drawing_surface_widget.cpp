@@ -136,7 +136,6 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     connect(mClearBackground, SIGNAL(triggered()), this, SLOT(onClearBackgroundTriggered()));
     connect(mSceneManager, SIGNAL(updateDrawingSurfaceWidget()), this, SLOT(update()));
     connect(mSceneManager, SIGNAL(resized(const QResizeEvent&)), this, SLOT(onResize(const QResizeEvent&)));
-    //connect(ResourceManager::instance(), SIGNAL(resourceChanged()), this, SLOT(update()));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onCustomContextMenuRequested(const QPoint&)));
 }
 

@@ -49,7 +49,6 @@ HEADERS      += belle.h\
     actions/fade.h \
     actions/fade_editor_widget.h \
     action_catalog_widget.h \
-    resources_combobox.h \
     actions/change_visibility.h \
     actions/change_visibility_editor_widget.h \
     actions/label.h \
@@ -155,7 +154,6 @@ SOURCES      += main.cpp\
     actions/fade.cpp \
     actions/fade_editor_widget.cpp \
     action_catalog_widget.cpp \
-    resources_combobox.cpp \
     objects/textbox.cpp \
     objects/textbox_editor_widget.cpp \
     actions/change_visibility.cpp \

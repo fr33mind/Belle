@@ -28,71 +28,26 @@
 #include "menu.h"
 #include "animatedimage.h"
 #include "sound.h"
+#include "gameobjectmanager.h"
 
-static QList<GameObject*> mResources;
 static ResourceManager* mInstance = new ResourceManager();
 
 ResourceManager::ResourceManager(QObject *parent) :
-    QObject(parent)
+    GameObjectManager(parent)
 {
 }
 
-void ResourceManager::addResource(GameObject * obj)
+void ResourceManager::add(GameObject * obj)
 {
-    if (obj) {
-        if (! isValidName(obj->objectName()))
-           obj->setObjectName(newName(obj));
+    if (obj && obj->parent() != this)
+        obj->setParent(this);
 
-        if (obj->parent() != this)
-            obj->setParent(this);
-
-        connect(obj, SIGNAL(dataChanged()), this, SIGNAL(resourceChanged()));
-        mResources.append(obj);
-        emit resourceAdded(obj);
-    }
+    GameObjectManager::add(obj);
 }
 
-void ResourceManager::addResource(const QVariantMap& data)
+void ResourceManager::add(const QVariantMap& data)
 {
-    addResource(this->createObject(data, this));
-}
-
-bool ResourceManager::isValidName(const QString& name)
-{
-    if (name.isEmpty() || name.isNull())
-        return false;
-
-    for(int i=0; i < mResources.size(); i++)
-        if (mResources[i]->objectName() == name)
-            return false;
-
-    return true;
-}
-
-QString ResourceManager::newName(QString name)
-{
-    if (name.isEmpty() || name.isNull())
-        name = "object";
-
-    while(! isValidName(name)) {
-        name = Utils::incrementLastNumber(name);
-    }
-
-    return name;
-}
-
-QString ResourceManager::newName(GameObject* obj)
-{
-   QString name = obj->objectName();
-   if (name.isEmpty() || name.isNull())
-        name = obj->type();
-
-   return newName(name);
-}
-
-QList<GameObject*> ResourceManager::resources()
-{
-    return mResources;
+    add(createObject(data, this));
 }
 
 GameObject * ResourceManager::typeToObject(const QString& type, QVariantMap& data, QObject* parent)
@@ -120,7 +75,6 @@ GameObject * ResourceManager::typeToObject(const QString& type, QVariantMap& dat
     //else if (_type == "sound")
       //  return new Sound(data, parent);
     return 0;
-
 }
 
 GameObject* ResourceManager::createGameObject(const QVariantMap& info, QObject* parent)
@@ -132,7 +86,7 @@ GameObject* ResourceManager::createGameObject(const QVariantMap& info, QObject* 
     fillWithResourceData(data);
 
     if (data.contains("resource") && data.value("resource").type() == QVariant::String)
-        _resource = resource(data.value("resource").toString());
+        _resource = this->object(data.value("resource").toString());
 
     if (data.contains("type") && data.value("type").type() == QVariant::String)
         type = data.value("type").toString();
@@ -149,17 +103,6 @@ Object* ResourceManager::createObject(const QVariantMap& info, QObject* parent)
     return qobject_cast<Object*>(createGameObject(info, parent));
 }
 
-void ResourceManager::removeResource(GameObject* object, bool del)
-{
-    if (mResources.contains(object)) {
-        mResources.removeOne(object);
-        object->disconnect(this);
-        emit resourceRemoved(object);
-        if (del && object)
-            object->deleteLater();
-    }
-}
-
 void ResourceManager::fillWithResourceData(QVariantMap& data)
 {
     if (! data.contains("resource") || data.value("resource").type() != QVariant::String)
@@ -167,7 +110,7 @@ void ResourceManager::fillWithResourceData(QVariantMap& data)
 
     QString name = data.value("resource").toString();
 
-    GameObject* resource = ResourceManager::resource(name);
+    GameObject* resource = object(name);
     if (! resource)
         return;
 
@@ -179,43 +122,9 @@ void ResourceManager::fillWithResourceData(QVariantMap& data)
     }
 }
 
-GameObject* ResourceManager::resource(const QString & name)
-{
-    for(int i=0; i < mResources.size(); i++) {
-        if (mResources[i]->objectName() == name)
-            return mResources[i];
-    }
-
-    return 0;
-}
-
-GameObject* ResourceManager::resource(int index)
-{
-    if (index >= mResources.size() || index < 0)
-        return 0;
-
-    return mResources.at(index);
-}
-
-
-bool ResourceManager::contains(const QString & name)
-{
-    if ( resource(name) )
-        return true;
-    return false;
-}
-
-void  ResourceManager::removeResources(bool del)
-{
-    for(int i=mResources.size()-1; i >= 0; i--)
-        removeResource(mResources[i], del);
-
-    mResources.clear();
-}
-
 void  ResourceManager::destroy()
 {
-    mInstance->removeResources(true);
+    mInstance->clear(true);
     mInstance->deleteLater();
 }
 
@@ -224,7 +133,7 @@ ResourceManager* ResourceManager::instance()
     return mInstance;
 }
 
-void ResourceManager::importResources(const QVariantMap& data)
+void ResourceManager::load(const QVariantMap& data)
 {
     if (data.contains("resources") && data.value("resources").type() == QVariant::Map) {
         QVariantMap resourcesMap = data.value("resources").toMap();
@@ -234,15 +143,15 @@ void ResourceManager::importResources(const QVariantMap& data)
             if (it.value().type() != QVariant::Map)
                 continue;
 
-            ResourceManager::instance()->addResource(it.value().toMap());
+            add(it.value().toMap());
         }
     }
 }
 
-QVariantMap ResourceManager::exportResources()
+QVariantMap ResourceManager::toMap()
 {
     QVariantMap resourcesData;
-    QList<GameObject*> resources = ResourceManager::resources();
+    QList<GameObject*> resources = objects();
     for (int i=0; i < resources.size(); i++) {
         resourcesData.insert(resources.at(i)->objectName(), resources.at(i)->toJsonObject(false));
     }

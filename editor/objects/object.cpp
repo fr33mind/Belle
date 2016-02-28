@@ -73,23 +73,6 @@ Object::~Object()
         AssetManager::instance()->releaseAsset(mBackground.image());
 }
 
-QVariantMap Object::fillWithResourceData(QVariantMap data)
-{
-    QString name = data.value("resource").toString();
-
-    GameObject* resource = ResourceManager::instance()->resource(name);
-    if (! resource)
-        return data;
-
-    QVariantMap resourceData = resource->toJsonObject();
-    QStringList keys = resourceData.keys();
-    foreach(const QString& key, keys)
-        if (! data.contains(key))
-            data.insert(key, resourceData.value(key));
-
-    return data;
-}
-
 bool Object::contains(qreal x, qreal y)
 {
     if (mSceneRect.contains(x, y) || containsResizeRectAt(x, y))

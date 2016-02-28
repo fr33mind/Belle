@@ -26,7 +26,7 @@ Menu::Menu(QObject *parent) :
     setWidth(300);
     mResourceButton = new Button(this);
     mResourceButton->setObjectName("menuButton");
-    ResourceManager::instance()->addResource(mResourceButton);
+    ResourceManager::instance()->add(mResourceButton);
 
     addOption("Button 1");
     addOption("Button 2");

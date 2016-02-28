@@ -29,50 +29,33 @@
 #include <QList>
 #include <QDir>
 
-#include "gameobject.h"
+#include "gameobjectmanager.h"
 #include "objects/object.h"
 #include "imagefile.h"
 
 class Object;
 class GameObject;
 
-class ResourceManager : public QObject
+class ResourceManager : public GameObjectManager
 {
     Q_OBJECT
 
 public:
     explicit ResourceManager(QObject *parent = 0);
-    void addResource(GameObject*);
-    void addResource(const QVariantMap&);
+    void add(GameObject*);
+    void add(const QVariantMap&);
     GameObject* createGameObject(const QVariantMap&, QObject* parent=0);
     Object* createObject(const QVariantMap&, QObject* parent=0);
-    bool contains(const QString&);
-    void removeResource(GameObject*, bool del=false);
-    static GameObject* resource(const QString&);
-    static GameObject* resource(int);
-    static void fillWithResourceData(QVariantMap&);
-    GameObject* typeToObject(const QString&, QVariantMap& extraData, QObject* parent=0);
-    bool isValidName(const QString&);
-    QString newName(QString);
-    QString newName(GameObject*);
-    static void setRelativePath(const QString&);
+    void load(const QVariantMap&);
+    QVariantMap toMap();
+
+    static GameObject* typeToObject(const QString&, QVariantMap& extraData, QObject* parent=0);
     static ResourceManager* instance();
     static QList<GameObject*> resources();
-    static void importResources(const QVariantMap&);
-    static QVariantMap exportResources();
-
     static void destroy();
-    void removeResources(bool del);
 
-signals:
-    void resourceAdded(GameObject*);
-    void resourceRemoved(GameObject*);
-    void resourceRemoved(int);
-    void resourceChanged();
-
-public slots:
-
-
+protected:
+    void fillWithResourceData(QVariantMap&);
 };
 
 #endif // RESOURCE_MANAGER_H

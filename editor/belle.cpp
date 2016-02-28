@@ -144,6 +144,7 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->topLevelItem(3)->setIcon(0, QIcon(":/media/talk-baloon.png"));
     mUi.twObjects->topLevelItem(4)->setIcon(0, QIcon(":/media/button.png"));
 
+
     //scenes' widget
     //connect(mUi.scenesWidget, SIGNAL(itemDoubleClicked (QTreeWidgetItem *, int)), this, SLOT(onmUi.scenesWidgetDoubleClicked(QTreeWidgetItem *, int)));
     connect(mUi.scenesWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onScenesWidgetItemChanged(QTreeWidgetItem*,int)));
@@ -529,14 +530,14 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         accepted = dialog->exec();
         if (accepted) {
             resource = new Character(dialog->name(), dialog->statesAndImagePaths(), ResourceManager::instance());
-            ResourceManager::instance()->addResource(resource);
+            ResourceManager::instance()->add(resource);
         }
         break;
 
         //TextBox
     case 1:
         resource = new TextBox(tr("Text goes here..."), ResourceManager::instance());
-        ResourceManager::instance()->addResource(resource);
+        ResourceManager::instance()->add(resource);
         break;
 
         //Image
@@ -549,19 +550,19 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         if (path.isEmpty())
             break;
         resource = new Image(path, ResourceManager::instance());
-        ResourceManager::instance()->addResource(resource);
+        ResourceManager::instance()->add(resource);
         break;
 
        //Dialogue Box
     case 3:
         resource = new DialogueBox(ResourceManager::instance());
-        ResourceManager::instance()->addResource(resource);
+        ResourceManager::instance()->add(resource);
         break;
 
         //Button
     case 4:
         resource = new Button(ResourceManager::instance());
-        ResourceManager::instance()->addResource(resource);
+        ResourceManager::instance()->add(resource);
         break;
     }
 
@@ -841,7 +842,7 @@ void Belle::clearProject()
 {
     mDefaultSceneManager->removeScenes(true);
     mPauseSceneManager->removeScenes(true);
-    ResourceManager::instance()->removeResources(true);
+    ResourceManager::instance()->clear(true);
     AssetManager::instance()->setLoadPath("");
     AssetManager::instance()->removeAssets();
     mSavePath = "";
@@ -876,7 +877,7 @@ void Belle::openFileOrProject(QString filepath)
     AssetManager::instance()->setLoadPath(mSavePath);
     setNovelProperties(object);
     AssetManager::instance()->load(QDir(mSavePath));
-    ResourceManager::instance()->importResources(object);
+    ResourceManager::instance()->load(object);
     //FIXME: For backwards compatibility, remove at some point
     if (object.contains("customFonts") && object.value("customFonts").type() == QVariant::List) {
         QVariantList customFonts = object["customFonts"].toList();
@@ -964,7 +965,7 @@ QVariantMap Belle::createGameFile() const
     jsonFile.remove("fontFamily");
     jsonFile.insert("version", VERSION);
 
-    QVariantMap resourcesData = ResourceManager::instance()->exportResources();
+    QVariantMap resourcesData = ResourceManager::instance()->toMap();
     jsonFile.insert("resources", resourcesData);
 
     QVariantList scenes;

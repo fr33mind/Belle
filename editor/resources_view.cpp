@@ -44,8 +44,8 @@ ResourcesView::ResourcesView(QWidget *parent) :
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuRequested(const QPoint&)));
     //connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onItemDoubleClicked(const QModelIndex&)));
-    connect(ResourceManager::instance(), SIGNAL(resourceAdded(GameObject*)), this, SLOT(addObject(GameObject*)));
-    connect(ResourceManager::instance(), SIGNAL(resourceRemoved(GameObject*)), this, SLOT(onResourceRemoved(GameObject*)));
+    connect(ResourceManager::instance(), SIGNAL(objectAdded(GameObject*)), this, SLOT(addObject(GameObject*)));
+    connect(ResourceManager::instance(), SIGNAL(objectRemoved(GameObject*)), this, SLOT(onResourceRemoved(GameObject*)));
     this->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::SelectedClicked);
 }
 
@@ -132,7 +132,7 @@ void ResourcesView::removeItem(GameObject* object, bool del)
 void ResourcesView::removeObject(GameObject * object, bool del)
 {
     if (ResourceManager::instance())
-        ResourceManager::instance()->removeResource(object, del);
+        ResourceManager::instance()->remove(object, del);
 }
 
 /*void ResourcesView::onItemDoubleClicked(const QModelIndex & index)
@@ -220,19 +220,16 @@ QStandardItem* ResourcesView::itemFromObject(GameObject* object)
 
 void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> & roles)
 {
-    GameObject* obj = object(topLeft);
-    QString name = topLeft.data().toString();
-
-    if (obj && obj->objectName() != name) {
-        if (ResourceManager::instance()->isValidName(name)) {
-            obj->setName(name);
-            this->model()->setData(topLeft, obj->name(), Qt::DisplayRole);
-            if (topLeft == bottomRight)
-                this->model()->setData(bottomRight, obj->name(), Qt::DisplayRole);
-        }
-    }
-
     QAbstractItemView::dataChanged(topLeft, bottomRight, roles);
+
+    GameObject* obj = object(topLeft);
+
+    if (obj) {
+        QString name = topLeft.data().toString();
+        obj->setName(name);
+        if (obj->name() != name)
+            model()->setData(topLeft, obj->name(), Qt::DisplayRole);
+    }
 }
 
 void ResourcesView::onObjectNameChanged(const QString & name)
