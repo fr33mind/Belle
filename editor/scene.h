@@ -26,6 +26,7 @@
 
 #include "imagefile.h"
 #include "gameobject.h"
+#include "gameobjectmanager.h"
 
 class SceneManager;
 class Object;
@@ -35,7 +36,7 @@ class Scene : public GameObject
 {
     Q_OBJECT
     
-    QList<Object*> mObjects;
+    GameObjectManager mObjectManager;
     QList<Object*> mTemporaryObjects;
     QList<Action*> mActions;
     Object * mSelectedObject;
@@ -50,7 +51,8 @@ class Scene : public GameObject
         Scene(const QVariantMap& data, QObject *parent = 0);
         ~Scene();
         SceneManager* sceneManager();
-        QList<Object*> objects(const QString& type="");
+        QList<Object*> objects() const;
+        QList<Object*> objects(const QString& type) const;
         QList<Object*> temporaryObjects();
         Object* objectAt (qreal, qreal);
         Object* object(const QString&);
@@ -82,15 +84,12 @@ class Scene : public GameObject
         QColor backgroundColor();
         QString backgroundPath();
         ImageFile* background() const;
-        int countTextBoxes();
         void removeSelectedObject(bool del=false);
         void removeObject(Object*, bool del=false);
         void selectObject(Object*);
         void highlightObject(Object*);
         Object * highlightedObject();
         Scene * copy();
-        bool isValidObjectName(const QString&);
-        QString newObjectName(QString);
         void resize(int, int, bool, bool);
 
         void insertAction(int, Action*, bool copy=false);
@@ -101,7 +100,7 @@ class Scene : public GameObject
         void appendAction(Action*, bool copy=false);
         Action* actionAt(int) const;
 
-        int indexOf(QObject*);
+        int indexOf(GameObject*);
 
         virtual QVariantMap toJsonObject(bool internal=true);
         QIcon icon();
@@ -118,7 +117,6 @@ class Scene : public GameObject
 
     private slots:
         void onResizeEvent(const QResizeEvent&);
-        void objectDestroyed(Object*);
 
     public slots:
         void moveSelectedObjectUp();

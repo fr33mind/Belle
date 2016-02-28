@@ -88,7 +88,7 @@ Scene::~Scene()
     if (mScenePixmap)
         delete mScenePixmap;
     mScenePixmap = 0;
-    mObjects.clear();
+    mObjectManager.clear();
     mTemporaryObjects.clear();
 }
 
@@ -113,16 +113,23 @@ SceneManager* Scene::sceneManager()
     return 0;
 }
 
+QList<Object*> Scene::objects() const
+{
+    QList<Object*> objects;
+    for(int i=0; i < mObjectManager.count(); i++)
+        objects << qobject_cast<Object*>(mObjectManager.objectAt(i));
+    return objects;
+}
 
-QList<Object*> Scene::objects(const QString& type)
+QList<Object*> Scene::objects(const QString& type) const
 {
     if (type.isEmpty())
-        return mObjects;
+        return objects();
 
     QList<Object*> objects;
-    for(int i=0; i < mObjects.size(); i++)
-        if (mObjects[i]->type() == type)
-            objects.append(mObjects[i]);
+    for(int i=0; i < mObjectManager.count(); i++)
+        if (mObjectManager.objectAt(i)->type() == type)
+            objects << qobject_cast<Object*>(mObjectManager.objectAt(i));
 
     return objects;
 }
@@ -138,19 +145,18 @@ Object* Scene::objectAt (qreal x, qreal y)
         if (mTemporaryObjects[i]->contains(x, y))
             return mTemporaryObjects[i]->objectAt(x, y);
 
-    for(int i=mObjects.size()-1; i >= 0; --i) 
-        if (mObjects[i]->contains(x, y))
-            return mObjects[i]->objectAt(x, y);
+    QList<Object*> objects = this->objects();
+    for(int i=objects.size()-1; i >= 0; --i)
+        if (objects[i]->contains(x, y))
+            return objects[i]->objectAt(x, y);
 
     return 0;
 }
 
-Object* Scene::object(const QString & name)
+Object* Scene::object(const QString& name)
 {
-    for(int i=0; i < mObjects.size(); i++)
-        if (mObjects[i]->objectName() == name)
-            return mObjects[i];
-    return 0;
+    GameObject* obj = mObjectManager.object(name);
+    return qobject_cast<Object*>(obj);
 }
 
 void Scene::addCopyOfObject(Object* object, bool select)
@@ -176,28 +182,27 @@ void Scene::_appendObject(Object* object, bool temporary)
         if (object->parent() != this)
             object->setParent(this);
 
-        //test if it's a valid name before adding the object to scene.
-        object->setObjectName(newObjectName(object->objectName()));
-        mObjects.append(object);
+        mObjectManager.add(object);
     }
 
     connect(object, SIGNAL(dataChanged()), DrawingSurfaceWidget::instance(), SLOT(update()));
-    connect(object, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)));
 }
 
 void Scene::_reorderObject(Object* object)
 {
     if (object->type() != "TextBox" && object->type() != "DialogueBox" && object->type() != "Button") {
-        int index = mObjects.indexOf(object);
+        int index = mObjectManager.indexOf(object);
         int i=index-1;
-        while(i >= 0 && (mObjects[i]->type() == "TextBox" || mObjects[i]->type() == "DialogueBox" || mObjects[i]->type() == "Button")) {
+        GameObject* obj = mObjectManager.objectAt(i);
+
+        while(i >= 0 && (obj->type() == "TextBox" || obj->type() == "DialogueBox" || obj->type() == "Button")) {
             --i;
         }
 
         ++i;
         if (i != index) {
-            mObjects.takeAt(index);
-            mObjects.insert(i, object);
+            mObjectManager.takeAt(index);
+            mObjectManager.insert(i, object);
         }
     }
 }
@@ -290,12 +295,12 @@ void Scene::moveSelectedObjectUp()
     if (! mSelectedObject)
         return;
 
-    int index = mObjects.indexOf(mSelectedObject);
-    if ( index >= mObjects.size()-1)
+    int index = mObjectManager.indexOf(mSelectedObject);
+    if (index >= mObjectManager.count()-1)
         return;
 
-    mObjects.removeAt(index);
-    mObjects.insert(index+1, mSelectedObject);
+    mObjectManager.removeAt(index);
+    mObjectManager.insert(index+1, mSelectedObject);
     emit dataChanged();
 }
 
@@ -304,12 +309,12 @@ void Scene::moveSelectedObjectDown()
     if (! mSelectedObject)
         return;
 
-    int index = mObjects.indexOf(mSelectedObject);
+    int index = mObjectManager.indexOf(mSelectedObject);
     if ( index == 0 )
         return;
 
-    mObjects.removeAt(index);
-    mObjects.insert(index-1, mSelectedObject);
+    mObjectManager.removeAt(index);
+    mObjectManager.insert(index-1, mSelectedObject);
     emit dataChanged();
 }
 
@@ -425,21 +430,6 @@ void Scene::clearBackground()
     }
 }
 
-int Scene::countTextBoxes()
-{
-    int count = 0;
-    TextBox* text = 0;
-
-    for(int i=0; i < mObjects.size(); i++) {
-        text = qobject_cast<TextBox*>(mObjects[i]);
-        if (text)
-            count++;
-    }
-
-    return count;
-}
-
-
 QPoint Scene::point()
 {
     return mPoint;
@@ -459,8 +449,8 @@ void Scene::removeObject(Object* object, bool del)
 
     if (mTemporaryObjects.contains(object))
         removed = mTemporaryObjects.removeOne(object);
-    else if (mObjects.contains(object))
-        removed = mObjects.removeOne(object);
+    else if (mObjectManager.contains(object))
+        removed = mObjectManager.remove(object);
 
     if (removed) {
         emit objectRemoved(object);
@@ -492,7 +482,7 @@ void Scene::selectObject(Object* obj)
 
 void Scene::highlightObject(Object* obj)
 {
-    if (mObjects.contains(obj) || ! obj) {
+    if (mObjectManager.contains(obj) || ! obj) {
         mHighlightedObject = obj;
         emit dataChanged();
     }
@@ -592,8 +582,8 @@ QVariantMap Scene::toJsonObject(bool internal)
         scene.insert("backgroundColor", Utils::colorToList(mBackgroundColor));
 
     QVariantList objects;
-    for(int i=0; i < mObjects.size(); i++) {
-        objects.append(mObjects[i]->toJsonObject(internal));
+    for(int i=0; i < mObjectManager.count(); i++) {
+        objects.append(mObjectManager.objectAt(i)->toJsonObject(internal));
     }
     scene.insert("objects", objects);
 
@@ -614,30 +604,6 @@ Scene* Scene::copy()
     return scene;
 }
 
-bool Scene::isValidObjectName(const QString& name)
-{
-    if (name.isEmpty() || name.isNull())
-        return false;
-
-    for(int i=0; i < mObjects.size(); i++)
-        if (mObjects[i]->objectName() == name)
-            return false;
-
-    return true;
-}
-
-QString Scene::newObjectName(QString name)
-{
-    if (name.isEmpty() || name.isNull())
-        name = "object";
-
-    while(! isValidObjectName(name)) {
-        name = Utils::incrementLastNumber(name);
-    }
-
-    return name;
-}
-
 void Scene::show()
 {
     if (mBackgroundImage && mBackgroundImage->isAnimated()) {
@@ -645,8 +611,9 @@ void Scene::show()
         anim->movie()->start();
     }
 
-    for(int i=0; i < mObjects.size(); i++)
-        mObjects[i]->show();
+    QList<Object*> objects = this->objects();
+    for(int i=0; i < objects.size(); i++)
+        objects[i]->show();
 }
 
 void Scene::hide()
@@ -657,8 +624,9 @@ void Scene::hide()
         anim->movie()->stop();
     }
 
-    for(int i=0; i < mObjects.size(); i++)
-        mObjects[i]->hide();
+    QList<Object*> objects = this->objects();
+    for(int i=0; i < objects.size(); i++)
+        objects[i]->hide();
 }
 
 void Scene::removeTemporaryBackground()
@@ -736,8 +704,9 @@ void Scene::resize(int w, int h, bool pos, bool size)
     qreal wratio = w / (Scene::width() * 1.0);
     qreal hratio = h / (Scene::height() * 1.0);
 
-    for(int i=0; i < mObjects.size(); i++) {
-        Object * obj = mObjects[i];
+    QList<Object*> objects = this->objects();
+    for(int i=0; i < objects.size(); i++) {
+        Object * obj = objects[i];
         if (pos) {
             obj->setX(qRound(obj->x()*wratio));
             obj->setY(qRound(obj->y()*hratio));
@@ -749,19 +718,14 @@ void Scene::resize(int w, int h, bool pos, bool size)
     }
 }
 
-int Scene::indexOf(QObject * obj)
+int Scene::indexOf(GameObject* obj)
 {
     if (qobject_cast<Object*>(obj)) {
-        return mObjects.indexOf(qobject_cast<Object*>(obj));
+        return mObjectManager.indexOf(obj);
     }
     else if (qobject_cast<Action*>(obj)) {
         return mActions.indexOf(qobject_cast<Action*>(obj));
     }
 
     return -1;
-}
-
-void Scene::objectDestroyed(Object * object)
-{
-    removeObject(object);
 }
