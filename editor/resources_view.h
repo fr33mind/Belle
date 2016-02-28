@@ -48,7 +48,7 @@ public slots:
     void onEditResource();
     //void onItemDoubleClicked(const QModelIndex&);
     void onResourceRemoved(GameObject*);
-    void onObjectDataChanged(const QVariantMap&);
+    void onObjectNameChanged(const QString&);
 
 private slots:
     void contextMenuRequested(const QPoint&);

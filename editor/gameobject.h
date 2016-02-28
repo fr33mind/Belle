@@ -71,6 +71,7 @@ private:
 signals:
     void destroyed(GameObject*);
     void dataChanged(const QVariantMap&data=QVariantMap());
+    void nameChanged(const QString&);
 
 public slots:
 

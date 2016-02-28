@@ -71,7 +71,7 @@ void GameObject::setName(const QString & name)
         return;
 
     setObjectName(name);
-    notify("name", name);
+    emit nameChanged(name);
 }
 
 QString GameObject::name() const

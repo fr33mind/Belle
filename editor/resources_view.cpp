@@ -87,7 +87,7 @@ void ResourcesView::addObject(GameObject * object)
     item = item->child(rowCount);
     item->setEditable(true);
     mItemToObject.insert(item, object);
-    connect(object, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
+    connect(object, SIGNAL(nameChanged(const QString&)), this, SLOT(onObjectNameChanged(const QString&)));
 }
 
 void ResourcesView::select(const QString& name)
@@ -235,12 +235,12 @@ void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex &
     PropertiesWidget::dataChanged(topLeft, bottomRight);
 }
 
-void ResourcesView::onObjectDataChanged(const QVariantMap & data)
+void ResourcesView::onObjectNameChanged(const QString & name)
 {
-    Object *obj = qobject_cast<Object*>(sender());
+    GameObject *obj = qobject_cast<GameObject*>(sender());
     if (obj) {
         QStandardItem* item = itemFromObject(obj);
-        if (item && data.contains("name"))
-            item->setData(data.value("name").toString(), Qt::DisplayRole);
+        if (item)
+            item->setData(obj->name(), Qt::DisplayRole);
     }
 }
