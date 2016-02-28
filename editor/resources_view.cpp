@@ -218,7 +218,7 @@ QStandardItem* ResourcesView::itemFromObject(GameObject* object)
 }
 
 
-void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight)
+void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> & roles)
 {
     GameObject* obj = object(topLeft);
     QString name = topLeft.data().toString();
@@ -232,7 +232,7 @@ void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex &
         }
     }
 
-    PropertiesWidget::dataChanged(topLeft, bottomRight);
+    QAbstractItemView::dataChanged(topLeft, bottomRight, roles);
 }
 
 void ResourcesView::onObjectNameChanged(const QString & name)

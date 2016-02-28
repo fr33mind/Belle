@@ -34,8 +34,8 @@ public:
     explicit ResourcesView(QWidget *parent = 0);
     void select(const QString&);
     GameObject* object(const QModelIndex&);
+
 protected:
-    virtual void dataChanged(const QModelIndex &, const QModelIndex &);
     QStandardItem* itemFromObject(GameObject*);
 
 signals:
@@ -52,6 +52,9 @@ public slots:
 
 private slots:
     void contextMenuRequested(const QPoint&);
+
+protected slots:
+    virtual void dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int> & roles = QVector<int> ());
 
 private:
     void removeObject(GameObject*, bool del=false);
