@@ -58,6 +58,7 @@ void SceneManager::insertScene(int index, Scene * scene)
 
     removeScene(scene);
 
+    connect(scene, SIGNAL(nameChanged(const QString&)), this, SLOT(onSceneNameChanged(const QString&)), Qt::UniqueConnection);
     connect(scene, SIGNAL(dataChanged()), this, SIGNAL(updateDrawingSurfaceWidget()), Qt::UniqueConnection);
     connect(scene, SIGNAL(selectionChanged(Object*)), this, SIGNAL(selectionChanged(Object*)), Qt::UniqueConnection);
 
@@ -201,4 +202,11 @@ void SceneManager::resizeScenes(int w, int h, bool pos, bool size)
     QList<Scene*> scenes = this->scenes();
     for(int i=0; i < scenes.size(); i++)
         scenes.at(i)->resize(w, h, pos, size);
+}
+
+void SceneManager::onSceneNameChanged(const QString & name)
+{
+    Scene* scene = qobject_cast<Scene*>(sender());
+    if (scene)
+        emit sceneNameChanged(indexOf(scene), name);
 }

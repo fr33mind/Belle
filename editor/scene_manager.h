@@ -67,9 +67,11 @@ class SceneManager : public QObject
         void currentSceneChanged();
         void selectionChanged(Object*);
         void sceneRemoved(int);
+        void sceneNameChanged(int, const QString&);
 
     private slots:
         void onCurrentSceneChanged();
+        void onSceneNameChanged(const QString&);
 
 };
 

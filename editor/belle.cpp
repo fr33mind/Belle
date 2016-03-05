@@ -87,6 +87,8 @@ Belle::Belle(QWidget *widget)
     //connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     connect(mDefaultSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
     connect(mPauseSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
+    connect(mDefaultSceneManager, SIGNAL(sceneNameChanged(int, const QString&)), this, SLOT(onSceneNameChanged(int, const QString&)));
+    connect(mPauseSceneManager, SIGNAL(sceneNameChanged(int, const QString&)), this, SLOT(onSceneNameChanged(int, const QString&)));
     mDefaultSceneManager->setClipboard(mClipboard);
     mPauseSceneManager->setClipboard(mClipboard);
 
@@ -442,6 +444,16 @@ void Belle::onSceneRemoved(int index)
     QTreeWidget * scenesWidget = this->scenesWidget(sender()->objectName());
     if (index >= 0 && index < scenesWidget->topLevelItemCount())
         scenesWidget->takeTopLevelItem(index);
+}
+
+void Belle::onSceneNameChanged(int index, const QString& name)
+{
+    QTreeWidget * scenesWidget = this->scenesWidget(sender()->objectName());
+    if (index >= 0 && index < scenesWidget->topLevelItemCount()) {
+        QTreeWidgetItem* item = scenesWidget->topLevelItem(index);
+        if (item)
+            item->setText(0, name);
+    }
 }
 
 void Belle::deleteScene()

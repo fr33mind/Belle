@@ -98,6 +98,7 @@ class Belle : public QMainWindow
         void onSceneDowned();
         void onPropertiesTriggered();
         void onSceneRemoved(int);
+        void onSceneNameChanged(int, const QString&);
         QString exportProject(const QString& path="", bool toRun=false);
         void saveProject();
         void newProject();
