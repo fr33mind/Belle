@@ -18,7 +18,6 @@ public:
 
     virtual QVariantMap toJsonObject(bool internal=false) const;
 
-    void setType(const QString&);
     QString type() const;
 
     void setName(const QString&);
@@ -55,6 +54,7 @@ protected:
     virtual void disconnectFromResource();
     void notify(const QString&, const QVariant&);
     void blockNotifications(bool);
+    void setType(const QString&);
 
 private:
     void init();
