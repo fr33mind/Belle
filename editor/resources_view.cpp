@@ -226,8 +226,8 @@ void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex &
 
     if (obj) {
         QString name = topLeft.data().toString();
-        obj->setName(name);
-        if (obj->name() != name)
+        bool ok = obj->setName(name);
+        if (! ok)
             model()->setData(topLeft, obj->name(), Qt::DisplayRole);
     }
 }
