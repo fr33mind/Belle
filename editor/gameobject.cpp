@@ -65,13 +65,17 @@ QString GameObject::type() const
     return mType;
 }
 
-void GameObject::setName(const QString & name)
+bool GameObject::setName(const QString & name)
 {
-    if (mManager && !mManager->isValidName(name))
-        return;
+    if (this->name() == name)
+        return true;
+
+    if (mManager && !mManager->isValidName(this, name))
+        return false;
 
     setObjectName(name);
     emit nameChanged(name);
+    return true;
 }
 
 QString GameObject::name() const

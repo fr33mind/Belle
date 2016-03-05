@@ -20,7 +20,7 @@ public:
 
     QString type() const;
 
-    void setName(const QString&);
+    bool setName(const QString&);
     QString name() const;
 
     void setNameEditable(bool);
