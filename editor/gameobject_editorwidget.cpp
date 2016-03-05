@@ -13,13 +13,19 @@ GameObjectEditorWidget::GameObjectEditorWidget(QWidget *parent) :
 
 void GameObjectEditorWidget::updateData(GameObject* object)
 {
+    mNameEdit->setStyleSheet("background: transparent");
     mNameEdit->setText(object->name());
 }
 
 void GameObjectEditorWidget::onNameEdited(const QString& name)
 {
-    if (mGameObject)
-        mGameObject->setName(name);
+    if (mGameObject) {
+        bool ok = mGameObject->setName(name);
+        if (ok)
+            mNameEdit->setStyleSheet("background: transparent");
+        else
+            mNameEdit->setStyleSheet("background: #FF6666");
+    }
 }
 
 void GameObjectEditorWidget::onGameObjectDestroyed()
