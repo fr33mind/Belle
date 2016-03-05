@@ -458,7 +458,6 @@ void DrawingSurfaceWidget::performOperation(Clipboard::Operation op)
 {
     if (mSceneManager->currentScene() && mSceneManager->currentScene()->selectedObject()) {
         mSceneManager->clipboard()->clear();
-        mSceneManager->setSrcScene(mSceneManager->currentScene());
         mSceneManager->clipboard()->add(mSceneManager->currentScene()->selectedObject(), op);
     }
 }

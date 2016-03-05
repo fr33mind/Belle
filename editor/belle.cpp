@@ -359,15 +359,14 @@ void Belle::onScenesWidgetItemChanged(QTreeWidgetItem* item, int column)
 {
     int index = item->treeWidget()->indexOfTopLevelItem(item);
     SceneManager* sceneManager = this->sceneManager(item->treeWidget()->objectName());
-    Scene* currScene = sceneManager->scene(index);
+    Scene* currScene = sceneManager->sceneAt(index);
 
-    if (! currScene)
+    if (! currScene || currScene->name() == item->text(0))
         return;
 
-    if (sceneManager->isValidSceneName(item->text(0)))
-        currScene->setObjectName(item->text(0));
-    else
-        item->setText(0, currScene->objectName());
+    bool ok = currScene->setName(item->text(0));
+    if (!ok)
+        item->setText(0, currScene->name());
 }
 
 void Belle::updateActions()
@@ -412,7 +411,7 @@ void Belle::addScene(Scene* scene, SceneManager* sceneManager)
     bool edit = false;
     if (! scene) {
         edit = true; //edit name after adding
-        scene = sceneManager->createNewScene();
+        scene = sceneManager->addScene();
     }
     else
         sceneManager->addScene(scene);
@@ -970,7 +969,7 @@ QVariantMap Belle::createGameFile() const
 
     QVariantList scenes;
     for (int i=0; i < mDefaultSceneManager->size(); i++) {
-        scenes.append(mDefaultSceneManager->scene(i)->toJsonObject(false));
+        scenes.append(mDefaultSceneManager->sceneAt(i)->toJsonObject(false));
     }
 
     jsonFile.insert("scenes", scenes);
@@ -978,7 +977,7 @@ QVariantMap Belle::createGameFile() const
     //export pause screen scenes
     scenes.clear();
     for (int i=0; i < mPauseSceneManager->size(); i++) {
-        scenes.append(mPauseSceneManager->scene(i)->toJsonObject(false));
+        scenes.append(mPauseSceneManager->sceneAt(i)->toJsonObject(false));
     }
 
     QVariantMap pauseScreen;
@@ -1058,7 +1057,7 @@ void Belle::copyScene()
 
     foreach(QTreeWidgetItem* item , scenesWidget->selectedItems()) {
         index = scenesWidget->indexOfTopLevelItem(item);
-        scene = mCurrentSceneManager->scene(index);
+        scene = mCurrentSceneManager->sceneAt(index);
         if (scene)
             scenes.append(scene);
     }

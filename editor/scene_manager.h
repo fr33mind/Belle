@@ -31,46 +31,30 @@ class SceneManager : public QObject
 {
     Q_OBJECT
 
-    QList<Scene*> mScenesTrash;
-    QList<Scene*> mScenes;
+    GameObjectManager mGameObjectManager;
     int mCurrentSceneIndex;
-    //QList<Object*> mObjectsClipboard;
-    Scene* mSrcScene;
     
     public:
         explicit SceneManager(QObject * parent=0, const QString& name="SceneManager");
         explicit SceneManager(int width, int height, QObject * parent=0, const QString& name="SceneManager");
-        ~SceneManager();
-        Scene* createNewScene(const QString& name="");
+        virtual ~SceneManager();
+        Scene* addScene(const QString& name="");
         void addScene(Scene*) ;
-
-        Object* objectAt(qreal x, qreal y);
-
-
-        void onResizeEvent(QResizeEvent*);
-
-        Scene* at(int);
-
-        Scene* srcScene();
-        void setSrcScene(Scene*);
+        Scene* sceneAt(int);
+        Scene* takeAt(int);
         void removeScenes(bool del);
         void setCurrentScene(Scene*);
         void setCurrentSceneIndex(int);
-        void insertSceneAfter(Scene*, Scene*);
-        void deleteScene(Scene*);
-        void deleteSceneAt(int);
         void removeScene(Scene*, bool del=false);
         void removeSceneAt(int, bool del=false);
         void insertScene(int, Scene*);
         QList<Scene*> scenes();
         int count();
         int size();
-        Scene* scene(int);
         int currentSceneIndex();
         Scene * currentScene();
-        QString validSceneName(QString name="");
         bool contains(const QString& name);
-        bool isValidSceneName(const QString& name);
+        bool contains(Scene*) const;
         int indexOf(Scene*);
         void resizeScenes(int, int, bool, bool);
 

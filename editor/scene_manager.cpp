@@ -26,7 +26,6 @@ static Clipboard *mClipboard = 0;
 SceneManager::SceneManager(QObject * parent, const QString& name) :
     QObject(parent)
 {
-    mSrcScene = 0;
     mCurrentSceneIndex = -1;
     connect(this, SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
     setObjectName(name);
@@ -45,22 +44,11 @@ SceneManager::SceneManager(int width, int height, QObject * parent, const QStrin
 
 SceneManager::~SceneManager()
 {
-    for(int i=0; i < mScenesTrash.size(); i++)
-        if(mScenesTrash[i])
-            mScenesTrash[i]->deleteLater();
-    mScenesTrash.clear();
 }
 
 void SceneManager::addScene(Scene * scene)
 {
-    insertScene(mScenes.size(), scene);
-}
-
-void SceneManager::insertSceneAfter(Scene * afterScene, Scene* scene)
-{
-    int index = mScenes.indexOf(afterScene);
-    if (index != -1)
-        insertScene(index, scene);
+    insertScene(size(), scene);
 }
 
 void SceneManager::insertScene(int index, Scene * scene)
@@ -68,23 +56,18 @@ void SceneManager::insertScene(int index, Scene * scene)
     if (! scene)
         return;
 
-    if (mScenes.contains(scene)) {
-        /*if (index > mScenes.indexOf(scene))
-            index--;*/
-        mScenes.removeAt(mScenes.indexOf(scene));
-    }
-    else {
-        connect(scene, SIGNAL(dataChanged()), this, SIGNAL(updateDrawingSurfaceWidget()));
-        connect(scene, SIGNAL(selectionChanged(Object*)), this, SIGNAL(selectionChanged(Object*)));
-    }
+    removeScene(scene);
+
+    connect(scene, SIGNAL(dataChanged()), this, SIGNAL(updateDrawingSurfaceWidget()), Qt::UniqueConnection);
+    connect(scene, SIGNAL(selectionChanged(Object*)), this, SIGNAL(selectionChanged(Object*)), Qt::UniqueConnection);
 
     mCurrentSceneIndex = index;
-    mScenes.insert(index, scene);
+    mGameObjectManager.insert(index, scene);
 }
 
-Scene* SceneManager::createNewScene(const QString& name)
+Scene* SceneManager::addScene(const QString& name)
 {
-    mCurrentSceneIndex = mScenes.size();
+    mCurrentSceneIndex = size();
     Scene* scene = new Scene(this, name);
     addScene(scene);
     return scene;
@@ -92,30 +75,26 @@ Scene* SceneManager::createNewScene(const QString& name)
 
 void SceneManager::removeScene(Scene* scene, bool del)
 {
-    removeSceneAt(mScenes.indexOf(scene), del);
+    removeSceneAt(indexOf(scene), del);
 }
 
 void SceneManager::removeSceneAt(int i, bool del)
 {
-    if (i >= 0 && i < mScenes.size()) {
-        if (mScenes.count(mScenes[i]) == 1)
-            mScenes[i]->disconnect(this);
-        Scene * scene = mScenes.takeAt(i);
-        emit sceneRemoved(i);
-        if (mScenes.size() == 0)
-            mCurrentSceneIndex = -1;
+    if (i < 0 || i >= size())
+        return;
 
-        if (del && scene)
-            scene->deleteLater();
+    Scene* scene = takeAt(i);
+    if (scene && del) {
+        scene->deleteLater();
     }
 
+    if (size() == 0)
+        mCurrentSceneIndex = -1;
 }
 
 void SceneManager::removeScenes(bool del)
 {
-    for (int i=mScenes.size()-1; i >= 0; i--)
-        removeSceneAt(i, del);
-
+    mGameObjectManager.clear(del);
     mCurrentSceneIndex = -1;
 }
 
@@ -126,7 +105,7 @@ int SceneManager::currentSceneIndex()
 
 void SceneManager::setCurrentSceneIndex(int index)
 {
-    if (index >= mScenes.size() || index < 0 || index == mCurrentSceneIndex)
+    if (index >= size() || index < 0 || index == mCurrentSceneIndex)
         return;
 
     mCurrentSceneIndex = index;
@@ -135,30 +114,44 @@ void SceneManager::setCurrentSceneIndex(int index)
 
 void SceneManager::setCurrentScene(Scene* scene)
 {
-    if (scene && mScenes.contains(scene))
-        setCurrentSceneIndex(mScenes.indexOf(scene));
+    if (! scene)
+        return;
+
+    int index = indexOf(scene);
+    if (index != -1)
+        setCurrentSceneIndex(index);
 }
 
 Scene* SceneManager::currentScene()
 {
-    if (mCurrentSceneIndex >= 0 && mCurrentSceneIndex < mScenes.size())
-        return mScenes[mCurrentSceneIndex];
+    Scene* currScene = sceneAt(mCurrentSceneIndex);
+    if (currScene)
+        return currScene;
     return 0;
 }
 
 int SceneManager::size()
 {
-    return mScenes.size();
+    return mGameObjectManager.size();
 }
 
 int SceneManager::count()
 {
-    return mScenes.size();
+    return mGameObjectManager.size();
 }
 
-Scene* SceneManager::at(int i)
+Scene* SceneManager::sceneAt(int i)
 {
-    return mScenes[i];
+    return qobject_cast<Scene*>(mGameObjectManager.objectAt(i));
+}
+
+Scene* SceneManager::takeAt(int i)
+{
+    Scene* scene = qobject_cast<Scene*>(mGameObjectManager.takeAt(i));
+    if (scene)
+        scene->disconnect(this);
+    emit sceneRemoved(i);
+    return scene;
 }
 
 void SceneManager::setClipboard(Clipboard* clipboard)
@@ -177,63 +170,35 @@ void SceneManager::onCurrentSceneChanged()
         currentScene()->selectObject(currentScene()->selectedObject());
 }
 
-Scene* SceneManager::scene(int i)
-{
-    if (i >= 0 && i < mScenes.size())
-        return mScenes[i];
-
-    return 0;
-}
-
-Scene* SceneManager::srcScene()
-{
-    return mSrcScene;
-}
-
-void SceneManager::setSrcScene(Scene * scene)
-{
-    mSrcScene = scene;
-}
-
 int SceneManager::indexOf(Scene* scene)
 {
-    return mScenes.indexOf(scene);
+    return mGameObjectManager.indexOf(scene);
 }
 
 bool SceneManager::contains(const QString& name)
 {
-    foreach(Scene* scene, mScenes)
-        if (scene->objectName() == name)
-            return true;
-    return false;
+    return mGameObjectManager.contains(name);
 }
 
-bool SceneManager::isValidSceneName(const QString& name)
+bool SceneManager::contains(Scene* scene) const
 {
-    if (name.isEmpty() || name.isNull())
-        return false;
-
-    return ! contains(name);
-}
-
-QString SceneManager::validSceneName(QString name)
-{
-    if (name.isEmpty() || name.isNull())
-        name = tr("scene");
-
-    while(! isValidSceneName(name))
-        name = Utils::incrementLastNumber(name);
-
-    return name;
+    return mGameObjectManager.contains(scene);
 }
 
 QList<Scene*> SceneManager::scenes()
 {
-    return mScenes;
+    QList<GameObject*> objects = mGameObjectManager.objects();
+    QList<Scene*> scenes;
+    foreach(GameObject* obj, objects) {
+        scenes << qobject_cast<Scene*>(obj);
+    }
+
+    return scenes;
 }
 
 void SceneManager::resizeScenes(int w, int h, bool pos, bool size)
 {
-    for(int i=0; i < mScenes.size(); i++)
-        mScenes[i]->resize(w, h, pos, size);
+    QList<Scene*> scenes = this->scenes();
+    for(int i=0; i < scenes.size(); i++)
+        scenes.at(i)->resize(w, h, pos, size);
 }

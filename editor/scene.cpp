@@ -43,10 +43,9 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
     GameObject(data, parent)
 {
     init("");
-    SceneManager *sceneManager = this->sceneManager();
 
     if (data.contains("name") && data.value("name").type() == QVariant::String)
-        setObjectName(sceneManager->validSceneName(data.value("name").toString()));
+        setName(data.value("name").toString());
 
     if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String)
         setBackgroundImage(data.value("backgroundImage").toString());
@@ -100,10 +99,11 @@ void Scene::init(const QString& name)
     mHighlightedObject = 0;
     mBackgroundImage = 0;
     mTemporaryBackgroundImage = 0;
+    setType("Scene");
     //mScenePixmap = new QPixmap(Scene::width(), Scene::height());
     //mScenePixmap->fill(Qt::gray);
 
-    this->setObjectName(sceneManager()->validSceneName(name));
+    this->setName(name);
 }
 
 SceneManager* Scene::sceneManager()
@@ -573,8 +573,6 @@ QVariantMap Scene::toJsonObject(bool internal)
 {
     QVariantMap scene;
 
-    scene.insert("name", objectName());
-    scene.insert("type", "Scene");
     if (mBackgroundImage)
         scene.insert("backgroundImage", mBackgroundImage->name());
 
@@ -600,7 +598,7 @@ QVariantMap Scene::toJsonObject(bool internal)
 Scene* Scene::copy()
 {
     Scene* scene = new Scene(this->toJsonObject(), this->parent());
-    scene->setObjectName(sceneManager()->validSceneName(objectName()));
+    scene->setName(name());
     return scene;
 }
 
