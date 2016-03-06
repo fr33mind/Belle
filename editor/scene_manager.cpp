@@ -95,7 +95,10 @@ void SceneManager::removeSceneAt(int i, bool del)
 
 void SceneManager::removeScenes(bool del)
 {
-    mGameObjectManager.clear(del);
+    for(int i=size()-1; i >= 0; --i) {
+        removeSceneAt(i, del);
+    }
+
     mCurrentSceneIndex = -1;
 }
 
