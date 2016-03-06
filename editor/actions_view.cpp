@@ -223,10 +223,12 @@ void ActionsView::onDeleteAction()
 {
     Scene* scene = Belle::instance()->currentScene();
     if (scene) {
+        setAutoScroll(false);
         QModelIndexList indexes = selectedIndexes();
         for(int i=indexes.size()-1; i >= 0; --i) {
             scene->removeActionAt(indexes[i].row(), true);
         }
+        setAutoScroll(true);
     }
 }
 
