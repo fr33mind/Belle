@@ -48,6 +48,7 @@ void GameObjectEditorWidget::setGameObject(GameObject * object)
         return;
 
     connect(object, SIGNAL(destroyed()), this, SLOT(onGameObjectDestroyed()), Qt::UniqueConnection);
+    connect(object, SIGNAL(nameChanged(const QString&)), this, SLOT(onGameObjectNameChanged(const QString&)), Qt::UniqueConnection);
     updateData(object);
     mGameObject = object;
     emit gameObjectChanged(mGameObject);
@@ -67,4 +68,13 @@ void GameObjectEditorWidget::reload()
     mGameObject = 0;
     updateData(obj);
     mGameObject = obj;
+}
+
+void GameObjectEditorWidget::onGameObjectNameChanged(const QString & name)
+{
+    if (mNameEdit->text() == name)
+        return;
+
+    mNameEdit->setText(name);
+    mNameEdit->setStyleSheet("background: transparent");
 }

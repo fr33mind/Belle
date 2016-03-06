@@ -35,6 +35,7 @@ protected slots:
 
 private slots:
     void onNameEdited(const QString&);
+    void onGameObjectNameChanged(const QString&);
 };
 
 #endif // GAMEOBJECT_EDITORWIDGET_H
