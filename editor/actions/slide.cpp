@@ -184,9 +184,9 @@ void Slide::setDuration(double dur) {
     }
 }
 
-QVariantMap Slide::toJsonObject()
+QVariantMap Slide::toJsonObject(bool internal) const
 {
-    QVariantMap action = Action::toJsonObject();
+    QVariantMap action = Action::toJsonObject(internal);
     action.insert("slideType", slideTypeAsString());
     action.insert("destX", mDestX);
     action.insert("destY", mDestY);

@@ -96,7 +96,7 @@ void Padding::setRight(int right)
     mPadding.insert("right", right);
 }
 
-bool Padding::isEmpty()
+bool Padding::isEmpty() const
 {
     QHashIterator<QString, int> it(mPadding);
     int total = 0;
@@ -108,7 +108,7 @@ bool Padding::isEmpty()
     return total ? true : false;
 }
 
-QVariantMap Padding::toJsonObject()
+QVariantMap Padding::toJsonObject() const
 {
     QVariantMap object;
 

@@ -167,7 +167,7 @@ void GameObject::sync()
     load(mResource->toJsonObject());
 }
 
-bool GameObject::isSynced()
+bool GameObject::isSynced() const
 {
     return mSynced;
 }

@@ -51,7 +51,7 @@ public:
     double duration() const;
     void setDuration(double);
     virtual void finishedEditing();
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
 signals:
     void startPositionChanged(int, int);

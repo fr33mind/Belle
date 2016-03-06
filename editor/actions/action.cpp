@@ -207,16 +207,16 @@ void Action::initFrom(Action* action)
     mAllowSkipping = action->allowSkipping();
 }
 
-QVariantMap Action::toJsonObject()
+QVariantMap Action::toJsonObject(bool internal) const
 {
-    QVariantMap action = GameObject::toJsonObject();
+    QVariantMap action = GameObject::toJsonObject(internal);
 
     if (! mAllowSkipping) //this property is true by default
         action.insert("skippable", mAllowSkipping);
     if (mMouseClickOnFinish) {
         Wait wait;
         wait.setWaitType(Wait::MouseClick);
-        action.insert("wait", wait.toJsonObject());
+        action.insert("wait", wait.toJsonObject(internal));
     }
 
     Object* object = sceneObject();

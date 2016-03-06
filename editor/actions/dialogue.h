@@ -51,7 +51,7 @@ public:
     QString characterName() const;
 
     virtual QString displayText() const;
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
     virtual void focusIn();
     virtual void focusOut();

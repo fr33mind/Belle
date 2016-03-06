@@ -543,11 +543,9 @@ bool Object::hasActionForEvent(Action* action, Interaction::InputEvent event)
     return mEventToActions.value(event, QList<Action*>()).contains(action);
 }
 
-QVariantMap Object::toJsonObject(bool internal)
+QVariantMap Object::toJsonObject(bool internal) const
 {
-    QVariantMap object;
-    object.insert("name", name());
-    object.insert("type", type());
+    QVariantMap object = GameObject::toJsonObject(internal);
     object.insert("x", mSceneRect.x());
     object.insert("y", mSceneRect.y());
     object.insert("opacity", mOpacity);
@@ -579,7 +577,7 @@ QVariantMap Object::toJsonObject(bool internal)
     }*/
 
     for(int i=0; i < actions.size(); i++)
-        jsonActions.append(actions[i]->toJsonObject());
+        jsonActions.append(actions[i]->toJsonObject(internal));
 
     if (jsonActions.size() || internal)
         object.insert("onMousePress", jsonActions);
@@ -592,7 +590,7 @@ QVariantMap Object::toJsonObject(bool internal)
     }*/
 
     for(int i=0; i < actions.size(); i++)
-        jsonActions.append(actions[i]->toJsonObject());
+        jsonActions.append(actions[i]->toJsonObject(internal));
 
     if (jsonActions.size() || internal)
         object.insert("onMouseRelease", jsonActions);
@@ -606,7 +604,7 @@ QVariantMap Object::toJsonObject(bool internal)
     }*/
 
     for(int i=0; i < actions.size(); i++)
-        jsonActions.append(actions[i]->toJsonObject());
+        jsonActions.append(actions[i]->toJsonObject(internal));
 
     if (jsonActions.size() || internal)
         object.insert("onMouseMove", jsonActions);
@@ -627,7 +625,7 @@ QVariantMap Object::toJsonObject(bool internal)
     return object;
 }
 
-void Object::filterResourceData(QVariantMap& objectData)
+void Object::filterResourceData(QVariantMap& objectData) const
 {
     GameObject* res = resource();
     if (! res)

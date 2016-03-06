@@ -115,7 +115,7 @@ class Object : public GameObject
         void moveAllSharedEventActions(Object*, Object*);
         virtual void paint(QPainter&);
         Object* copy();
-        virtual QVariantMap toJsonObject(bool internal=true);
+        virtual QVariantMap toJsonObject(bool internal=true) const;
         bool containsResizeRectAt(int, int);
         QRect resizeRectAt(int, int);
         QList<QRect> resizeRects();
@@ -130,7 +130,7 @@ class Object : public GameObject
         void setPadding(const Padding&);
         void setPadding(const QString&, int);
 
-        void filterResourceData(QVariantMap&);
+        void filterResourceData(QVariantMap&) const;
 
         bool isResource() const;
 

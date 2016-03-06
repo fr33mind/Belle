@@ -74,7 +74,7 @@ public:
     bool allowSkipping() const;
     virtual void paint(const QPainter&);
     virtual QString toString() const;
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
     virtual void focusIn();
     virtual void focusOut();

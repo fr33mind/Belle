@@ -70,9 +70,9 @@ double StopSound::fadeTime()
     return mFadeTime;
 }
 
-QVariantMap StopSound::toJsonObject()
+QVariantMap StopSound::toJsonObject(bool internal) const
 {
-    QVariantMap data = Action::toJsonObject();
+    QVariantMap data = Action::toJsonObject(internal);
 
     data.insert("sound", mSound);
 

@@ -36,7 +36,7 @@ public:
     QVariantList variantObjects() const;
     virtual void paint(QPainter&);
     virtual void move(int x, int y);
-    virtual QVariantMap toJsonObject(bool internal=true);
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     virtual Object* objectAt(qreal, qreal);
     void adaptSize();
     virtual void resize(int, int);

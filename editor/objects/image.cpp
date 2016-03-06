@@ -159,7 +159,7 @@ void Image::hide()
         mImage->movie()->stop();
 }
 
-QVariantMap Image::toJsonObject(bool internal)
+QVariantMap Image::toJsonObject(bool internal) const
 {
     QVariantMap object = Object::toJsonObject(internal);
 

@@ -107,9 +107,9 @@ QString GetUserInput::displayText() const
     return text;
 }
 
-QVariantMap GetUserInput::toJsonObject()
+QVariantMap GetUserInput::toJsonObject(bool internal) const
 {
-    QVariantMap object = Action::toJsonObject();
+    QVariantMap object = Action::toJsonObject(internal);
 
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
     if (! codec)

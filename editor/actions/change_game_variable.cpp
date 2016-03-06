@@ -115,9 +115,9 @@ QString ChangeGameVariable::displayText() const
                                  .arg(variable);
 }
 
-QVariantMap ChangeGameVariable::toJsonObject()
+QVariantMap ChangeGameVariable::toJsonObject(bool internal) const
 {
-    QVariantMap data = Action::toJsonObject();
+    QVariantMap data = Action::toJsonObject(internal);
 
     data.insert("variable", mVariable);
     data.insert("operator", mOperators[mOperatorIndex]);

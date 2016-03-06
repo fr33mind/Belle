@@ -94,9 +94,9 @@ bool PlaySound::loop()
     return mLoop;
 }
 
-QVariantMap PlaySound::toJsonObject()
+QVariantMap PlaySound::toJsonObject(bool internal) const
 {
-    QVariantMap action = Action::toJsonObject();
+    QVariantMap action = Action::toJsonObject(internal);
     action.insert("sound", mSound ? mSound->name() : "");
     action.insert("volume", mVolume);
     action.insert("loop", mLoop);

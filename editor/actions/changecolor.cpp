@@ -61,9 +61,9 @@ void ChangeColor::init()
     mColor = Qt::white;
 }
 
-QVariantMap ChangeColor::toJsonObject()
+QVariantMap ChangeColor::toJsonObject(bool internal) const
 {
-    QVariantMap action = Action::toJsonObject();
+    QVariantMap action = Action::toJsonObject(internal);
     action.insert("color", Utils::colorToList(mColor));
     action.insert("changeObjectColor", mChangeObjectColor);
     action.insert("changeObjectBackgroundColor", mChangeObjectBackgroundColor);

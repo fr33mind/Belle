@@ -33,7 +33,7 @@ public:
 public:
     explicit GoToLabel(const QString& name="", QObject *parent = 0);
     GoToLabel(const QVariantMap&, QObject *parent);
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     void setTargetLabel(Label*);
     void setTargetLabel(const QString&);
     QString targetLabelName();

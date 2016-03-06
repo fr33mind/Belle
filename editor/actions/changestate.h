@@ -16,7 +16,7 @@ public:
     virtual QString displayText() const;
     QList<Object*> availableObjects() const;
 
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
     QString state() const;
     void setState(const QString&);

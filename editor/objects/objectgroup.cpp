@@ -447,7 +447,7 @@ void ObjectGroup::objectChanged(const QVariantMap& data)
     }
 }
 
-QVariantMap ObjectGroup::toJsonObject(bool internal)
+QVariantMap ObjectGroup::toJsonObject(bool internal) const
 {
     QVariantMap object = Object::toJsonObject(internal);
     QVariantList objects;

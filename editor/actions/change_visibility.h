@@ -42,7 +42,7 @@ public:
     virtual QString displayText() const;
     void setCharacter(Character*);
     Character* character() const;
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     bool toShow() const;
     bool toHide() const;
     virtual void setSceneObject(Object *);

@@ -68,22 +68,22 @@ void Branch::init()
     mCondition = "";
 }
 
-QVariantMap Branch::toJsonObject()
+QVariantMap Branch::toJsonObject(bool internal) const
 {
-    QVariantMap data = Action::toJsonObject();
+    QVariantMap data = Action::toJsonObject(internal);
     data.insert("condition", mCondition);
 
     QVariantList actions;
     if (! mTrueActions.isEmpty()){
         foreach(Action* action, mTrueActions)
-            actions.append(action->toJsonObject());
+            actions.append(action->toJsonObject(internal));
     }
     data.insert("trueActions", actions);
     actions.clear();
 
     if (! mFalseActions.isEmpty()){
         foreach(Action* action, mFalseActions)
-            actions.append(action->toJsonObject());
+            actions.append(action->toJsonObject(internal));
     }
     data.insert("falseActions", actions);
     actions.clear();

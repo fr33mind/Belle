@@ -55,9 +55,9 @@ QString Show::characterState() const
     return mCharacterState;
 }
 
-QVariantMap Show::toJsonObject()
+QVariantMap Show::toJsonObject(bool internal) const
 {
-    QVariantMap data = ChangeVisibility::toJsonObject();
+    QVariantMap data = ChangeVisibility::toJsonObject(internal);
 
     if (sceneObject() && qobject_cast<Character*>(sceneObject()))
         data.insert("state", mCharacterState);

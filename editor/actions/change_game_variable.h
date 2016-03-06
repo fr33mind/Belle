@@ -48,7 +48,7 @@ public:
 
     QString displayText() const;
 
-    QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     
 signals:
     

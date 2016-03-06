@@ -79,7 +79,7 @@ void Wait::setWaitType(WaitType type)
         setDisplayText(tr("Forever"));
 }
 
-QString Wait::waitTypeToString(WaitType type)
+QString Wait::waitTypeToString(WaitType type) const
 {
     switch(type) {
     case Timed:
@@ -113,9 +113,9 @@ Wait::WaitType Wait::waitType()
     return mWaitType;
 }
 
-QVariantMap Wait::toJsonObject()
+QVariantMap Wait::toJsonObject(bool internal) const
 {
-    QVariantMap action = Action::toJsonObject();
+    QVariantMap action = Action::toJsonObject(internal);
     if (mWaitType == Wait::Timed)
         action.insert("time", mTime);
     action.insert("waitType", waitTypeToString(mWaitType));

@@ -62,9 +62,9 @@ QString GoToScene::targetScene()
     return mTargetScene;
 }
 
-QVariantMap GoToScene::toJsonObject()
+QVariantMap GoToScene::toJsonObject(bool internal) const
 {
-    QVariantMap action = Action::toJsonObject();
+    QVariantMap action = Action::toJsonObject(internal);
     if (! mTargetScene.isEmpty()) {
         action.insert("target", mTargetScene);
         action.insert("targetType", mTargetType);

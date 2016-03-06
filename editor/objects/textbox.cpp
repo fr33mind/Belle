@@ -143,7 +143,7 @@ void TextBox::setText(const QString & text)
     }
 }
 
-QColor TextBox::textColor()
+QColor TextBox::textColor() const
 {
     return mTextColor;
 }
@@ -253,7 +253,7 @@ void TextBox::paint(QPainter & painter)
     painter.restore();
 }
 
-QVariantMap TextBox::toJsonObject(bool internal)
+QVariantMap TextBox::toJsonObject(bool internal) const
 {
     QVariantMap object = Object::toJsonObject(internal);
 
@@ -295,7 +295,7 @@ Qt::Alignment TextBox::textAlignment()
     return mTextAlignment;
 }
 
-QString TextBox::textAlignmentAsString()
+QString TextBox::textAlignmentAsString() const
 {
     QString textAlignment("");
     if (mTextAlignment.testFlag(Qt::AlignHCenter))

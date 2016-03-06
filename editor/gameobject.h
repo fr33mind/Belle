@@ -16,7 +16,7 @@ public:
     GameObject(const QVariantMap&, QObject *parent = 0);
     virtual ~GameObject();
 
-    virtual QVariantMap toJsonObject(bool internal=false) const;
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
     QString type() const;
 
@@ -35,7 +35,7 @@ public:
 
     void sync();
     void setSync(bool);
-    bool isSynced();
+    bool isSynced() const;
 
     Scene* scene() const;
 

@@ -135,9 +135,9 @@ QString Dialogue::displayText() const
     return text;
 }
 
-QVariantMap Dialogue::toJsonObject()
+QVariantMap Dialogue::toJsonObject(bool internal) const
 {
-    QVariantMap object = Action::toJsonObject();
+    QVariantMap object = Action::toJsonObject(internal);
 
     if (mCharacter)
         object.insert("character", mCharacter->objectName());

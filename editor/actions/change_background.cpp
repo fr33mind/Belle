@@ -122,9 +122,9 @@ void ChangeBackground::focusOut()
     }
 }
 
-QVariantMap ChangeBackground::toJsonObject()
+QVariantMap ChangeBackground::toJsonObject(bool internal) const
 {
-    QVariantMap data = Action::toJsonObject();
+    QVariantMap data = Action::toJsonObject(internal);
     QString path = mBackgroundImage ? mBackgroundImage->path() : "";
 
     if (! path.isEmpty())

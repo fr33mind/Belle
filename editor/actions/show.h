@@ -36,7 +36,7 @@ public:
     explicit Show(const QVariantMap& data, QObject *parent = 0);
     void setCharacterState(const QString&);
     QString characterState() const;
-    QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
 private:
     void init();

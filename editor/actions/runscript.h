@@ -18,7 +18,7 @@ public:
 public:
     explicit RunScript(QObject *parent = 0);
     RunScript(const QVariantMap& data, QObject *parent=0);
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     QString script() const;
     void setScript(const QString&);
     QString comment() const;

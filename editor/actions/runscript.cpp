@@ -29,9 +29,9 @@ void RunScript::init()
     setIcon(Info.icon);
 }
 
-QVariantMap RunScript::toJsonObject()
+QVariantMap RunScript::toJsonObject(bool internal) const
 {
-    QVariantMap object = Action::toJsonObject();
+    QVariantMap object = Action::toJsonObject(internal);
     object.insert("script", mScript);
     object.insert("comment", mComment);
     return object;

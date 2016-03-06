@@ -35,7 +35,7 @@ public:
     static void setBranchActionInfo(ActionInfo*);
     QString condition()const;
     void setCondition(const QString&);
-    QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     QList<Action*> actions(bool) const;
     Action* action(int, bool) const;
     void appendAction(Action*, bool);

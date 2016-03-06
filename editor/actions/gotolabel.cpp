@@ -102,9 +102,9 @@ Action* GoToLabel::copy()
     return goToLabel;
 }
 
-QVariantMap GoToLabel::toJsonObject()
+QVariantMap GoToLabel::toJsonObject(bool internal) const
 {
-    QVariantMap action = Action::toJsonObject();
+    QVariantMap action = Action::toJsonObject(internal);
     action.insert("label", mTargetLabelName);
 
     return action;

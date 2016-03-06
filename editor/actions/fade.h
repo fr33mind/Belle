@@ -34,7 +34,7 @@ public:
     explicit Fade(QObject *parent = 0);
     Fade(const QVariantMap&, QObject *parent = 0);
 
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     QString displayText() const;
 
     Fade::Type fadeType();

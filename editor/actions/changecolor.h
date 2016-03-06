@@ -29,7 +29,7 @@ public:
 public:
     explicit ChangeColor(QObject *parent = 0);
     ChangeColor(const QVariantMap&, QObject *parent = 0);
-    QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     virtual QString displayText() const;
 
     QColor color() const;

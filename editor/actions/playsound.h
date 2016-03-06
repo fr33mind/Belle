@@ -44,7 +44,7 @@ public:
     void setLoop(bool);
     bool loop();
 
-    QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     virtual QString displayText() const;
 
 private:

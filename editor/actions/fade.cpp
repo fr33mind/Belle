@@ -105,9 +105,9 @@ QString Fade::displayText() const
     return QString("\"%1\" %2 %3s").arg(sceneObject()->objectName()).arg(tr("in")).arg(duration());
 }
 
-QVariantMap Fade::toJsonObject()
+QVariantMap Fade::toJsonObject(bool internal) const
 {
-    QVariantMap data = Action::toJsonObject();
+    QVariantMap data = Action::toJsonObject(internal);
     data.insert("fadeType", fadeTypeToString(mFadeType));
     data.insert("duration", QVariant(mDuration));
 

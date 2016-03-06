@@ -571,7 +571,7 @@ QPixmap* Scene::pixmap()
 
 QVariantMap Scene::toJsonObject(bool internal)
 {
-    QVariantMap scene;
+    QVariantMap scene = GameObject::toJsonObject(internal);
 
     if (mBackgroundImage)
         scene.insert("backgroundImage", mBackgroundImage->name());
@@ -587,7 +587,7 @@ QVariantMap Scene::toJsonObject(bool internal)
 
     QVariantList actions;
     for(int i=0; i < mActions.size(); i++) {
-        actions.append(mActions[i]->toJsonObject());
+        actions.append(mActions[i]->toJsonObject(internal));
     }
 
     scene.insert("actions", actions);

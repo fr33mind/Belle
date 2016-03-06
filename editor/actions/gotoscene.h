@@ -38,7 +38,7 @@ public:
     void setTargetScene(const QString&, TargetType type=Name);
     QString targetScene();
 
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
 
 signals:

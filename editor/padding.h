@@ -47,8 +47,8 @@ public:
     int right() const;
     void setRight(int);
 
-    bool isEmpty();
-    QVariantMap toJsonObject();
+    bool isEmpty() const;
+    QVariantMap toJsonObject() const;
 
 private:
     void init();

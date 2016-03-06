@@ -28,7 +28,7 @@ public:
 public:
     explicit ShowMenu(QObject *parent = 0);
      ShowMenu(const QVariantMap&, QObject *parent = 0);
-     virtual QVariantMap toJsonObject();
+     virtual QVariantMap toJsonObject(bool internal=true) const;
 
      void focusIn();
      void focusOut();

@@ -71,7 +71,7 @@ QVariantMap MenuOption::toJsonObject(bool internal)
     QVariantList actions;
 
     for(int i=0; i < mActions.size(); i++) {
-        actions.append(mActions[i]->toJsonObject());
+        actions.append(mActions[i]->toJsonObject(internal));
     }
 
     option.insert("actions", actions);

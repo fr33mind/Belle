@@ -169,14 +169,14 @@ Slide* ChangeVisibility::slideAction() const
     return mSlideAction;
 }
 
-QVariantMap ChangeVisibility::toJsonObject()
+QVariantMap ChangeVisibility::toJsonObject(bool internal) const
 {
-    QVariantMap object = Action::toJsonObject();
+    QVariantMap object = Action::toJsonObject(internal);
     QVariantList transitions;
     if (mSlideAction && (! mSlideAction->destX().isEmpty() || ! mSlideAction->destY().isEmpty()))
-        transitions.append(mSlideAction->toJsonObject());
+        transitions.append(mSlideAction->toJsonObject(internal));
     if (mFadeAction && mFadeAction->duration() > 0)
-        transitions.append(mFadeAction->toJsonObject());
+        transitions.append(mFadeAction->toJsonObject(internal));
     object.insert("transitions", transitions);
 
     return object;

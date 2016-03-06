@@ -45,8 +45,8 @@ public:
     WaitType waitType();
     void setWaitType(WaitType);
     void setWaitTypeFromIndex(int);
-    QString waitTypeToString(WaitType);
-    virtual QVariantMap toJsonObject();
+    QString waitTypeToString(WaitType) const;
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
 signals:
 

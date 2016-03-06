@@ -39,7 +39,7 @@ public:
     virtual void setImage(const QString&);
     virtual void setImage(ImageFile*);
     ImageFile* image() const;
-    virtual QVariantMap toJsonObject(bool internal=true);
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
     virtual void show();
     virtual void hide();

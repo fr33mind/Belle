@@ -248,7 +248,7 @@ void Character::setTextColor(const QColor & color)
     this->notify("textColor", Utils::colorToList(color));
 }
 
-QVariantMap Character::toJsonObject(bool internal)
+QVariantMap Character::toJsonObject(bool internal) const
 {
     QVariantMap object = Object::toJsonObject(internal);
     QVariantMap stateToPath;

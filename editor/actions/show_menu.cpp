@@ -62,12 +62,12 @@ void ShowMenu::init()
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
 }
 
-QVariantMap ShowMenu::toJsonObject()
+QVariantMap ShowMenu::toJsonObject(bool internal) const
 {
-    QVariantMap object = Action::toJsonObject();
+    QVariantMap object = Action::toJsonObject(internal);
 
     if (sceneObject())
-        object.insert("object", sceneObject()->toJsonObject(false));
+        object.insert("object", sceneObject()->toJsonObject(internal));
 
     return object;
 }

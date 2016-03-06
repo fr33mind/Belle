@@ -44,7 +44,7 @@ public:
     QString text();
     virtual void setText(const QString&);
     void setTextColor(const QColor&);
-    QColor textColor();
+    QColor textColor() const;
     void setDefaultTextColor(const QColor&);
     QColor defaultTextColor() const;
     void activateDefaultTextColor();
@@ -66,7 +66,7 @@ public:
     virtual void move(int, int);
     void init(const QString&);
     virtual void paint(QPainter &);
-    virtual QVariantMap toJsonObject(bool internal=true);
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
     void setX(int);
     void setY(int);
@@ -74,7 +74,7 @@ public:
     virtual void setHeight(int, bool percent=false);
 
     Qt::Alignment textAlignment();
-    QString textAlignmentAsString();
+    QString textAlignmentAsString() const;
     void setTextAlignment(Qt::Alignment);
 
     void alignText();

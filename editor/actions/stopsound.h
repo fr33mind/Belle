@@ -39,7 +39,7 @@ public:
     double fadeTime();
     void setFadeTime(double);
 
-    QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
 signals:
 
