@@ -153,7 +153,7 @@ QVariantMap ResourceManager::toMap()
     QVariantMap resourcesData;
     QList<GameObject*> resources = objects();
     for (int i=0; i < resources.size(); i++) {
-        resourcesData.insert(resources.at(i)->objectName(), resources.at(i)->toJsonObject(false));
+        resourcesData.insert(resources.at(i)->name(), resources.at(i)->toJsonObject(false));
     }
     return resourcesData;
 }
