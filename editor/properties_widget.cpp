@@ -41,12 +41,27 @@ PropertiesWidget::PropertiesWidget(QWidget *parent, int columns) :
 
 void PropertiesWidget::beginGroup(const QString & name, const QString & key)
 {
-    QStandardItem *root = new QStandardItem(name);
-    root->setEditable(false);
-    if (! key.isEmpty())
-        root->setData(key);
-    mModel->appendRow(QList<QStandardItem*>() << root);
-    mLastItem = root;
+    QStandardItem* item = 0;
+    QList<QStandardItem*> items;
+
+    if (! mModel->columnCount())
+        return;
+
+    for(int i=0; i < mModel->columnCount(); i++) {
+        item = new QStandardItem();
+        item->setEditable(false);
+        items << item;
+    }
+
+    if (items.size()) {
+        item = items.first();
+        item->setText(name);
+        if (! key.isEmpty())
+            item->setData(key);
+
+        mModel->appendRow(items);
+        mLastItem = item;
+    }
 }
 
 void PropertiesWidget::appendRow(QStandardItem * item)
