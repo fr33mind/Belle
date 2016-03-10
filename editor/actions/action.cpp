@@ -69,6 +69,7 @@ void Action::init()
     setType(Info.type);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
+    setName("");
 }
 
 QIcon Action::icon() const
