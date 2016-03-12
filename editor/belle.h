@@ -31,6 +31,7 @@
 #include "drawing_surface_widget.h"
 #include "resources_view.h"
 #include "simple_http_server.h"
+#include "webviewwindow.h"
 
 #define WIDTH 640
 #define HEIGHT 480
@@ -54,11 +55,11 @@ class Belle : public QMainWindow
     QSettings *mSettings;
     SimpleHttpServer mHttpServer;
     QString mSavePath;
-    QWebView *mWebView;
     SceneManager* mCurrentSceneManager;
     SceneManager* mDefaultSceneManager;
     SceneManager* mPauseSceneManager;
     Clipboard* mClipboard;
+    WebViewWindow* mWebViewWindow;
     
     public:
         explicit Belle(QWidget *widget=0);

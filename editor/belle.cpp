@@ -70,11 +70,7 @@ Belle::Belle(QWidget *widget)
     mClipboard = new Clipboard(this);
 
     //init webview
-    mWebView = new QWebView(this);
-    mWebView->setWindowFlags(mWebView->windowFlags() | Qt::Window);
-    mWebView->setWindowModality(Qt::WindowModal);
-    QWebSettings* webSettings = mWebView->settings();
-    webSettings->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    mWebViewWindow = new WebViewWindow(this);
 
     mHttpServer.setServerPort(8000);
     mDisableClick = false;
@@ -726,11 +722,7 @@ void Belle::onRunTriggered()
         }
 
         if (Engine::useBuiltinBrowser()) {
-            if (mWebView->url() == mHttpServer.serverUrl())
-                mWebView->reload();
-            else
-                mWebView->setUrl(mHttpServer.serverUrl());
-            mWebView->show();
+            mWebViewWindow->open(mHttpServer.serverUrl());
         }
         else {
             //Get browser specified by the user
@@ -1246,7 +1238,7 @@ void Belle::setNovelProperties(const QVariantMap& _data)
     if (data.contains("width") && data.value("width").canConvert(QVariant::Int)) {
         int width = data.value("width").toInt();
         mNovelData.insert("width", width);
-        mWebView->setFixedWidth(width);
+        mWebViewWindow->setWebViewWidth(width);
         Scene::setWidth(width);
         //SceneManager::setSceneWidth(width);
         mDrawingSurfaceWidget->setFixedWidth(width);
@@ -1255,7 +1247,7 @@ void Belle::setNovelProperties(const QVariantMap& _data)
     if (data.contains("height") && data.value("height").canConvert(QVariant::Int)) {
         int height = data.value("height").toInt();
         mNovelData.insert("height", height);
-        mWebView->setFixedHeight(height);
+        mWebViewWindow->setWebViewHeight(height);
         Scene::setHeight(height);
         //SceneManager::setSceneHeight(height);
         mDrawingSurfaceWidget->setFixedHeight(height);

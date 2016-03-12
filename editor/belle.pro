@@ -124,7 +124,8 @@ HEADERS      += belle.h\
     objects/menuoption.h \
     gameobject_editorwidget.h \
     editorwidgetfactory.h \
-    gameobjectmanager.h
+    gameobjectmanager.h \
+    webviewwindow.h
                 
 
 SOURCES      += main.cpp\
@@ -231,6 +232,7 @@ SOURCES      += main.cpp\
     objects/menuoption.cpp \
     gameobject_editorwidget.cpp \
     editorwidgetfactory.cpp \
-    gameobjectmanager.cpp
+    gameobjectmanager.cpp \
+    webviewwindow.cpp
 
 RESOURCES += media.qrc
