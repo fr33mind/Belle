@@ -8,6 +8,9 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QUrl>
+#include <QLocale>
+
+#include "sockettimeout.h"
 
 SimpleHttpServer::SimpleHttpServer(const QString& address, int port, const QString& dir, QObject *parent) :
     QTcpServer(parent)
@@ -21,10 +24,10 @@ SimpleHttpServer::SimpleHttpServer(const QString& address, int port, const QStri
     mMimetypes.insert("", "application/octet-stream");
     mMimetypes.insert("ogg", "audio/ogg");
     mMimetypes.insert("oga", "audio/ogg");
-    mMimetypes.insert("mp3", "audio/mp3");
+    mMimetypes.insert("mp3", "audio/mpeg");
     mMimetypes.insert("html", "text/html");
     mMimetypes.insert("htm", "text/html");
-    mMimetypes.insert("js", "text/javascript");
+    mMimetypes.insert("js", "application/javascript");
     mMimetypes.insert("css", "text/css");
     mMimetypes.insert("json", "application/json");
     mMimetypes.insert("xml", "text/xml");
@@ -43,7 +46,6 @@ void SimpleHttpServer::onNewConnection()
     if (hasPendingConnections()) {
         QTcpSocket* socket = nextPendingConnection();
         connect(socket, SIGNAL(readyRead()), this, SLOT(readClient()));
-        connect(socket, SIGNAL(disconnected()), this, SLOT(discardClient()));
     }
 }
 
@@ -52,46 +54,98 @@ void SimpleHttpServer::readClient()
     QTcpSocket* socket = (QTcpSocket*)sender();
 
     if (socket->canReadLine()) {
+        QMap<QString, QString> headers;
+        QString header_line;
         QStringList tokens = QString(socket->readLine()).split(QRegExp("[ \r\n][ \r\n]*"));
+        int range_start = 0, range_end = 0;
+        bool isRanged = false;
+        bool keepAlive = true;
+        QString value;
 
-        if (tokens[0] == "GET" && tokens.size() > 1) {
+        while(socket->canReadLine()) {
+            header_line = socket->readLine().trimmed();
+            if (header_line.contains(":")) {
+                QStringList parts = header_line.split(":");
+                headers[parts[0].trimmed().toLower()] = parts[1].trimmed();
+            }
+        }
+
+        if (headers.contains("range")) {
+            value = headers.value("range", "");
+            if (value.contains("-")) {
+                QString range = value.replace("bytes=", "");
+                range_start = range.split("-")[0].toInt();
+                range_end = range.split("-")[1].toInt();
+                isRanged = true;
+            }
+        }
+
+        if (headers.contains("connection")) {
+            value = headers.value("connection");
+            if (value.toLower() == "close")
+                keepAlive = false;
+        }
+
+        if (tokens.size() > 1 && tokens[0] == "GET") {
             QStringList header;
             QString file = tokens[1];
-            QString path = fullPath(file);
-            QByteArray data = QString("No index.html or index.htm found on \"%1\". :(").arg(mDirectory.absolutePath()).toLatin1();
-            QString ctype = "text/plain";
-            QString modified = "";
-            QString charset("");
+            QFileInfo fileInfo = this->fileInfo(file);
+            QByteArray data;
+            QString mimetype = "text/html";
+            QString rangeinfo("");
 
-            if (! path.isEmpty()) {
-                ctype = guessType(path);
-                QFileInfo info(path);
-                QDateTime date = info.lastModified();
-                modified = QString("%1 %2").arg(date.toString("ddd, dd MMM yyyy hh:mm:ss")).arg("GMT");
-                data = readFile(path);
-            }
-
-            if (ctype.contains("text") || ctype.contains("json"))
-                charset = "; charset=\"utf-8\"";
-
-            if (file != "/" && data.size() <= 0) {
-                header << "HTTP/1.0 404 Not Found\r\n" << "\r\n";
+            if (!fileInfo.exists()) {
+                header << "HTTP/1.1 404 Not Found";
+                header << QString("Content-Type: %1").arg(mimetype);
+                header << "Connection: close";
+                keepAlive = false;
             }
             else {
-                 header << "HTTP/1.0 200 Ok\r\n"
-                 << QString("Content-Type: %1%2\r\n").arg(ctype).arg(charset)
-                 << QString("Content-Length: %1\r\n").arg(data.size())
-                 << QString("Last-Modified: %1\r\n").arg(modified)
-                 << "\r\n";
+                if (fileInfo.isFile()) {
+                    mimetype = guessMimeType(fileInfo);
+                    data = readFile(fileInfo.absoluteFilePath());
+                    if (isRanged) {
+                        int size = data.size();
+                        if (!range_end)
+                            range_end = size - 1;
+
+                        data = data.mid(range_start, (range_end - range_start)+1);
+                        rangeinfo = QString("bytes %1-%2/%3").arg(range_start).arg(range_end).arg(size);
+                    }
+                }
+                else if (fileInfo.isDir()) {
+                    data = readDir(fileInfo.absoluteFilePath());
+                }
+
+                if (isRanged) {
+                    header << "HTTP/1.1 206 Partial Content";
+                    header << QString("Accept-Ranges: bytes");
+                    header << QString("Content-Range: %1").arg(rangeinfo);
+                }
+                else {
+                    header << "HTTP/1.1 200 Ok";
+                }
+
+                header << QString("Content-Type: %1").arg(mimetype);
+                header << QString("Content-Length: %1").arg(data.size());
+                header << QString("Last-Modified: %1").arg(httpDate(fileInfo.lastModified()));
+                if (keepAlive)
+                    header << "Connection: keep-alive";
             }
 
-            socket->write(header.join("").toLatin1());
+            header << "Server: Belle/0.7";
+            header << QString("Date: %1").arg(httpDate(QDateTime::currentDateTime()));
+            header << "\r\n";
+
+            socket->write(header.join("\r\n").toUtf8());
             if (data.size())
                 socket->write(data);
-            socket->disconnectFromHost();
 
-            if (socket->state() == QTcpSocket::UnconnectedState)
-                socket->deleteLater();
+            quint32 timeout = 0;
+            if (keepAlive)
+                timeout = KEEP_ALIVE_TIMEOUT * 1000;
+
+            new SocketTimeout(socket, timeout, this);
         }
     }
 }
@@ -100,11 +154,33 @@ QByteArray SimpleHttpServer::readFile(const QString& filePath)
 {
     QFile file(filePath);
     QByteArray data;
+
+    if (! file.exists())
+        return data;
+
     if (! file.open(QFile::ReadOnly))
         return data;
 
     data = file.readAll();
     file.close();
+    return data;
+}
+
+QByteArray SimpleHttpServer::readDir(const QString& dirPath)
+{
+    QDir dir(dirPath);
+    QByteArray data;
+
+    if (! dir.exists())
+        return data;
+
+    if (dir.exists("index.html"))
+        data = readFile(dir.absoluteFilePath("index.html"));
+    else if (dir.exists("index.htm"))
+        data = readFile(dir.absoluteFilePath("index.htm"));
+    else
+        data = QString("No index.html or index.htm found at \"%1\".").arg(mDirectory.absolutePath()).toUtf8();
+
     return data;
 }
 
@@ -114,10 +190,9 @@ void SimpleHttpServer::discardClient()
     socket->deleteLater();
 }
 
-QString SimpleHttpServer::guessType(const QString& path)
+QString SimpleHttpServer::guessMimeType(const QFileInfo& fileInfo)
 {
-    QFileInfo info(path);
-    QString ext = info.suffix();
+    QString ext = fileInfo.suffix();
 
     if (! mMimetypes.contains(ext))
         ext = ext.toLower();
@@ -166,27 +241,18 @@ QString SimpleHttpServer::serverDirectory()
     return mDirectory.absolutePath();
 }
 
-QString SimpleHttpServer::fullPath(QString path)
+QFileInfo SimpleHttpServer::fileInfo(const QString& filepath)
 {
+    QString path = filepath;
     path = path.split('?')[0];
     path = path.split('#')[0];
-    path = QUrl::fromPercentEncoding(path.toLatin1());
+    path = QUrl::fromPercentEncoding(path.toUtf8());
     path = QDir::cleanPath(path);
     if (path.startsWith("/"))
         path.remove(0, 1);
-    QDir dir = mDirectory;
-    QFileInfo info (mDirectory.absoluteFilePath(path));
 
-    if (info.isDir()) {
-        if (dir.exists("index.html"))
-            return dir.absoluteFilePath("index.html");
-        else if (dir.exists("index.htm"))
-            return dir.absoluteFilePath("index.htm");
-        else
-            return "";
-    }
-
-    return info.absoluteFilePath();
+    QFileInfo info(mDirectory.absoluteFilePath(path));
+    return info;
 }
 
 void SimpleHttpServer::setServerPort(qint64 port)
@@ -197,4 +263,17 @@ void SimpleHttpServer::setServerPort(qint64 port)
 QString SimpleHttpServer::serverUrl()
 {
     return QString("http://%1:%2").arg(serverAddress().toString()).arg(serverPort());
+}
+
+QString SimpleHttpServer::httpDate(const QDateTime & date)
+{
+    QLocale en(QLocale::English);
+    QDateTime utcDate = date.toUTC();
+    int weekDay = utcDate.date().dayOfWeek();
+    int month = utcDate.date().month();
+
+    return QString("%1, %2 %3 %4 GMT").arg(en.dayName(weekDay, QLocale::ShortFormat))
+                                         .arg(utcDate.toString("dd"))
+                                         .arg(en.monthName(month, QLocale::ShortFormat))
+                                         .arg(utcDate.toString("yyyy hh:mm:ss"));
 }

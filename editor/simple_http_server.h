@@ -3,6 +3,10 @@
 
 #include <QTcpServer>
 #include <QDir>
+#include <QTimer>
+#include <QTcpSocket>
+
+const quint32 KEEP_ALIVE_TIMEOUT = 5;
 
 class SimpleHttpServer : public QTcpServer
 {
@@ -17,6 +21,7 @@ class SimpleHttpServer : public QTcpServer
 public:
     explicit SimpleHttpServer(const QString& address="127.0.0.1", int port=0, const QString& dir=".", QObject *parent = 0);
     QByteArray readFile(const QString&);
+    QByteArray readDir(const QString&);
     bool start();
     void stop();
     void setServerPort(qint64);
@@ -25,8 +30,9 @@ public:
     QString serverUrl();
 
 protected:
-    QString guessType(const QString&);
-    QString fullPath(QString);
+    QString guessMimeType(const QFileInfo&);
+    QString httpDate(const QDateTime&);
+    QFileInfo fileInfo(const QString&);
 
 signals:
 

@@ -125,7 +125,8 @@ HEADERS      += belle.h\
     gameobject_editorwidget.h \
     editorwidgetfactory.h \
     gameobjectmanager.h \
-    webviewwindow.h
+    webviewwindow.h \
+    sockettimeout.h
                 
 
 SOURCES      += main.cpp\
@@ -233,6 +234,7 @@ SOURCES      += main.cpp\
     gameobject_editorwidget.cpp \
     editorwidgetfactory.cpp \
     gameobjectmanager.cpp \
-    webviewwindow.cpp
+    webviewwindow.cpp \
+    sockettimeout.cpp
 
 RESOURCES += media.qrc
