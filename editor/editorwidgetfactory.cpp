@@ -28,55 +28,159 @@
 #include "objectgroup_editor_widget.h"
 #include "scene_editor_widget.h"
 
-static QHash<QString, GameObjectEditorWidget*> mEditorWidgets;
+static QHash<EditorWidgetFactory::Type, GameObjectEditorWidget*> mEditorWidgets;
+static QHash<EditorWidgetFactory::Type, QString> mEditorTypes;
 
 void EditorWidgetFactory::load()
 {
+    mEditorTypes.insert(EditorWidgetFactory::Action, "Action");
+    mEditorTypes.insert(EditorWidgetFactory::Show, "Show");
+    mEditorTypes.insert(EditorWidgetFactory::Hide, "Hide");
+    mEditorTypes.insert(EditorWidgetFactory::Wait, "Wait");
+    mEditorTypes.insert(EditorWidgetFactory::Dialogue, "Dialogue");
+    mEditorTypes.insert(EditorWidgetFactory::Slide, "Slide");
+    mEditorTypes.insert(EditorWidgetFactory::Fade, "Fade");
+    mEditorTypes.insert(EditorWidgetFactory::Label, "Label");
+    mEditorTypes.insert(EditorWidgetFactory::GoToLabel, "GoToLabel");
+    mEditorTypes.insert(EditorWidgetFactory::GoToScene, "GoToScene");
+    mEditorTypes.insert(EditorWidgetFactory::Branch, "Branch");
+    mEditorTypes.insert(EditorWidgetFactory::GetUserInput, "GetUserInput");
+    mEditorTypes.insert(EditorWidgetFactory::ShowMenu, "ShowMenu");
+    mEditorTypes.insert(EditorWidgetFactory::ChangeColor, "ChangeColor");
+    mEditorTypes.insert(EditorWidgetFactory::PlaySound, "PlaySound");
+    mEditorTypes.insert(EditorWidgetFactory::StopSound, "StopSound");
+    mEditorTypes.insert(EditorWidgetFactory::ChangeGameVariable, "ChangeGameVariable");
+    mEditorTypes.insert(EditorWidgetFactory::ChangeBackground, "ChangeBackground");
+    mEditorTypes.insert(EditorWidgetFactory::RunScript, "RunScript");
+    mEditorTypes.insert(EditorWidgetFactory::ChangeState, "ChangeState");
+    mEditorTypes.insert(EditorWidgetFactory::End, "End");
+
+    mEditorTypes.insert(EditorWidgetFactory::Object, "Object");
+    mEditorTypes.insert(EditorWidgetFactory::TextBox, "TextBox");
+    mEditorTypes.insert(EditorWidgetFactory::Button, "Button");
+    mEditorTypes.insert(EditorWidgetFactory::Image, "Image");
+    mEditorTypes.insert(EditorWidgetFactory::Character, "Character");
+    mEditorTypes.insert(EditorWidgetFactory::ObjectGroup, "ObjectGroup");
+    mEditorTypes.insert(EditorWidgetFactory::DialogueBox, "DialogueBox");
+    mEditorTypes.insert(EditorWidgetFactory::Menu, "Menu");
+
+    mEditorTypes.insert(EditorWidgetFactory::Scene, "Scene");
+
+    QHashIterator<Type, QString> it(mEditorTypes);
+    GameObjectEditorWidget* editor = 0;
+
+    while(it.hasNext()) {
+        it.next();
+
+        editor = createEditorWidget(it.key());
+        if (editor)
+            mEditorWidgets.insert(it.key(), editor);
+    }
+}
+
+GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(Type type)
+{
     //actions
-    mEditorWidgets.insert("action", new ActionEditorWidget);
-    mEditorWidgets.insert("show", new ShowEditorWidget);
-    mEditorWidgets.insert("hide", new HideEditorWidget);
-    mEditorWidgets.insert("wait", new WaitEditorWidget);
-    mEditorWidgets.insert("dialogue", new DialogueEditorWidget);
-    mEditorWidgets.insert("slide", new SlideEditorWidget);
-    mEditorWidgets.insert("fade", new FadeEditorWidget);
-    mEditorWidgets.insert("label", new LabelEditorWidget);
-    mEditorWidgets.insert("gotolabel", new GoToLabelEditorWidget);
-    mEditorWidgets.insert("gotoscene", new GoToSceneEditorWidget);
-    mEditorWidgets.insert("branch", new BranchEditorWidget);
-    mEditorWidgets.insert("getuserinput", new GetUserInputEditorWidget);
-    mEditorWidgets.insert("showmenu", new ShowMenuEditorWidget);
-    mEditorWidgets.insert("changecolor", new ChangeColorEditorWidget);
-    mEditorWidgets.insert("playsound", new PlaySoundEditorWidget);
-    mEditorWidgets.insert("stopsound", new StopSoundEditorWidget);
-    mEditorWidgets.insert("changegamevariable", new ChangeGameVariableEditorWidget);
-    mEditorWidgets.insert("changebackground", new ChangeBackgroundEditorWidget);
-    mEditorWidgets.insert("runscript", new RunScriptEditorWidget);
-    mEditorWidgets.insert("changestate", new ChangeStateEditorWidget);
-    mEditorWidgets.insert("end", new GameObjectEditorWidget);
+    if (type == Action)
+        return new ActionEditorWidget;
+    else if (type == Show)
+        return new ShowEditorWidget;
+    else if (type == Hide)
+        return new HideEditorWidget;
+    else if (type == Wait)
+        return new WaitEditorWidget;
+    else if (type == Dialogue)
+        return new DialogueEditorWidget;
+    else if (type == Slide)
+        return new SlideEditorWidget;
+    else if (type == Fade)
+        return new FadeEditorWidget;
+    else if (type == Label)
+        return new LabelEditorWidget;
+    else if (type == GoToLabel)
+        return new GoToLabelEditorWidget;
+    else if (type == GoToScene)
+        return new GoToSceneEditorWidget;
+    else if (type == Branch)
+        return new BranchEditorWidget;
+    else if (type == GetUserInput)
+        return new GetUserInputEditorWidget;
+    else if (type == ShowMenu)
+        return new ShowMenuEditorWidget;
+    else if (type == ChangeColor)
+        return new ChangeColorEditorWidget;
+    else if (type == PlaySound)
+        return new PlaySoundEditorWidget;
+    else if (type == StopSound)
+        return new StopSoundEditorWidget;
+    else if (type == ChangeGameVariable)
+        return new ChangeGameVariableEditorWidget;
+    else if (type == ChangeBackground)
+        return new ChangeBackgroundEditorWidget;
+    else if (type == RunScript)
+        return new RunScriptEditorWidget;
+    else if (type == ChangeState)
+        return new ChangeStateEditorWidget;
+    else if (type == End)
+        return new GameObjectEditorWidget;
 
     //objects
-    mEditorWidgets.insert("object", new ObjectEditorWidget);
-    mEditorWidgets.insert("textbox", new TextPropertiesWidget);
-    mEditorWidgets.insert("button", new TextPropertiesWidget);
-    mEditorWidgets.insert("image", new ObjectEditorWidget);
-    mEditorWidgets.insert("character", new CharacterPropertiesWidget);
-    mEditorWidgets.insert("objectgroup", new ObjectGroupEditorWidget);
-    mEditorWidgets.insert("dialoguebox", new ObjectGroupEditorWidget);
-    mEditorWidgets.insert("menu", new ObjectGroupEditorWidget);
+    else if (type == Object)
+        return new ObjectEditorWidget;
+    else if (type == TextBox)
+        return new TextPropertiesWidget;
+    else if (type == Button)
+        return new TextPropertiesWidget;
+    else if (type == Image)
+        return new ObjectEditorWidget;
+    else if (type == Character)
+        return new CharacterPropertiesWidget;
+    else if (type == ObjectGroup)
+        return new ObjectGroupEditorWidget;
+    else if (type == DialogueBox)
+        return new ObjectGroupEditorWidget;
+    else if (type == Menu)
+        return new ObjectGroupEditorWidget;
 
     //scene
-    mEditorWidgets.insert("scene", new SceneEditorWidget);
+    else if (type == Scene)
+        return new SceneEditorWidget;
+
+    return 0;
+}
+
+GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(const QString & type)
+{
+    createEditorWidget(typeFromString(type));
+}
+
+EditorWidgetFactory::Type EditorWidgetFactory::typeFromString(const QString& type)
+{
+    QHashIterator<Type, QString> it(mEditorTypes);
+    QString ltype = type.toLower();
+
+    while(it.hasNext()) {
+        it.next();
+        if (it.value().toLower() == ltype)
+            return it.key();
+    }
+
+    return Unknown;
+}
+
+GameObjectEditorWidget* EditorWidgetFactory::editorWidget(Type type)
+{
+    return mEditorWidgets.value(type, 0);
 }
 
 GameObjectEditorWidget* EditorWidgetFactory::editorWidget(const QString& type)
 {
-    return mEditorWidgets.value(type.toLower(), 0);
+    return editorWidget(typeFromString(type));
 }
 
 void EditorWidgetFactory::destroy()
 {
-    QHashIterator<QString, GameObjectEditorWidget*> it(mEditorWidgets);
+    QHashIterator<Type, GameObjectEditorWidget*> it(mEditorWidgets);
     while(it.hasNext()) {
         it.next();
         if (it.value())
