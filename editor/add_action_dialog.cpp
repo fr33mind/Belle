@@ -164,16 +164,18 @@ void AddActionDialog::switchPropertyWidget(QWidget* widget)
 {
     QLayout *layout = mPropertiesEditorParentWidget->layout();
     QLayoutItem *item;
+
     if (! layout)
         return;
 
-    while((item = layout->takeAt(0)) != 0)
+    if((item = layout->takeAt(0)) != 0) {
         if (item && item->widget()) {
-            item->widget()->setParent(0);
-            item->widget()->hide();
+            item->widget()->deleteLater();
         }
+    }
 
     if (widget) {
+        widget->setParent(mPropertiesEditorParentWidget);
         layout->addWidget(widget);
         if (widget->isHidden())
             widget->show();
@@ -218,7 +220,8 @@ void AddActionDialog::onNewAction(Action * action)
     }
 
     mCurrentAction = action;
-    editor = EditorWidgetFactory::editorWidget(action->type());
+    editor = EditorWidgetFactory::createEditorWidget(action->type());
+    editor->setParent(this);
     switchPropertyWidget(editor);
     if (editor)
         editor->setGameObject(action);
