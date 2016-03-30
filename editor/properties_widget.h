@@ -37,9 +37,9 @@ public:
     explicit PropertiesWidget(QWidget *parent = 0, int columns=2);
     void beginGroup(const QString&, const QString& key="");
     void appendRow ( QStandardItem *);
-    void appendRow(const QString&, const QString&, const QString& key="");
-    void appendRow(const QIcon&, const QString&, const QString& key="");
-    void appendRow(const QString&, QWidget*, const QString& key="");
+    void appendRow(const QString&, const QString&, const QVariant& data=QVariant());
+    void appendRow(const QIcon&, const QString&, const QVariant& data=QVariant());
+    void appendRow(const QString&, QWidget*, const QVariant& data=QVariant());
     void appendRow(PropertiesWidget*, QStandardItem*, QStandardItem*);
     void endGroup();
     void beginSubGroup(const QString&, QWidget* widget=0);

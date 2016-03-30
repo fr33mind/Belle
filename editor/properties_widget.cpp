@@ -69,7 +69,7 @@ void PropertiesWidget::appendRow(QStandardItem * item)
     mModel->appendRow(item);
 }
 
-void PropertiesWidget::appendRow(const QString& text, const QString& text2, const QString & key)
+void PropertiesWidget::appendRow(const QString& text, const QString& text2, const QVariant & data)
 {
     if (! mLastItem)
         return;
@@ -78,14 +78,14 @@ void PropertiesWidget::appendRow(const QString& text, const QString& text2, cons
     QStandardItem *child = new QStandardItem(text);
     QStandardItem *child2 = new QStandardItem(text2);
     child->setEditable(false);
-    if (! key.isEmpty())
-        child->setData(key);
+    if (! data.isNull())
+        child->setData(data);
     item->appendRow(QList<QStandardItem*>() << child << child2);
     this->expand(child->index().parent());
 
 }
 
-void PropertiesWidget::appendRow(const QIcon& icon, const QString& text, const QString & key)
+void PropertiesWidget::appendRow(const QIcon& icon, const QString& text, const QVariant & data)
 {
     if (! mLastItem)
         return;
@@ -94,14 +94,14 @@ void PropertiesWidget::appendRow(const QIcon& icon, const QString& text, const Q
     QStandardItem *child = new QStandardItem(text);
     child->setIcon(icon);
     child->setEditable(false);
-    if (! key.isEmpty())
-        child->setData(key);
+    if (! data.isNull())
+        child->setData(data);
     item->appendRow(QList<QStandardItem*>() << child);
     this->expand(child->index().parent());
 }
 
 
-void PropertiesWidget::appendRow(const QString& text, QWidget* widget, const QString & key)
+void PropertiesWidget::appendRow(const QString& text, QWidget* widget, const QVariant & data)
 {
     if (! mLastItem)
         return;
@@ -110,8 +110,8 @@ void PropertiesWidget::appendRow(const QString& text, QWidget* widget, const QSt
     QStandardItem *child = new QStandardItem(text);
     QStandardItem *child2 = new QStandardItem;
     child->setEditable(false);
-    if (! key.isEmpty())
-        child->setData(key);
+    if (! data.isNull())
+        child->setData(data);
     item->appendRow(QList<QStandardItem*>() << child << child2);
     if (widget)
         this->setIndexWidget(child2->index(), widget);
