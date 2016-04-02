@@ -127,7 +127,8 @@ HEADERS      += belle.h\
     gameobjectmanager.h \
     webviewwindow.h \
     sockettimeout.h \
-    gameobjectmetatype.h
+    gameobjectmetatype.h \
+    gameobjectfactory.h
                 
 
 SOURCES      += main.cpp\
@@ -237,6 +238,7 @@ SOURCES      += main.cpp\
     gameobjectmanager.cpp \
     webviewwindow.cpp \
     sockettimeout.cpp \
-    gameobjectmetatype.cpp
+    gameobjectmetatype.cpp \
+    gameobjectfactory.cpp
 
 RESOURCES += media.qrc

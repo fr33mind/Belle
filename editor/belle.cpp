@@ -58,6 +58,7 @@
 #include "update_elements_dialog.h"
 #include "objectsview.h"
 #include "editorwidgetfactory.h"
+#include "gameobjectfactory.h"
 
 static Belle* mInstance = 0;
 
@@ -113,6 +114,7 @@ Belle::Belle(QWidget *widget)
     mUi.pauseScenesWidget->setIconSize(QSize(64, 48));
 
     //create editors
+    GameObjectFactory::init();
     EditorWidgetFactory::load();
     ActionInfoManager::init();
 
@@ -291,6 +293,7 @@ bool Belle::eventFilter(QObject *obj, QEvent *ev)
 
 Belle::~Belle()
 {
+    GameObjectFactory::destroy();
     ActionInfoManager::destroy();
     ResourceManager::destroy();
     EditorWidgetFactory::destroy();
