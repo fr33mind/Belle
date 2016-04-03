@@ -29,6 +29,7 @@
 #include "animatedimage.h"
 #include "sound.h"
 #include "gameobjectmanager.h"
+#include "gameobjectfactory.h"
 
 static ResourceManager* mInstance = new ResourceManager();
 
@@ -50,33 +51,6 @@ void ResourceManager::add(const QVariantMap& data)
     add(createObject(data, this));
 }
 
-GameObject * ResourceManager::typeToObject(const QString& type, QVariantMap& data, QObject* parent)
-{
-    QString _type = type.toLower();
-
-    if (_type == "object")
-        return new Object(data, parent);
-    else if (_type == "image")
-        return new Image(data, parent);
-    else if (_type == "character")
-        return new Character(data, parent);
-    else if (_type == "dialoguebox")
-        return new DialogueBox(data, parent);
-    else if (_type == "textbox")
-        return new TextBox(data, parent);
-    else if (_type == "button")
-        return new Button(data, parent);
-    else if (_type == "objectgroup")
-        return new ObjectGroup(data, parent);
-    else if (_type == "menu")
-        return new Menu(data, parent);
-    else if (_type == "menuoption")
-        return new MenuOption(data, parent);
-    //else if (_type == "sound")
-      //  return new Sound(data, parent);
-    return 0;
-}
-
 GameObject* ResourceManager::createGameObject(const QVariantMap& info, QObject* parent)
 {
     GameObject* _resource = 0;
@@ -91,7 +65,7 @@ GameObject* ResourceManager::createGameObject(const QVariantMap& info, QObject* 
     if (data.contains("type") && data.value("type").type() == QVariant::String)
         type = data.value("type").toString();
 
-    GameObject *object = typeToObject(type, data, parent);
+    GameObject* object = GameObjectFactory::createGameObject(data, parent);
     if (object && _resource)
         object->setResource(_resource);
 

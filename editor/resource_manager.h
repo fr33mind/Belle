@@ -49,7 +49,6 @@ public:
     void load(const QVariantMap&);
     QVariantMap toMap();
 
-    static GameObject* typeToObject(const QString&, QVariantMap& extraData, QObject* parent=0);
     static ResourceManager* instance();
     static QList<GameObject*> resources();
     static void destroy();
