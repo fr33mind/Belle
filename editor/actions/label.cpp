@@ -34,7 +34,7 @@ Label::Label(const QVariantMap& data, QObject *parent) :
 
 void Label::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::Label);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
 }

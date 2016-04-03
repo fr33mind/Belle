@@ -63,12 +63,12 @@ void ChangeVisibility::init(bool show)
 
     if (show) {
         setTypeName(tr("Show"));
-        setType("Show");
+        setType(GameObjectMetaType::Show);
         mFadeAction->setFadeType(Fade::In);
     }
     else {
         setTypeName(tr("Hide"));
-        setType("Hide");
+        setType(GameObjectMetaType::Hide);
         mFadeAction->setFadeType(Fade::Out);
     }
 

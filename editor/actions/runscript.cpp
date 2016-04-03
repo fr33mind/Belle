@@ -24,7 +24,7 @@ RunScript::RunScript(const QVariantMap& data, QObject *parent) :
 
 void RunScript::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::RunScript);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
 }

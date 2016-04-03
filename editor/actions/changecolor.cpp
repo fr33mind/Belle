@@ -53,7 +53,7 @@ ChangeColor::ChangeColor(const QVariantMap& data, QObject *parent) :
 void ChangeColor::init()
 {
     setTypeName(Info.typeName);
-    setType(Info.type);
+    setType(GameObjectMetaType::ChangeColor);
     setIcon(Info.icon);
     mChangeObjectColor = true;
     mChangeObjectBackgroundColor = false;

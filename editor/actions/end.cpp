@@ -21,7 +21,7 @@ ActionInfo End::Info;
 End::End(QObject *parent) :
     Action(parent)
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::End);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
 }

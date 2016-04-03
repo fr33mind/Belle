@@ -50,7 +50,7 @@ DialogueBox::DialogueBox(const QVariantMap& data, QObject* parent):
 
 void DialogueBox::init()
 {
-    setType("DialogueBox");
+    setType(GameObjectMetaType::DialogueBox);
 }
 
 DialogueBox::~DialogueBox()

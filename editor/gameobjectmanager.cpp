@@ -192,8 +192,10 @@ QString GameObjectManager::uniqueName(GameObject* object, const QString& newName
 
     if (name.isEmpty())
         name = object->name();
-    if (name.isEmpty())
-        name = object->type();
+    if (name.isEmpty()) {
+        const GameObjectMetaType* metatype = GameObjectMetaType::metaType(object->type());
+        name = metatype ? metatype->toString() : "";
+    }
 
     while(! isValidName(object, name)) {
         name = Utils::incrementLastNumber(name);

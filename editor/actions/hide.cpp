@@ -32,7 +32,7 @@ Hide::Hide(const QVariantMap &data, QObject *parent):
 
 void Hide::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::Hide);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
 }

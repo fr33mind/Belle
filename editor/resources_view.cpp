@@ -72,12 +72,15 @@ void ResourcesView::addObject(GameObject * object)
     if (! object)
         return;
 
-    if (containsGroup(object->type())) {
-        setLastItem(object->type());
+    const GameObjectMetaType* metatype = GameObjectMetaType::metaType(object->type());
+    QString typeName = metatype ? metatype->name() : "";
+
+    if (containsGroup(typeName)) {
+        setLastItem(typeName);
         appendRow(QIcon(), object->objectName());
     }
     else {
-        beginGroup(object->type());
+        beginGroup(typeName);
         appendRow(QIcon(), object->objectName());
         endGroup();
     }

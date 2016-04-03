@@ -45,7 +45,7 @@ Slide::Slide(const QVariantMap& data, QObject *parent) :
 
 void Slide::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::Slide);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |

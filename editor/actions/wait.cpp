@@ -48,7 +48,7 @@ Wait::Wait(const QVariantMap& data, QObject *parent) :
 
 void Wait::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::Wait);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     setWaitType(Timed);

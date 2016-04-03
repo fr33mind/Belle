@@ -99,7 +99,7 @@ void Scene::init(const QString& name)
     mHighlightedObject = 0;
     mBackgroundImage = 0;
     mTemporaryBackgroundImage = 0;
-    setType("Scene");
+    setType(GameObjectMetaType::Scene);
     //mScenePixmap = new QPixmap(Scene::width(), Scene::height());
     //mScenePixmap->fill(Qt::gray);
 
@@ -121,11 +121,8 @@ QList<Object*> Scene::objects() const
     return objects;
 }
 
-QList<Object*> Scene::objects(const QString& type) const
+QList<Object*> Scene::objects(GameObjectMetaType::Type type) const
 {
-    if (type.isEmpty())
-        return objects();
-
     QList<Object*> objects;
     for(int i=0; i < mObjectManager.count(); i++)
         if (mObjectManager.objectAt(i)->type() == type)
@@ -190,12 +187,12 @@ void Scene::_appendObject(Object* object, bool temporary)
 
 void Scene::_reorderObject(Object* object)
 {
-    if (object->type() != "TextBox" && object->type() != "DialogueBox" && object->type() != "Button") {
+    if (object->type() != GameObjectMetaType::TextBox && object->type() != GameObjectMetaType::DialogueBox && object->type() != GameObjectMetaType::Button) {
         int index = mObjectManager.indexOf(object);
         int i=index-1;
         GameObject* obj = mObjectManager.objectAt(i);
 
-        while(i >= 0 && (obj->type() == "TextBox" || obj->type() == "DialogueBox" || obj->type() == "Button")) {
+        while(i >= 0 && (obj->type() == GameObjectMetaType::TextBox || obj->type() == GameObjectMetaType::DialogueBox || obj->type() == GameObjectMetaType::Button)) {
             --i;
         }
 

@@ -110,7 +110,7 @@ void TextBox::init(const QString& text)
     mTextRect = sceneRect();
     mPlaceholderText = "";
     mTextAlignment = Qt::AlignLeft | Qt::AlignTop;
-    setType("TextBox");
+    setType(GameObjectMetaType::TextBox);
     mFont.setFamily(Object::defaultFontFamily());
     mFont.setPixelSize(Object::defaultFontSize());
 }

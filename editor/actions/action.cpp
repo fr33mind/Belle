@@ -66,7 +66,7 @@ void Action::init()
     mAllowSkipping = true;
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
-    setType(Info.type);
+    setType(GameObjectMetaType::Action);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     setName("");

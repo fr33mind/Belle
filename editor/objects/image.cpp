@@ -79,7 +79,7 @@ void Image::init()
 {
     setKeepAspectRatio(true);
     mImage = 0;
-    setType("Image");
+    setType(GameObjectMetaType::Image);
 }
 
 void Image::_setImage(ImageFile* image)

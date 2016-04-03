@@ -62,7 +62,7 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
 
 void Branch::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::Branch);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     mCondition = "";

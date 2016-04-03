@@ -47,6 +47,7 @@ Object::Object(const QVariantMap& data, QObject* parent):
 
 void Object::init()
 {
+    setType(GameObjectMetaType::Object);
     mOpacity = 255;
     mBackground.setColor(QColor(255, 255, 255, 0));
     mCornerRadius = 0;

@@ -39,7 +39,7 @@ GoToLabel::GoToLabel(const QVariantMap& data, QObject *parent) :
 
 void GoToLabel::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::GoToLabel);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     mTargetLabel = 0;

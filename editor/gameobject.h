@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QVariantMap>
 
+#include "gameobjectmetatype.h"
+
 class Scene;
 class GameObjectManager;
 
@@ -18,7 +20,7 @@ public:
 
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
-    QString type() const;
+    GameObjectMetaType::Type type() const;
 
     bool setName(const QString&);
     QString name() const;
@@ -54,7 +56,7 @@ protected:
     virtual void disconnectFromResource();
     void notify(const QString&, const QVariant&);
     void blockNotifications(bool);
-    void setType(const QString&);
+    void setType(GameObjectMetaType::Type);
 
 private:
     void init();
@@ -64,7 +66,7 @@ private:
     GameObject* mResource;
     bool mNameEditable;
     bool mSynced;
-    QString mType;
+    GameObjectMetaType::Type mType;
     QList<GameObject*> mClones;
     GameObjectManager* mManager;
 

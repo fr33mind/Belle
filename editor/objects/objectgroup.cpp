@@ -77,7 +77,7 @@ void ObjectGroup::load(const QVariantMap& data)
 
 void ObjectGroup::init()
 {
-    setType("ObjectGroup");
+    setType(GameObjectMetaType::ObjectGroup);
     mEditingMode = false;
     mSelectedObject = 0;
 }

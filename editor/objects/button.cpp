@@ -36,7 +36,7 @@ Button::Button(const QString&text, QObject *parent, const QString& name) :
 Button::Button(const QVariantMap& data, QObject *parent) :
     TextBox(data, parent)
 {
-    setType("Button");
+    setType(GameObjectMetaType::Button);
 }
 
 void Button::init()
@@ -52,7 +52,7 @@ void Button::init()
     setCornerRadius(10);
     setBorderColor(Qt::black);
     setBorderWidth(1);
-    setType("Button");
+    setType(GameObjectMetaType::Button);
 
     int width = Scene::width();
     int height = Scene::height();

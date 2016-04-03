@@ -46,7 +46,7 @@ void ChangeBackground::init()
 {
     setIcon(Info.icon);
     setTypeName(Info.typeName);
-    setType(Info.type);
+    setType(GameObjectMetaType::ChangeBackground);
 
     mBackgroundImage = 0;
 }

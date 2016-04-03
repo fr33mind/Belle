@@ -93,7 +93,7 @@ void Character::init(const QString& name)
     mCurrentState = "";
     mNameColor = QColor(Qt::white);
     mTextColor = QColor(Qt::white);
-    setType("Character");
+    setType(GameObjectMetaType::Character);
     if (! name.isEmpty())
         setObjectName(name);
 }

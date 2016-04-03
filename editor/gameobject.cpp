@@ -26,7 +26,7 @@ void GameObject::init()
     mNameEditable = true;
     mResource = 0;
     mSynced = true;
-    mType = "GameObject";
+    mType = GameObjectMetaType::GameObject;
     mManager = 0;
 }
 
@@ -36,7 +36,7 @@ void GameObject::_load(const QVariantMap & data)
         setName(data.value("name").toString());
 
     if (data.contains("type") && data.value("type").type() == QVariant::String)
-        setType(data.value("type").toString());
+        setType(GameObjectMetaType::typeFromString(data.value("type").toString()));
 }
 
 void GameObject::load(const QVariantMap & data)
@@ -51,16 +51,18 @@ QVariantMap GameObject::toJsonObject(bool internal) const
     QVariantMap data;
     if (! name().isEmpty())
         data.insert("name", name());
-    data.insert("type", mType);
+    const GameObjectMetaType* metatype = GameObjectMetaType::metaType(type());
+    if (metatype)
+        data.insert("type", metatype->toString());
     return data;
 }
 
-void GameObject::setType(const QString & type)
+void GameObject::setType(GameObjectMetaType::Type type)
 {
     mType = type;
 }
 
-QString GameObject::type() const
+GameObjectMetaType::Type GameObject::type() const
 {
     return mType;
 }

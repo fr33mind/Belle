@@ -108,7 +108,9 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
         painter->restore();
     }
 
-    int textHeight = option.fontMetrics.size(0, action->type()).height();
+    const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
+    QString typeString = metatype ? metatype->toString() : "";
+    int textHeight = option.fontMetrics.size(0, typeString).height();
     action->icon().paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
 
     textRect.setX(textHeight+BORDER*2);

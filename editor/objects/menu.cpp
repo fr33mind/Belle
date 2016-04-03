@@ -46,7 +46,7 @@ Menu::Menu(const QVariantMap& data, QObject *parent) :
 
 void Menu::init()
 {
-    setType("Menu");
+    setType(GameObjectMetaType::Menu);
     mResourceButton = 0;
 }
 

@@ -36,7 +36,7 @@ Show::Show(QObject *parent):
 
 void Show::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::Show);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     mCharacterState = "";

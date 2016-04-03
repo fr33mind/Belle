@@ -52,7 +52,7 @@ class Scene : public GameObject
         ~Scene();
         SceneManager* sceneManager();
         QList<Object*> objects() const;
-        QList<Object*> objects(const QString& type) const;
+        QList<Object*> objects(GameObjectMetaType::Type) const;
         QList<Object*> temporaryObjects();
         Object* objectAt (qreal, qreal);
         Object* object(const QString&);

@@ -28,7 +28,7 @@ MenuOption::MenuOption(const QVariantMap& data, QObject* parent) :
 
 void MenuOption::init()
 {
-    setType("MenuOption");
+    setType(GameObjectMetaType::MenuOption);
 }
 
 QList<Action *> MenuOption::actions() const

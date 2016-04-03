@@ -40,7 +40,7 @@ StopSound::StopSound(const QVariantMap& data,QObject *parent) :
 
 void StopSound::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::StopSound);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     mSound = "";

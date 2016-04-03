@@ -56,7 +56,7 @@ ShowMenu::ShowMenu(const QVariantMap& data, QObject *parent) :
 
 void ShowMenu::init()
 {
-    setType(Info.type);
+    setType(GameObjectMetaType::ShowMenu);
     setTypeName(Info.typeName);
     setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);

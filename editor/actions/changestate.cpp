@@ -22,7 +22,7 @@ ChangeState::ChangeState(const QVariantMap& data, QObject *parent) :
 void ChangeState::init()
 {
     setTypeName(Info.typeName);
-    setType(Info.type);
+    setType(GameObjectMetaType::ChangeState);
     setIcon(Info.icon);
     mState = "";
 }
@@ -38,7 +38,7 @@ QList<Object*> ChangeState::availableObjects() const
 {
     Scene* scene = this->scene();
     if (scene)
-        return scene->objects("Character");
+        return scene->objects(GameObjectMetaType::Character);
 
     return QList<Object*>();
 }
