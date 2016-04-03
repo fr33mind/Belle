@@ -35,7 +35,7 @@ class PropertiesWidget : public QTreeView
 
 public:
     explicit PropertiesWidget(QWidget *parent = 0, int columns=2);
-    void beginGroup(const QString&, const QString& key="");
+    void beginGroup(const QString&, const QVariant& data=QVariant());
     void appendRow ( QStandardItem *);
     void appendRow(const QString&, const QString&, const QVariant& data=QVariant());
     void appendRow(const QIcon&, const QString&, const QVariant& data=QVariant());

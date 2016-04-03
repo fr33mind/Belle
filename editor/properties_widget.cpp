@@ -39,7 +39,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent, int columns) :
     //this->header()->setResizeMode(QHeaderView::ResizeToContents);
 }
 
-void PropertiesWidget::beginGroup(const QString & name, const QString & key)
+void PropertiesWidget::beginGroup(const QString & name, const QVariant &data)
 {
     QStandardItem* item = 0;
     QList<QStandardItem*> items;
@@ -56,8 +56,8 @@ void PropertiesWidget::beginGroup(const QString & name, const QString & key)
     if (items.size()) {
         item = items.first();
         item->setText(name);
-        if (! key.isEmpty())
-            item->setData(key);
+        if (! data.isNull())
+            item->setData(data);
 
         mModel->appendRow(items);
         mLastItem = item;
@@ -238,7 +238,6 @@ void PropertiesWidget::beginSubGroup(PropertiesWidget* propertiesWidget, QStanda
 
 bool PropertiesWidget::containsGroup(const QString& name)
 {
-
     QStandardItem* item = 0;
     QStandardItem* child = 0;
 
