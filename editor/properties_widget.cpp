@@ -236,7 +236,7 @@ void PropertiesWidget::beginSubGroup(PropertiesWidget* propertiesWidget, QStanda
     updateLastItem();
 }
 
-bool PropertiesWidget::containsGroup(const QString& name)
+bool PropertiesWidget::containsGroup(const QString& name, const QVariant& data)
 {
     QStandardItem* item = 0;
     QStandardItem* child = 0;
@@ -248,8 +248,12 @@ bool PropertiesWidget::containsGroup(const QString& name)
 
         for(int j=0; j < item->rowCount(); j++) {
             child = item->child(j);
-            if (child && child->text() == name)
-                return true;
+            if (child && child->text() == name) {
+                if (data.isNull())
+                    return true;
+                else if (child->data() == data)
+                    return true;
+            }
         }
     }
 

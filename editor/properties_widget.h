@@ -46,7 +46,7 @@ public:
     void beginSubGroup(const QString&, const QString&);
     void beginSubGroup(PropertiesWidget*, QStandardItem*, QStandardItem*);
     virtual void setData(const QString&, const QString&);
-    bool containsGroup(const QString&);
+    bool containsGroup(const QString&, const QVariant& data=QVariant());
     void setGroupName(const QString&);
     void moveToGroup(const QString&);
     QStandardItem * lastItem() const;
