@@ -115,7 +115,7 @@ Belle::Belle(QWidget *widget)
 
     //create editors
     GameObjectFactory::init();
-    EditorWidgetFactory::load();
+    EditorWidgetFactory::init();
 
     mActionsView = new ActionsView(this);
     ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
@@ -509,8 +509,8 @@ void Belle::updateSceneIcon(Scene* scene)
 void Belle::updateSceneEditorWidget(Scene* scene)
 {
     if (scene) {
-        GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget("scene");
-        switchWidgetInPropertiesWidget(EditorWidgetFactory::editorWidget("scene"));
+        GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene);
+        switchWidgetInPropertiesWidget(EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene));
         if (editor) {
             editor->setGameObject(scene);
         }
@@ -610,7 +610,7 @@ void Belle::onSelectedObjectChanged(Object* obj)
             editor->setGameObject(obj);
     }
     else if (mCurrentSceneManager && mCurrentSceneManager->currentScene()) {
-        editor = EditorWidgetFactory::editorWidget("scene");
+        editor = EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene);
         switchWidgetInPropertiesWidget(editor);
     }
     else

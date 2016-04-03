@@ -28,159 +28,97 @@
 #include "objectgroup_editor_widget.h"
 #include "scene_editor_widget.h"
 
-static QHash<EditorWidgetFactory::Type, GameObjectEditorWidget*> mEditorWidgets;
-static QHash<EditorWidgetFactory::Type, QString> mEditorTypes;
+static QHash<GameObjectMetaType::Type, GameObjectEditorWidget*> mEditorWidgets;
 
-void EditorWidgetFactory::load()
+void EditorWidgetFactory::init()
 {
-    mEditorTypes.insert(EditorWidgetFactory::Action, "Action");
-    mEditorTypes.insert(EditorWidgetFactory::Show, "Show");
-    mEditorTypes.insert(EditorWidgetFactory::Hide, "Hide");
-    mEditorTypes.insert(EditorWidgetFactory::Wait, "Wait");
-    mEditorTypes.insert(EditorWidgetFactory::Dialogue, "Dialogue");
-    mEditorTypes.insert(EditorWidgetFactory::Slide, "Slide");
-    mEditorTypes.insert(EditorWidgetFactory::Fade, "Fade");
-    mEditorTypes.insert(EditorWidgetFactory::Label, "Label");
-    mEditorTypes.insert(EditorWidgetFactory::GoToLabel, "GoToLabel");
-    mEditorTypes.insert(EditorWidgetFactory::GoToScene, "GoToScene");
-    mEditorTypes.insert(EditorWidgetFactory::Branch, "Branch");
-    mEditorTypes.insert(EditorWidgetFactory::GetUserInput, "GetUserInput");
-    mEditorTypes.insert(EditorWidgetFactory::ShowMenu, "ShowMenu");
-    mEditorTypes.insert(EditorWidgetFactory::ChangeColor, "ChangeColor");
-    mEditorTypes.insert(EditorWidgetFactory::PlaySound, "PlaySound");
-    mEditorTypes.insert(EditorWidgetFactory::StopSound, "StopSound");
-    mEditorTypes.insert(EditorWidgetFactory::ChangeGameVariable, "ChangeGameVariable");
-    mEditorTypes.insert(EditorWidgetFactory::ChangeBackground, "ChangeBackground");
-    mEditorTypes.insert(EditorWidgetFactory::RunScript, "RunScript");
-    mEditorTypes.insert(EditorWidgetFactory::ChangeState, "ChangeState");
-    mEditorTypes.insert(EditorWidgetFactory::End, "End");
-
-    mEditorTypes.insert(EditorWidgetFactory::Object, "Object");
-    mEditorTypes.insert(EditorWidgetFactory::TextBox, "TextBox");
-    mEditorTypes.insert(EditorWidgetFactory::Button, "Button");
-    mEditorTypes.insert(EditorWidgetFactory::Image, "Image");
-    mEditorTypes.insert(EditorWidgetFactory::Character, "Character");
-    mEditorTypes.insert(EditorWidgetFactory::ObjectGroup, "ObjectGroup");
-    mEditorTypes.insert(EditorWidgetFactory::DialogueBox, "DialogueBox");
-    mEditorTypes.insert(EditorWidgetFactory::Menu, "Menu");
-
-    mEditorTypes.insert(EditorWidgetFactory::Scene, "Scene");
-
-    QHashIterator<Type, QString> it(mEditorTypes);
-    GameObjectEditorWidget* editor = 0;
-
-    while(it.hasNext()) {
-        it.next();
-
-        editor = createEditorWidget(it.key());
-        if (editor)
-            mEditorWidgets.insert(it.key(), editor);
-    }
 }
 
-GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(Type type)
+GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaType::Type type)
 {
-    //actions
-    if (type == Action)
-        return new ActionEditorWidget;
-    else if (type == Show)
-        return new ShowEditorWidget;
-    else if (type == Hide)
-        return new HideEditorWidget;
-    else if (type == Wait)
-        return new WaitEditorWidget;
-    else if (type == Dialogue)
-        return new DialogueEditorWidget;
-    else if (type == Slide)
-        return new SlideEditorWidget;
-    else if (type == Fade)
-        return new FadeEditorWidget;
-    else if (type == Label)
-        return new LabelEditorWidget;
-    else if (type == GoToLabel)
-        return new GoToLabelEditorWidget;
-    else if (type == GoToScene)
-        return new GoToSceneEditorWidget;
-    else if (type == Branch)
-        return new BranchEditorWidget;
-    else if (type == GetUserInput)
-        return new GetUserInputEditorWidget;
-    else if (type == ShowMenu)
-        return new ShowMenuEditorWidget;
-    else if (type == ChangeColor)
-        return new ChangeColorEditorWidget;
-    else if (type == PlaySound)
-        return new PlaySoundEditorWidget;
-    else if (type == StopSound)
-        return new StopSoundEditorWidget;
-    else if (type == ChangeGameVariable)
-        return new ChangeGameVariableEditorWidget;
-    else if (type == ChangeBackground)
-        return new ChangeBackgroundEditorWidget;
-    else if (type == RunScript)
-        return new RunScriptEditorWidget;
-    else if (type == ChangeState)
-        return new ChangeStateEditorWidget;
-    else if (type == End)
+    if (type == GameObjectMetaType::GameObject)
         return new GameObjectEditorWidget;
-
+    //actions
+    else if (type == GameObjectMetaType::Action)
+        return new ActionEditorWidget;
+    else if (type == GameObjectMetaType::Show)
+        return new ShowEditorWidget;
+    else if (type == GameObjectMetaType::Hide)
+        return new HideEditorWidget;
+    else if (type == GameObjectMetaType::Wait)
+        return new WaitEditorWidget;
+    else if (type == GameObjectMetaType::Dialogue)
+        return new DialogueEditorWidget;
+    else if (type == GameObjectMetaType::Slide)
+        return new SlideEditorWidget;
+    else if (type == GameObjectMetaType::Fade)
+        return new FadeEditorWidget;
+    else if (type == GameObjectMetaType::Label)
+        return new LabelEditorWidget;
+    else if (type == GameObjectMetaType::GoToLabel)
+        return new GoToLabelEditorWidget;
+    else if (type == GameObjectMetaType::GoToScene)
+        return new GoToSceneEditorWidget;
+    else if (type == GameObjectMetaType::Branch)
+        return new BranchEditorWidget;
+    else if (type == GameObjectMetaType::GetUserInput)
+        return new GetUserInputEditorWidget;
+    else if (type == GameObjectMetaType::ShowMenu)
+        return new ShowMenuEditorWidget;
+    else if (type == GameObjectMetaType::ChangeColor)
+        return new ChangeColorEditorWidget;
+    else if (type == GameObjectMetaType::PlaySound)
+        return new PlaySoundEditorWidget;
+    else if (type == GameObjectMetaType::StopSound)
+        return new StopSoundEditorWidget;
+    else if (type == GameObjectMetaType::ChangeGameVariable)
+        return new ChangeGameVariableEditorWidget;
+    else if (type == GameObjectMetaType::ChangeBackground)
+        return new ChangeBackgroundEditorWidget;
+    else if (type == GameObjectMetaType::RunScript)
+        return new RunScriptEditorWidget;
+    else if (type == GameObjectMetaType::ChangeState)
+        return new ChangeStateEditorWidget;
+    else if (type == GameObjectMetaType::End)
+        return new GameObjectEditorWidget;
     //objects
-    else if (type == Object)
+    else if (type == GameObjectMetaType::Object)
         return new ObjectEditorWidget;
-    else if (type == TextBox)
+    else if (type == GameObjectMetaType::TextBox)
         return new TextPropertiesWidget;
-    else if (type == Button)
+    else if (type == GameObjectMetaType::Button)
         return new TextPropertiesWidget;
-    else if (type == Image)
+    else if (type == GameObjectMetaType::Image)
         return new ObjectEditorWidget;
-    else if (type == Character)
+    else if (type == GameObjectMetaType::Character)
         return new CharacterPropertiesWidget;
-    else if (type == ObjectGroup)
+    else if (type == GameObjectMetaType::ObjectGroup)
         return new ObjectGroupEditorWidget;
-    else if (type == DialogueBox)
+    else if (type == GameObjectMetaType::DialogueBox)
         return new ObjectGroupEditorWidget;
-    else if (type == Menu)
+    else if (type == GameObjectMetaType::Menu)
         return new ObjectGroupEditorWidget;
-
     //scene
-    else if (type == Scene)
+    else if (type == GameObjectMetaType::Scene)
         return new SceneEditorWidget;
 
     return 0;
 }
 
-GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(const QString & type)
+GameObjectEditorWidget* EditorWidgetFactory::editorWidget(GameObjectMetaType::Type type)
 {
-    createEditorWidget(typeFromString(type));
-}
-
-EditorWidgetFactory::Type EditorWidgetFactory::typeFromString(const QString& type)
-{
-    QHashIterator<Type, QString> it(mEditorTypes);
-    QString ltype = type.toLower();
-
-    while(it.hasNext()) {
-        it.next();
-        if (it.value().toLower() == ltype)
-            return it.key();
+    GameObjectEditorWidget* widget = mEditorWidgets.value(type, 0);
+    if (! widget) {
+        widget = createEditorWidget(type);
+        if (widget)
+            mEditorWidgets.insert(type, widget);
     }
-
-    return Unknown;
-}
-
-GameObjectEditorWidget* EditorWidgetFactory::editorWidget(Type type)
-{
-    return mEditorWidgets.value(type, 0);
-}
-
-GameObjectEditorWidget* EditorWidgetFactory::editorWidget(const QString& type)
-{
-    return editorWidget(typeFromString(type));
+    return widget;
 }
 
 void EditorWidgetFactory::destroy()
 {
-    QHashIterator<Type, GameObjectEditorWidget*> it(mEditorWidgets);
+    QHashIterator<GameObjectMetaType::Type, GameObjectEditorWidget*> it(mEditorWidgets);
     while(it.hasNext()) {
         it.next();
         if (it.value())
