@@ -21,7 +21,6 @@
 #include <QComboBox>
 #include <QDialogButtonBox>
 
-#include "action_info_manager.h"
 #include "action_catalog_widget.h"
 
 class AddActionDialog : public QDialog

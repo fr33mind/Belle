@@ -23,8 +23,6 @@
 #include <QStyledItemDelegate>
 #include <QDialog>
 
-#include "action_info_manager.h"
-
 class ComboBoxItemDelegate : public QStyledItemDelegate
 {
    Q_OBJECT

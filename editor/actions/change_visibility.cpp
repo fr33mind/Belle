@@ -16,7 +16,7 @@
 
 #include "change_visibility.h"
 #include "show.h"
-#include "action_info_manager.h"
+#include "gameobjectfactory.h"
 
 ChangeVisibility::ChangeVisibility(bool show, QObject *parent) :
     Action(parent)
@@ -43,9 +43,9 @@ ChangeVisibility::ChangeVisibility(const QVariantMap& data, QObject *parent) :
                 continue;
             QVariantMap data = transitions[i].toMap();
             if (data.contains("type") && data.value("type") == "Fade")
-                mFadeAction = qobject_cast<Fade*>(ActionInfoManager::typeToAction(data, this));
+                mFadeAction = qobject_cast<Fade*>(GameObjectFactory::createAction(data, this));
             if (data.contains("type") && data.value("type") == "Slide")
-                mSlideAction = qobject_cast<Slide*>(ActionInfoManager::typeToAction(data, this));
+                mSlideAction = qobject_cast<Slide*>(GameObjectFactory::createAction(data, this));
         }
     }
 }

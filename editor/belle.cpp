@@ -116,7 +116,6 @@ Belle::Belle(QWidget *widget)
     //create editors
     GameObjectFactory::init();
     EditorWidgetFactory::load();
-    ActionInfoManager::init();
 
     mActionsView = new ActionsView(this);
     ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
@@ -294,7 +293,6 @@ bool Belle::eventFilter(QObject *obj, QEvent *ev)
 Belle::~Belle()
 {
     GameObjectFactory::destroy();
-    ActionInfoManager::destroy();
     ResourceManager::destroy();
     EditorWidgetFactory::destroy();
     AssetManager::instance()->removeAssets();

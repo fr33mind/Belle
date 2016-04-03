@@ -24,7 +24,6 @@
 
 #include "scene_manager.h"
 #include "ui_mainwindow.h"
-#include "action_info_manager.h"
 #include "actions_view.h"
 #include "objectsview.h"
 #include "resource_manager.h"

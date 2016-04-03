@@ -22,7 +22,6 @@
 #include <QDialogButtonBox>
 
 #include "gotolabel.h"
-#include "action_info_manager.h"
 #include "scene_manager.h"
 #include "belle.h"
 #include "editorwidgetfactory.h"

@@ -22,7 +22,6 @@
 #include <QSpinBox>
 #include <QLabel>
 
-//#include "action_info_manager.h"
 #include "combobox.h"
 #include "color_pushbutton.h"
 #include "gameobject_editorwidget.h"

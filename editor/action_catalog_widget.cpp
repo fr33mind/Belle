@@ -38,6 +38,7 @@
 #include "change_background.h"
 #include "runscript.h"
 #include "changestate.h"
+#include "gameobjectfactory.h"
 
 ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     PropertiesWidget(parent, 1)
@@ -45,35 +46,35 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     this->setHeaderHidden(true);
 
     beginGroup(tr("Story"));
-    appendRow(Dialogue::Info.icon, Dialogue::Info.typeName);
-    appendRow(Wait::Info.icon, Wait::Info.typeName);
-    appendRow(Show::Info.icon, Show::Info.typeName);
-    appendRow(Hide::Info.icon, Hide::Info.typeName);
-    appendRow(ChangeBackground::Info.icon, ChangeBackground::Info.typeName);
-    appendRow(ChangeState::Info.icon, ChangeState::Info.typeName);
-    appendRow(Label::Info.icon, Label::Info.typeName);
-    appendRow(GoToLabel::Info.icon, GoToLabel::Info.typeName);
-    appendRow(GoToScene::Info.icon, GoToScene::Info.typeName);
-    appendRow(Branch::Info.icon, Branch::Info.typeName);
-    appendRow(ShowMenu::Info.icon, ShowMenu::Info.typeName);
-    appendRow(End::Info.icon, End::Info.typeName);
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Dialogue));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Wait));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Show));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Hide));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ChangeBackground));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ChangeState));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Label));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::GoToLabel));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::GoToScene));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Branch));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ShowMenu));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::End));
     endGroup();
 
     beginGroup(tr("Transform"));
-    appendRow(Slide::Info.icon, Slide::Info.typeName);
-    appendRow(Fade::Info.icon, Fade::Info.typeName);
-    appendRow(ChangeColor::Info.icon, ChangeColor::Info.typeName);
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Slide));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Fade));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ChangeColor));
     endGroup();
 
     beginGroup(tr("Audio"));
-    appendRow(PlaySound::Info.icon, PlaySound::Info.typeName);
-    appendRow(StopSound::Info.icon, StopSound::Info.typeName);
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::PlaySound));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::StopSound));
     endGroup();
 
     beginGroup(tr("Scripting"));
-    appendRow(GetUserInput::Info.icon, GetUserInput::Info.typeName);
-    appendRow(ChangeGameVariable::Info.icon, ChangeGameVariable::Info.typeName);
-    appendRow(RunScript::Info.icon, RunScript::Info.typeName);
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::GetUserInput));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ChangeGameVariable));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::RunScript));
     endGroup();
 
     setIconSize(QSize(22, 22));
@@ -91,39 +92,21 @@ void ActionCatalogWidget::onDoubleClick(const QModelIndex & index)
     if (! model)
         return;
 
-    int row = index.parent().row();
-    int childRow = index.row();
+    QVariant data = index.data(Qt::UserRole+1);
+    bool ok;
+    int type = data.toInt(&ok);
+    if (! ok)
+        return;
 
-    for (int i=0; i < row; i++ ) {
-        if (model->item(i, 0))
-            childRow += model->item(i)->rowCount();
-    }
-
-    Action *action = 0;
-
-    switch (childRow) {
-    case Actions::Dialogue: action = new Dialogue(); break;
-    case Actions::Wait: action = new Wait(); break;
-    case Actions::Show: action = new Show(); break;
-    case Actions::Hide: action = new Hide(); break;
-    case Actions::ChangeBackground: action = new ChangeBackground(); break;
-    case Actions::ChangeState: action = new ChangeState(); break;
-    case Actions::Label: action = new Label(""); break;
-    case Actions::GoToLabel: action = new GoToLabel(""); break;
-    case Actions::GoToScene: action = new GoToScene(); break;
-    case Actions::ShowMenu: action = new ShowMenu(); break;
-    case Actions::Slide: action = new Slide(); break;
-    case Actions::Fade: action = new Fade(); break;
-    case Actions::Branch: action = new Branch(); break;
-    case Actions::ChangeColor: action = new ChangeColor(); break;
-    case Actions::PlaySound: action = new PlaySound(); break;
-    case Actions::StopSound: action = new StopSound(); break;
-    case Actions::End: action = new End(); break;
-    case Actions::GetUserInput: action = new GetUserInput(); break;
-    case Actions::ChangeGameVariable: action = new ChangeGameVariable(); break;
-    case Actions::RunScript: action = new RunScript(); break;
-    }
+    Action* action = GameObjectFactory::createAction((GameObjectMetaType::Type) type);
 
     if (action)
         emit newAction(action);
+}
+
+void ActionCatalogWidget::_appendRow(const GameObjectMetaType * metaType)
+{
+    if (metaType) {
+        appendRow(metaType->icon(), metaType->name(), metaType->type());
+    }
 }

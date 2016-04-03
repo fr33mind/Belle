@@ -15,7 +15,7 @@
  */
 
 #include "branch.h"
-#include "action_info_manager.h"
+#include "gameobjectfactory.h"
 
 ActionInfo Branch::Info;
 
@@ -37,7 +37,7 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
         foreach(const QVariant& actionData, actions) {
             if (actionData.type() != QVariant::Map)
                 continue;
-            Action* action = ActionInfoManager::typeToAction(actionData.toMap(), this);
+            Action* action = GameObjectFactory::createAction(actionData.toMap(), this);
             if (action)
                 appendAction(action, true);
         }
@@ -48,7 +48,7 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
         foreach(const QVariant& actionData, actions) {
             if (actionData.type() != QVariant::Map)
                 continue;
-            Action* action = ActionInfoManager::typeToAction(actionData.toMap(), this);
+            Action* action = GameObjectFactory::createAction(actionData.toMap(), this);
             if (action)
                 appendAction(action, false);
         }

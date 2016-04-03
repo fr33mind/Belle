@@ -27,7 +27,7 @@
 #include "utils.h"
 #include "drawing_surface_widget.h"
 #include "resource_manager.h"
-#include "action_info_manager.h"
+#include "gameobjectfactory.h"
 
 static QSize mSize;
 static QPoint mPoint;
@@ -71,7 +71,7 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
             if (actions[i].type() != QVariant::Map)
                 continue;
 
-            Action *action = ActionInfoManager::typeToAction(actions[i], this);
+            Action *action = GameObjectFactory::createAction(actions[i].toMap(), this);
             if (action)
                 appendAction(action);
         }
@@ -530,7 +530,7 @@ void Scene::insertAction(int row, Action* action, bool copy)
         return;
 
     if (copy)
-        action = ActionInfoManager::typeToAction(action->toJsonObject(), this);
+        action = GameObjectFactory::createAction(action->toJsonObject(), this);
     else
         action->setParent(this);
     mActions.insert(row, action);

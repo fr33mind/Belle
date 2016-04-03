@@ -109,12 +109,14 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
     }
 
     const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
-    QString typeString = metatype ? metatype->toString() : "";
-    int textHeight = option.fontMetrics.size(0, typeString).height();
-    action->icon().paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
+    int textHeight = 0;
+    if (metatype) {
+        textHeight = option.fontMetrics.size(0, metatype->toString()).height();
+        metatype->icon().paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
 
-    textRect.setX(textHeight+BORDER*2);
-    painter->drawText(textRect, action->typeName());
+        textRect.setX(textHeight+BORDER*2);
+        painter->drawText(textRect, metatype->name());
+    }
 
     if (! action->displayText().isEmpty()) {
         textRect.setY(textRect.y() + textHeight);

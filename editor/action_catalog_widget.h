@@ -19,31 +19,7 @@
 
 #include "properties_widget.h"
 #include "action.h"
-
-namespace Actions {
-    enum {
-        Dialogue,
-        Wait,
-        Show,
-        Hide,
-        ChangeBackground,
-        ChangeState,
-        Label,
-        GoToLabel,
-        GoToScene,
-        Branch,
-        ShowMenu,
-        End,
-        Slide,   
-        Fade,
-        ChangeColor,
-        PlaySound,
-        StopSound,
-        GetUserInput,
-        ChangeGameVariable,
-        RunScript
-    };
-}
+#include "gameobjectmetatype.h"
 
 class ActionCatalogWidget : public PropertiesWidget
 {
@@ -57,6 +33,9 @@ signals:
 
 public slots:
     void onDoubleClick(const QModelIndex&);
+
+private:
+    void _appendRow(const GameObjectMetaType*);
 
 };
 

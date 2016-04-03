@@ -24,7 +24,7 @@
 #include "scene.h"
 #include "utils.h"
 #include "resource_manager.h"
-#include "action_info_manager.h"
+#include "gameobjectfactory.h"
 
 static QFont mDefaultFont;
 
@@ -414,7 +414,7 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
 
         //copy action if it comes from the resource
         if (resource() && action->parent() == resource()) {
-            newAction = ActionInfoManager::typeToAction(action->toJsonObject(), this);
+            newAction = GameObjectFactory::createAction(action->toJsonObject(), this);
             newAction->setResource(action);
             action = newAction;
         }
@@ -1041,7 +1041,7 @@ void Object::_load(const QVariantMap &data)
             action = 0;
             if (eventActions[i].type() == QVariant::Map) {
                 actionData = eventActions[i].toMap();
-                action = ActionInfoManager::typeToAction(actionData, this);
+                action = GameObjectFactory::createAction(actionData, this);
             }
             else if (eventActions[i].type() == QMetaType::QObjectStar) {
                 action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
@@ -1061,7 +1061,7 @@ void Object::_load(const QVariantMap &data)
         for(int i=0; i < eventActions.size(); i++) {
             if (eventActions[i].type() == QVariant::Map) {
                 actionData = eventActions[i].toMap();
-                action = ActionInfoManager::typeToAction(actionData, this);
+                action = GameObjectFactory::createAction(actionData, this);
             }
             else if (eventActions[i].type() == QMetaType::QObjectStar) {
                 action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
@@ -1080,7 +1080,7 @@ void Object::_load(const QVariantMap &data)
         for(int i=0; i < eventActions.size(); i++) {
             if (eventActions[i].type() == QVariant::Map) {
                 actionData = eventActions[i].toMap();
-                action = ActionInfoManager::typeToAction(actionData, this);
+                action = GameObjectFactory::createAction(actionData, this);
             }
             else if (eventActions[i].type() == QMetaType::QObjectStar) {
                 action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
@@ -1142,7 +1142,7 @@ void Object::copyResourceActions(Interaction::InputEvent event)
 
     for(int i=0; i < actions.size(); i++) {
         if (actions[i]->parent() != this)
-            action = ActionInfoManager::typeToAction(actions[i]->toJsonObject(), this);
+            action = GameObjectFactory::createAction(actions[i]->toJsonObject(), this);
         else
             action = actions[i];
         copiedActions.append(action);

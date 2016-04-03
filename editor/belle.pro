@@ -58,7 +58,6 @@ HEADERS      += belle.h\
     objects/button.h \
     combobox.h \
     add_action_dialog.h \
-    action_info_manager.h\
     objects/image.h \
     utils.h \
     resources_view.h \
@@ -169,7 +168,6 @@ SOURCES      += main.cpp\
     objects/button.cpp \
     combobox.cpp \
     add_action_dialog.cpp \
-    action_info_manager.cpp\
     objects/image.cpp \
     objects/character.cpp \
     objects/object.cpp \

@@ -1,6 +1,6 @@
 #include "menuoption.h"
 
-#include "action_info_manager.h"
+#include "gameobjectfactory.h"
 
 MenuOption::MenuOption(const QString& text, const QList<Action*>& actions, const QString& condition, QObject* parent) :
     Button(text, parent)
@@ -18,7 +18,7 @@ MenuOption::MenuOption(const QVariantMap& data, QObject* parent) :
     if (data.contains("actions") && data.value("actions").type() == QVariant::List) {
         QVariantList actions = data.value("actions").toList();
         for(int i=0; i < actions.size(); i++)
-            addAction(ActionInfoManager::typeToAction(actions.at(i).toMap(), this));
+            addAction(GameObjectFactory::createAction(actions.at(i).toMap(), this));
     }
 
     if (data.contains("condition") && data.value("condition").type() == QVariant::String) {
