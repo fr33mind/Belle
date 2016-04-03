@@ -28,9 +28,6 @@ class PlaySound : public Action
     bool mLoop;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit PlaySound(QObject *parent = 0);
     PlaySound(const QVariantMap&, QObject *parent = 0);
 

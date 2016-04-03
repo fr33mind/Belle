@@ -24,9 +24,6 @@ class ChangeColor : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit ChangeColor(QObject *parent = 0);
     ChangeColor(const QVariantMap&, QObject *parent = 0);
     virtual QVariantMap toJsonObject(bool internal=true) const;

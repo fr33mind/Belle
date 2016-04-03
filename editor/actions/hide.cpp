@@ -16,8 +16,6 @@
 
 #include "hide.h"
 
-ActionInfo Hide::Info;
-
 Hide::Hide(QObject *parent):
     ChangeVisibility(false, parent)
 {
@@ -33,6 +31,4 @@ Hide::Hide(const QVariantMap &data, QObject *parent):
 void Hide::init()
 {
     setType(GameObjectMetaType::Hide);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
 }

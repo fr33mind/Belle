@@ -18,8 +18,6 @@
 
 #include <QFileInfo>
 
-ActionInfo PlaySound::Info;
-
 PlaySound::PlaySound(QObject *parent) :
     Action(parent)
 {
@@ -44,8 +42,6 @@ PlaySound::PlaySound(const QVariantMap& data,QObject *parent) :
 void PlaySound::init()
 {
     setType(GameObjectMetaType::PlaySound);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     mVolume = 100;
     mSound = 0;
     mLoop = false;

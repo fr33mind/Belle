@@ -19,8 +19,6 @@
 #include "resource_manager.h"
 #include "utils.h"
 
-ActionInfo ChangeColor::Info;
-
 ChangeColor::ChangeColor(QObject *parent) :
     Action(parent)
 {
@@ -52,9 +50,7 @@ ChangeColor::ChangeColor(const QVariantMap& data, QObject *parent) :
 
 void ChangeColor::init()
 {
-    setTypeName(Info.typeName);
     setType(GameObjectMetaType::ChangeColor);
-    setIcon(Info.icon);
     mChangeObjectColor = true;
     mChangeObjectBackgroundColor = false;
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease | Interaction::MouseMove);

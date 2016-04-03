@@ -16,8 +16,6 @@
 
 #include "show.h"
 
-ActionInfo Show::Info;
-
 Show::Show(const QVariantMap &data, QObject *parent):
     ChangeVisibility(data, parent)
 {
@@ -37,8 +35,6 @@ Show::Show(QObject *parent):
 void Show::init()
 {
     setType(GameObjectMetaType::Show);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     mCharacterState = "";
 }
 

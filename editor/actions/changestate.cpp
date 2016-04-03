@@ -2,8 +2,6 @@
 
 #include "scene.h"
 
-ActionInfo ChangeState::Info;
-
 ChangeState::ChangeState(QObject *parent) :
     Action(parent)
 {
@@ -21,9 +19,7 @@ ChangeState::ChangeState(const QVariantMap& data, QObject *parent) :
 
 void ChangeState::init()
 {
-    setTypeName(Info.typeName);
     setType(GameObjectMetaType::ChangeState);
-    setIcon(Info.icon);
     mState = "";
 }
 

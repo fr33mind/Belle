@@ -22,8 +22,6 @@
 #include <QFileInfo>
 #include <QtDebug>
 
-ActionInfo ChangeBackground::Info;
-
 ChangeBackground::ChangeBackground(QObject *parent) :
     Action(parent)
 {
@@ -44,8 +42,6 @@ ChangeBackground::ChangeBackground(const QVariantMap & data, QObject *parent):
 
 void ChangeBackground::init()
 {
-    setIcon(Info.icon);
-    setTypeName(Info.typeName);
     setType(GameObjectMetaType::ChangeBackground);
 
     mBackgroundImage = 0;

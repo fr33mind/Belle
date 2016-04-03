@@ -1,7 +1,5 @@
 #include "runscript.h"
 
-ActionInfo RunScript::Info;
-
 RunScript::RunScript(QObject *parent) :
     Action(parent)
 {
@@ -25,8 +23,6 @@ RunScript::RunScript(const QVariantMap& data, QObject *parent) :
 void RunScript::init()
 {
     setType(GameObjectMetaType::RunScript);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
 }
 
 QVariantMap RunScript::toJsonObject(bool internal) const

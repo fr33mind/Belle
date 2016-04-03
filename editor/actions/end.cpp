@@ -16,12 +16,8 @@
 
 #include "end.h"
 
-ActionInfo End::Info;
-
 End::End(QObject *parent) :
     Action(parent)
 {
     setType(GameObjectMetaType::End);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
 }

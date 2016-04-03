@@ -24,9 +24,6 @@ class GetUserInput : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit GetUserInput(QObject *parent = 0);
     GetUserInput(const QVariantMap&, QObject *parent = 0);
 

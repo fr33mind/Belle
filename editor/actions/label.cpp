@@ -16,8 +16,6 @@
 
 #include "label.h"
 
-ActionInfo Label::Info;
-
 Label::Label(const QString& name, QObject *parent) :
     Action(parent)
 {
@@ -35,8 +33,6 @@ Label::Label(const QVariantMap& data, QObject *parent) :
 void Label::init()
 {
     setType(GameObjectMetaType::Label);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
 }
 
 void Label::setObjectName(const QString & name)

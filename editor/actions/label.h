@@ -24,9 +24,6 @@ class Label : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit Label(const QString&, QObject *parent = 0);
     Label(const QVariantMap&, QObject *parent);
     void setObjectName(const QString &);

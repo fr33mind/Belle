@@ -31,9 +31,6 @@ class ChangeGameVariable : public Action
     QStringList mOperators;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit ChangeGameVariable(QObject *parent = 0);
     ChangeGameVariable(const QVariantMap& data, QObject *parent = 0);
 

@@ -20,8 +20,6 @@
 #include "scene.h"
 #include "resource_manager.h"
 
-ActionInfo ShowMenu::Info;
-
 ShowMenu::ShowMenu(QObject *parent) :
     Action(parent)
 {
@@ -57,8 +55,6 @@ ShowMenu::ShowMenu(const QVariantMap& data, QObject *parent) :
 void ShowMenu::init()
 {
     setType(GameObjectMetaType::ShowMenu);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
 }
 

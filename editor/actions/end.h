@@ -24,9 +24,6 @@ class End : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit End(QObject *parent = 0);
 
 signals:

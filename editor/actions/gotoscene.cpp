@@ -17,8 +17,6 @@
 #include "gotoscene.h"
 #include "scene_manager.h"
 
-ActionInfo GoToScene::Info;
-
 GoToScene::GoToScene(QObject *parent) :
     Action(parent)
 {
@@ -43,8 +41,6 @@ GoToScene::GoToScene(const QVariantMap& data, QObject *parent) :
 void GoToScene::init()
 {
     setType(GameObjectMetaType::GoToScene);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
     mTargetScene = "";
     mTargetType = Name;

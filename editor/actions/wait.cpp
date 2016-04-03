@@ -16,8 +16,6 @@
 
 #include "wait.h"
 
-ActionInfo Wait::Info;
-
 Wait::Wait(QObject *parent) :
     Action(parent)
 {
@@ -49,8 +47,6 @@ Wait::Wait(const QVariantMap& data, QObject *parent) :
 void Wait::init()
 {
     setType(GameObjectMetaType::Wait);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     setWaitType(Timed);
     setTime(1);
 }

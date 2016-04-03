@@ -28,9 +28,6 @@ class GoToLabel : public Action
     QString mTargetLabelName;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit GoToLabel(const QString& name="", QObject *parent = 0);
     GoToLabel(const QVariantMap&, QObject *parent);
     virtual QVariantMap toJsonObject(bool internal=true) const;

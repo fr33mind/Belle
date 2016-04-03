@@ -94,7 +94,6 @@ HEADERS      += belle.h\
     actions/change_game_variable_editor_widget.h \
     actions/change_background.h \
     actions/change_background_editorwidget.h \
-    action_info.h \
     clipboard.h \
     novel_properties_dialog.h \
     scene_editor_widget.h \
@@ -204,7 +203,6 @@ SOURCES      += main.cpp\
     actions/change_game_variable_editor_widget.cpp \
     actions/change_background.cpp \
     actions/change_background_editorwidget.cpp \
-    action_info.cpp \
     clipboard.cpp \
     novel_properties_dialog.cpp \
     scene_editor_widget.cpp \

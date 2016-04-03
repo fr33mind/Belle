@@ -25,13 +25,11 @@
 #include "resource_manager.h"
 #include "interaction.h"
 #include "action_editor_widget.h"
-#include "action_info.h"
 
 class ActionEditorWidget;
 class Object;
 class ResourceManager;
 class Wait;
-class ActionInfo;
 
 class Action : public GameObject
 {
@@ -45,7 +43,6 @@ public:
     Object* sceneObject() const;
     virtual void setSceneObject(Object*);
     void setSceneObject(const QString&);
-    static void setActionInfo(ActionInfo*);
     bool isActive();
 
     void setIcon(const QIcon&);
@@ -78,8 +75,6 @@ public:
 
     virtual void focusIn();
     virtual void focusOut();
-
-    static ActionInfo Info;
 
 public slots:
     void onSceneObjectDestroyed();

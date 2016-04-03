@@ -27,12 +27,8 @@ class Branch : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit Branch(QObject *parent = 0);
     Branch(const QVariantMap& data, QObject *parent);
-    static void setBranchActionInfo(ActionInfo*);
     QString condition()const;
     void setCondition(const QString&);
     virtual QVariantMap toJsonObject(bool internal=true) const;

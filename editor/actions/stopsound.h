@@ -27,9 +27,6 @@ class StopSound : public Action
    double mFadeTime;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit StopSound(QObject *parent = 0);
     StopSound(const QVariantMap&, QObject *parent = 0);
 

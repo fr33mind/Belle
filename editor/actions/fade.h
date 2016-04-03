@@ -28,7 +28,6 @@ public:
         In,
         Out
     };
-    static ActionInfo Info;
 
 public:
     explicit Fade(QObject *parent = 0);

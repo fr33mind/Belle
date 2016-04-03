@@ -35,9 +35,6 @@ class Dialogue : public Action
     bool mAppend;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit Dialogue(QObject *parent = 0);
     Dialogue(const QVariantMap&, QObject *parent = 0);
 

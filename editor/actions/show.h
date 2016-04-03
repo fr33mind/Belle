@@ -29,9 +29,6 @@ class Show : public ChangeVisibility
     QString mStateImagePath;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit Show(QObject *parent = 0);
     explicit Show(const QVariantMap& data, QObject *parent = 0);
     void setCharacterState(const QString&);

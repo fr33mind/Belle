@@ -18,8 +18,6 @@
 #include "scene_manager.h"
 #include "scene.h"
 
-ActionInfo GoToLabel::Info;
-
 GoToLabel::GoToLabel(const QString& name, QObject *parent) :
     Action(parent)
 {
@@ -40,8 +38,6 @@ GoToLabel::GoToLabel(const QVariantMap& data, QObject *parent) :
 void GoToLabel::init()
 {
     setType(GameObjectMetaType::GoToLabel);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     mTargetLabel = 0;
     mTargetLabelName = "";
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);

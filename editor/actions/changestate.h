@@ -8,9 +8,6 @@ class ChangeState : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit ChangeState(QObject *parent = 0);
     ChangeState(const QVariantMap&, QObject *parent = 0);
     virtual QString displayText() const;

@@ -16,8 +16,6 @@
 
 #include "fade.h"
 
-ActionInfo Fade::Info;
-
 Fade::Fade(QObject *parent) :
     Action(parent)
 {
@@ -39,8 +37,6 @@ Fade::Fade(const QVariantMap& data, QObject *parent) :
 void Fade::init()
 {
     setType(GameObjectMetaType::Fade);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |
     Interaction::MouseMove);
     setFadeType(Fade::Out);

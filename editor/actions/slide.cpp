@@ -16,8 +16,6 @@
 
 #include "slide.h"
 
-ActionInfo Slide::Info;
-
 Slide::Slide(QObject *parent) :
     Action(parent)
 {
@@ -46,8 +44,6 @@ Slide::Slide(const QVariantMap& data, QObject *parent) :
 void Slide::init()
 {
     setType(GameObjectMetaType::Slide);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |
     Interaction::MouseMove);
     mObjectOriginalPoint = QPoint();

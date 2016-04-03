@@ -24,9 +24,6 @@ class Hide : public ChangeVisibility
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit Hide(QObject *parent = 0);
     Hide(const QVariantMap& data, QObject *parent = 0);
 

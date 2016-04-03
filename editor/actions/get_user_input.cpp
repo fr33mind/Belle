@@ -18,8 +18,6 @@
 
 #include <QTextCodec>
 
-ActionInfo GetUserInput::Info;
-
 GetUserInput::GetUserInput(QObject *parent) :
     Action(parent)
 {
@@ -49,8 +47,6 @@ GetUserInput::GetUserInput(const QVariantMap& data, QObject *parent):
 void GetUserInput::init()
 {
     setType(GameObjectMetaType::GetUserInput);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
 }
 
 QString GetUserInput::variable()

@@ -26,15 +26,12 @@ class Slide : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
     enum Type {
         In,
         Out,
         Custom
     };
 
-public:
     explicit Slide(QObject *parent = 0);
     Slide(const QVariantMap&, QObject* parent = 0);
     virtual QString displayText() const;

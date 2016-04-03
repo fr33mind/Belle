@@ -13,9 +13,6 @@ class RunScript : public Action
     QString mComment;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit RunScript(QObject *parent = 0);
     RunScript(const QVariantMap& data, QObject *parent=0);
     virtual QVariantMap toJsonObject(bool internal=true) const;

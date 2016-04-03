@@ -23,8 +23,6 @@
 #include "wait.h"
 #include "scene.h"
 
-ActionInfo Action::Info;
-
 Action::Action(QObject *parent) :
     GameObject(parent)
 {
@@ -67,8 +65,6 @@ void Action::init()
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
     setType(GameObjectMetaType::Action);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     setName("");
 }
 

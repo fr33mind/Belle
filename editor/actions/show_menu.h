@@ -22,8 +22,6 @@
 class ShowMenu : public Action
 {
     Q_OBJECT
-public:
-    static ActionInfo Info;
 
 public:
     explicit ShowMenu(QObject *parent = 0);

@@ -18,8 +18,6 @@
 
 #include "scene_manager.h"
 
-ActionInfo StopSound::Info;
-
 StopSound::StopSound(QObject *parent) :
     Action(parent)
 {
@@ -41,8 +39,6 @@ StopSound::StopSound(const QVariantMap& data,QObject *parent) :
 void StopSound::init()
 {
     setType(GameObjectMetaType::StopSound);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     mSound = "";
     mFadeTime = 0;
 }

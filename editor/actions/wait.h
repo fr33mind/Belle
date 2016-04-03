@@ -28,9 +28,6 @@ class Wait : public Action
     Q_OBJECT
 
 public:
-    static ActionInfo Info;
-
-public:
 
     enum WaitType {
         Timed=0,

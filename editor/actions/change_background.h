@@ -29,9 +29,6 @@ class ChangeBackground : public Action
     QColor mBackgroundColor;
 
 public:
-    static ActionInfo Info;
-
-public:
     explicit ChangeBackground(QObject *parent = 0);
     ChangeBackground(const QVariantMap&, QObject *parent=0);
     virtual QVariantMap toJsonObject(bool internal=true) const;

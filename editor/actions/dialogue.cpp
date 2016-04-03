@@ -18,8 +18,6 @@
 
 #include <QTextCodec>
 
-ActionInfo Dialogue::Info;
-
 Dialogue::Dialogue(QObject *parent) :
     Action(parent)
 {
@@ -56,8 +54,6 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
 void Dialogue::init()
 {
     setType(GameObjectMetaType::Dialogue);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     mCharacter = 0;
     mText = "";
     mAppend = false;

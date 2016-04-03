@@ -29,8 +29,6 @@ public:
         Position
     };
 
-    static ActionInfo Info;
-
 public:
     explicit GoToScene(QObject *parent = 0);
     GoToScene(const QVariantMap&, QObject *parent);

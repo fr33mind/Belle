@@ -17,8 +17,6 @@
 #include "branch.h"
 #include "gameobjectfactory.h"
 
-ActionInfo Branch::Info;
-
 Branch::Branch(QObject *parent) :
     Action(parent)
 {
@@ -63,8 +61,6 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
 void Branch::init()
 {
     setType(GameObjectMetaType::Branch);
-    setTypeName(Info.typeName);
-    setIcon(Info.icon);
     mCondition = "";
 }
 
