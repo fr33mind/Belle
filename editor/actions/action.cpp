@@ -58,6 +58,7 @@ Action::Action(const QVariantMap& data, QObject *parent) :
 
 void Action::init()
 {
+    setTitle("");
     mObject = 0;
     mObjectName = "";
     mActive = false;
@@ -68,9 +69,20 @@ void Action::init()
     setName("");
 }
 
-QIcon Action::icon() const
+void Action::setTitle(const QString & title)
 {
-    return mIcon;
+    mTitle = title;
+}
+
+QString Action::title() const
+{
+    if (mTitle.isEmpty()) {
+        const GameObjectMetaType* metatype = GameObjectMetaType::metaType(type());
+        if (metatype)
+            return metatype->name();
+    }
+
+    return mTitle;
 }
 
 QString Action::description() const
@@ -91,21 +103,6 @@ void Action::setAllowSkipping(bool skip)
 Action* Action::newAction(QObject *parent)
 {
     return new Action(parent);
-}
-
-void Action::setIcon(const QIcon & icon)
-{
-    mIcon = icon;
-}
-
-void Action::setTypeName(const QString & typeName)
-{
-    mTypeName = typeName;
-}
-
-QString Action::typeName() const
-{
-    return mTypeName;
 }
 
 void Action::setDescription(const QString& desc)
@@ -175,7 +172,9 @@ QString Action::displayText() const
 
 QString Action::toString() const
 {
-    return QString("%1 [%2]").arg(displayText()).arg(typeName());
+    const GameObjectMetaType* metatype = GameObjectMetaType::metaType(type());
+    QString typeName = metatype ? metatype->name() : "";
+    return QString("%1 [%2]").arg(displayText()).arg(typeName);
 }
 
 bool Action::supportsEvent(Interaction::InputEvent ev)

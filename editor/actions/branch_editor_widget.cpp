@@ -72,13 +72,20 @@ void BranchEditorWidget::updateData(GameObject* action)
 
     mConditionEdit->setText(branch->condition());
 
+    const GameObjectMetaType* metatype = 0;
     QList<Action*> actions = branch->actions(true);
-    foreach(Action* action,  actions)
-        mTrueActionsChooser->addItem(action->icon(), action->toString());
+    foreach(Action* action,  actions) {
+        metatype = GameObjectMetaType::metaType(action->type());
+        const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+        mTrueActionsChooser->addItem(typeIcon, action->toString());
+    }
 
     actions = branch->actions(false);
-    foreach(Action* action,  actions)
-        mFalseActionsChooser->addItem(action->icon(), action->toString());
+    foreach(Action* action,  actions) {
+        metatype = GameObjectMetaType::metaType(action->type());
+        const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+        mFalseActionsChooser->addItem(typeIcon, action->toString());
+    }
 }
 
 void BranchEditorWidget::onConditionsClicked()
@@ -107,7 +114,10 @@ void BranchEditorWidget::onAddItemActivated()
         Action* action = dialog.selectedAction();
         ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
         if(comboBox && action) {
-            comboBox->addItem(action->icon(), action->toString());
+            const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
+            const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+
+            comboBox->addItem(typeIcon, action->toString());
             if (sender()->objectName() == "true")
                 branch->appendAction(action, true);
             else

@@ -61,7 +61,9 @@ void ChangeVisibilityEditorWidget::updateData(GameObject* action)
     mFadeEditorWidget->setGameObject(changeVisibility->fadeAction());
     mSlideEditorWidget->setGameObject(changeVisibility->slideAction());
 
-    setGroupName(changeVisibility->typeName());
+    const GameObjectMetaType* metatype = GameObjectMetaType::metaType(changeVisibility->type());
+    QString typeName = metatype ? metatype->name() : "";
+    setGroupName(typeName);
 
     mObjectsWidget->loadFromAction(changeVisibility);
 }

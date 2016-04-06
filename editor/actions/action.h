@@ -45,11 +45,8 @@ public:
     void setSceneObject(const QString&);
     bool isActive();
 
-    void setIcon(const QIcon&);
-    QIcon icon() const;
-
-    void setTypeName(const QString&);
-    QString typeName() const;
+    void setTitle(const QString&);
+    QString title() const;
 
     void setDescription(const QString&);
     QString description() const;
@@ -85,8 +82,6 @@ private slots:
 private:
     Object* mObject;
     QString mObjectName;
-    QIcon mIcon;
-    QString mTypeName;
     QString mTitle;
     QString mDescription;
     QString mDisplayText;

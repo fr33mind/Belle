@@ -109,14 +109,12 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
     }
 
     const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
-    int textHeight = 0;
-    if (metatype) {
-        textHeight = option.fontMetrics.size(0, metatype->toString()).height();
-        metatype->icon().paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
+    const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+    int textHeight = option.fontMetrics.size(0, action->title()).height();
+    typeIcon.paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
 
-        textRect.setX(textHeight+BORDER*2);
-        painter->drawText(textRect, metatype->name());
-    }
+    textRect.setX(textHeight+BORDER*2);
+    painter->drawText(textRect, action->title());
 
     if (! action->displayText().isEmpty()) {
         textRect.setY(textRect.y() + textHeight);
@@ -283,8 +281,11 @@ void ActionsView::appendAction(Action* action)
     if (! model)
         return;
 
-    if (action)
-        model->appendRow(new QStandardItem(action->icon(), action->name()));
+    if (action) {
+        const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
+        const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+        model->appendRow(new QStandardItem(typeIcon, action->name()));
+    }
 }
 
 void ActionsView::dropEvent(QDropEvent *event)

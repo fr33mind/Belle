@@ -99,8 +99,11 @@ void ShowMenuEditorWidget::updateData(GameObject * action)
 
         actions = option->actions();
         if (i < mEventChoosers.size()) {
-            for(int j=0; j < actions.size(); j++)
-                mEventChoosers[i]->addItem(actions[j]->icon(), actions[j]->toString());
+            for(int j=0; j < actions.size(); j++) {
+                const GameObjectMetaType* metatype = GameObjectMetaType::metaType(actions[j]->type());
+                const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+                mEventChoosers[i]->addItem(typeIcon, actions[j]->toString());
+            }
         }
     }
 }
@@ -141,7 +144,9 @@ void ShowMenuEditorWidget::onAddItemActivated()
 
         ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
         if(comboBox && action) {
-            comboBox->addItem(action->icon(), action->toString());
+            const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
+            const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+            comboBox->addItem(typeIcon, action->toString());
             int index = mEventChoosers.indexOf(comboBox);
             MenuOption* option = menu->optionAt(index);
             if (option)
