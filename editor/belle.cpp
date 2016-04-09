@@ -510,7 +510,7 @@ void Belle::updateSceneEditorWidget(Scene* scene)
 {
     if (scene) {
         GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene);
-        switchWidgetInPropertiesWidget(EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene));
+        switchWidgetInPropertiesWidget(editor);
         if (editor) {
             editor->setGameObject(scene);
         }
