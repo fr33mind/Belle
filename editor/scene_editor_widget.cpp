@@ -35,7 +35,7 @@ SceneEditorWidget::SceneEditorWidget(QWidget *parent) :
 void SceneEditorWidget::updateData(GameObject* obj)
 {
     GameObjectEditorWidget::updateData(obj);
-    Scene* scene = qobject_cast<Scene*>(gameObject());
+    Scene* scene = qobject_cast<Scene*>(obj);
     if (scene) {
         mChooseBackgroundButton->setFilePath(scene->backgroundPath());
         mChooseBackgroundColorButton->setColor(scene->backgroundColor());
