@@ -101,6 +101,7 @@ class Belle : public QMainWindow
         QString exportProject(const QString& path="", bool toRun=false);
         void saveProject();
         void newProject();
+        void scenesTabWidgetPageChanged(int);
 
 protected:
         virtual void closeEvent(QCloseEvent*);
@@ -139,6 +140,8 @@ private:
         void clearProject();
         void _fixSync(const QList<Scene*>&);
         void initSceneManager(SceneManager*);
+        void setCurrentSceneIndex(int);
+        void setCurrentSceneManager(SceneManager*);
 };
 
 #endif

@@ -244,6 +244,8 @@ Belle::Belle(QWidget *widget)
     mUi.scenesWidget->addAction(mDeleteScene);
     connect(mDeleteScene, SIGNAL(triggered()), this, SLOT(deleteScene()));
 
+    connect(mUi.scenesTabWidget, SIGNAL(currentChanged(int)), this, SLOT(scenesTabWidgetPageChanged(int)));
+
     restoreSettings();
     loadDefaultGame();
 }
@@ -363,21 +365,24 @@ void Belle::onScenesWidgetItemChanged(QTreeWidgetItem* item, int column)
 
 void Belle::updateActions()
 {
+    ActionsModel *model = qobject_cast<ActionsModel*> (mActionsView->model());
+    if (! model)
+        return;
+
+    model->clear();
+
     if (currentScene()) {
-        ActionsModel *model = qobject_cast<ActionsModel*> (mActionsView->model());
-        if (model) {
-            model->setActions(currentScene()->actions());
-            connect(currentScene(), SIGNAL(actionAdded(Action*)), model, SLOT(appendAction(Action*)), Qt::UniqueConnection);
-            connect(currentScene(), SIGNAL(actionRemoved(int)), model, SLOT(removeAction(int)), Qt::UniqueConnection);
-        }
+        model->setActions(currentScene()->actions());
+        connect(currentScene(), SIGNAL(actionAdded(Action*)), model, SLOT(appendAction(Action*)), Qt::UniqueConnection);
+        connect(currentScene(), SIGNAL(actionRemoved(int)), model, SLOT(removeAction(int)), Qt::UniqueConnection);
     }
 }
 
 void Belle::updateObjects()
 {
+    mObjectsView->clear();
     Scene * scene = currentScene();
     if (scene) {
-        mObjectsView->clear();
         mObjectsView->addObjects(scene->objects());
         connect(scene, SIGNAL(objectAdded(Object*)), mObjectsView, SLOT(addObject(Object*)), Qt::UniqueConnection);
         connect(scene, SIGNAL(objectRemoved(Object*)), mObjectsView, SLOT(removeObject(Object*)), Qt::UniqueConnection);
@@ -471,22 +476,12 @@ void Belle::onSceneItemClicked(QTreeWidgetItem *item, int column)
     int currIndex = widget->indexOfTopLevelItem(item);
 
     mDrawingSurfaceWidget->setObject(0);
-
-    if (currSceneManager != mCurrentSceneManager || prevIndex != currIndex) {
-        updateSceneIcon(mCurrentSceneManager->currentScene()); //update current scene icon
-
-        currSceneManager->setCurrentSceneIndex(currIndex);
-        mCurrentSceneManager = currSceneManager;
-        if (mCurrentSceneManager->currentScene())
-            mCurrentSceneManager->currentScene()->show();
-
-        updateActions();
-        updateObjects();
-        mDrawingSurfaceWidget->setSceneManager(currSceneManager);
-        mDrawingSurfaceWidget->update();
-    }
-
-    updateSceneEditorWidget(mCurrentSceneManager->currentScene());
+    if (currSceneManager != mCurrentSceneManager)
+        setCurrentSceneManager(currSceneManager);
+    if (prevIndex != currIndex)
+        setCurrentSceneIndex(currIndex);
+    else //update SceneEditorWidget anyway
+        updateSceneEditorWidget(mCurrentSceneManager->currentScene());
 }
 
 void Belle::updateSceneIcon(Scene* scene)
@@ -502,12 +497,15 @@ void Belle::updateSceneIcon(Scene* scene)
 
 void Belle::updateSceneEditorWidget(Scene* scene)
 {
-    if (scene) {
-        GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene);
-        switchWidgetInPropertiesWidget(editor);
-        if (editor) {
-            editor->setGameObject(scene);
-        }
+    GameObjectEditorWidget* editor = 0;
+
+    if (scene)
+        editor = EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene);
+
+    switchWidgetInPropertiesWidget(editor);
+
+    if (editor) {
+        editor->setGameObject(scene);
     }
 }
 
@@ -1387,4 +1385,44 @@ void Belle::initSceneManager(SceneManager * sceneManager)
         connect(sceneManager, SIGNAL(resized(const QResizeEvent&)), mDrawingSurfaceWidget, SLOT(onResize(const QResizeEvent&)));
     }
     sceneManager->setClipboard(mClipboard);
+}
+
+void Belle::setCurrentSceneIndex(int index)
+{
+    if (! mCurrentSceneManager)
+        return;
+
+    updateSceneIcon(mCurrentSceneManager->currentScene()); //update previous scene icon
+
+    mCurrentSceneManager->setCurrentSceneIndex(index);
+    Scene* currScene = mCurrentSceneManager->currentScene();
+    if (currScene)
+        currScene->show();
+
+    updateSceneEditorWidget(currScene);
+    updateActions();
+    updateObjects();
+    mDrawingSurfaceWidget->update();
+}
+
+void Belle::setCurrentSceneManager(SceneManager* sceneManager)
+{
+    if (mCurrentSceneManager == sceneManager)
+        return;
+
+    if (mCurrentSceneManager)
+        updateSceneIcon(mCurrentSceneManager->currentScene()); //update previous scene icon
+
+    mCurrentSceneManager = sceneManager;
+    mDrawingSurfaceWidget->setSceneManager(mCurrentSceneManager);
+    setCurrentSceneIndex(mCurrentSceneManager->currentSceneIndex());
+}
+
+void Belle::scenesTabWidgetPageChanged(int index)
+{
+    switch (index) {
+        case 0: setCurrentSceneManager(sceneManager("Main")); break;
+        case 1: setCurrentSceneManager(sceneManager("Pause")); break;
+        default: break;
+    }
 }
