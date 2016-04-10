@@ -98,7 +98,10 @@ int SceneManager::currentSceneIndex()
 
 void SceneManager::setCurrentSceneIndex(int index)
 {
-    if (index >= size() || index < 0 || index == mCurrentSceneIndex)
+    if (index < 0 || index >= size())
+        index = -1;
+
+    if (index == mCurrentSceneIndex)
         return;
 
     mCurrentSceneIndex = index;
