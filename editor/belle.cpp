@@ -891,6 +891,7 @@ void Belle::openFileOrProject(QString filepath)
             mCurrentSceneManager = mPauseSceneManager;
             importScenes(scenes, mPauseSceneManager);
             mPauseSceneManager->setCurrentSceneIndex(0);
+            mUi.pauseScenesWidget->setCurrentItem(mUi.pauseScenesWidget->topLevelItem(0));
         }
     }
 
@@ -900,6 +901,7 @@ void Belle::openFileOrProject(QString filepath)
         importScenes(scenes, mDefaultSceneManager);
         mDefaultSceneManager->setCurrentSceneIndex(0);
         updateActions();
+        mUi.scenesWidget->setCurrentItem(mUi.scenesWidget->topLevelItem(0));
     }
 
     AssetManager::instance()->setLoadPath("");
