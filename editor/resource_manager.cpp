@@ -54,16 +54,12 @@ void ResourceManager::add(const QVariantMap& data)
 GameObject* ResourceManager::createGameObject(const QVariantMap& info, QObject* parent)
 {
     GameObject* _resource = 0;
-    QString type("");
     QVariantMap data = info;
 
     fillWithResourceData(data);
 
     if (data.contains("resource") && data.value("resource").type() == QVariant::String)
         _resource = this->object(data.value("resource").toString());
-
-    if (data.contains("type") && data.value("type").type() == QVariant::String)
-        type = data.value("type").toString();
 
     GameObject* object = GameObjectFactory::createGameObject(data, parent);
     if (object && _resource)
