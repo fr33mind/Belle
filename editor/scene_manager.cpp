@@ -31,17 +31,6 @@ SceneManager::SceneManager(QObject * parent, const QString& name) :
     setObjectName(name);
 }
 
-SceneManager::SceneManager(int width, int height, QObject * parent, const QString& name) :
-    QObject(parent)
-{
-    Scene::setWidth(width);
-    Scene::setHeight(height);
-    mCurrentSceneIndex = -1;
-    connect(this, SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
-    setObjectName(name);
-}
-
-
 SceneManager::~SceneManager()
 {
 }

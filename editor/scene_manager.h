@@ -36,7 +36,6 @@ class SceneManager : public QObject
     
     public:
         explicit SceneManager(QObject * parent=0, const QString& name="SceneManager");
-        explicit SceneManager(int width, int height, QObject * parent=0, const QString& name="SceneManager");
         virtual ~SceneManager();
         Scene* addScene(const QString& name="");
         void addScene(Scene*) ;

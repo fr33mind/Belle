@@ -138,6 +138,7 @@ private:
         bool loadDefaultGame();
         void clearProject();
         void _fixSync(const QList<Scene*>&);
+        void initSceneManager(SceneManager*);
 };
 
 #endif

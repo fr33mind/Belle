@@ -53,7 +53,6 @@ class DrawingSurfaceWidget : public QWidget
     
     public:
         explicit DrawingSurfaceWidget(QWidget* parent=0);
-        DrawingSurfaceWidget(SceneManager* sceneManager, QWidget* parent=0);
         ~DrawingSurfaceWidget();
         virtual bool eventFilter(QObject *, QEvent *);
         void paintSceneTo(QPaintDevice*);

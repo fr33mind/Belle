@@ -77,28 +77,26 @@ Belle::Belle(QWidget *widget)
     mDisableClick = false;
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
-    //init scene manager instance
-    mDefaultSceneManager = new SceneManager(WIDTH, HEIGHT, this, "DefaultSceneManager");
-    mPauseSceneManager = new SceneManager(WIDTH, HEIGHT, this, "PauseSceneManager");
-    mCurrentSceneManager = mDefaultSceneManager;
-    //connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
-    connect(mDefaultSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
-    connect(mPauseSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
-    connect(mDefaultSceneManager, SIGNAL(sceneNameChanged(int, const QString&)), this, SLOT(onSceneNameChanged(int, const QString&)));
-    connect(mPauseSceneManager, SIGNAL(sceneNameChanged(int, const QString&)), this, SLOT(onSceneNameChanged(int, const QString&)));
-    mDefaultSceneManager->setClipboard(mClipboard);
-    mPauseSceneManager->setClipboard(mClipboard);
+    Scene::setWidth(WIDTH);
+    Scene::setHeight(HEIGHT);
 
     //init drawing widget
     QLayout *vLayout = centralWidget()->layout();
     QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
-    mDrawingSurfaceWidget = new DrawingSurfaceWidget(mDefaultSceneManager, scrollArea);
+    mDrawingSurfaceWidget = new DrawingSurfaceWidget(scrollArea);
     connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     scrollArea->setWidget(mDrawingSurfaceWidget);
     scrollArea->setContentsMargins(0, 0, 0, 0);
     scrollArea->viewport()->installEventFilter(mDrawingSurfaceWidget);
     scrollArea->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     vLayout->addWidget(scrollArea);
+
+    //init scene manager instances
+    mDefaultSceneManager = new SceneManager(this, "DefaultSceneManager");
+    mPauseSceneManager = new SceneManager(this, "PauseSceneManager");
+    mCurrentSceneManager = mDefaultSceneManager;
+    initSceneManager(mDefaultSceneManager);
+    initSceneManager(mPauseSceneManager);
 
     //setup default data
     QVariantMap data;
@@ -414,6 +412,7 @@ void Belle::addScene(Scene* scene, SceneManager* sceneManager)
     updateSceneEditorWidget(scene);
     updateActions();
     updateObjects();
+    mDrawingSurfaceWidget->setSceneManager(sceneManager);
     mDrawingSurfaceWidget->update();
 }
 
@@ -1374,4 +1373,18 @@ void Belle::newProject()
 Clipboard* Belle::clipboard() const
 {
     return mClipboard;
+}
+
+void Belle::initSceneManager(SceneManager * sceneManager)
+{
+    if (! sceneManager)
+        return;
+
+    connect(sceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
+    connect(sceneManager, SIGNAL(sceneNameChanged(int, const QString&)), this, SLOT(onSceneNameChanged(int, const QString&)));
+    if (mDrawingSurfaceWidget) {
+        connect(sceneManager, SIGNAL(updateDrawingSurfaceWidget()), mDrawingSurfaceWidget, SLOT(update()));
+        connect(sceneManager, SIGNAL(resized(const QResizeEvent&)), mDrawingSurfaceWidget, SLOT(onResize(const QResizeEvent&)));
+    }
+    sceneManager->setClipboard(mClipboard);
 }

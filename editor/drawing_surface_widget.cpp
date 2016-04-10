@@ -28,7 +28,7 @@
 
 static QWidget *mInstance = 0;
 
-DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *parent) :
+DrawingSurfaceWidget::DrawingSurfaceWidget(QWidget *parent) :
     QWidget(parent)
 {
     mMousePressed = false;
@@ -36,7 +36,7 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     mCanResize = false;
     mMoving = false;
     mCanMove = false;
-    mSceneManager = sceneManager;
+    mSceneManager = 0;
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     setFixedSize(QSize(Scene::width(), Scene::height()));
@@ -134,8 +134,6 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     connect(mPasteObject, SIGNAL(triggered()), this, SLOT(onPasteTriggered()));
     connect(mDeleteObject, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
     connect(mClearBackground, SIGNAL(triggered()), this, SLOT(onClearBackgroundTriggered()));
-    connect(mSceneManager, SIGNAL(updateDrawingSurfaceWidget()), this, SLOT(update()));
-    connect(mSceneManager, SIGNAL(resized(const QResizeEvent&)), this, SLOT(onResize(const QResizeEvent&)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onCustomContextMenuRequested(const QPoint&)));
 }
 
@@ -157,7 +155,7 @@ void DrawingSurfaceWidget::paintEvent(QPaintEvent* paint)
 
     if (mObject)
         paintObject(this);
-    else if (mSceneManager->currentScene())
+    else if (mSceneManager && mSceneManager->currentScene())
         paintSceneTo(this);
     else
         return;
@@ -581,6 +579,9 @@ void DrawingSurfaceWidget::onObjectDestroyed()
 
 void DrawingSurfaceWidget::setSceneManager(SceneManager* sceneManager)
 {
+    if (mSceneManager == sceneManager)
+        return;
+
     mSceneManager = sceneManager;
 }
 
