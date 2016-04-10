@@ -48,7 +48,7 @@ public:
         ChangeState,
         End,
         firstObjectType = Object,
-        lastObjectType = Menu,
+        lastObjectType = MenuOption,
         firstActionType = Action,
         lastActionType = End
     };
