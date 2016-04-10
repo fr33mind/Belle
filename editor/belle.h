@@ -63,7 +63,6 @@ class Belle : public QMainWindow
     public:
         explicit Belle(QWidget *widget=0);
         ~Belle();
-        bool eventFilter(QObject *, QEvent *);
         Scene* currentScene();
         static Belle* instance();
         Clipboard * clipboard() const;

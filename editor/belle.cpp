@@ -285,11 +285,6 @@ void Belle::restoreSettings()
         Engine::setUseBuiltinBrowser(mSettings->value("Project/useBuiltinBrowser").toBool());
 }
 
-bool Belle::eventFilter(QObject *obj, QEvent *ev)
-{
-    return QMainWindow::eventFilter(obj, ev);
-}
-
 Belle::~Belle()
 {
     GameObjectFactory::destroy();
