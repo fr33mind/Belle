@@ -56,7 +56,7 @@ void ObjectsView::addObject(Object * object)
     item = item->child(rowCount);
     item->setEditable(false);
     item->setData(qVariantFromValue((void*) object));
-    connect(object, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(objectChanged(const QVariantMap&)));
+    connect(object, SIGNAL(nameChanged(const QString&)), this, SLOT(objectNameChanged(const QString&)));
     connect(object, SIGNAL(destroyed(QObject*)), this, SLOT(removeObject(QObject*)));
 }
 
@@ -80,20 +80,6 @@ void ObjectsView::removeObject(QObject * qobject)
     removeObject(qobject_cast<Object*>(qobject));
 }
 
-void ObjectsView::objectChanged(const QVariantMap& data)
-{
-    if (data.contains("name")) {
-        Object* object = qobject_cast<Object*>(sender());
-        if (object) {
-            QStandardItem* item = itemFromObject(object);
-            if (item) {
-                item->setData(data["name"], Qt::DisplayRole);
-                update(item->index());
-            }
-        }
-    }
-}
-
 void ObjectsView::itemClicked(const QModelIndex & index)
 {
     QStandardItemModel* model = qobject_cast<QStandardItemModel*>(this->model());
@@ -101,4 +87,16 @@ void ObjectsView::itemClicked(const QModelIndex & index)
     Object* obj = (Object*) item->data().value<void*>();
     if (obj)
         emit objectSelected(obj);
+}
+
+void ObjectsView::objectNameChanged(const QString & name)
+{
+    Object* object = qobject_cast<Object*>(sender());
+    if (object) {
+        QStandardItem* item = itemFromObject(object);
+        if (item) {
+            item->setData(name, Qt::DisplayRole);
+            update(item->index());
+        }
+    }
 }

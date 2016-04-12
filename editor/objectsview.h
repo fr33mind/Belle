@@ -22,8 +22,10 @@ public slots:
     void addObject(Object*);
     void removeObject(QObject*);
     void removeObject(Object*);
-    void objectChanged(const QVariantMap&);
     void itemClicked(const QModelIndex&);
+
+private slots:
+    void objectNameChanged(const QString&);
 
 };
 
