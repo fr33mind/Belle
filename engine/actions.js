@@ -556,7 +556,7 @@ ChangeVisibility.prototype.onExecute = function ()
 {
     var object = this.getObject();
     
-    if (! object || object.visible == this.show) {
+    if (! object) {
       this.setFinished(true);
       return;
     }
