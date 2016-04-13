@@ -52,6 +52,11 @@ GameObject* GameObjectFactory::createGameObject(GameObjectMetaType::Type type, c
     return obj;
 }
 
+GameObject* GameObjectFactory::createGameObject(GameObjectMetaType::Type type, QObject * parent)
+{
+    return createGameObject(type, QVariantMap(), parent);
+}
+
 GameObject* GameObjectFactory::createGameObject(const QVariantMap & data, QObject * parent)
 {
     GameObjectMetaType::Type type = GameObjectMetaType::typeFromString(data.value("type").toString());
@@ -95,6 +100,11 @@ Action* GameObjectFactory::createAction(const QVariantMap & data, QObject * pare
     return createAction(type, data, parent);
 }
 
+Action* GameObjectFactory::createAction(GameObjectMetaType::Type type, QObject * parent)
+{
+    return createAction(type, QVariantMap(), parent);
+}
+
 Object* GameObjectFactory::createObject(GameObjectMetaType::Type type, const QVariantMap & data, QObject * parent)
 {
     Object* obj = 0;
@@ -113,6 +123,11 @@ Object* GameObjectFactory::createObject(GameObjectMetaType::Type type, const QVa
     }
 
     return obj;
+}
+
+Object* GameObjectFactory::createObject(GameObjectMetaType::Type type, QObject * parent)
+{
+    return createObject(type, QVariantMap(), parent);
 }
 
 Object* GameObjectFactory::createObject(const QVariantMap & data, QObject * parent)

@@ -21,11 +21,14 @@ class GameObjectFactory : public QObject
 public:
     static void init();
     static void destroy();
-    static GameObject* createGameObject(GameObjectMetaType::Type, const QVariantMap& data=QVariantMap(), QObject* parent=0);
+    static GameObject* createGameObject(GameObjectMetaType::Type, const QVariantMap&, QObject* parent=0);
+    static GameObject* createGameObject(GameObjectMetaType::Type, QObject* parent=0);
     static GameObject* createGameObject(const QVariantMap&, QObject* parent=0);
-    static Action* createAction(GameObjectMetaType::Type, const QVariantMap& data=QVariantMap(), QObject* parent=0);
+    static Action* createAction(GameObjectMetaType::Type, const QVariantMap& data, QObject* parent=0);
+    static Action* createAction(GameObjectMetaType::Type, QObject* parent=0);
     static Action* createAction(const QVariantMap&, QObject* parent=0);
-    static Object* createObject(GameObjectMetaType::Type, const QVariantMap& data=QVariantMap(), QObject* parent=0);
+    static Object* createObject(GameObjectMetaType::Type, const QVariantMap&, QObject* parent=0);
+    static Object* createObject(GameObjectMetaType::Type, QObject* parent=0);
     static Object* createObject(const QVariantMap&, QObject* parent=0);
     static Scene* createScene(const QVariantMap&, QObject* parent=0);
 
