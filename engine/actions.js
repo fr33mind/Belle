@@ -349,10 +349,14 @@ Slide.prototype.onExecute = function ()
     this.incXPerMs = this.incYPerMs = 0;
     this.incX = this.incY = 0;
 
-    if (this.duration) {
-      this.incXPerMs = belle.utils.distance(this.startX, 1, this.endX, 1) / this.duration;
-      this.incYPerMs = belle.utils.distance(1, this.endY, 1, this.startY) / this.duration;
+    if (!this.duration) {
+        object.moveTo(this.endX, this.endY);
+        this.setFinished(true);
+        return;
     }
+
+    this.incXPerMs = belle.utils.distance(this.startX, 1, this.endX, 1) / this.duration;
+    this.incYPerMs = belle.utils.distance(1, this.endY, 1, this.startY) / this.duration;
 
     if (this.endX < this.startX)
       this.incXPerMs *= -1;
