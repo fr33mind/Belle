@@ -440,3 +440,18 @@ PropertiesWidget* PropertiesWidget::copy()
     newWidget->append(this);
     return newWidget;
 }
+
+QStandardItem* PropertiesWidget::groupAt(int index) const
+{
+    if (! mModel)
+        return 0;
+
+    return mModel->item(index);
+}
+
+void PropertiesWidget::setCurrentGroup(int index)
+{
+    QStandardItem* item = groupAt(index);
+    if (item)
+        mLastItem = item;
+}

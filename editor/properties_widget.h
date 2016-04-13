@@ -57,6 +57,8 @@ public:
     void setFilters(const QStringList&);
     void removeItem(QStandardItem*);
     PropertiesWidget* copy();
+    QStandardItem* groupAt(int) const;
+    void setCurrentGroup(int);
 
 protected:
     void drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const;
