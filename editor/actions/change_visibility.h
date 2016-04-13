@@ -47,9 +47,13 @@ public:
     bool toHide() const;
     virtual void setSceneObject(Object *);
 
+    void setFadeActionEnabled(bool);
+    bool isFadeActionEnabled() const;
     void setFadeAction(Fade*);
     Fade* fadeAction() const;
 
+    void setSlideActionEnabled(bool);
+    bool isSlideActionEnabled() const;
     void setSlideAction(Slide*);
     Slide* slideAction() const;
 

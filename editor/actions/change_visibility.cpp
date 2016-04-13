@@ -53,23 +53,8 @@ ChangeVisibility::ChangeVisibility(const QVariantMap& data, QObject *parent) :
 void ChangeVisibility::init(bool show)
 {
     mToShow = show;
-    mFadeAction = new Fade(this);
-    mSlideAction = new Slide(this);
-    mFadeAction->setDuration(0);
-    mSlideAction->setDuration(0);
-
-    connect(mFadeAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
-    connect(mSlideAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
-
-    if (show) {
-        setType(GameObjectMetaType::Show);
-        mFadeAction->setFadeType(Fade::In);
-    }
-    else {
-        setType(GameObjectMetaType::Hide);
-        mFadeAction->setFadeType(Fade::Out);
-    }
-
+    mFadeAction = 0;
+    mSlideAction = 0;
     setDescription(name() + "...");
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |
     Interaction::MouseMove);
@@ -147,6 +132,35 @@ bool ChangeVisibility::toHide() const
     return ! mToShow;
 }
 
+void ChangeVisibility::setFadeActionEnabled(bool enable)
+{
+    if (enable) {
+        if (!mFadeAction) {
+            Action* fadeAction = GameObjectFactory::createAction(GameObjectMetaType::Fade, this);
+            mFadeAction = static_cast<Fade*>(fadeAction);
+            mFadeAction->setDuration(0);
+            connect(mFadeAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()), Qt::UniqueConnection);
+            if (mToShow) {
+                setType(GameObjectMetaType::Show);
+                mFadeAction->setFadeType(Fade::In);
+            }
+            else {
+                setType(GameObjectMetaType::Hide);
+                mFadeAction->setFadeType(Fade::Out);
+            }
+        }
+    }
+    else if (mFadeAction) {
+        mFadeAction->deleteLater();
+        mFadeAction = 0;
+    }
+}
+
+bool ChangeVisibility::isFadeActionEnabled() const
+{
+    return mFadeAction ? true: false;
+}
+
 void ChangeVisibility::setFadeAction(Fade* action)
 {
     mFadeAction = action;
@@ -155,6 +169,27 @@ void ChangeVisibility::setFadeAction(Fade* action)
 Fade* ChangeVisibility::fadeAction() const
 {
     return mFadeAction;
+}
+
+void ChangeVisibility::setSlideActionEnabled(bool enable)
+{
+    if (enable) {
+        if (! mSlideAction) {
+            Action* slideAction = GameObjectFactory::createAction(GameObjectMetaType::Slide, this);
+            mSlideAction = static_cast<Slide*>(slideAction);
+            mSlideAction->setDuration(0);
+            connect(mSlideAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()), Qt::UniqueConnection);
+        }
+    }
+    else if (mSlideAction) {
+        mSlideAction->deleteLater();
+        mSlideAction = 0;
+    }
+}
+
+bool ChangeVisibility::isSlideActionEnabled() const
+{
+    return mSlideAction ? true : false;
 }
 
 void ChangeVisibility::setSlideAction(Slide* action)
@@ -171,9 +206,9 @@ QVariantMap ChangeVisibility::toJsonObject(bool internal) const
 {
     QVariantMap object = Action::toJsonObject(internal);
     QVariantList transitions;
-    if (mSlideAction && (! mSlideAction->destX().isEmpty() || ! mSlideAction->destY().isEmpty()))
+    if (mSlideAction)
         transitions.append(mSlideAction->toJsonObject(internal));
-    if (mFadeAction && mFadeAction->duration() > 0)
+    if (mFadeAction)
         transitions.append(mFadeAction->toJsonObject(internal));
     object.insert("transitions", transitions);
 

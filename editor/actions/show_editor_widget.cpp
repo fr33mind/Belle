@@ -24,6 +24,7 @@ ShowEditorWidget::ShowEditorWidget(QWidget *parent):
     ChangeVisibilityEditorWidget(parent)
 {
     mObjectStateWidget = new QComboBox(this);
+    setCurrentGroup(1);
     appendRow(tr("Initial State"), mObjectStateWidget);
     connect(mObjectStateWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(onStateChanged(int)));
     connect(this, SIGNAL(objectChanged(Object*)), this , SLOT(onObjectChanged(Object*)));

@@ -18,6 +18,7 @@
 #define CHANGE_VISIBILITY_EDITOR_WIDGET_H
 
 #include <QComboBox>
+#include <QCheckBox>
 
 #include "action_editor_widget.h"
 #include "resource_manager.h"
@@ -39,6 +40,10 @@ protected:
     QList<Object*> mObjects;
     FadeEditorWidget* mFadeEditorWidget;
     SlideEditorWidget* mSlideEditorWidget;
+    QCheckBox* mFadeCheckBox;
+    QCheckBox* mSlideCheckBox;
+    QStandardItem* mFadeItemGroup;
+    QStandardItem* mSlideItemGroup;
 
 public:
     explicit ChangeVisibilityEditorWidget(QWidget *parent = 0);
@@ -53,6 +58,8 @@ public:
 
 private slots:
     void onObjectChanged(Object*);
+    void onFadeToggled(bool);
+    void onSlideToggled(bool);
 
 protected:
     virtual void updateData(GameObject*);

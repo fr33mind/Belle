@@ -37,10 +37,25 @@ void ChangeVisibilityEditorWidget::init()
     appendRow(tr("Object"), mObjectsWidget);
     endGroup();
 
+    mFadeCheckBox = new QCheckBox(this);
+    connect(mFadeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onFadeToggled(bool)));
+    mSlideCheckBox = new QCheckBox(this);
+    connect(mSlideCheckBox, SIGNAL(toggled(bool)), this, SLOT(onSlideToggled(bool)));
+
+    beginGroup(tr("Transitions"));
+    appendRow(tr("Fade"), mFadeCheckBox);
+    appendRow(tr("Slide"), mSlideCheckBox);
+    endGroup();
+
     mFadeEditorWidget = new FadeEditorWidget();
     mSlideEditorWidget = new SlideEditorWidget;
     append(mFadeEditorWidget, 0, QStringList() << "GameObject" << "Object");
+    mFadeItemGroup = groupAt(3);
+    onFadeToggled(false);
+
     append(mSlideEditorWidget, 0, QStringList() << "GameObject" << "Object");
+    mSlideItemGroup = groupAt(4);
+    onSlideToggled(false);
 
     resizeColumnToContents(0);
 }
@@ -61,9 +76,16 @@ void ChangeVisibilityEditorWidget::updateData(GameObject* action)
     mFadeEditorWidget->setGameObject(changeVisibility->fadeAction());
     mSlideEditorWidget->setGameObject(changeVisibility->slideAction());
 
+    if (changeVisibility->isFadeActionEnabled())
+        mFadeCheckBox->setChecked(true);
+    if (changeVisibility->isSlideActionEnabled())
+        mSlideCheckBox->setChecked(true);
+
     const GameObjectMetaType* metatype = GameObjectMetaType::metaType(changeVisibility->type());
     QString typeName = metatype ? metatype->name() : "";
-    setGroupName(typeName);
+    QStandardItem* item = groupAt(1);
+    if (item)
+        item->setText(typeName);
 
     mObjectsWidget->loadFromAction(changeVisibility);
 }
@@ -110,4 +132,30 @@ Action* ChangeVisibilityEditorWidget::lastChangeVisibilityActionForObject(Object
 ChangeVisibility* ChangeVisibilityEditorWidget::currentAction()
 {
     return qobject_cast<ChangeVisibility*>(mGameObject);
+}
+
+void ChangeVisibilityEditorWidget::onFadeToggled(bool checked)
+{
+    ChangeVisibility* currAction = currentAction();
+    if (currAction) {
+        currAction->setFadeActionEnabled(checked);
+        if (checked)
+            mFadeEditorWidget->setGameObject(currAction->fadeAction());
+    }
+
+    if (mFadeItemGroup)
+        setRowHidden(mFadeItemGroup->row(), mFadeItemGroup->index().parent(), !checked);
+}
+
+void ChangeVisibilityEditorWidget::onSlideToggled(bool checked)
+{
+    ChangeVisibility* currAction = currentAction();
+    if (currAction) {
+        currAction->setSlideActionEnabled(checked);
+        if (checked)
+            mSlideEditorWidget->setGameObject(currAction->slideAction());
+    }
+
+    if (mSlideItemGroup)
+        setRowHidden(mSlideItemGroup->row(), mSlideItemGroup->index().parent(), !checked);
 }
