@@ -14,7 +14,7 @@ class GameObject : public QObject
     Q_OBJECT
 
 public:
-    explicit GameObject(QObject *parent = 0, const QString& name="GameObject");
+    explicit GameObject(QObject *parent = 0, const QString& name="");
     GameObject(const QVariantMap&, QObject *parent = 0);
     virtual ~GameObject();
 

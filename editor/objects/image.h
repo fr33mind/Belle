@@ -32,7 +32,7 @@ class Image : public Object
 
 public:
     //explicit Image(QPixmap* image=0, QObject *parent = 0, const QString& name="Image");
-    Image(const QString&path, QObject* parent=0, const QString& name="Image");
+    Image(const QString&path, QObject* parent=0, const QString& name="");
     Image(const QVariantMap&, QObject*);
     virtual ~Image();
     virtual void paint(QPainter &);

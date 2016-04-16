@@ -24,8 +24,8 @@ class Button : public TextBox
     Q_OBJECT
 
 public:
-    explicit Button(QObject *parent = 0, const QString& name="Button");
-    Button(const QString& text, QObject *parent = 0, const QString& name="Button");
+    explicit Button(QObject *parent = 0, const QString& name="");
+    Button(const QString& text, QObject *parent = 0, const QString& name="");
     explicit Button(const QVariantMap&, QObject *parent = 0);
     virtual void paint(QPainter &);
     virtual void move(int, int);

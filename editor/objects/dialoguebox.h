@@ -25,7 +25,7 @@ class DialogueBox : public ObjectGroup
     Q_OBJECT
 
     public:
-        explicit DialogueBox(QObject* parent=0, const QString& name="DialogueBox");
+        explicit DialogueBox(QObject* parent=0, const QString& name="");
         DialogueBox(const QVariantMap& data, QObject* parent=0);
         ~DialogueBox();
         void setTextColor(const QColor &);

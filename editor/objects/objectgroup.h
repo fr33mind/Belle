@@ -26,7 +26,7 @@ class ObjectGroup : public Object
     Object* mSelectedObject;
 
 public:
-    explicit ObjectGroup(QObject *parent = 0, const QString& name="ObjectGroup");
+    explicit ObjectGroup(QObject *parent = 0, const QString& name="");
     ObjectGroup(const QVariantMap& data, QObject *parent = 0);
     void append(Object*, int spacing=0);
     Object* object(int) const;

@@ -43,7 +43,7 @@ class Object : public GameObject
     
     public:
 
-        explicit Object(QObject* parent=0, const QString& name="Object");
+        explicit Object(QObject* parent=0, const QString& name="");
         Object(const QVariantMap& data, QObject* parent=0);
         virtual ~Object();
         bool contains(qreal, qreal);
