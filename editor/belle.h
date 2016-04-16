@@ -79,7 +79,7 @@ class Belle : public QMainWindow
         void deleteScene();
         void onSelectedObjectChanged(Object*);
         void onActionCatalogClicked(const QModelIndex&);
-        void onActionsViewClicked(const QModelIndex&);
+        void showActionEditorWidget(Action*);
         void onNewAction(Action*);
         void exportGameFile(const QString& fileName="");
         void onRunTriggered();

@@ -21,9 +21,12 @@
 #include <QStyledItemDelegate>
 
 #include "action.h"
+#include "actions_model.h"
 
 #define BORDER 2
 #define ITEM_SELECTED_LINE_WIDTH 4
+
+class ActionsModel;
 
 class ActionsViewDelegate : public QStyledItemDelegate
 {
@@ -46,11 +49,14 @@ public:
 protected:
     virtual void dropEvent(QDropEvent *);
     QList<Action*> selectedActions() const;
+    virtual void selectionChanged(const QItemSelection &, const QItemSelection &);
 
 signals:
     void actionCopied(const QList<Action*>&);
     void actionCut(const QList<Action*>&);
     void actionPasted(const QList<Action*>&);
+    void currentActionClicked(Action*);
+    void currentActionChanged(Action*);
 
 private slots:
     void onContextMenuRequested(const QPoint&);
@@ -65,6 +71,7 @@ private:
     QAction* mCopyAction;
     QAction* mCutAction;
     QAction* mPasteAction;
+    ActionsModel* mActionsModel;
 };
 
 #endif // ACTIONS_VIEW_H

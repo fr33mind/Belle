@@ -162,9 +162,8 @@ ActionsView::ActionsView(QWidget *parent) :
     QListView(parent)
 {
     ActionsModel* model = new ActionsModel(this);
+    mActionsModel = model;
     this->setModel(model);
-
-    connect(this, SIGNAL(clicked(const QModelIndex&)), model, SLOT(setCurrentAction(const QModelIndex&)));
 
     setDragEnabled(true);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -298,6 +297,13 @@ void ActionsView::onItemClicked(const QModelIndex & index)
     if (parent() && qobject_cast<QWidget*>(parent())) {
         this->setFocus();
     }
+
+    if (mActionsModel) {
+        Action* action = mActionsModel->actionForIndex(index);
+        //Forces selected action's editor widget to appear
+        if (action == mActionsModel->currentAction())
+            emit currentActionClicked(action);
+    }
 }
 
 QList<Action*> ActionsView::selectedActions() const
@@ -311,4 +317,35 @@ QList<Action*> ActionsView::selectedActions() const
     }
 
     return actions;
+}
+
+void ActionsView::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected )
+{
+    QListView::selectionChanged(selected, deselected);
+
+    if (!mActionsModel)
+        return;
+
+    QModelIndexList indexes;
+    Action* action = mActionsModel->currentAction();
+
+    if (!deselected.isEmpty()) {
+        indexes = deselected.indexes();
+        if (mActionsModel->currentAction() == mActionsModel->actionForIndex(indexes.first()))
+            action = 0;
+    }
+
+    if (!selected.isEmpty()) {
+        indexes = selected.indexes();
+        action = mActionsModel->actionForIndex(indexes.first());
+    }
+
+    if (!action) {
+        indexes = selectedIndexes();
+        if (!indexes.isEmpty())
+            action = mActionsModel->actionForIndex(indexes.first());
+    }
+
+    mActionsModel->setCurrentAction(action);
+    emit currentActionChanged(mActionsModel->currentAction());
 }

@@ -25,26 +25,34 @@ class ActionsModel : public QStandardItemModel
     Q_OBJECT
 
     Action* mCurrentAction;
+    QList<Action*> mActions;
+    Scene* mCurrentScene;
 
 public:
     explicit ActionsModel(QObject *parent = 0);
     void insertAction(int, Action*);
     Action* actionForIndex(const QModelIndex&) const;
+    QModelIndex indexForAction(Action*) const;
     void setActions(const QList<Action*>&);
     virtual bool dropMimeData ( const QMimeData *, Qt::DropAction, int, int, const QModelIndex &);
     virtual QMimeData* mimeData( const QModelIndexList & ) const;
     virtual QStringList mimeTypes() const;
+    void setCurrentScene(Scene*);
+    void clear();
+    void setCurrentAction(Action*);
+    Action* currentAction() const;
 
 signals:
 
 public slots:
     void appendAction(Action*);
     void removeAction(int);
-    void setCurrentAction(const QModelIndex&);
-    void onCurrentActionDestroyed();
+    void setCurrentIndex(const QModelIndex&);
 
 private slots:
     void updateView();
+    void onCurrentActionDestroyed();
+    void onCurrentSceneDestroyed();
 
 };
 

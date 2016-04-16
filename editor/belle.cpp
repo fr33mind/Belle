@@ -123,7 +123,8 @@ Belle::Belle(QWidget *widget)
         layout->addWidget(mActionsView);
 
     //connect(mDrawingSurfaceWidget, SIGNAL(paintFinished()), this, SLOT(updateSceneIcon()));
-    connect(mActionsView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(onActionsViewClicked(const QModelIndex&)));
+    connect(mActionsView, SIGNAL(currentActionChanged(Action*)), this, SLOT(showActionEditorWidget(Action*)));
+    connect(mActionsView, SIGNAL(currentActionClicked(Action*)), this, SLOT(showActionEditorWidget(Action*)));
 
     //menu bar connections
     connect(mUi.propertiesAction, SIGNAL(triggered()), this, SLOT(onPropertiesTriggered()));
@@ -371,10 +372,11 @@ void Belle::updateActions()
 
     model->clear();
 
-    if (currentScene()) {
-        model->setActions(currentScene()->actions());
-        connect(currentScene(), SIGNAL(actionAdded(Action*)), model, SLOT(appendAction(Action*)), Qt::UniqueConnection);
-        connect(currentScene(), SIGNAL(actionRemoved(int)), model, SLOT(removeAction(int)), Qt::UniqueConnection);
+    Scene* currScene = currentScene();
+    if (currScene) {
+        model->setCurrentScene(currScene);
+        connect(currScene, SIGNAL(actionAdded(Action*)), model, SLOT(appendAction(Action*)), Qt::UniqueConnection);
+        connect(currScene, SIGNAL(actionRemoved(int)), model, SLOT(removeAction(int)), Qt::UniqueConnection);
     }
 }
 
@@ -610,29 +612,18 @@ void Belle::onSelectedObjectChanged(Object* obj)
 }
 
 
-void Belle::onActionsViewClicked(const QModelIndex& index)
+void Belle::showActionEditorWidget(Action* action)
 {
-    if (! index.isValid())
-        return;
-
-    const ActionsModel *model = qobject_cast<const ActionsModel*>(index.model());
-    if (! model)
-        return;
-
-    Action* action = model->actionForIndex(index);
-    if (! action)
-        return;
-    GameObjectEditorWidget* editor = 0;
-
     removeWidgetsInPropertiesWidget();
-    editor = EditorWidgetFactory::editorWidget(action->type());
-    if (editor) {
-        editor->setGameObject(action);
-        addWidgetToPropertiesWidget(editor);
+
+    if (action) {
+        GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget(action->type());
+        if (editor) {
+            editor->setGameObject(action);
+            addWidgetToPropertiesWidget(editor);
+        }
     }
-
 }
-
 
 void Belle::onNewAction(Action * action)
 {
