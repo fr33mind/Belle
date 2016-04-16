@@ -37,7 +37,7 @@ class Scene : public GameObject
     Q_OBJECT
     
     GameObjectManager mObjectManager;
-    QList<Object*> mTemporaryObjects;
+    GameObjectManager mTemporaryObjectManager;
     QList<Action*> mActions;
     Object * mSelectedObject;
     Object* mHighlightedObject;
@@ -53,7 +53,7 @@ class Scene : public GameObject
         SceneManager* sceneManager();
         QList<Object*> objects() const;
         QList<Object*> objects(GameObjectMetaType::Type) const;
-        QList<Object*> temporaryObjects();
+        QList<Object*> temporaryObjects() const;
         Object* objectAt (qreal, qreal);
         Object* object(const QString&);
         void appendObject(Object*, bool select=true, bool temporarily=false);
@@ -117,6 +117,7 @@ class Scene : public GameObject
 
     private slots:
         void onResizeEvent(const QResizeEvent&);
+        void clearRemovedObject(Object*);
 
     public slots:
         void moveSelectedObjectUp();

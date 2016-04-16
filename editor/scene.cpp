@@ -88,13 +88,16 @@ Scene::~Scene()
         delete mScenePixmap;
     mScenePixmap = 0;
     mObjectManager.clear();
-    mTemporaryObjects.clear();
+    mTemporaryObjectManager.clear();
 }
 
 void Scene::init(const QString& name)
 {
     if ( parent() )
         connect(parent(), SIGNAL(resized(const QResizeEvent&)), this, SLOT(onResizeEvent(const QResizeEvent&)));
+
+    mTemporaryObjectManager.setUniqueNames(false);
+    mTemporaryObjectManager.setAllowEmptyNames(true);
     mSelectedObject = 0;
     mHighlightedObject = 0;
     mBackgroundImage = 0;
@@ -131,16 +134,20 @@ QList<Object*> Scene::objects(GameObjectMetaType::Type type) const
     return objects;
 }
 
-QList<Object*> Scene::temporaryObjects()
+QList<Object*> Scene::temporaryObjects() const
 {
-    return mTemporaryObjects;
+    QList<Object*> objects;
+    for(int i=0; i < mTemporaryObjectManager.count(); i++)
+        objects << qobject_cast<Object*>(mTemporaryObjectManager.objectAt(i));
+    return objects;
 }
 
 Object* Scene::objectAt (qreal x, qreal y)
 {
-    for(int i=mTemporaryObjects.size()-1; i >= 0; --i)
-        if (mTemporaryObjects[i]->contains(x, y))
-            return mTemporaryObjects[i]->objectAt(x, y);
+    QList<Object*> tempObjects = temporaryObjects();
+    for(int i=tempObjects.size()-1; i >= 0; --i)
+        if (tempObjects[i]->contains(x, y))
+            return tempObjects[i]->objectAt(x, y);
 
     QList<Object*> objects = this->objects();
     for(int i=objects.size()-1; i >= 0; --i)
@@ -173,7 +180,7 @@ void Scene::_appendObject(Object* object, bool temporary)
         return;
 
     if (temporary) {
-        mTemporaryObjects.append(object);
+        mTemporaryObjectManager.add(object);
     }
     else {
         if (object->parent() != this)
@@ -183,6 +190,7 @@ void Scene::_appendObject(Object* object, bool temporary)
     }
 
     connect(object, SIGNAL(dataChanged()), DrawingSurfaceWidget::instance(), SLOT(update()));
+    connect(object, SIGNAL(destroyed(Object*)), this, SLOT(clearRemovedObject(Object*)));
 }
 
 void Scene::_reorderObject(Object* object)
@@ -444,21 +452,26 @@ void Scene::removeObject(Object* object, bool del)
 
     bool removed = false;
 
-    if (mTemporaryObjects.contains(object))
-        removed = mTemporaryObjects.removeOne(object);
+    if (mTemporaryObjectManager.contains(object))
+        removed = mTemporaryObjectManager.remove(object);
     else if (mObjectManager.contains(object))
         removed = mObjectManager.remove(object);
 
     if (removed) {
-        emit objectRemoved(object);
-        if (selectedObject() == object)
-            selectObject(0);
-        object->disconnect(this);
+        clearRemovedObject(object);
         if (del && object->parent() == this) {
             object->deleteLater();
         }
-        emit dataChanged();
     }
+}
+
+void Scene::clearRemovedObject(Object *object)
+{
+    emit objectRemoved(object);
+    if (selectedObject() == object)
+        selectObject(0);
+    object->disconnect(this);
+    emit dataChanged();
 }
 
 void Scene::removeSelectedObject(bool del)
