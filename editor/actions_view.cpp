@@ -115,21 +115,30 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
 
     textRect.setX(textHeight+BORDER*2);
     painter->drawText(textRect, action->title());
+    QString displayText = action->displayText();
 
-    if (! action->displayText().isEmpty()) {
+    if (! displayText.isEmpty()) {
         textRect.setY(textRect.y() + textHeight);
-        QString text = action->displayText();
-        int textWidth = option.fontMetrics.width(text);
+        QStringList lines = displayText.split("\n");
+        QString line;
+        int lineWidth = 0;
+        int marginWidth = option.fontMetrics.width("...") + 2;
 
-        if (textWidth > textRect.width()) {
-            int marginWidth = option.fontMetrics.width("...") + 2;
-            for(int i=text.size()-1; i >= 0 && option.fontMetrics.width(text) >= textRect.width() - marginWidth; i--) {
-                text.remove(i, 1);
+        for(int i=0; i < lines.size(); i++) {
+            line = lines.at(i);
+            lineWidth = option.fontMetrics.width(line);
+
+            if (lineWidth > textRect.width()) {
+                for(int j=line.size()-1; j >= 0 && option.fontMetrics.width(line) >= textRect.width() - marginWidth; j--) {
+                    line.remove(j, 1);
+                }
+                line.append("...");
             }
-            text.append("...");
+
+            lines[i] = line;
         }
 
-        painter->drawText(textRect, Qt::TextWordWrap, text, &textRect);
+        painter->drawText(textRect, Qt::TextWordWrap, lines.join("\n"), &textRect);
     }
 }
 
