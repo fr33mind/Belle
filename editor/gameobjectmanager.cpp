@@ -51,8 +51,12 @@ QList<GameObject*> GameObjectManager::objects() const
 
 GameObject* GameObjectManager::takeAt(int index)
 {
+    if (index < 0 || index >= mGameObjects.size())
+        return 0;
+
     GameObject* obj = mGameObjects.takeAt(index);
-    obj->disconnect(this);
+    if (obj)
+        obj->disconnect(this);
     emit objectRemoved(obj);
     return obj;
 }
