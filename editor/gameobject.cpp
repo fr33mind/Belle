@@ -100,6 +100,9 @@ void GameObject::setResource(GameObject * resource)
     if (! resource || resource == mResource)
         return;
 
+    if (mResource)
+        mResource->disconnect(this);
+
     mResource = resource;
     mResource->addClone(this);
     connectToResource();
