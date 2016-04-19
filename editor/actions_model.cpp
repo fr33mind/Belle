@@ -166,8 +166,10 @@ void ActionsModel::setCurrentAction(Action* action)
     if (action == mCurrentAction || (action && !mActions.contains(action)))
         return;
 
-    if (mCurrentAction)
+    if (mCurrentAction) {
         mCurrentAction->focusOut();
+        mCurrentAction->disconnect(this);
+    }
 
     if (action)
         action->focusIn();
@@ -197,6 +199,10 @@ void ActionsModel::onCurrentActionDestroyed()
 void ActionsModel::setCurrentScene(Scene * scene)
 {
     clear();
+
+    if (mCurrentScene)
+        mCurrentScene->disconnect(this);
+
     mCurrentScene = scene;
 
     if (mCurrentScene) {
