@@ -66,7 +66,6 @@ void Action::init()
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
     setType(GameObjectMetaType::Action);
-    setName("");
 }
 
 void Action::setTitle(const QString & title)
