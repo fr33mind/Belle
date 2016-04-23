@@ -27,6 +27,12 @@ LabelEditorWidget::LabelEditorWidget(QWidget *parent) :
     mLabelEdit = new QLineEdit(this);
     connect(mLabelEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onLabelEdited(const QString&)));
 
+    QStandardItem* groupItem = groupAt(0);
+    if (groupItem) {
+        QModelIndex index = groupItem->index();
+        setRowHidden(index.row(), index.parent(), true);
+    }
+
     beginGroup(tr("Label Editor"));
     appendRow(tr("Label"), mLabelEdit);
     endGroup();
