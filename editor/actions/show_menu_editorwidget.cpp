@@ -30,7 +30,11 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
     for(int i=2; i <= NUMBER_OF_OPTIONS; i++)
         mChooseNumberOfOptions->addItem(QString::number(i));
     connect(mChooseNumberOfOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(onNumberOfOptionsChanged(int)));
+    beginGroup(tr("Show Menu"));
     appendRow(tr("Number of Options"), mChooseNumberOfOptions);
+    endGroup();
+
+    mFirstOptionIndex = model()->rowCount();
 
     for (int i=0; i < NUMBER_OF_OPTIONS; i++) {
         mTextEdits.append(new QLineEdit(this));
@@ -47,7 +51,7 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
         endGroup();
 
         if (i >= 2)
-            this->setRowHidden(i+1, model()->index(i+1, 0).parent(), true);
+            this->setRowHidden(mFirstOptionIndex+i, model()->index(i+1, 0).parent(), true);
 
         connect(mConditionEdits.last(), SIGNAL(textChanged()), this, SLOT(onConditionChanged()));
         connect(mTextEdits.last(), SIGNAL(textEdited(const QString&)), this, SLOT(onTextEdited(const QString&)));
@@ -254,11 +258,11 @@ void ShowMenuEditorWidget::onConditionChanged()
 
 void ShowMenuEditorWidget::setNumberOfOptions(int number)
 {
-    for(int i=1; i < number+1; i++) {
+    for(int i=mFirstOptionIndex; i < mFirstOptionIndex+number; i++) {
         this->setRowHidden(i, model()->index(i, 0).parent(), false);
     }
 
-    for(int i=number+1; i < model()->rowCount(); i++) {
+    for(int i=mFirstOptionIndex+number; i < model()->rowCount(); i++) {
         this->setRowHidden(i, model()->index(i, 0).parent(), true);
     }
 }
