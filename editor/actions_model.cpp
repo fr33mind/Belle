@@ -104,11 +104,14 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
         return true;
 
     int destRow = -1;
+    bool middleRow = false;
     if (parent.isValid())
        destRow = parent.row();
 
-    if (destRow < 0)
+    if (destRow < 0) {
        destRow = row;
+       middleRow = true;
+    }
 
     if (destRow < 0)
         destRow = this->rowCount()-1;
@@ -121,16 +124,10 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
         if (index == -1)
             continue;
 
-        if (destRow >= index ) {
-            mActions.insert(destRow+1, action);
-            insertRow(destRow+1);
-            mActions.removeAt(index);
-        }
-        else {
-            mActions.removeAt(index);
-            mActions.insert(destRow, action);
-            insertRow(destRow);
-        }
+        mActions.removeAt(index);
+        int destIndex = destRow > index && middleRow ? destRow - 1 : destRow;
+        mActions.insert(destIndex, action);
+        insertRow(destIndex);
     }
 
     if (mCurrentScene)
