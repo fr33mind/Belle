@@ -25,7 +25,7 @@ GetUserInput::GetUserInput(QObject *parent) :
 }
 
 GetUserInput::GetUserInput(const QVariantMap& data, QObject *parent):
-    Action(parent)
+    Action(data, parent)
 {
     init();
 
