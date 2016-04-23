@@ -53,6 +53,7 @@ ChangeVisibility::ChangeVisibility(const QVariantMap& data, QObject *parent) :
 void ChangeVisibility::init(bool show)
 {
     mToShow = show;
+    setType(mToShow ? GameObjectMetaType::Show : GameObjectMetaType::Hide);
     mFadeAction = 0;
     mSlideAction = 0;
     setDescription(name() + "...");
@@ -141,11 +142,9 @@ void ChangeVisibility::setFadeActionEnabled(bool enable)
             mFadeAction->setDuration(0);
             connect(mFadeAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()), Qt::UniqueConnection);
             if (mToShow) {
-                setType(GameObjectMetaType::Show);
                 mFadeAction->setFadeType(Fade::In);
             }
             else {
-                setType(GameObjectMetaType::Hide);
                 mFadeAction->setFadeType(Fade::Out);
             }
         }
