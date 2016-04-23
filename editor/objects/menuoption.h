@@ -16,7 +16,7 @@ class MenuOption : public Button
 public:
     MenuOption(const QString& text, const QList<Action*>& actions=QList<Action*>(), const QString& condition="", QObject* parent=0);
     MenuOption(const QVariantMap&, QObject* parent=0);
-    virtual QVariantMap toJsonObject(bool internal=true);
+    virtual QVariantMap toJsonObject(bool internal=true) const;
 
     QList<Action*> actions() const;
     void setActions(const QList<Action*>&);

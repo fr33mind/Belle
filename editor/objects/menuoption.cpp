@@ -65,7 +65,7 @@ void MenuOption::setCondition(const QString& condition)
     mCondition = condition;
 }
 
-QVariantMap MenuOption::toJsonObject(bool internal)
+QVariantMap MenuOption::toJsonObject(bool internal) const
 {
     QVariantMap option = Button::toJsonObject(internal);
     QVariantList actions;
