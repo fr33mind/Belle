@@ -73,13 +73,17 @@ void ChangeVisibilityEditorWidget::updateData(GameObject* action)
     if (! changeVisibility)
         return;
 
-    mFadeEditorWidget->setGameObject(changeVisibility->fadeAction());
-    mSlideEditorWidget->setGameObject(changeVisibility->slideAction());
+    mFadeCheckBox->setChecked(changeVisibility->isFadeActionEnabled());
 
-    if (changeVisibility->isFadeActionEnabled())
-        mFadeCheckBox->setChecked(true);
-    if (changeVisibility->isSlideActionEnabled())
-        mSlideCheckBox->setChecked(true);
+    if (changeVisibility->isFadeActionEnabled()) {
+        mFadeEditorWidget->setGameObject(changeVisibility->fadeAction());
+    }
+
+    mSlideCheckBox->setChecked(changeVisibility->isSlideActionEnabled());
+
+    if (changeVisibility->isSlideActionEnabled()) {
+        mSlideEditorWidget->setGameObject(changeVisibility->slideAction());
+    }
 
     const GameObjectMetaType* metatype = GameObjectMetaType::metaType(changeVisibility->type());
     QString typeName = metatype ? metatype->name() : "";
