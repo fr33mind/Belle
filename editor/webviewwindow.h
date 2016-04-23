@@ -31,6 +31,7 @@ public slots:
 private:
    QWebView* mWebView;
    QWebInspector* mWebInspector;
+   void centerOnScreen();
 
 };
 

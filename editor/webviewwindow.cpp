@@ -6,6 +6,8 @@
 #include <QApplication>
 #include <QDebug>
 #include <QWebInspector>
+#include <QApplication>
+#include <QDesktopWidget>
 
 WebViewWindow::WebViewWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -60,6 +62,7 @@ void WebViewWindow::open(const QUrl& url)
     show();
     mWebView->show();
     loadWebInspector();
+    centerOnScreen();
 
     if (mWebView->url() == url)
         mWebView->reload();
@@ -91,4 +94,27 @@ void WebViewWindow::showWebInspector()
 {
     if (mWebInspector)
         mWebInspector->show();
+}
+
+void WebViewWindow::centerOnScreen()
+{
+    QDesktopWidget* desktopWidget = QApplication::desktop();
+
+    if (desktopWidget) {
+        QWidget* mainWindow = qobject_cast<QWidget*>(parent());
+        QRect geometry = desktopWidget->screenGeometry(mainWindow);
+
+        int centerWidth = geometry.width()/2 - width()/2;
+        if (centerWidth < 0)
+            centerWidth = 0;
+        int centerHeight = geometry.height()/2 - height()/2;
+        if (centerHeight < 0)
+            centerHeight = 0;
+
+        //in case of multi-monitor
+        centerWidth += geometry.x();
+        centerHeight += geometry.y();
+
+        move(centerWidth, centerHeight);
+    }
 }
