@@ -173,8 +173,10 @@ void ActionsModel::setCurrentAction(Action* action)
 
     mCurrentAction = action;
 
-    if (mCurrentAction)
+    if (mCurrentAction) {
         connect(mCurrentAction, SIGNAL(destroyed()), this, SLOT(onCurrentActionDestroyed()), Qt::UniqueConnection);
+        connect(mCurrentAction, SIGNAL(dataChanged()), this, SLOT(updateView()), Qt::UniqueConnection);
+    }
 }
 
 void ActionsModel::setCurrentIndex(const QModelIndex & index)
