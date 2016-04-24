@@ -95,17 +95,7 @@ QString Branch::condition() const
 void Branch::setCondition(const QString & condition)
 {
     mCondition = condition;
-    QString trueAction(tr("Do Nothing"));
-    QString falseAction(tr("Do Nothing"));
-
-    if (mTrueActions.size())
-        trueAction = mTrueActions[0]->toString();
-
-    if (mFalseActions.size())
-        falseAction = mFalseActions[0]->toString();
-
-    QString text = QString("%1 %2: %3\n%4: %5").arg(tr("If")).arg(condition).arg(trueAction).arg(tr("Else")).arg(falseAction);
-    setDisplayText(text);
+    updateDisplayText();
 }
 
 QList<Action*> Branch::actions(bool cond) const
@@ -121,6 +111,7 @@ void Branch::appendAction(Action* action, bool cond)
         mTrueActions.append(action);
     else
         mFalseActions.append(action);
+    updateDisplayText();
 }
 
 Action* Branch::action(int index, bool cond) const
@@ -147,4 +138,35 @@ void Branch::removeAction(int index, bool cond, bool del){
 
     if (action && del)
         action->deleteLater();
+}
+
+void Branch::updateDisplayText()
+{
+    QString trueAction(tr("Do Nothing"));
+    QString falseAction(tr("Do Nothing"));
+    QStringList trueActions;
+    QStringList falseActions;
+    const GameObjectMetaType* metatype = 0;
+
+    for(int i=0; i < mTrueActions.size(); i++) {
+        metatype = GameObjectMetaType::metaType(mTrueActions.at(i)->type());
+        if (metatype)
+            trueActions.append(metatype->name());
+    }
+
+    if (!trueActions.isEmpty())
+        trueAction = trueActions.join(", ");
+
+    for(int i=0; i < mFalseActions.size(); i++) {
+        metatype = GameObjectMetaType::metaType(mFalseActions.at(i)->type());
+        if (metatype)
+            falseActions.append(metatype->name());
+    }
+
+    if (!falseActions.isEmpty())
+        falseAction = falseActions.join(", ");
+
+    QString text = QString(tr("If %1\nThen: %2\nElse: %3")).arg(mCondition).arg(trueAction).arg(falseAction);
+    setDisplayText(text);
+    emit dataChanged();
 }

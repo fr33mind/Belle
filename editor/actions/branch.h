@@ -46,6 +46,7 @@ private:
     QList<Action*> mTrueActions;
     QList<Action*> mFalseActions;
     void init();
+    void updateDisplayText();
     
 };
 
