@@ -128,7 +128,7 @@ class Scene : public GameObject
     signals:
        void resized(const QResizeEvent&);
        void selectionChanged(Object*);
-       void actionAdded(Action*);
+       void actionInserted(int, Action*);
        void actionRemoved(int);
        void objectAdded(Object*);
        void objectRemoved(Object*);

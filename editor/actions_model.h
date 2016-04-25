@@ -30,7 +30,6 @@ class ActionsModel : public QStandardItemModel
 
 public:
     explicit ActionsModel(QObject *parent = 0);
-    void insertAction(int, Action*);
     Action* actionForIndex(const QModelIndex&) const;
     QModelIndex indexForAction(Action*) const;
     void setActions(const QList<Action*>&);
@@ -47,6 +46,7 @@ signals:
 public slots:
     void appendAction(Action*);
     void removeAction(int);
+    void insertAction(int, Action*);
     void setCurrentIndex(const QModelIndex&);
 
 private slots:

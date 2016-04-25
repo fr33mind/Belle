@@ -375,7 +375,7 @@ void Belle::updateActions()
     Scene* currScene = currentScene();
     if (currScene) {
         model->setCurrentScene(currScene);
-        connect(currScene, SIGNAL(actionAdded(Action*)), model, SLOT(appendAction(Action*)), Qt::UniqueConnection);
+        connect(currScene, SIGNAL(actionInserted(int, Action*)), model, SLOT(insertAction(int, Action*)), Qt::UniqueConnection);
         connect(currScene, SIGNAL(actionRemoved(int)), model, SLOT(removeAction(int)), Qt::UniqueConnection);
     }
 }

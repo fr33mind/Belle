@@ -547,7 +547,7 @@ void Scene::insertAction(int row, Action* action, bool copy)
     else
         action->setParent(this);
     mActions.insert(row, action);
-    emit actionAdded(action);
+    emit actionInserted(row, action);
 }
 
 Action* Scene::actionAt(int i) const
