@@ -37,7 +37,7 @@ FadeEditorWidget::FadeEditorWidget(QWidget *parent) :
 
     beginGroup(tr("Fade Action"));
     appendRow(tr("Object"), mObjectChooser, "Object");
-    appendRow(tr("Fade"), mFadeTypeChooser);
+    appendRow(tr("Fade"), mFadeTypeChooser, "FadeTypeChooser");
     appendRow(tr("Duration"), mDurationSpin);
     endGroup();
 }

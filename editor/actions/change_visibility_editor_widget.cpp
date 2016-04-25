@@ -50,6 +50,7 @@ void ChangeVisibilityEditorWidget::init()
     mFadeEditorWidget = new FadeEditorWidget();
     mSlideEditorWidget = new SlideEditorWidget;
     append(mFadeEditorWidget, 0, QStringList() << "GameObject" << "Object");
+    setFadeTypeWidgetDisabled(true);
     mFadeItemGroup = groupAt(3);
     onFadeToggled(false);
 
@@ -162,4 +163,14 @@ void ChangeVisibilityEditorWidget::onSlideToggled(bool checked)
 
     if (mSlideItemGroup)
         setRowHidden(mSlideItemGroup->row(), mSlideItemGroup->index().parent(), !checked);
+}
+
+void ChangeVisibilityEditorWidget::setFadeTypeWidgetDisabled(bool disable)
+{
+    QStandardItem* item = findItemData("FadeTypeChooser");
+    if (item) {
+        QWidget* widget = indexWidget(item->index().sibling(item->row(), 1));
+        if (widget)
+            widget->setDisabled(disable);
+    }
 }

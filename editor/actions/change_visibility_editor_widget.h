@@ -66,6 +66,7 @@ protected:
 
 private:
     void init();
+    void setFadeTypeWidgetDisabled(bool);
     Action* lastChangeVisibilityActionForObject(Object*);
     
 signals:
