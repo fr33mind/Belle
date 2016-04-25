@@ -66,7 +66,7 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
 void ShowMenuEditorWidget::updateData(GameObject * action)
 {
     ActionEditorWidget::updateData(action);
-    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(action);
     if (! showMenu)
         return;
 
