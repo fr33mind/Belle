@@ -27,13 +27,15 @@ public:
     explicit ShowMenu(QObject *parent = 0);
      ShowMenu(const QVariantMap&, QObject *parent = 0);
      virtual QVariantMap toJsonObject(bool internal=true) const;
+     void setSceneObject(Object*);
 
      void focusIn();
      void focusOut();
 
 signals:
 
-public slots:
+private slots:
+    void updateDisplayText();
 
 private:
     void init();

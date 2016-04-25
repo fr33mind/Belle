@@ -58,6 +58,15 @@ void ShowMenu::init()
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
 }
 
+void ShowMenu::setSceneObject(Object * obj)
+{
+    Action::setSceneObject(obj);
+    if (obj) {
+        connect(obj, SIGNAL(dataChanged()), this, SLOT(updateDisplayText()), Qt::UniqueConnection);
+        updateDisplayText();
+    }
+}
+
 QVariantMap ShowMenu::toJsonObject(bool internal) const
 {
     QVariantMap object = Action::toJsonObject(internal);
@@ -79,5 +88,44 @@ void ShowMenu::focusOut()
     if (sceneObject() && this->scene()) {
         this->scene()->removeObject(sceneObject(), false);
     }
+}
+
+void ShowMenu::updateDisplayText()
+{
+    QStringList lines;
+    QString text;
+    Menu* menu = static_cast<Menu*>(this->sceneObject());
+    QList<MenuOption*> options = menu->options();
+    QList<Action*> actions;
+    Action* action = 0;
+    QStringList actionsTextList;
+    const GameObjectMetaType* metatype = 0;
+
+    for(int i=0; i < 3 && i < options.size(); i++) {
+        MenuOption* option = options.at(i);
+        if (option) {
+            actions = option->actions();
+            actionsTextList.clear();
+            for(int j=0; j < actions.size(); j++) {
+                action = actions.at(j);
+                if (action) {
+                    metatype = GameObjectMetaType::metaType(action->type());
+                    if (metatype)
+                        actionsTextList.append(metatype->name());
+                }
+            }
+
+            QString cond = option->condition();
+            if (!cond.isEmpty())
+                cond = QString(" (if %1)").arg(cond);
+            QString actionsText = actionsTextList.join(", ");
+            if (actionsText.isEmpty())
+                actionsText = tr("Do nothing");
+            text = QString("\"%1\"%2: %3").arg(option->text()).arg(cond).arg(actionsText);
+            lines.append(text);
+        }
+    }
+
+    setDisplayText(lines.join("\n"));
 }
 

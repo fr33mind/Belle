@@ -44,6 +44,7 @@ void MenuOption::setActions(const QList<Action *> & actions)
 void MenuOption::addAction(Action* action)
 {
     mActions.append(action);
+    emit dataChanged();
 }
 
 void MenuOption::removeActionAt(int index)
@@ -52,6 +53,7 @@ void MenuOption::removeActionAt(int index)
         Action* action = mActions.takeAt(index);
         if (action)
             action->deleteLater();
+        emit dataChanged();
     }
 }
 
@@ -62,7 +64,10 @@ QString MenuOption::condition() const
 
 void MenuOption::setCondition(const QString& condition)
 {
-    mCondition = condition;
+    if (mCondition != condition) {
+        mCondition = condition;
+        emit dataChanged();
+    }
 }
 
 QVariantMap MenuOption::toJsonObject(bool internal) const
