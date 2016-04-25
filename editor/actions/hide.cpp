@@ -31,4 +31,5 @@ Hide::Hide(const QVariantMap &data, QObject *parent):
 void Hide::init()
 {
     setType(GameObjectMetaType::Hide);
+    setToShow(false);
 }

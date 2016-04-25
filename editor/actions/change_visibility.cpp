@@ -213,3 +213,8 @@ QVariantMap ChangeVisibility::toJsonObject(bool internal) const
 
     return object;
 }
+
+void ChangeVisibility::setToShow(bool show)
+{
+    mToShow = show;
+}

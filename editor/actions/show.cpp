@@ -35,6 +35,7 @@ Show::Show(QObject *parent):
 void Show::init()
 {
     setType(GameObjectMetaType::Show);
+    setToShow(true);
     mCharacterState = "";
 }
 

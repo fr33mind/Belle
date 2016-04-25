@@ -57,6 +57,9 @@ public:
     void setSlideAction(Slide*);
     Slide* slideAction() const;
 
+protected:
+    void setToShow(bool);
+
 private:
     void init(bool);
 
