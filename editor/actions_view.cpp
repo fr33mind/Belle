@@ -358,3 +358,12 @@ void ActionsView::selectionChanged(const QItemSelection & selected, const QItemS
     mActionsModel->setCurrentAction(action);
     emit currentActionChanged(mActionsModel->currentAction());
 }
+
+void ActionsView::selectAction(Action * action)
+{
+    if (!mActionsModel)
+        return;
+
+    QModelIndex index = mActionsModel->indexForAction(action);
+    selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+}

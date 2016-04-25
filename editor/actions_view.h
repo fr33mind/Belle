@@ -44,6 +44,7 @@ class ActionsView : public QListView
 public:
     explicit ActionsView(QWidget *parent = 0);
     void appendAction(Action*);
+    void selectAction(Action*);
 
 
 protected:

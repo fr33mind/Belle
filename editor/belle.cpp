@@ -638,6 +638,8 @@ void Belle::onNewAction(Action * action)
             currentScene()->appendAction(action);
             mActionsView->scrollToBottom();
         }
+
+        mActionsView->selectAction(action);
     }
 
 }
