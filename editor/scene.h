@@ -130,6 +130,7 @@ class Scene : public GameObject
        void selectionChanged(Object*);
        void actionInserted(int, Action*);
        void actionRemoved(int);
+       void actionRemoved(Action*);
        void objectAdded(Object*);
        void objectRemoved(Object*);
        void loaded();

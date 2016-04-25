@@ -507,6 +507,7 @@ void Scene::removeActionAt(int index , bool del)
 {
     if (index >= 0 && index < mActions.size()) {
         Action * action = mActions.takeAt(index);
+        emit actionRemoved(action);
         emit actionRemoved(index);
 
         if (del)
