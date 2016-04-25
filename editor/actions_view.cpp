@@ -366,4 +366,5 @@ void ActionsView::selectAction(Action * action)
 
     QModelIndex index = mActionsModel->indexForAction(action);
     selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+    scrollTo(index);
 }
