@@ -125,6 +125,7 @@ void PropertiesWidget::appendRow(PropertiesWidget* propertiesWidget, QStandardIt
 
     QWidget* widget = 0;
     QString text("");
+    QVariant dataLeft = itemLeft->data(Qt::UserRole+1);
 
     if (itemRight) {
          widget = propertiesWidget->indexWidget(itemRight->index());
@@ -133,11 +134,11 @@ void PropertiesWidget::appendRow(PropertiesWidget* propertiesWidget, QStandardIt
     }
 
     if (widget)
-        appendRow(itemLeft->data(Qt::DisplayRole).toString(), widget);
+        appendRow(itemLeft->data(Qt::DisplayRole).toString(), widget, dataLeft);
     else if (! text.isEmpty())
-        appendRow(itemLeft->data(Qt::DisplayRole).toString(), text);
+        appendRow(itemLeft->data(Qt::DisplayRole).toString(), text, dataLeft);
     else
-        appendRow(itemLeft->data(Qt::DisplayRole).toString(), 0);
+        appendRow(itemLeft->data(Qt::DisplayRole).toString(), 0, dataLeft);
 }
 
 void PropertiesWidget::endGroup()
