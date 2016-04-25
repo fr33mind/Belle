@@ -455,3 +455,22 @@ void PropertiesWidget::setCurrentGroup(int index)
     if (item)
         mLastItem = item;
 }
+
+QStandardItem* PropertiesWidget::findItemData(const QVariant & data, QStandardItem* rootItem) const
+{
+    if (!mModel && !rootItem)
+        return 0;
+
+    if (!rootItem && mModel->rowCount() > 0)
+        rootItem = mModel->item(0);
+
+    if (rootItem) {
+        QModelIndexList indexes = mModel->match(rootItem->index(), Qt::UserRole+1, data, -1, Qt::MatchFixedString | Qt::MatchRecursive);
+        if (indexes.size()) {
+            QModelIndex index = indexes.first();
+            return mModel->itemFromIndex(index);
+        }
+    }
+
+    return 0;
+}

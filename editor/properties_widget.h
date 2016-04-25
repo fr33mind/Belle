@@ -59,6 +59,7 @@ public:
     PropertiesWidget* copy();
     QStandardItem* groupAt(int) const;
     void setCurrentGroup(int);
+    QStandardItem* findItemData(const QVariant&, QStandardItem* rootItem=0) const;
 
 protected:
     void drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const;
