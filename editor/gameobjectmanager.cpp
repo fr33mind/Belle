@@ -119,10 +119,8 @@ int GameObjectManager::size() const
 
 void GameObjectManager::clear(bool del)
 {
-    if (del) {
-        for(int i=mGameObjects.size()-1; i >= 0; --i) {
-            mGameObjects.takeAt(i)->deleteLater();
-        }
+    for(int i=mGameObjects.size()-1; i >= 0; --i) {
+        removeAt(i, del);
     }
 
     mGameObjects.clear();
