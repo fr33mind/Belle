@@ -38,7 +38,7 @@ public:
     virtual Action* copy();
     bool isValidLabel(const QString&);
     bool hasValidLabel();
-
+    QList<Label*> availableLabels() const;
     
 signals:
     

@@ -17,6 +17,8 @@
 #ifndef GOTOLABEL_EDITOR_WIDGET_H
 #define GOTOLABEL_EDITOR_WIDGET_H
 
+#include <QComboBox>
+
 #include "action_editor_widget.h"
 #include "gotolabel.h"
 
@@ -26,11 +28,14 @@ class GoToLabelEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    QLineEdit* mLabelEdit;
+    QComboBox* mLabelChooser;
 
 public:
     explicit GoToLabelEditorWidget(QWidget *parent = 0);
 
+private:
+    void loadLabels(GoToLabel*);
+    void checkLabelValidity(GoToLabel*);
 
 signals:
 
@@ -38,7 +43,7 @@ protected:
     virtual void updateData(GameObject*);
 
 private slots:
-    void onLabelEdited(const QString&);
+    void onLabelChanged(const QString&);
     
 };
 

@@ -60,13 +60,10 @@ void GoToLabel::setTargetLabel(const QString& name)
 
 bool GoToLabel::isValidLabel(const QString& name)
 {
-    Scene * scene = this->scene();
-    if (! scene)
-        return false;
+    QList<Label*> labels = availableLabels();
 
-    QList<Action*> actions = scene->actions();
-    for(int i=0; i < actions.size(); i++)
-        if (actions[i] && qobject_cast<Label*>(actions[i]) && actions[i]->objectName() == name)
+    for(int i=0; i < labels.size(); i++)
+        if (labels[i]->name() == name)
             return true;
 
     return false;
@@ -106,4 +103,18 @@ QVariantMap GoToLabel::toJsonObject(bool internal) const
     return action;
 }
 
+QList<Label*> GoToLabel::availableLabels() const
+{
+    Scene * scene = this->scene();
+    QList<Label*> labels;
+    if (! scene)
+        return labels;
 
+    QList<Action*> actions = scene->actions();
+    for(int i=0; i < actions.size(); i++) {
+        if (actions[i] && actions[i]->type() == GameObjectMetaType::Label)
+            labels.append(qobject_cast<Label*>(actions[i]));
+    }
+
+    return labels;
+}

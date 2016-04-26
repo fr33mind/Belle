@@ -16,19 +16,17 @@
 
 #include "gotolabel_editor_widget.h"
 
-#include <QLineEdit>
-#include <QDebug>
-
 #include "scene.h"
 
 GoToLabelEditorWidget::GoToLabelEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mLabelEdit = new QLineEdit(this);
-    connect(mLabelEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onLabelEdited(const QString&)));
+    mLabelChooser = new QComboBox(this);
+    mLabelChooser->setEditable(true);
+    connect(mLabelChooser, SIGNAL(currentTextChanged(const QString&)), this, SLOT(onLabelChanged(const QString&)));
 
-    beginGroup(tr("Go to Label Editor"));
-    appendRow(tr("Label"), mLabelEdit);
+    beginGroup(tr("Go to Label"));
+    appendRow(tr("Label"), mLabelChooser);
     endGroup();
 }
 
@@ -39,23 +37,39 @@ void GoToLabelEditorWidget::updateData(GameObject* action)
     if (! gotolabel)
         return;
 
-    mLabelEdit->setText(gotolabel->targetLabelName());
-    if (gotolabel->hasValidLabel())
-        mLabelEdit->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
-    else
-        mLabelEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
+    loadLabels(gotolabel);
+    checkLabelValidity(gotolabel);
 }
 
-void GoToLabelEditorWidget::onLabelEdited(const QString & text)
+void GoToLabelEditorWidget::onLabelChanged(const QString & text)
 {
     GoToLabel* gotolabel = qobject_cast<GoToLabel*>(mGameObject);
     if (! gotolabel)
         return;
 
     gotolabel->setTargetLabel(text);
+    checkLabelValidity(gotolabel);
+}
 
+void GoToLabelEditorWidget::checkLabelValidity(GoToLabel *gotolabel)
+{
     if (gotolabel->hasValidLabel())
-        mLabelEdit->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
+        mLabelChooser->lineEdit()->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
     else
-        mLabelEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
+        mLabelChooser->lineEdit()->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
+}
+
+void GoToLabelEditorWidget::loadLabels(GoToLabel* gotolabel)
+{
+    mLabelChooser->clear();
+
+    QList<Label*> labels = gotolabel->availableLabels();
+    for(int i=0; i < labels.size(); i++) {
+        mLabelChooser->addItem(labels.at(i)->name());
+    }
+
+    int index = mLabelChooser->findText(gotolabel->targetLabelName());
+    mLabelChooser->setCurrentIndex(index);
+    if (index == -1)
+        mLabelChooser->setCurrentText(gotolabel->targetLabelName());
 }
