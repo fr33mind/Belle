@@ -82,7 +82,7 @@ void Image::init()
     setType(GameObjectMetaType::Image);
 }
 
-void Image::_setImage(ImageFile* image)
+void Image::_setImage(ImageFile* image, bool load)
 {
     if (image == mImage)
         return;
@@ -94,7 +94,7 @@ void Image::_setImage(ImageFile* image)
 
     AssetManager::instance()->releaseAsset(mImage);
     mImage = image;
-    if (mImage)
+    if (mImage && load)
         AssetManager::instance()->loadAsset(mImage->path());
 
     if (mImage && mImage->isAnimated()) {
@@ -117,7 +117,7 @@ void Image::setImage(const QString& path)
         return;
 
     Asset *image = AssetManager::instance()->loadAsset(path, Asset::Image);
-    _setImage(dynamic_cast<ImageFile*>(image));
+    _setImage(dynamic_cast<ImageFile*>(image), false);
 }
 
 void Image::setImage(ImageFile* image)

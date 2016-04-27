@@ -52,7 +52,7 @@ public slots:
 private:
     void init();
     void _load(const QVariantMap&);
-    void _setImage(ImageFile*);
+    void _setImage(ImageFile*, bool load=true);
 
 
 
