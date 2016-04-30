@@ -108,13 +108,3 @@ bool ImageFile::isTransparent(const QImage& image)
 
     return useAlpha;
 }
-
-bool ImageFile::save(const QString & path)
-{
-    //save image in memory to path
-    if (! mPixmap.isNull())
-        return mPixmap.save(path);
-    return false;
-}
-
-

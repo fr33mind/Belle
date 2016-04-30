@@ -21,7 +21,6 @@ public:
     virtual int height() const;
     virtual QRect rect() const;
     virtual bool isValid() const;
-    virtual bool save(const QString&);
 
     static bool isAnimated(const QString&);
     static ImageFile* create(const QString&);
