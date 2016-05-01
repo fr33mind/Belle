@@ -441,6 +441,12 @@ void Belle::onSceneRemoved(int index)
     QTreeWidget * scenesWidget = this->scenesWidget(sender()->objectName());
     if (index >= 0 && index < scenesWidget->topLevelItemCount())
         scenesWidget->takeTopLevelItem(index);
+
+    int nextIndex = index;
+    if (nextIndex >= scenesWidget->topLevelItemCount())
+        nextIndex = scenesWidget->topLevelItemCount() - 1;
+    if (nextIndex >= 0)
+        setCurrentSceneIndex(nextIndex);
 }
 
 void Belle::onSceneNameChanged(int index, const QString& name)
