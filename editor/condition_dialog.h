@@ -21,8 +21,6 @@
 #include <QComboBox>
 #include <QRadioButton>
 
-#include "lineedit.h"
-
 class ConditionWidget;
 
 class ConditionDialog : public QDialog
@@ -45,9 +43,9 @@ private slots:
 
 private:
     ConditionWidget* mConditionWidget;
-    LineEdit* mEditVariable;
+    QLineEdit* mEditVariable;
     QComboBox* mOperatorsComboBox;
-    LineEdit* mEditValue;
+    QLineEdit* mEditValue;
     QComboBox* mComboValueType;
     QRadioButton * mAndRadioButton;
     QRadioButton * mOrRadioButton;

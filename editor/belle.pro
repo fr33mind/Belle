@@ -25,7 +25,6 @@ HEADERS      += belle.h\
                 objects/object.h\
                 curtain_widget.h \
     boxlayout.h \
-    extendedlineedit.h \
     objects/textbox.h \
     properties_widget.h \
     objects/textbox_editor_widget.h\
@@ -63,7 +62,6 @@ HEADERS      += belle.h\
     resources_view.h \
     actions/branch.h \
     actions/branch_editor_widget.h \
-    lineedit.h \
     interaction.h \
     actions/get_user_input.h \
     actions/get_user_input_editor_widget.h \
@@ -135,7 +133,6 @@ SOURCES      += main.cpp\
                 scene.cpp\
                 curtain_widget.cpp \
     boxlayout.cpp \
-    extendedlineedit.cpp \
     properties_widget.cpp \
     objects/object_editor_widget.cpp \
     color_pushbutton.cpp \
@@ -173,7 +170,6 @@ SOURCES      += main.cpp\
     resources_view.cpp \
     actions/branch.cpp \
     actions/branch_editor_widget.cpp \
-    lineedit.cpp \
     actions/get_user_input.cpp \
     actions/get_user_input_editor_widget.cpp \
     actions/changecolor.cpp \

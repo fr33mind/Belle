@@ -24,7 +24,6 @@
 #include <QVariant>
 #include <QFileDialog>
 
-#include "lineedit.h"
 #include "gotolabel.h"
 #include "color_pushbutton.h"
 #include "combobox.h"

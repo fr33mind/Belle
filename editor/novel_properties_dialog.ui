@@ -236,7 +236,7 @@
           </widget>
          </item>
          <item>
-          <widget class="LineEdit" name="engineDirectoryEdit"/>
+          <widget class="QLineEdit" name="engineDirectoryEdit"/>
          </item>
          <item>
           <widget class="QPushButton" name="engineDirectoryButton">
@@ -268,7 +268,7 @@
           </widget>
          </item>
          <item>
-          <widget class="LineEdit" name="browserEdit"/>
+          <widget class="QLineEdit" name="browserEdit"/>
          </item>
          <item>
           <widget class="QPushButton" name="browserButton">
@@ -313,11 +313,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>LineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>lineedit.h</header>
-  </customwidget>
   <customwidget>
    <class>ChooseFontWidget</class>
    <extends>QComboBox</extends>

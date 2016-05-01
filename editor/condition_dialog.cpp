@@ -29,7 +29,6 @@
 #include <QDialogButtonBox>
 #include <QComboBox>
 
-#include "lineedit.h"
 #include "condition_widget.h"
 #include "utils.h"
 
@@ -54,7 +53,8 @@ ConditionDialog::ConditionDialog(const QString& condition, QWidget *parent) :
     mLogicalOperators->setVisible(false);
 
     //edit variable widget
-    mEditVariable = new LineEdit(tr("Variable"), this);
+    mEditVariable = new QLineEdit(this);
+    mEditVariable->setPlaceholderText(tr("Variable"));
     mEditVariable->setObjectName("variableEditor");
     //QRegExpValidator *validator = new QRegExpValidator(QRegExp("([a-zA-Z]+[0-9]*)*|('|\")[^ '\"]*('|\")|[0-9]+\.[0-9]*"), this);
 
@@ -76,7 +76,8 @@ ConditionDialog::ConditionDialog(const QString& condition, QWidget *parent) :
     }
     connect(mOperatorsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentOperatorChanged(int)));
 
-    mEditValue = new LineEdit(tr("Value"),this);
+    mEditValue = new QLineEdit(this);
+    mEditValue->setPlaceholderText(tr("Value"));
     mEditVariable->setObjectName("valueEditor");
     mEditValue->setToolTip(tr("Values are interpreted as a string, if you want to compare to a variable instead, use the dollar sign before name (eg. $objects)"));
     connect(mEditValue, SIGNAL(textEdited(const QString&)), this, SLOT(onValueEdited(const QString&)));
@@ -211,7 +212,7 @@ void ConditionDialog::onTypeChanged(int index)
     QString objName = sender()->objectName();
     QComboBox* senderComboBox = static_cast<QComboBox*>(sender());
     QString type = senderComboBox->itemData(index).toString();
-    LineEdit* lineEdit = 0;
+    QLineEdit* lineEdit = 0;
 
     if (objName == "type1")
         lineEdit = mEditVariable;

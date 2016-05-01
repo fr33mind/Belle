@@ -18,6 +18,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QMouseEvent>
 
 #include "condition_dialog.h"
 
