@@ -88,8 +88,14 @@ Asset* AssetManager::loadAsset(QString path, Asset::Type type)
     }
 
     asset = _loadAsset(path, type);
-    if (asset)
+    if (asset) {
         mAssets.insert(asset, 1);
+        if (mFilesToRemove.contains(asset->path())) {
+            mFilesToRemove.remove(asset->path());
+            asset->setRemovable(true);
+        }
+    }
+
     return asset;
 }
 
@@ -121,15 +127,26 @@ void AssetManager::releaseAsset(Asset* asset)
     if (count) {
         --count;
         if (count <= 0) {
-            mAssets.remove(asset);
-            delete asset;
+            removeAsset(asset);
         }
-        else
+        else {
             mAssets.insert(asset, count);
+        }
     }
 }
 
-void AssetManager::removeAssets()
+void AssetManager::removeAsset(Asset* asset)
+{
+    if (!asset)
+        return;
+
+    mAssets.remove(asset);
+    if (asset->isRemovable())
+        mFilesToRemove.insert(asset->path());
+    delete asset;
+}
+
+void AssetManager::clearAssets()
 {
     QHashIterator<Asset*, int> it(mAssets);
     while(it.hasNext()) {
@@ -206,7 +223,7 @@ QVariantMap AssetManager::readAssetsFile(const QString& filepath)
     return data.toMap();
 }
 
-void AssetManager::load(const QDir & dir)
+void AssetManager::load(const QDir & dir, bool fromProject)
 {
     QVariantMap data = readAssetsFile(dir.absoluteFilePath(ASSETS_FILE));
     if (data.isEmpty())
@@ -218,23 +235,30 @@ void AssetManager::load(const QDir & dir)
     mTypeToPath[Asset::Font] = subdirs.value("fonts", "").toString();
 
     QVariantMap item;
+    Asset* asset = 0;
 
     QVariantList imagesData = data.value("images").toList();
     for(int i=0; i < imagesData.size(); i++) {
         item = imagesData[i].toMap();
-        loadAsset(item.value("name", "").toString(), Asset::Image);
+        asset = loadAsset(item.value("name", "").toString(), Asset::Image);
+        if (asset && fromProject)
+            asset->setRemovable(true);
     }
 
     QVariantList audioData = data.value("sounds").toList();
     for(int i=0; i < audioData.size(); i++) {
         item = audioData[i].toMap();
-        loadAsset(item.value("name", "").toString(), Asset::Audio);
+        asset = loadAsset(item.value("name", "").toString(), Asset::Audio);
+        if (asset && fromProject)
+            asset->setRemovable(true);
     }
 
     QVariantList fontsData = data.value("fonts").toList();
     for(int i=0; i < fontsData.size(); i++) {
         item = fontsData[i].toMap();
-        loadAsset(item.value("name", "").toString(), Asset::Font);
+        asset = loadAsset(item.value("name", "").toString(), Asset::Font);
+        if (asset && fromProject)
+            asset->setRemovable(true);
     }
 
     //reset reference counts
@@ -243,7 +267,7 @@ void AssetManager::load(const QDir & dir)
         mAssets[assets[i]] = 0;
 }
 
-void AssetManager::save(const QDir & dir)
+void AssetManager::save(const QDir & dir, bool toProject)
 {
     QVariantMap data;
     QFile file(dir.absoluteFilePath(ASSETS_FILE));
@@ -260,21 +284,27 @@ void AssetManager::save(const QDir & dir)
     QVariantList imagesData;
     for(int i=0; i < images.size(); i++) {
         imagesData.append(images[i]->toJsonObject());
-        images[i]->save(dir);
+        bool saved = images[i]->save(dir, toProject);
+        if (saved && toProject)
+            images[i]->setRemovable(true);
     }
 
     QList<Asset*> sounds = this->assets(Asset::Audio);
     QVariantList soundsData;
     for(int i=0; i < sounds.size(); i++) {
         soundsData.append(sounds[i]->toJsonObject());
-        sounds[i]->save(dir);
+        sounds[i]->save(dir, toProject);
+        if (toProject)
+            sounds[i]->setRemovable(true);
     }
 
     QList<Asset*> fonts = this->assets(Asset::Font);
     QVariantList fontsData;
     for(int i=0; i < fonts.size(); i++) {
         fontsData.append(fonts[i]->toJsonObject());
-        fonts[i]->save(dir);
+        fonts[i]->save(dir, toProject);
+        if (toProject)
+            fonts[i]->setRemovable(true);
     }
 
     data.insert("images", imagesData);
@@ -286,6 +316,9 @@ void AssetManager::save(const QDir & dir)
     file.close();
 
     saveFontFaces(fonts, dir);
+
+    if (toProject)
+        cleanup();
 }
 
 void AssetManager::saveFontFaces(const QList<Asset*>& fonts, const QDir& dir)
@@ -326,4 +359,21 @@ QList<int> AssetManager::fontsIds()
     }
 
     return ids;
+}
+
+void AssetManager::cleanup()
+{
+    foreach(const QString& path, mFilesToRemove) {
+        if (QFile::exists(path))
+            QFile::remove(path);
+    }
+
+    mFilesToRemove.clear();
+}
+
+void AssetManager::clear()
+{
+    setLoadPath("");
+    clearAssets();
+    mFilesToRemove.clear();
 }

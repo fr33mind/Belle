@@ -5,6 +5,7 @@
 Asset::Asset(const QString& path, Type type)
 {
     init();
+    mRemovable = false;
     mPath = path;
     mType = type;
     mName = QFileInfo(path).fileName();
@@ -44,10 +45,20 @@ bool Asset::isValid() const
     return false;
 }
 
-void Asset::save(const QDir& dir)
+bool Asset::save(const QDir& dir, bool updatePath)
+{
+    bool success = onSave(dir);
+    if (success && updatePath) {
+        mPath = dir.absoluteFilePath(mName);
+    }
+    return success;
+}
+
+bool Asset::onSave(const QDir & dir)
 {
     if (isValid())
-        QFile::copy(mPath, dir.absoluteFilePath(mName));
+        return QFile::copy(mPath, dir.absoluteFilePath(mName));
+    return false;
 }
 
 QVariantMap Asset::toJsonObject()
@@ -57,3 +68,19 @@ QVariantMap Asset::toJsonObject()
     return data;
 }
 
+bool Asset::isRemovable() const
+{
+    return mRemovable && QFile::exists(mPath);
+}
+
+void Asset::setRemovable(bool removable)
+{
+    mRemovable = removable;
+}
+
+bool Asset::remove()
+{
+    if (isRemovable())
+        return QFile::remove(mPath);
+    return false;
+}

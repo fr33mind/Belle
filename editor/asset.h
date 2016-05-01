@@ -25,12 +25,19 @@ public:
     QString path() const;
     Type type() const;
     virtual bool isValid() const;
-    virtual void save(const QDir&);
+    bool save(const QDir&, bool updatePath=false);
     virtual QVariantMap toJsonObject();
+    bool isRemovable() const;
+    void setRemovable(bool);
+    bool remove();
+
+protected:
+    virtual bool onSave(const QDir&);
 
 private:
     void init();
 
+    bool mRemovable;
     QString mPath;
     QString mName;
     Type mType;

@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QVariantMap>
 #include <QString>
+#include <QSet>
 
 #include "asset.h"
 #include "imagefile.h"
@@ -15,6 +16,7 @@ class AssetManager
 {
     QHash<Asset*, int> mAssets;
     QHash<Asset::Type, QString> mTypeToPath;
+    QSet<QString> mFilesToRemove;
     QString mLoadPath;
     QStringList mImageFormats;
     QStringList mAudioFormats;
@@ -24,16 +26,18 @@ class AssetManager
 public:
     AssetManager();
     static AssetManager* instance();
-    void load(const QDir&);
-    void save(const QDir&);
+    void load(const QDir&, bool fromProject=false);
+    void save(const QDir&, bool toProject=false);
     Asset* asset(const QString&, Asset::Type type=Asset::Unknown) const;
     QList<Asset*> assets() const;
     QList<Asset*> assets(Asset::Type type) const;
     Asset* loadAsset(QString, Asset::Type=Asset::Unknown);
     void releaseAsset(Asset*);
-    void removeAssets();
+    void removeAsset(Asset*);
+    void clearAssets();
     ImageFile* image(const QString&);
     QList<int> fontsIds();
+    void clear();
 
     bool isNameUnique(const QString&, const QString&destPath="") const;
     QString uniqueName(QString, const QString&destPath="") const;
@@ -46,6 +50,9 @@ protected:
     void updateRefCount();
     Asset* _loadAsset(const QString&, Asset::Type) const;
     Asset::Type guessType(const QString&) const;
+
+private:
+    void cleanup();
 
 };
 

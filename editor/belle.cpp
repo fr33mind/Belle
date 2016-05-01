@@ -291,7 +291,7 @@ Belle::~Belle()
     GameObjectFactory::destroy();
     ResourceManager::destroy();
     EditorWidgetFactory::destroy();
-    AssetManager::instance()->removeAssets();
+    AssetManager::instance()->clear();
     if (! mCurrentRunDirectory.isEmpty()) {
         QDir tmpdir(mCurrentRunDirectory);
         if (tmpdir.exists())
@@ -790,7 +790,7 @@ void Belle::saveProject()
     if (QFile::exists(mSavePath)) {
         QDir projectDir(mSavePath);
         //copy images and fonts in use
-        AssetManager::instance()->save(projectDir);
+        AssetManager::instance()->save(projectDir, true);
         //export gameFile
         exportGameFile(projectDir.absoluteFilePath(GAME_FILENAME));
 
@@ -832,8 +832,7 @@ void Belle::clearProject()
     mDefaultSceneManager->removeScenes(true);
     mPauseSceneManager->removeScenes(true);
     ResourceManager::instance()->clear(true);
-    AssetManager::instance()->setLoadPath("");
-    AssetManager::instance()->removeAssets();
+    AssetManager::instance()->clear();
     mSavePath = "";
     mCurrentRunDirectory = "";
 }
@@ -865,14 +864,17 @@ void Belle::openFileOrProject(QString filepath)
     saveDir = QFileInfo(filepath).absoluteDir();
     AssetManager::instance()->setLoadPath(mSavePath);
     setNovelProperties(object);
-    AssetManager::instance()->load(QDir(mSavePath));
+    AssetManager::instance()->load(QDir(mSavePath), true);
     ResourceManager::instance()->load(object);
     //FIXME: For backwards compatibility, remove at some point
     if (object.contains("customFonts") && object.value("customFonts").type() == QVariant::List) {
         QVariantList customFonts = object["customFonts"].toList();
         if (! customFonts.isEmpty()) {
-            for(int i=0; i < customFonts.size(); i++)
-                AssetManager::instance()->loadAsset(saveDir.absoluteFilePath(customFonts[i].toString()), Asset::Font);
+            for(int i=0; i < customFonts.size(); i++) {
+                Asset* asset = AssetManager::instance()->loadAsset(saveDir.absoluteFilePath(customFonts[i].toString()), Asset::Font);
+                if (asset)
+                    asset->setRemovable(true);
+            }
         }
     }
 
