@@ -4,11 +4,13 @@
 #include <QFontDatabase>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QScopedPointer>
 
 #include "utils.h"
 #include "fontfile.h"
 
 static AssetManager* mInstance = new AssetManager();
+static QScopedPointer<AssetManager> mInstanceScopedPointer(mInstance);
 
 AssetManager::AssetManager()
 {
@@ -21,6 +23,11 @@ AssetManager::AssetManager()
     mAudioFormats << "mp3" << "aac" << "ogg" << "oga" << "webm" << "wav" << "m4a" << "mp4";
     mVideoFormats << "mp4" << "m4v" << "webm" << "ogv" << "ogg";
     mFontFormats << "ttf" << "otf" << "eot" << "woff";
+}
+
+AssetManager::~AssetManager()
+{
+    clear();
 }
 
 AssetManager* AssetManager::instance()

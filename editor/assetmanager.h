@@ -25,6 +25,7 @@ class AssetManager
 
 public:
     AssetManager();
+    virtual ~AssetManager();
     static AssetManager* instance();
     void load(const QDir&, bool fromProject=false);
     void save(const QDir&, bool toProject=false);
