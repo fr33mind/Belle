@@ -93,6 +93,15 @@ inline QString incrementLastNumber(const QString& text)
     return text;
 }
 
+inline QString incrementFileName(const QString& fileName)
+{
+    QFileInfo info(fileName);
+    QString name = incrementLastNumber(info.baseName());
+    if (!info.completeSuffix().isEmpty())
+        name += "." + info.completeSuffix();
+    return name;
+}
+
 inline QString newFilePath(const QString& path)
 {
     if (path.isEmpty() || path.isNull() || ! QFile::exists(path))

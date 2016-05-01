@@ -186,7 +186,7 @@ QString AssetManager::uniqueName(QString name, const QString& destPath) const
         name = "asset";
 
     while(! isNameUnique(name, destPath))
-        name = Utils::incrementLastNumber(name);
+        name = Utils::incrementFileName(name);
 
     return name;
 }
