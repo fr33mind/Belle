@@ -17,9 +17,9 @@
 #ifndef RESOURCE_MANAGER_H
 #define RESOURCE_MANAGER_H
 
-#if defined(Q_WS_X11)
+#if defined(Q_OS_UNIX)
     #define RESOURCES_DEFAULT_PATH "/usr/share/belle/resources"
-#elif defined(Q_WS_MAC)
+#elif defined(Q_OS_MAC)
     #define RESOURCES_DEFAULT_PATH "Belle.app/Contents/Resources/engine"
 #else
     #define RESOURCES_DEFAULT_PATH  "resources"

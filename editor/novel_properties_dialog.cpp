@@ -146,7 +146,7 @@ void NovelPropertiesDialog::onBrowserSelect()
     if (paths.size())
         startPath = paths.first();
 
-#if defined(Q_WS_X11)
+#if defined(Q_OS_UNIX)
     if (startPath.isEmpty()) {
         if (QFile::exists("/usr/bin"))
             startPath = "/usr/bin/";
@@ -154,9 +154,9 @@ void NovelPropertiesDialog::onBrowserSelect()
             startPath = "/usr/local/bin";
     }
 
-#elif defined(Q_WS_WIN)
+#elif defined(Q_OS_WIN)
     filter = tr("Executables (*.exe)");
-#elif defined(Q_WS_MACX)
+#elif defined(Q_OS_MAC)
     if (startPath.isEmpty() && QFile::exists("/Applications"))
         startPath = "/Applications";
 #endif
