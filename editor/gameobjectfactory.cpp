@@ -66,28 +66,69 @@ GameObject* GameObjectFactory::createGameObject(const QVariantMap & data, QObjec
 Action* GameObjectFactory::createAction(GameObjectMetaType::Type type, const QVariantMap & data, QObject * parent)
 {
     Action* action = 0;
+    bool validData = !data.isEmpty();
 
     switch(type) {
-        case GameObjectMetaType::Dialogue: action = new Dialogue(data, parent); break;
-        case GameObjectMetaType::Wait: action = new Wait(data, parent); break;
-        case GameObjectMetaType::Show: action = new Show(data, parent); break;
-        case GameObjectMetaType::Hide: action = new Hide(data, parent); break;
-        case GameObjectMetaType::ChangeBackground: action = new ChangeBackground(data, parent); break;
-        case GameObjectMetaType::ChangeState: action = new ChangeState(data, parent); break;
-        case GameObjectMetaType::Label: action = new Label(data, parent); break;
-        case GameObjectMetaType::GoToLabel: action = new GoToLabel(data, parent); break;
-        case GameObjectMetaType::GoToScene: action = new GoToScene(data, parent); break;
-        case GameObjectMetaType::ShowMenu: action = new ShowMenu(data, parent); break;
-        case GameObjectMetaType::Slide: action = new Slide(data, parent); break;
-        case GameObjectMetaType::Fade: action = new Fade(data, parent); break;
-        case GameObjectMetaType::Branch: action = new Branch(data, parent); break;
-        case GameObjectMetaType::ChangeColor: action = new ChangeColor(data, parent); break;
-        case GameObjectMetaType::PlaySound: action = new PlaySound(data, parent); break;
-        case GameObjectMetaType::StopSound: action = new StopSound(data, parent); break;
-        case GameObjectMetaType::End: action = new End(parent); break;
-        case GameObjectMetaType::GetUserInput: action = new GetUserInput(data, parent); break;
-        case GameObjectMetaType::ChangeGameVariable: action = new ChangeGameVariable(data, parent); break;
-        case GameObjectMetaType::RunScript: action = new RunScript(data, parent); break;
+        case GameObjectMetaType::Dialogue:
+            action = validData ? new Dialogue(data, parent) : new Dialogue(parent);
+            break;
+        case GameObjectMetaType::Wait:
+            action = validData ? new Wait(data, parent) : new Wait(parent);
+            break;
+        case GameObjectMetaType::Show:
+            action = validData ? new Show(data, parent) : new Show(parent);
+            break;
+        case GameObjectMetaType::Hide:
+            action = validData ? new Hide(data, parent) : new Hide(parent);
+            break;
+        case GameObjectMetaType::ChangeBackground:
+            action = validData ? new ChangeBackground(data, parent) : new ChangeBackground(parent);
+            break;
+        case GameObjectMetaType::ChangeState:
+            action = validData ? new ChangeState(data, parent) : new ChangeState(parent);
+            break;
+        case GameObjectMetaType::Label:
+            action = validData ? new Label(data, parent) : new Label("", parent);
+            break;
+        case GameObjectMetaType::GoToLabel:
+            action = validData ? new GoToLabel(data, parent) : new GoToLabel("", parent);
+            break;
+        case GameObjectMetaType::GoToScene:
+            action = validData ? new GoToScene(data, parent) : new GoToScene(parent);
+            break;
+        case GameObjectMetaType::ShowMenu:
+            action = validData ? new ShowMenu(data, parent) : new ShowMenu(parent);
+            break;
+        case GameObjectMetaType::Slide:
+            action = validData ? new Slide(data, parent) : new Slide(parent);
+            break;
+        case GameObjectMetaType::Fade:
+            action = validData ? new Fade(data, parent) : new Fade(parent);
+            break;
+        case GameObjectMetaType::Branch:
+            action = validData ? new Branch(data, parent) : new Branch(parent);
+            break;
+        case GameObjectMetaType::ChangeColor:
+            action = validData ? new ChangeColor(data, parent) : new ChangeColor(parent);
+            break;
+        case GameObjectMetaType::PlaySound:
+            action = validData ? new PlaySound(data, parent) : new PlaySound(parent);
+            break;
+        case GameObjectMetaType::StopSound:
+            action = validData ? new StopSound(data, parent) : new StopSound(parent);
+            break;
+        case GameObjectMetaType::End:
+            action = new End(parent);
+            break;
+        case GameObjectMetaType::GetUserInput:
+            action = validData ? new GetUserInput(data, parent) : new GetUserInput(parent);
+            break;
+        case GameObjectMetaType::ChangeGameVariable:
+            action = validData ? new ChangeGameVariable(data, parent) : new ChangeGameVariable(parent);
+            break;
+        case GameObjectMetaType::RunScript:
+            action = validData ? new RunScript(data, parent) : new RunScript(parent);
+            break;
         default: break;
     }
 
@@ -108,17 +149,36 @@ Action* GameObjectFactory::createAction(GameObjectMetaType::Type type, QObject *
 Object* GameObjectFactory::createObject(GameObjectMetaType::Type type, const QVariantMap & data, QObject * parent)
 {
     Object* obj = 0;
+    bool validData = !data.isEmpty();
 
     switch(type) {
-        case GameObjectMetaType::Object: obj = new Object(data, parent); break;
-        case GameObjectMetaType::Image: obj = new Image(data, parent); break;
-        case GameObjectMetaType::Character: obj = new Character(data, parent); break;
-        case GameObjectMetaType::DialogueBox: obj = new DialogueBox(data, parent); break;
-        case GameObjectMetaType::TextBox: obj = new TextBox(data, parent); break;
-        case GameObjectMetaType::Button: obj = new Button(data, parent); break;
-        case GameObjectMetaType::ObjectGroup: obj = new ObjectGroup(data, parent); break;
-        case GameObjectMetaType::Menu: obj = new Menu(data, parent); break;
-        case GameObjectMetaType::MenuOption: obj = new MenuOption(data, parent); break;
+        case GameObjectMetaType::Object:
+            obj =  validData ? new Object(data, parent) : new Object(parent);
+            break;
+        case GameObjectMetaType::Image:
+            obj = validData ? new Image(data, parent) : new Image("", parent);
+            break;
+        case GameObjectMetaType::Character:
+            obj = validData ? new Character(data, parent) : new Character(parent);
+            break;
+        case GameObjectMetaType::DialogueBox:
+            obj = validData ? new DialogueBox(data, parent) : new DialogueBox(parent);
+            break;
+        case GameObjectMetaType::TextBox:
+            obj = validData ? new TextBox(data, parent) : new TextBox(parent);
+            break;
+        case GameObjectMetaType::Button:
+            obj = validData ? new Button(data, parent) : new Button(parent);
+            break;
+        case GameObjectMetaType::ObjectGroup:
+            obj = validData ? new ObjectGroup(data, parent) : new ObjectGroup(parent);
+            break;
+        case GameObjectMetaType::Menu:
+            obj = validData ? new Menu(data, parent) : new Menu(parent);
+            break;
+        case GameObjectMetaType::MenuOption:
+            obj = validData ? new MenuOption(data, parent) : new MenuOption("", parent);
+            break;
         default: break;
     }
 
@@ -138,7 +198,9 @@ Object* GameObjectFactory::createObject(const QVariantMap & data, QObject * pare
 
 Scene* GameObjectFactory::createScene(const QVariantMap & data, QObject * parent)
 {
-    return new Scene(data, parent);
+    bool validData = !data.isEmpty();
+    Scene* scene = validData ? new Scene(data, parent) : new Scene(parent);
+    return scene;
 }
 
 
