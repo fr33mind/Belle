@@ -2,6 +2,12 @@
 
 #include "gameobjectfactory.h"
 
+MenuOption::MenuOption(const QString& text, QObject* parent) :
+    Button(text, parent)
+{
+    init();
+}
+
 MenuOption::MenuOption(const QString& text, const QList<Action*>& actions, const QString& condition, QObject* parent) :
     Button(text, parent)
 {
