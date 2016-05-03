@@ -27,6 +27,7 @@ int main(int argc, char ** argv)
     QApplication app(argc, argv);
     Belle belle;
     belle.show();
+    belle.afterShow();
 
     return app.exec();
 }

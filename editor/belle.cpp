@@ -248,7 +248,17 @@ Belle::Belle(QWidget *widget)
     connect(mUi.scenesTabWidget, SIGNAL(currentChanged(int)), this, SLOT(scenesTabWidgetPageChanged(int)));
 
     restoreSettings();
+}
+
+void Belle::afterShow()
+{
     loadDefaultGame();
+    if (!Engine::isValid()) {
+        QMessageBox::warning(this, tr("Invalid engine"),
+                             tr("No valid engine was found at \"%1\".\n"
+                                "Please select a valid engine in Novel > Properties > Project. "
+                                "Otherwise you won't be able to run your game.").arg(Engine::path()));
+    }
 }
 
 void Belle::saveSettings()
@@ -277,8 +287,7 @@ void Belle::restoreSettings()
     if (mSettings->contains("Window/State"))
         this->restoreState(mSettings->value("Window/State").toByteArray());
     if (mSettings->contains("Project/enginePath")) {
-        if (Engine::isValidPath(mSettings->value("Project/enginePath").toString()))
-            Engine::setPath(mSettings->value("Project/enginePath").toString());
+        Engine::setPath(mSettings->value("Project/enginePath").toString());
     }
     if (mSettings->contains("Project/browser"))
         Engine::setBrowserPath(mSettings->value("Project/browser").toString());
