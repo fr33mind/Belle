@@ -264,6 +264,7 @@ void Belle::afterShow()
 void Belle::saveSettings()
 {
     //save settings
+    mSettings->setValue("showBuiltinBrowserMessage", mShowBuiltinBrowserMessage);
     mSettings->beginGroup("Window");
     mSettings->setValue("Geometry", this->saveGeometry());
     mSettings->setValue("State", this->saveState());
@@ -293,6 +294,10 @@ void Belle::restoreSettings()
         Engine::setBrowserPath(mSettings->value("Project/browser").toString());
     if (mSettings->contains("Project/useBuiltinBrowser"))
         Engine::setUseBuiltinBrowser(mSettings->value("Project/useBuiltinBrowser").toBool());
+
+    mShowBuiltinBrowserMessage = true;
+    if (mSettings->contains("showBuiltinBrowserMessage"))
+        mShowBuiltinBrowserMessage = mSettings->value("showBuiltinBrowserMessage").toBool();
 }
 
 Belle::~Belle()
@@ -705,6 +710,28 @@ void Belle::removeWidgetsInPropertiesWidget()
     }
 }
 
+void Belle::showBuiltinBrowserMessage()
+{
+    QString title = tr("Built-in browser");
+    QString msg = tr("As of version 0.7, Belle's built-in browser has become good enough "
+                     "that now it's the recommended way to test your game while making it. "
+                     "Since it's more integrated with Belle it's easier and quicker "
+                     "to use than an external browser.\n"
+                     "Nevertheless it's also recommended that, "
+                     "from time to time, you test your game in other browsers.\n\n"
+                     "Do you want to switch to the built-in browser now?");
+
+    QMessageBox msgBox(QMessageBox::Question, title, msg, QMessageBox::No | QMessageBox::Yes, this);
+    QCheckBox checkBox(tr("Do not show this again"));
+    msgBox.setCheckBox(&checkBox);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+    int result = msgBox.exec();
+
+    bool use = result == QMessageBox::Yes ? true : false;
+    Engine::setUseBuiltinBrowser(use);
+    mShowBuiltinBrowserMessage = !checkBox.isChecked();
+}
+
 void Belle::onRunTriggered()
 {
     if (! checkEnginePath())
@@ -719,6 +746,10 @@ void Belle::onRunTriggered()
         if (! started) {
             QMessageBox::critical(this, tr("Couldn't start the server"), tr("The server couldn't find any free ports on your system, which is very odd."));
             return;
+        }
+
+        if (!Engine::useBuiltinBrowser() && mShowBuiltinBrowserMessage) {
+            showBuiltinBrowserMessage();
         }
 
         if (Engine::useBuiltinBrowser()) {

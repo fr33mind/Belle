@@ -59,6 +59,7 @@ class Belle : public QMainWindow
     SceneManager* mPauseSceneManager;
     Clipboard* mClipboard;
     WebViewWindow* mWebViewWindow;
+    bool mShowBuiltinBrowserMessage;
     
     public:
         explicit Belle(QWidget *widget=0);
@@ -143,6 +144,7 @@ private:
         void initSceneManager(SceneManager*);
         void setCurrentSceneIndex(int);
         void setCurrentSceneManager(SceneManager*);
+        void showBuiltinBrowserMessage();
 };
 
 #endif
