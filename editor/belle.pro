@@ -23,8 +23,6 @@ HEADERS      += belle.h\
                 scene_manager.h\
                 scene.h\
                 objects/object.h\
-                curtain_widget.h \
-    boxlayout.h \
     objects/textbox.h \
     properties_widget.h \
     objects/textbox_editor_widget.h\
@@ -131,8 +129,6 @@ SOURCES      += main.cpp\
                 belle.cpp\
                 scene_manager.cpp\
                 scene.cpp\
-                curtain_widget.cpp \
-    boxlayout.cpp \
     properties_widget.cpp \
     objects/object_editor_widget.cpp \
     color_pushbutton.cpp \
