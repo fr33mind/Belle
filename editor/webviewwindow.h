@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QWebView>
 #include <QWebInspector>
+#include <QToolBar>
+#include <QLineEdit>
 
 class WebViewWindow : public QMainWindow
 {
@@ -17,6 +19,7 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent*);
+    bool eventFilter(QObject *, QEvent *);
 
 private:
     void loadWebInspector();
@@ -31,6 +34,8 @@ public slots:
 private:
    QWebView* mWebView;
    QWebInspector* mWebInspector;
+   QLineEdit* mAddressBar;
+   QToolBar* mToolBar;
    void centerOnScreen();
 
 };

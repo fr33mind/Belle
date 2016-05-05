@@ -8,6 +8,7 @@
 #include <QWebInspector>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QEvent>
 
 WebViewWindow::WebViewWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -15,9 +16,22 @@ WebViewWindow::WebViewWindow(QWidget *parent) :
     QAction* reloadAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_BrowserReload), tr("Reload"), this);
     reloadAction->setShortcut(QKeySequence(QKeySequence::Refresh));
 
+    QToolBar* toolBar = new QToolBar(tr("ToolBar"), this);
+    mAddressBar = new QLineEdit(toolBar);
+    mAddressBar->setReadOnly(true);
+    toolBar->addWidget(mAddressBar);
+    toolBar->addAction(reloadAction);
+    toolBar->setMovable(false);
+    toolBar->hide();
+    toolBar->installEventFilter(this);
+    mToolBar = toolBar;
+    addToolBar(toolBar);
+
     QMenuBar* menuBar = this->menuBar();
     QMenu* fileMenu = menuBar->addMenu(tr("&File"));
     fileMenu->addAction(reloadAction);
+    QMenu* viewMenu = menuBar->addMenu(tr("&View"));
+    viewMenu->addAction(toolBar->toggleViewAction());
     QMenu* debugMenu = menuBar->addMenu(tr("&Debug"));
     QAction* inspectAction = debugMenu->addAction(tr("Inspect"));
     connect(inspectAction, SIGNAL(triggered()), this, SLOT(showWebInspector()));
@@ -68,6 +82,7 @@ void WebViewWindow::open(const QUrl& url)
         mWebView->reload();
     else
         mWebView->setUrl(url);
+    mAddressBar->setText(url.toString());
 }
 
 void WebViewWindow::closeEvent(QCloseEvent *event)
@@ -117,4 +132,11 @@ void WebViewWindow::centerOnScreen()
 
         move(centerWidth, centerHeight);
     }
+}
+
+bool WebViewWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == mToolBar && event->type() == QEvent::HideToParent)
+        adjustSize();
+    return QMainWindow::eventFilter(obj, event);
 }
