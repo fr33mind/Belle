@@ -624,6 +624,9 @@ void Belle::onSelectedObjectChanged(Object* obj)
         switchWidgetInPropertiesWidget(editor);
         if (editor)
             editor->setGameObject(obj);
+        Scene* scene = mCurrentSceneManager->currentScene();
+        if (scene)
+            scene->selectObject(obj);
     }
     else if (mCurrentSceneManager && mCurrentSceneManager->currentScene()) {
         editor = EditorWidgetFactory::editorWidget(GameObjectMetaType::Scene);
