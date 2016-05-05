@@ -27,7 +27,6 @@
 #include "button.h"
 #include "menu.h"
 #include "animatedimage.h"
-#include "sound.h"
 #include "gameobjectmanager.h"
 #include "gameobjectfactory.h"
 
