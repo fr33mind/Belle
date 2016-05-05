@@ -537,6 +537,7 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         return;
 
     GameObject* resource = 0;
+    TextBox* textbox = 0;
     int accepted = 0;
     QString startPath = QDir::currentPath();
     QString filter;
@@ -557,8 +558,10 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
 
         //TextBox
     case 1:
-        resource = new TextBox(tr("Text goes here..."), ResourceManager::instance());
-        ResourceManager::instance()->add(resource);
+        textbox = new TextBox("", ResourceManager::instance());
+        textbox->setPlaceholderText(tr("Text goes here..."));
+        ResourceManager::instance()->add(textbox);
+        resource = textbox;
         break;
 
         //Image
