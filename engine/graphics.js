@@ -119,24 +119,17 @@
 
   function Color(components)
   {
-    var error = false;
-    if (! components || components.length < 4) {
-      error = true;
-      belle.log("Color(components) : Missing one or more color component(s)");
+    var comps = [0, 0, 0, 0];
+    if (components && jQuery.isArray(components)) {
+      for(var i=0; i < components.length && i < comps.length; i++) {
+        comps[i] = components[i];
+      }
     }
 
-    if (error) {
-      this.red = 0;
-      this.green = 0;
-      this.blue = 0;
-      this.alpha = 0;
-    }
-    else {
-      this.red = components[0];
-      this.green = components[1];
-      this.blue = components[2];
-      this.alpha = components[3];
-    }
+    this.red = comps[0];
+    this.green = comps[1];
+    this.blue = comps[2];
+    this.alpha = comps[3];
   }
 
   Color.prototype.toString = function()
