@@ -555,11 +555,7 @@ QVariantMap Object::toJsonObject(bool internal) const
     else object.insert("width", contentWidth());
     if (mPercentHeight) object.insert("height", QString("%1\%").arg(mPercentHeight));
     else object.insert("height", contentHeight());
-    QVariantList color;
-    QColor bgColor = mBackground.color();
-    color << bgColor.red() << bgColor.green() << bgColor.blue()
-             << bgColor.alpha();
-    object.insert("backgroundColor", color);
+    object.insert("backgroundColor", Utils::colorToList(mBackground.color()));
     object.insert("backgroundOpacity", mBackground.opacity());
 
     if (mCornerRadius) {
