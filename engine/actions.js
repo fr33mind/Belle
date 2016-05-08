@@ -393,9 +393,9 @@ Slide.prototype.slide = function (timer)
     x += incX;
     y += incY;
 
-    if (incX > 0 && object.x > this.endX || incX < 0 && object.x < this.endX)
+    if (incX > 0 && x > this.endX || incX < 0 && x < this.endX)
         x = this.endX;
-    if (incY > 0 && object.y > this.endY || incY < 0 && object.y < this.endY)
+    if (incY > 0 && y > this.endY || incY < 0 && y < this.endY)
         y = this.endY;
 
     object.moveTo(x, y);
