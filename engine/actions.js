@@ -334,12 +334,6 @@ Slide.prototype.onExecute = function ()
       return;
     }
 
-    var destX = parseInt(this.destX),
-        destY = parseInt(this.destY);
-    if (! belle.utils.isNumber(this.destX))
-
-        belle.utils.isNumber(this.destX) ? parseInt(this.destX) : this.destX + this.slideType;
-
     this.startX = object.x;
     this.startY = object.y;
     this.endX = typeof this.destX == "string" ? object.mapXFromName(this.destX) : this.destX;
