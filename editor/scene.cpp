@@ -345,12 +345,10 @@ void Scene::setBackgroundImage(const QString & path)
         }
         assetManager->releaseAsset(mBackgroundImage);
 
-        if (image && image->isValid()) {
-            if (image->isAnimated()) {
-                connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
-                image->movie()->setScaledSize(Scene::size());
-                image->movie()->start();
-            }
+        if (image && image->isAnimated()) {
+            connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+            image->movie()->setScaledSize(Scene::size());
+            image->movie()->start();
         }
 
         mBackgroundImage = image;
