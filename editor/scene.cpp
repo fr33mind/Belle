@@ -340,6 +340,7 @@ void Scene::setBackgroundImage(const QString & path)
 
     if (mBackgroundImage != image) {
         if (mBackgroundImage && mBackgroundImage->isAnimated()) {
+            mBackgroundImage->movie()->stop();
             mBackgroundImage->movie()->disconnect(this);
         }
         assetManager->releaseAsset(mBackgroundImage);
