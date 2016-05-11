@@ -511,11 +511,8 @@ void Object::setBackgroundImage(const QString & path)
         image->movie()->start();
     }
 
-    QString prevPath("");
-    if (mBackground.image())
-        mBackground.image()->path();
     mBackground.setImage(image);
-    notify("backgroundImage", path, prevPath);
+    notify("backgroundImage", path);
 }
 
 ImageFile* Object::backgroundImage() const
