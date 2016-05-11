@@ -655,12 +655,12 @@ void Scene::paint(QPainter & painter)
 {
     QColor bgColor = backgroundColor().isValid() ? backgroundColor() : Qt::gray;
 
-    if (mTemporaryBackgroundImage && mTemporaryBackgroundImage->isValid()) {
+    if (mTemporaryBackgroundImage && !mTemporaryBackgroundImage->isNull()) {
         painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mTemporaryBackgroundImage->pixmap());
     }
     else if (mTemporaryBackgroundColor.isValid())
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), mTemporaryBackgroundColor);
-    else if (mBackgroundImage && mBackgroundImage->isValid()) {
+    else if (mBackgroundImage && !mBackgroundImage->isNull()) {
         painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mBackgroundImage->pixmap());
     }
     else

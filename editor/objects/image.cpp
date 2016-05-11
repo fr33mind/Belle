@@ -102,7 +102,7 @@ void Image::_setImage(ImageFile* image, bool load)
         mImage->movie()->start();
     }
 
-    if (mImage && mImage->isValid() && (width() == 0 || height() == 0)) {
+    if (mImage && !mImage->isNull() && (width() == 0 || height() == 0)) {
         mSceneRect.setWidth(mImage->width());
         mSceneRect.setHeight(mImage->height());
     }
