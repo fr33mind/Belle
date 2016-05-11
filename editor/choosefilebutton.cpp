@@ -106,28 +106,30 @@ void ChooseFileButton::setFilePath(const QString & path)
         return;
 
     mFilePath = path;
-    QFileInfo file(mFilePath);
 
-    if (file.exists()) {
-        setText(file.fileName());
-        if (mActiveFilter == ImageFilter) {
-            ImageFile* image = AssetManager::instance()->image(path);
-            if (image)
-                setIcon(QIcon(image->pixmap()));
-            else
-                setIcon(QIcon(mFilePath));
-        }
-    }
-    else {
+    if (mFilePath.isEmpty()) {
         setText(tr("No File Selected"));
         setIcon(QIcon());
+        return;
     }
+
+    QFileInfo file(mFilePath);
+    QIcon icon;
+
+    if (file.exists()) {
+        if (mActiveFilter == ImageFilter)
+            icon = QIcon(mFilePath);
+    }
+
+    setText(file.fileName());
+    setIcon(icon);
 }
 
 void ChooseFileButton::setImageFile(ImageFile* image)
 {
     if (image) {
         mFilePath = image->path();
+        setText(QFileInfo(mFilePath).fileName());
         setIcon(QIcon(image->pixmap()));
     }
     else {

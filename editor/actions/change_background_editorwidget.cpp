@@ -41,7 +41,7 @@ void ChangeBackgroundEditorWidget::updateData(GameObject* action)
     if (! changeBackground)
         return;
 
-    mImageChooser->setFilePath(changeBackground->backgroundPath());
+    mImageChooser->setImageFile(changeBackground->background());
     mChooseBackgroundColorButton->setColor(changeBackground->backgroundColor());
 }
 
