@@ -73,11 +73,11 @@ int AnimatedImage::height() const
     return 0;
 }
 
-bool AnimatedImage::isValid() const
+bool AnimatedImage::isNull() const
 {
     if (mMovie)
-        return mMovie->isValid();
-    return false;
+        return !mMovie->isValid();
+    return true;
 }
 
 int AnimatedImage::frameNumber() const

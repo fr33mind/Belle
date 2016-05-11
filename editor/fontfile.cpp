@@ -12,3 +12,8 @@ int FontFile::id() const
 {
     return mId;
 }
+
+bool FontFile::isNull() const
+{
+    return mId == -1;
+}

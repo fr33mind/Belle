@@ -20,7 +20,7 @@ public:
     virtual int width() const;
     virtual int height() const;
     virtual QRect rect() const;
-    virtual bool isValid() const;
+    virtual bool isNull() const;
 
     static bool isAnimated(const QString&);
     static ImageFile* create(const QString&);

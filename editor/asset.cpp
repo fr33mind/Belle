@@ -40,9 +40,12 @@ QString Asset::path() const
 
 bool Asset::isValid() const
 {
-    if (!mName.isEmpty() && QFile::exists(mPath))
-        return true;
-    return false;
+    return !isNull() && QFile::exists(mPath);
+}
+
+bool Asset::isNull() const
+{
+    return mName.isEmpty() || mPath.isEmpty();
 }
 
 bool Asset::save(const QDir& dir, bool updatePath)

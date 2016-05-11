@@ -8,6 +8,7 @@ class FontFile : public Asset
 public:
     FontFile(const QString&);
     int id() const;
+    virtual bool isNull() const;
 
 private:
     int mId;

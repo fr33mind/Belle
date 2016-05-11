@@ -24,7 +24,8 @@ public:
     QString name() const;
     QString path() const;
     Type type() const;
-    virtual bool isValid() const;
+    bool isValid() const;
+    virtual bool isNull() const;
     bool save(const QDir&, bool updatePath=false);
     virtual QVariantMap toJsonObject();
     bool isRemovable() const;

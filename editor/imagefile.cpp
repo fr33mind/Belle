@@ -41,12 +41,9 @@ QPixmap ImageFile::pixmap() const
     return mPixmap;
 }
 
-bool ImageFile::isValid() const
+bool ImageFile::isNull() const
 {
-    bool valid = Asset::isValid();
-    if (! valid)
-        return false;
-    return !mPixmap.isNull();
+    return mPixmap.isNull();
 }
 
 int ImageFile::width() const

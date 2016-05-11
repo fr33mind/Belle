@@ -22,7 +22,7 @@ public:
 
     QPixmap pixmap() const;
     bool isAnimated() const;
-    bool isValid() const;
+    virtual bool isNull() const;
     QMovie* movie() const;
     int width() const;
     int height() const;
