@@ -40,8 +40,7 @@ void GameObjectEditorWidget::setGameObject(GameObject * object)
         return;
     }
 
-    if (mGameObject)
-        mGameObject->disconnect(this);
+    disconnectGameObject();
     mGameObject = 0;
 
     if (! object)
@@ -77,4 +76,10 @@ void GameObjectEditorWidget::onGameObjectNameChanged(const QString & name)
 
     mNameEdit->setText(name);
     mNameEdit->setStyleSheet("background: transparent");
+}
+
+void GameObjectEditorWidget::disconnectGameObject()
+{
+    if (mGameObject)
+        mGameObject->disconnect(this);
 }

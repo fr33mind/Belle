@@ -26,6 +26,7 @@ signals:
 
 protected:
     virtual void updateData(GameObject*);
+    virtual void disconnectGameObject();
 
 public slots:
     void reload();
