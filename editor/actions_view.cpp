@@ -235,6 +235,7 @@ void ActionsView::onDeleteAction()
     if (scene) {
         setAutoScroll(false);
         QModelIndexList indexes = selectedIndexes();
+        qSort(indexes);
         for(int i=indexes.size()-1; i >= 0; --i) {
             scene->removeActionAt(indexes[i].row(), true);
         }
