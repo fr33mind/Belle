@@ -4,8 +4,8 @@ TEMPLATE = app
 isEmpty(PREFIX) {
  PREFIX = /usr
 }
-INCLUDEPATH += actions objects widgets
-DEPENDPATH += actions objects widgets
+INCLUDEPATH += actions objects widgets conditions
+DEPENDPATH += actions objects widgets conditions
 
 TARGET = belle
 TARGET.path = $$PREFIX/
@@ -122,7 +122,16 @@ HEADERS      += belle.h\
     webviewwindow.h \
     sockettimeout.h \
     gameobjectmetatype.h \
-    gameobjectfactory.h
+    gameobjectfactory.h \
+    conditions/conditiontoken.h \
+    conditions/abstractcondition.h \
+    conditions/simplecondition.h \
+    conditions/conditionoperation.h \
+    conditions/complexcondition.h \
+    conditions/literalcondition.h \
+    conditions/conditiontokenfactory.h \
+    conditions/conditiontokenmetatype.h \
+    conditions/conditionlogicaloperator.h
                 
 
 SOURCES      += main.cpp\
@@ -227,6 +236,14 @@ SOURCES      += main.cpp\
     webviewwindow.cpp \
     sockettimeout.cpp \
     gameobjectmetatype.cpp \
-    gameobjectfactory.cpp
+    gameobjectfactory.cpp \
+    conditions/conditiontoken.cpp \
+    conditions/abstractcondition.cpp \
+    conditions/simplecondition.cpp \
+    conditions/conditionoperation.cpp \
+    conditions/complexcondition.cpp \
+    conditions/literalcondition.cpp \
+    conditions/conditiontokenfactory.cpp \
+    conditions/conditionlogicaloperator.cpp
 
 RESOURCES += media.qrc
