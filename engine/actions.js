@@ -20,7 +20,8 @@
     
 var GameObject = belle.GameObject,
     Color = belle.graphics.Color,
-    Point = belle.core.Point;
+    Point = belle.core.Point,
+    ConditionTokenFactory = belle.core.ConditionTokenFactory;
  
 function Action(data, parent)
 {
@@ -850,9 +851,8 @@ function Branch(data, parent)
             this.falseActions.push(action);
         }
     }
-    
-    if ("condition" in data)
-      this.loadCondition(data["condition"]);
+
+    this.condition = ConditionTokenFactory.createCondition(data["condition"]);
 }
 
 belle.extend(Branch, Action);
@@ -860,7 +860,12 @@ belle.extend(Branch, Action);
 Branch.prototype.onExecute = function()
 {
   var game = this.getGame();
-  this.result = eval(this.condition);
+
+  this.result = null;
+
+  if (this.condition)
+    this.result = this.condition.eval(game.variables);
+
   var actions = (this.result === true) ? this.trueActions : this.falseActions;
 
   if (this._actionGroup)
@@ -895,114 +900,6 @@ Branch.prototype.skip = function()
   }
 
   Action.prototype.skip.call(this);
-}
-
-Branch.prototype.loadCondition = function(condition)
-{
-    var symbol = "";
-    var name = "";
-    var _in = "in";
-    var _and = "and";
-    var _or = "or";
-    var validchar = /^[a-zA-Z_]$/g;
-    var number = /^[0-9]|([0-9]*\.[0-9]+)$/g;
-    var variable_pattern = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
-    var c = "";
-    var i = 0;
-    var conditionParts = [];
-    var symbols = ["==", "!=", ">" , ">=", "<", "<=", "&&", "||"];
-    var string = false;
-    condition = condition.split("");
-  
-    for(i=0; i < condition.length; i++) {
-        c = condition[i];
-        
-        if (c == '"' || c == '\'')
-            string = !string;
-
-        //if string add everything to the same value
-        if (string) {
-            name += c;
-            continue;
-        }
-
-        if (c.search(validchar) != -1 || c.search(number) != -1 || c == '"' || c == '\'') {
-            if (! name) {
-                if (condition.slice(i, _in.length) == _in) {
-                    i += _in.length;
-                    conditionParts.push(_in);
-                }
-                else if (condition.slice(i, _and.length) == _and) {
-                    i += _and.length;
-                    conditionParts.push(_and);
-                }
-                else if (condition.slice(i, _or.length) == _or) {
-                    i += _or.length;
-                    conditionParts.push(_or);
-                }
-                else
-                    name += c;
-            }
-            else
-                name += c;
-        }
-        else if (c == '.') {
-          if (! string) {
-            if (name){
-                if (parseInt(name) === NaN)
-                    break;
-            }
-            else
-                name += "0";
-          }
-          name += c;
-        }
-        else {
-
-            if (name) {
-                if (name.search(variable_pattern) != -1)
-                  conditionParts.push("game.getVariableValue('" + name + "')");
-                else
-                  conditionParts.push(name);
-                name = "";
-            }
-             
-            if (c == ' ') {
-                //do nothing :)
-            }
-            else if (c == '&' || c == '|') {
-                symbol += c;
-                if (i+1 < condition.length && condition[i+1] == c) {
-                    symbol += condition[i+1];
-                    ++i;
-                }
-            }
-            else if (c == '>' || c == '=' || c == '<' || c == '!') {
-                symbol += c;
-                //in case of ">=" or "<="
-                if (i+1 < condition.length && condition[i+1] == '=') {
-                    symbol += condition[i+1];
-                    ++i;
-                }
-            }
-            else
-                continue;
-
-            if (symbols.indexOf(symbol) != -1) {
-                conditionParts.push(symbol);
-                symbol = "";
-            }
-        }
-    }
-    
-    if (name) {
-        if (name.search(variable_pattern) != -1)
-          conditionParts.push("game.getVariableValue('" + name + "')");
-        else
-          conditionParts.push(name);
-    }
-    
-    this.condition = conditionParts.join(" ");
 }
 
 /************* Change Color *****************/
