@@ -18,6 +18,7 @@
 #define BRANCH_H
 
 #include "action.h"
+#include "complexcondition.h"
 
 class Action;
 class BranchEditorWidget;
@@ -28,9 +29,9 @@ class Branch : public Action
 
 public:
     explicit Branch(QObject *parent = 0);
+    virtual ~Branch();
     Branch(const QVariantMap& data, QObject *parent);
-    QString condition()const;
-    void setCondition(const QString&);
+    AbstractCondition* condition() const;
     virtual QVariantMap toJsonObject(bool internal=true) const;
     QList<Action*> actions(bool) const;
     Action* action(int, bool) const;
@@ -40,13 +41,15 @@ public:
 signals:
     
 public slots:
+    void setCondition(AbstractCondition*);
+    void setCondition(const QString&);
+    void updateDisplayText();
 
 private:
-    QString mCondition;
+    AbstractCondition* mCondition;
     QList<Action*> mTrueActions;
     QList<Action*> mFalseActions;
     void init();
-    void updateDisplayText();
     
 };
 

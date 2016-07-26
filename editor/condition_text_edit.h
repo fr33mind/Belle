@@ -20,12 +20,22 @@
 #include <QTextEdit>
 #include <QPixmap>
 
+#include "complexcondition.h"
+
+class ComplexCondition;
+
 class ConditionTextEdit : public QTextEdit
 {
     Q_OBJECT
 
 public:
     explicit ConditionTextEdit(QWidget *parent = 0);
+    void setCondition(AbstractCondition*);
+    AbstractCondition* condition() const;
+
+signals:
+    void conditionChanged();
+    void conditionChanged(AbstractCondition*);
 
 protected:
     virtual void mouseReleaseEvent(QMouseEvent *);
@@ -34,8 +44,10 @@ protected:
 
 private:
     QPoint editPixmapPos() const;
+
 private:
     QPixmap mEditPixmap;
+    AbstractCondition* mCondition;
 };
 
 #endif // CONDITION_TEXT_EDIT_H

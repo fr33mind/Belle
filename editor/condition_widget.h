@@ -19,6 +19,13 @@
 
 #include <QListView>
 #include <QStyledItemDelegate>
+#include <QStandardItem>
+#include <QMouseEvent>
+
+#include "complexcondition.h"
+
+class AbstractCondition;
+class ComplexCondition;
 
 class ConditionWidgetDelegate : public QStyledItemDelegate
 {
@@ -38,37 +45,25 @@ class ConditionWidget : public QListView
 {
     Q_OBJECT
 
-    enum {
-        Equal=0,
-        NotEqual,
-        In,
-        GreaterThan,
-        GreaterThanOrEqual,
-        LesserThan,
-        LesserThanOrEqual,
-        True,
-        False,
-        Defined,
-        Undefined
-    };
-
 public:
-    explicit ConditionWidget(const QString& condition="",QWidget *parent = 0);
-    void appendLogicalOperator(const QString&, int);
-    void appendCondition(const QString&, int, const QString&);
-    QString condition();
-    QStringList operatorsText();
-    void setCondition(const QString&);
+    ConditionWidget(ComplexCondition*, QWidget *parent = 0);
+    void appendCondition(SimpleCondition*);
+    void appendCondition(ConditionLogicalOperator::Type, SimpleCondition*);
+    void setCondition(ComplexCondition*);
+    void initFromCondition(ComplexCondition*);
     
-signals:
-    
+protected:
+    void clear();
+
 public slots:
 
+private slots:
+    void onDeleteTriggered();
+
 private:
-    QStringList mOperators;
-    QStringList mOperatorsText;
-    QStringList mPrimitives;
-    
+    QStandardItemModel* mModel;
+    ComplexCondition* mCondition;
+    QHash<QStandardItem*, AbstractCondition*> mItemToCondition;
 };
 
 #endif // Condition_WIDGET_H

@@ -20,20 +20,16 @@
 #include <QDebug>
 
 #include "combobox.h"
-#include "condition_text_edit.h"
 #include "add_action_dialog.h"
+#include "condition_dialog.h"
 
 BranchEditorWidget::BranchEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-
     mConditionEdit = new ConditionTextEdit(this);
-
-    //connect(mConditionsTreeWidget, SIGNAL(itemPressed(QTreeWidgetItem*,int)), this, SLOT(onConditionsClicked(QTreeWidgetItem*, int)));
-
     mConditionEdit->installEventFilter(this);
     mConditionEdit->setMaximumHeight(50);
-    connect(mConditionEdit, SIGNAL(textChanged()), this, SLOT(onConditionChanged()));
+    mConditionEdit->setReadOnly(true);
 
     beginGroup(tr("Condition"));
     appendRow(tr("Contidition"), mConditionEdit);
@@ -67,10 +63,14 @@ void BranchEditorWidget::updateData(GameObject* action)
     if (! branch)
         return;
 
+    connect(mConditionEdit, SIGNAL(conditionChanged()), branch, SLOT(updateDisplayText()), Qt::UniqueConnection);
+    connect(mConditionEdit, SIGNAL(conditionChanged(AbstractCondition*)), branch, SLOT(setCondition(AbstractCondition*)), Qt::UniqueConnection);
+
     mTrueActionsChooser->clear();
     mFalseActionsChooser->clear();
 
-    mConditionEdit->setText(branch->condition());
+    mConditionEdit->clear();
+    mConditionEdit->setCondition(branch->condition());
 
     const GameObjectMetaType* metatype = 0;
     QList<Action*> actions = branch->actions(true);
@@ -94,7 +94,7 @@ void BranchEditorWidget::onConditionsClicked()
 
 bool BranchEditorWidget::eventFilter(QObject * obj, QEvent * event)
 {
-    if (obj == mConditionEdit && event->type() == QEvent::MouseButtonDblClick)
+    if (obj == mConditionEdit && event->type() == QEvent::MouseButtonPress)
         onConditionsClicked();
 
     return ActionEditorWidget::eventFilter(obj, event);
@@ -163,9 +163,10 @@ void BranchEditorWidget::onItemRemoved(int index)
     }
 }
 
-void BranchEditorWidget::onConditionChanged()
+void BranchEditorWidget::disconnectGameObject()
 {
-    Branch *branch = qobject_cast<Branch*>(mGameObject);
-    if (branch)
-        branch->setCondition(mConditionEdit->toPlainText());
+    ActionEditorWidget::disconnectGameObject();
+
+    if (mGameObject)
+        mConditionEdit->disconnect(mGameObject);
 }

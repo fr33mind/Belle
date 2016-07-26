@@ -32,10 +32,11 @@
 #include "condition_widget.h"
 #include "utils.h"
 
-ConditionDialog::ConditionDialog(const QString& condition, QWidget *parent) :
+ConditionDialog::ConditionDialog(ComplexCondition* condition, QWidget *parent) :
     QDialog(parent)
 {
-    mVariableValidator = new QRegExpValidator(QRegExp("[a-zA-Z]+[0-9]*"), this);
+    mCondition = condition;
+    mVariableValidator = new QRegExpValidator(QRegExp("[a-zA-Z_][a-zA-Z0-9_]*"), this);
     QVBoxLayout* vlayout1 = 0, * vlayout2 = 0;
     setWindowTitle(tr("Edit Condition"));
     QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -48,48 +49,45 @@ ConditionDialog::ConditionDialog(const QString& condition, QWidget *parent) :
 
     //Create logical operator ComboBox
     mLogicalOperators = new QComboBox(this);
-    mLogicalOperators->addItem(tr("And"));
-    mLogicalOperators->addItem(tr("Or"));
+    mLogicalOperators->addItem(tr("And"), ConditionLogicalOperator::And);
+    mLogicalOperators->addItem(tr("Or"), ConditionLogicalOperator::Or);
     mLogicalOperators->setVisible(false);
 
     //edit variable widget
-    mEditVariable = new QLineEdit(this);
-    mEditVariable->setPlaceholderText(tr("Variable"));
-    mEditVariable->setObjectName("variableEditor");
-    //QRegExpValidator *validator = new QRegExpValidator(QRegExp("([a-zA-Z]+[0-9]*)*|('|\")[^ '\"]*('|\")|[0-9]+\.[0-9]*"), this);
-
-    mEditVariable->setValidator(mVariableValidator);
-    connect(mEditVariable, SIGNAL(textEdited(const QString&)), this, SLOT(onVariableEdited(const QString&)));
+    mLeftMemberEdit = new QLineEdit(this);
+    mLeftMemberEdit->setObjectName("variableEditor");
+    setLineEditType(mLeftMemberEdit, Variable);
+    connect(mLeftMemberEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onLeftMemberEdited(const QString&)));
 
     //data type combobox
     mDataType1Chooser = new QComboBox(this);
     mDataType1Chooser->setObjectName("type1");
-    mDataType1Chooser->addItem(tr("Auto"), "auto");
-    mDataType1Chooser->addItem(tr("Variable"), "variable");
-    mDataType1Chooser->addItem(tr("Value"), "value");
+    mDataType1Chooser->addItem(tr("Value"), Value);
+    mDataType1Chooser->addItem(tr("Variable"), Variable);
+    mDataType1Chooser->setCurrentIndex(1);
     connect(mDataType1Chooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onTypeChanged(int)));
 
-    mOperatorsComboBox = new QComboBox(this);
-    QStringList operators = mConditionWidget->operatorsText();
-    foreach(const QString& op, operators) {
-        mOperatorsComboBox->addItem(op);
+    mOperationsComboBox = new QComboBox(this);
+    QMapIterator<int, QString> it(ConditionOperation::operations());
+    while(it.hasNext()) {
+        it.next();
+        mOperationsComboBox->addItem(it.value(), it.key());
     }
-    connect(mOperatorsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentOperatorChanged(int)));
+    connect(mOperationsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentOperatorChanged(int)));
 
-    mEditValue = new QLineEdit(this);
-    mEditValue->setPlaceholderText(tr("Value"));
-    mEditVariable->setObjectName("valueEditor");
-    mEditValue->setToolTip(tr("Values are interpreted as a string, if you want to compare to a variable instead, use the dollar sign before name (eg. $objects)"));
-    connect(mEditValue, SIGNAL(textEdited(const QString&)), this, SLOT(onValueEdited(const QString&)));
+    mRightMemberEdit = new QLineEdit(this);
+    mRightMemberEdit->setObjectName("valueEditor");
+    setLineEditType(mRightMemberEdit, Value);
+    connect(mRightMemberEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onRightMemberEdited(const QString&)));
 
     //data type combobox
     mDataType2Chooser = new QComboBox(this);
     mDataType2Chooser->setObjectName("type2");
-    for(int i=0; i < mDataType1Chooser->count(); i++)
-        mDataType2Chooser->addItem(mDataType1Chooser->itemText(i), mDataType1Chooser->itemData(i));
+    mDataType2Chooser->addItem(tr("Value"), Value);
+    mDataType2Chooser->addItem(tr("Variable"), Variable);
     connect(mDataType2Chooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onTypeChanged(int)));
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, Qt::Horizontal, this);
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
@@ -100,19 +98,19 @@ ConditionDialog::ConditionDialog(const QString& condition, QWidget *parent) :
 
     //create first vertical layout
     vlayout1 = new QVBoxLayout();
-    vlayout1->addWidget(mEditVariable);
+    vlayout1->addWidget(mLeftMemberEdit);
     vlayout1->addWidget(mDataType1Chooser);
 
     //create second vertical layout
     vlayout2 = new QVBoxLayout();
-    vlayout2->addWidget(mEditValue);
+    vlayout2->addWidget(mRightMemberEdit);
     vlayout2->addWidget(mDataType2Chooser);
 
     //add all widgets and layouts to parent horizontal layout
     QHBoxLayout *hlayout = new QHBoxLayout();
     hlayout->addWidget(mLogicalOperators);
     hlayout->addLayout(vlayout1);
-    hlayout->addWidget(mOperatorsComboBox);
+    hlayout->addWidget(mOperationsComboBox);
     hlayout->addLayout(vlayout2);
     hlayout->addWidget(mAddButton);
 
@@ -128,41 +126,41 @@ ConditionDialog::ConditionDialog(const QString& condition, QWidget *parent) :
 void ConditionDialog::onAddClicked()
 {
     QStandardItemModel *model = qobject_cast<QStandardItemModel*>(mConditionWidget->model());
-    if (! model)
+    if (! model || !mCondition)
         return;
 
-    if (mLogicalOperators->isVisible())
-        mConditionWidget->appendLogicalOperator(mLogicalOperators->currentText(), mLogicalOperators->currentIndex());
+    ConditionTokenMetaType::Type type = (ConditionTokenMetaType::Type) mDataType1Chooser->currentData().toInt();
+    SimpleConditionToken left(type, mLeftMemberEdit->text());
+    SimpleConditionToken right;
+    ConditionOperation::Type op = (ConditionOperation::Type) mOperationsComboBox->currentData().toInt();
+    if (mRightMemberEdit->isVisible()) {
+        type = (ConditionTokenMetaType::Type) mDataType2Chooser->currentData().toInt();
+        right = SimpleConditionToken(type, mRightMemberEdit->text());
+    }
 
-    if (mEditValue->isVisible()) {
-        mConditionWidget->appendCondition(mEditVariable->text(), mOperatorsComboBox->currentIndex(), mEditValue->text());
+    SimpleCondition* condition = new SimpleCondition(left, op, right);
+    if (mLogicalOperators->isVisible()) {
+        ConditionLogicalOperator::Type lop = (ConditionLogicalOperator::Type) mLogicalOperators->currentData().toInt();
+        mConditionWidget->appendCondition(lop, condition);
     }
     else {
-        // zero index means "=="
-        mConditionWidget->appendCondition(mEditVariable->text(), 0, mOperatorsComboBox->currentText());
+        mConditionWidget->appendCondition(condition);
     }
 
     if (mLogicalOperators->isHidden())
         mLogicalOperators->setVisible(true);
-
 }
 
 void ConditionDialog::onCurrentOperatorChanged(int index)
 {
-    if (index >= mOperatorsComboBox->count()-4){
-        mEditValue->hide();
+    if (index >= mOperationsComboBox->count()-4){
+        mRightMemberEdit->hide();
         mDataType2Chooser->hide();
         mDataType1Chooser->setCurrentIndex(1); //set "variable"
         mDataType1Chooser->setEnabled(false);
     }
-    else if (index == 2) { //"in" operator - invert variable and value position
-        mDataType1Chooser->setCurrentIndex(2); //set "value"
-        mDataType2Chooser->setCurrentIndex(1); //set "variable
-        mDataType1Chooser->setEnabled(false);
-        mDataType2Chooser->setEnabled(false);
-    }
     else {
-        mEditValue->show();
+        mRightMemberEdit->show();
         mDataType2Chooser->show();
         if (! mDataType1Chooser->isEnabled())
             mDataType1Chooser->setEnabled(true);
@@ -170,38 +168,33 @@ void ConditionDialog::onCurrentOperatorChanged(int index)
             mDataType2Chooser->setEnabled(true);
     }
 
-    onVariableEdited(mEditVariable->text());
+    onLeftMemberEdited(mLeftMemberEdit->text());
 }
 
-void ConditionDialog::onVariableEdited(const QString & text)
+void ConditionDialog::onLeftMemberEdited(const QString & text)
 {
     if (text.isEmpty())
         mAddButton->setEnabled(false);
-    else if (! mEditValue->isVisible() || (mEditValue->isVisible() && ! mEditValue->text().isEmpty()))
+    else if (! mRightMemberEdit->isVisible() || (mRightMemberEdit->isVisible() && ! mRightMemberEdit->text().isEmpty()))
         mAddButton->setEnabled(true);
     else
         mAddButton->setEnabled(false);
 }
 
-void ConditionDialog::onValueEdited(const QString & text)
+void ConditionDialog::onRightMemberEdited(const QString & text)
 {
-    if (mEditValue->isVisible()) {
-        if (text.isEmpty() || mEditVariable->text().isEmpty())
+    if (mRightMemberEdit->isVisible()) {
+        if (text.isEmpty() || mLeftMemberEdit->text().isEmpty())
             mAddButton->setEnabled(false);
         else
             mAddButton->setEnabled(true);
 
     }
-    else if (! mEditVariable->text().isEmpty()){
+    else if (! mLeftMemberEdit->text().isEmpty()){
          mAddButton->setEnabled(true);
     }
     else
          mAddButton->setEnabled(false);
-}
-
-QString ConditionDialog::condition()
-{
-    return mConditionWidget->condition();
 }
 
 void ConditionDialog::onTypeChanged(int index)
@@ -211,30 +204,36 @@ void ConditionDialog::onTypeChanged(int index)
 
     QString objName = sender()->objectName();
     QComboBox* senderComboBox = static_cast<QComboBox*>(sender());
-    QString type = senderComboBox->itemData(index).toString();
+    int type = senderComboBox->itemData(index).toInt();
     QLineEdit* lineEdit = 0;
 
     if (objName == "type1")
-        lineEdit = mEditVariable;
+        lineEdit = mLeftMemberEdit;
     else
-        lineEdit = mEditValue;
+        lineEdit = mRightMemberEdit;
 
-    lineEdit->setPlaceholderText(senderComboBox->itemText(index));
-
-    if (type == "auto") {
-        type = determineType(lineEdit->text());
-    }
-
-    if (type == "variable")
-        lineEdit->setValidator(mVariableValidator);
-    else
-        lineEdit->setValidator(0);
+    setLineEditType(lineEdit, (LineEditType) type);
 }
 
-QString ConditionDialog::determineType(const QString& value)
+void ConditionDialog::setLineEditType(QLineEdit * lineEdit, LineEditType type)
 {
-    if (value.contains(QRegExp("[^a-zA-Z0-9]")) || value.isEmpty() || value.isNull() || value[0].isDigit())
-        return "value";
+    if (!lineEdit)
+        return;
 
-    return "variable";
+    bool match = false;
+
+    switch (type) {
+        case Variable:
+            lineEdit->setValidator(mVariableValidator);
+            lineEdit->setPlaceholderText(tr("Variable"));
+            match = mVariableValidator->regExp().exactMatch(lineEdit->text());
+            if (!match)
+                lineEdit->clear();
+            break;
+        case Value:
+            lineEdit->setValidator(0);
+            lineEdit->setPlaceholderText(tr("Value"));
+            break;
+        default: break;
+    }
 }

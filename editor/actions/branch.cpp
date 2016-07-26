@@ -16,6 +16,8 @@
 
 #include "branch.h"
 #include "gameobjectfactory.h"
+#include "literalcondition.h"
+#include "conditiontokenfactory.h"
 
 Branch::Branch(QObject *parent) :
     Action(parent)
@@ -52,22 +54,27 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
         }
     }
 
-
-    if (data.contains("condition") && data.value("condition").type() == QVariant::String) {
-        setCondition(data.value("condition").toString());
+    if (data.contains("condition")) {
+        setCondition(ConditionTokenFactory::createCondition(data.value("condition")));
     }
+}
+
+Branch::~Branch()
+{
+    if (mCondition)
+        delete mCondition;
 }
 
 void Branch::init()
 {
     setType(GameObjectMetaType::Branch);
-    mCondition = "";
+    mCondition = new ComplexCondition();
 }
 
 QVariantMap Branch::toJsonObject(bool internal) const
 {
     QVariantMap data = Action::toJsonObject(internal);
-    data.insert("condition", mCondition);
+    data.insert("condition", mCondition->toMap());
 
     QVariantList actions;
     if (! mTrueActions.isEmpty()){
@@ -87,15 +94,25 @@ QVariantMap Branch::toJsonObject(bool internal) const
     return data;
 }
 
-QString Branch::condition() const
+AbstractCondition* Branch::condition() const
 {
     return mCondition;
 }
 
-void Branch::setCondition(const QString & condition)
+void Branch::setCondition(AbstractCondition *condition)
 {
+    if (mCondition == condition)
+        return;
+
+    if (mCondition)
+        delete mCondition;
     mCondition = condition;
     updateDisplayText();
+}
+
+void Branch::setCondition(const QString& condition)
+{
+    setCondition(new LiteralCondition(condition));
 }
 
 QList<Action*> Branch::actions(bool cond) const
@@ -142,11 +159,15 @@ void Branch::removeAction(int index, bool cond, bool del){
 
 void Branch::updateDisplayText()
 {
+    QString condition("");
     QString trueAction(tr("Do Nothing"));
     QString falseAction(tr("Do Nothing"));
     QStringList trueActions;
     QStringList falseActions;
     const GameObjectMetaType* metatype = 0;
+
+    if (mCondition)
+        condition = mCondition->toString();
 
     for(int i=0; i < mTrueActions.size(); i++) {
         metatype = GameObjectMetaType::metaType(mTrueActions.at(i)->type());
@@ -166,7 +187,7 @@ void Branch::updateDisplayText()
     if (!falseActions.isEmpty())
         falseAction = falseActions.join(", ");
 
-    QString text = QString(tr("If %1\nThen: %2\nElse: %3")).arg(mCondition).arg(trueAction).arg(falseAction);
+    QString text = QString(tr("If %1\nThen: %2\nElse: %3")).arg(condition).arg(trueAction).arg(falseAction);
     setDisplayText(text);
     emit dataChanged();
 }

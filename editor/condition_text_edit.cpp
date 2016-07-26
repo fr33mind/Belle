@@ -19,54 +19,65 @@
 #include <QDebug>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QCursor>
+#include <QMessageBox>
 
 #include "condition_dialog.h"
+#include "literalcondition.h"
 
 ConditionTextEdit::ConditionTextEdit(QWidget *parent) :
     QTextEdit(parent)
 {
     setMouseTracking(true);
+    viewport()->setCursor(Qt::PointingHandCursor);
     mEditPixmap = QIcon(":/media/object-edit.png").pixmap(20, 20);
+}
+
+void ConditionTextEdit::setCondition(AbstractCondition* condition)
+{
+    mCondition = condition;
+    if (mCondition)
+        setPlainText(mCondition->toString());
+}
+
+AbstractCondition* ConditionTextEdit::condition() const
+{
+    return mCondition;
 }
 
 void ConditionTextEdit::mouseReleaseEvent(QMouseEvent *e)
 {
     QTextEdit::mouseReleaseEvent(e);
 
-    QPoint pos = editPixmapPos();
-    if (e->x() > pos.x() && e->y() < pos.y() + mEditPixmap.height()) {
-        ConditionDialog dialog(this->toPlainText());
-        dialog.exec();
+    if (mCondition->isLiteral()) {
+        QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Editing Unsupported"), tr("This condition is in a format that can't be edited.\n"
+                                                                                                   "You'll have to recreate the condition using the condition editor.\n\n"
+                                                                                                   "Do you want to recreate it now?"),
+                                                               QMessageBox::No | QMessageBox::Yes);
+        if (btn == QMessageBox::No)
+            return;
 
-        if (dialog.result() == QDialog::Accepted) {
-            setPlainText(dialog.condition());
-        }
-        e->accept();
+        mCondition = new ComplexCondition();
+        emit conditionChanged(mCondition);
+    }
+
+    ComplexCondition* ccondition = dynamic_cast<ComplexCondition*>(mCondition);
+    if (isReadOnly() && ccondition) {
+        ConditionDialog dialog(ccondition);
+        dialog.exec();
+        setPlainText(mCondition->toString());
+        emit conditionChanged();
     }
 }
 
 void ConditionTextEdit::mouseMoveEvent(QMouseEvent *e)
 {
     QTextEdit::mouseMoveEvent(e);
-
-    if (! viewport())
-        return;
-
-    QPoint pos = editPixmapPos();
-    if (e->x() > pos.x() && e->y() < pos.y() + mEditPixmap.height()) {
-        viewport()->setCursor(Qt::PointingHandCursor);
-    }
-    else if (viewport()->cursor().shape() != Qt::IBeamCursor) {
-        viewport()->setCursor(Qt::IBeamCursor);
-    }
 }
 
 void ConditionTextEdit::paintEvent(QPaintEvent *e)
 {
     QTextEdit::paintEvent(e);
-    QPainter p(viewport());
-    QPoint pos = editPixmapPos();
-    p.drawPixmap(pos.x(), pos.y(), mEditPixmap);
 }
 
 QPoint ConditionTextEdit::editPixmapPos() const

@@ -22,8 +22,10 @@
 #include "action_editor_widget.h"
 #include "branch.h"
 #include "combobox.h"
+#include "condition_text_edit.h"
 
 class Branch;
+class ConditionTextEdit;
 
 class BranchEditorWidget : public ActionEditorWidget
 {
@@ -34,18 +36,18 @@ public:
 
 protected:
     virtual void updateData(GameObject*);
+    virtual void disconnectGameObject();
 
 signals:
     
 private slots:
     void onConditionsClicked();
     void onAddItemActivated();
-    void onConditionChanged();
     void onItemActivated(int);
     void onItemRemoved(int);
 
 private:
-    QTextEdit* mConditionEdit;
+    ConditionTextEdit* mConditionEdit;
     ComboBox* mTrueActionsChooser;
     ComboBox* mFalseActionsChooser;
     

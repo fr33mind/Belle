@@ -21,31 +21,40 @@
 #include <QComboBox>
 #include <QRadioButton>
 
+#include "complexcondition.h"
+
 class ConditionWidget;
+class ComplexCondition;
 
 class ConditionDialog : public QDialog
 {
     Q_OBJECT
+
+    enum LineEditType {
+        Variable = ConditionTokenMetaType::Variable,
+        Value = ConditionTokenMetaType::Value
+    };
+
 public:
-    explicit ConditionDialog(const QString&, QWidget *parent = 0);
-    QString condition();
+    explicit ConditionDialog(ComplexCondition*, QWidget *parent = 0);
+
 private:
-    QString determineType(const QString&);
+    void setLineEditType(QLineEdit*, LineEditType);
     
 signals:
     
 private slots:
     void onAddClicked();
     void onCurrentOperatorChanged(int);
-    void onVariableEdited(const QString&);
-    void onValueEdited(const QString&);
+    void onLeftMemberEdited(const QString&);
+    void onRightMemberEdited(const QString&);
     void onTypeChanged(int);
 
 private:
     ConditionWidget* mConditionWidget;
-    QLineEdit* mEditVariable;
-    QComboBox* mOperatorsComboBox;
-    QLineEdit* mEditValue;
+    QLineEdit* mLeftMemberEdit;
+    QComboBox* mOperationsComboBox;
+    QLineEdit* mRightMemberEdit;
     QComboBox* mComboValueType;
     QRadioButton * mAndRadioButton;
     QRadioButton * mOrRadioButton;
@@ -53,7 +62,8 @@ private:
     QPushButton* mAddButton;
     QComboBox* mDataType1Chooser;
     QComboBox* mDataType2Chooser;
-    QValidator* mVariableValidator;
+    QRegExpValidator* mVariableValidator;
+    ComplexCondition* mCondition;
 };
 
 #endif // Condition_DIALOG_H
