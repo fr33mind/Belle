@@ -38,22 +38,22 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
 
     for (int i=0; i < NUMBER_OF_OPTIONS; i++) {
         mTextEdits.append(new QLineEdit(this));
-        QTextEdit* conditionEdit = new ConditionTextEdit(this);
-        conditionEdit->installEventFilter(this);
-        conditionEdit->setMaximumHeight(50);
-        mConditionEdits.append(conditionEdit);
+//        QTextEdit* conditionEdit = new ConditionTextEdit(this);
+//        conditionEdit->installEventFilter(this);
+//        conditionEdit->setMaximumHeight(50);
+//        mConditionEdits.append(conditionEdit);
         mEventChoosers.append(new ComboBox(this));
 
         beginGroup(QString("%1 %2").arg(tr("Option")).arg(QString::number(i+1)));
         appendRow(tr("Text"), mTextEdits.last());
         appendRow(tr("Action"), mEventChoosers.last());
-        appendRow(tr("Condition"), mConditionEdits.last());
+        //appendRow(tr("Condition"), mConditionEdits.last());
         endGroup();
 
         if (i >= 2)
             this->setRowHidden(mFirstOptionIndex+i, model()->index(i+1, 0).parent(), true);
 
-        connect(mConditionEdits.last(), SIGNAL(textChanged()), this, SLOT(onConditionChanged()));
+        //connect(mConditionEdits.last(), SIGNAL(textChanged()), this, SLOT(onConditionChanged()));
         connect(mTextEdits.last(), SIGNAL(textEdited(const QString&)), this, SLOT(onTextEdited(const QString&)));
         connect(mEventChoosers.last(), SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
         connect(mEventChoosers.last(), SIGNAL(itemRemoved(int)), this, SLOT(onItemRemoved(int)));
