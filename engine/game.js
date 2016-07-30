@@ -296,6 +296,7 @@
     }
 
     this.variables = state.variables || {};
+    this.soundManager.stopAll();
     if (state.sounds) {
       var sounds = state.sounds;
       for(var i=0; i < sounds.length; i++)

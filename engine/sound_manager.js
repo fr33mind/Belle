@@ -74,7 +74,7 @@ SoundManager.prototype.play = function(sound, channel, options) {
   sound = _addSound(sound, channel, options);
   
   if (sound) {
-    if (! sound.isEnded())
+    if (sound.isPaused() === false)
         sound.stop();
     sound.play();
   }
@@ -146,11 +146,12 @@ SoundManager.prototype.getSounds = function(channel) {
 
 SoundManager.prototype.getPlayingSounds = function(channel) {
   var sounds = this.getSounds();
+  var playing_sounds = [];
   for(var i=0; i < sounds.length; i++) {
-      if (sounds[i].isEnded())
-        sounds.splice(i, 1);
+      if (sounds[i].isPaused() === false)
+        playing_sounds.push(sounds[i]);
   }
-  return sounds;
+  return playing_sounds;
 };
   
 belle.SoundManager = SoundManager;
