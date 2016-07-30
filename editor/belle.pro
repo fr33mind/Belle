@@ -131,7 +131,8 @@ HEADERS      += belle.h\
     conditions/conditiontokenmetatype.h \
     conditions/conditionlogicaloperator.h \
     actions/set_game_variable.h \
-    actions/set_game_variable_editor_widget.h
+    actions/set_game_variable_editor_widget.h \
+    widgets/variablevalidator.h
                 
 
 SOURCES      += main.cpp\
@@ -244,6 +245,7 @@ SOURCES      += main.cpp\
     conditions/conditiontokenfactory.cpp \
     conditions/conditionlogicaloperator.cpp \
     actions/set_game_variable.cpp \
-    actions/set_game_variable_editor_widget.cpp
+    actions/set_game_variable_editor_widget.cpp \
+    widgets/variablevalidator.cpp
 
 RESOURCES += media.qrc
