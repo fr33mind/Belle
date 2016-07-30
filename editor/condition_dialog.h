@@ -22,9 +22,11 @@
 #include <QRadioButton>
 
 #include "complexcondition.h"
+#include "variablevalidator.h"
 
 class ConditionWidget;
 class ComplexCondition;
+class VariableValidator;
 
 class ConditionDialog : public QDialog
 {
@@ -62,7 +64,7 @@ private:
     QPushButton* mAddButton;
     QComboBox* mDataType1Chooser;
     QComboBox* mDataType2Chooser;
-    QRegExpValidator* mVariableValidator;
+    VariableValidator* mVariableValidator;
     ComplexCondition* mCondition;
 };
 

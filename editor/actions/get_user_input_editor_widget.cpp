@@ -19,6 +19,7 @@
 #include <QLineEdit>
 
 #include "get_user_input.h"
+#include "variablevalidator.h"
 
 GetUserInputEditorWidget::GetUserInputEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
@@ -27,6 +28,7 @@ GetUserInputEditorWidget::GetUserInputEditorWidget(QWidget *parent) :
     connect(mMessageEdit, SIGNAL(textEdited(const QString &)), this, SLOT(onMessageChanged(const QString &)));
 
     mVariableEdit = new QLineEdit(this);
+    mVariableEdit->setValidator(new VariableValidator(this));
     connect(mVariableEdit, SIGNAL(textEdited(const QString &)), this, SLOT(onVariableChanged(const QString &)));
 
     mDefaultValueEdit= new QLineEdit(this);

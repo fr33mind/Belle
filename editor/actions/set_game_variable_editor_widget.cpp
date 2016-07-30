@@ -15,13 +15,13 @@
  */
 
 #include "set_game_variable_editor_widget.h"
+#include "variablevalidator.h"
 
 SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *parent) :
     ActionEditorWidget(parent)
 {
     mVariableEdit = new QLineEdit(this);
-    QRegExpValidator* validator = new QRegExpValidator(QRegExp("^[a-zA-Z_]+[a-zA-Z_0-9]*$"), this);
-    mVariableEdit->setValidator(validator);
+    mVariableEdit->setValidator(new VariableValidator(this));
 
     mOperatorChooser = new QComboBox(this);
     mOperatorChooser->addItem(tr("Assign"));

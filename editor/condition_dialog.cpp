@@ -36,7 +36,7 @@ ConditionDialog::ConditionDialog(ComplexCondition* condition, QWidget *parent) :
     QDialog(parent)
 {
     mCondition = condition;
-    mVariableValidator = new QRegExpValidator(QRegExp("[a-zA-Z_][a-zA-Z0-9_]*"), this);
+    mVariableValidator = new VariableValidator(this);
     QVBoxLayout* vlayout1 = 0, * vlayout2 = 0;
     setWindowTitle(tr("Edit Condition"));
     QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -226,8 +226,7 @@ void ConditionDialog::setLineEditType(QLineEdit * lineEdit, LineEditType type)
         case Variable:
             lineEdit->setValidator(mVariableValidator);
             lineEdit->setPlaceholderText(tr("Variable"));
-            match = mVariableValidator->regExp().exactMatch(lineEdit->text());
-            if (!match)
+            if (mVariableValidator->validate(lineEdit->text()) == QValidator::Invalid)
                 lineEdit->clear();
             break;
         case Value:
