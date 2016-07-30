@@ -23,7 +23,7 @@
 #include "stopsound.h"
 #include "show_menu.h"
 #include "end.h"
-#include "change_game_variable.h"
+#include "set_game_variable.h"
 #include "change_background.h"
 #include "runscript.h"
 #include "changestate.h"
@@ -123,8 +123,8 @@ Action* GameObjectFactory::createAction(GameObjectMetaType::Type type, const QVa
         case GameObjectMetaType::GetUserInput:
             action = validData ? new GetUserInput(data, parent) : new GetUserInput(parent);
             break;
-        case GameObjectMetaType::ChangeGameVariable:
-            action = validData ? new ChangeGameVariable(data, parent) : new ChangeGameVariable(parent);
+        case GameObjectMetaType::SetGameVariable:
+            action = validData ? new SetGameVariable(data, parent) : new SetGameVariable(parent);
             break;
         case GameObjectMetaType::RunScript:
             action = validData ? new RunScript(data, parent) : new RunScript(parent);

@@ -1150,9 +1150,9 @@ GetUserInput.prototype.onExecute = function()
     }, 1);
 }
 
-/************* Change Game Variable *****************/
+/************* Set Game Variable *****************/
 
-function ChangeGameVariable(data, parent)
+function SetGameVariable(data, parent)
 {
     Action.call(this, data, parent);
     
@@ -1176,9 +1176,9 @@ function ChangeGameVariable(data, parent)
 
 }
 
-belle.extend(ChangeGameVariable, Action);
+belle.extend(SetGameVariable, Action);
 
-ChangeGameVariable.prototype.onExecute = function()
+SetGameVariable.prototype.onExecute = function()
 {   
     var currValue = "";
     var newValue = this.value;
@@ -1355,7 +1355,7 @@ actions.PlaySound = PlaySound;
 actions.StopSound = StopSound;
 actions.ShowMenu = ShowMenu;
 actions.GetUserInput = GetUserInput;
-actions.ChangeGameVariable = ChangeGameVariable;
+actions.SetGameVariable = SetGameVariable;
 actions.RunScript = RunScript;
 actions.ActionGroup = ActionGroup;
 

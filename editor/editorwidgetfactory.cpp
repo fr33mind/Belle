@@ -18,7 +18,7 @@
 #include "changecolor_editor_widget.h"
 #include "playsound_editorwidget.h"
 #include "stopsound_editorwidget.h"
-#include "change_game_variable_editor_widget.h"
+#include "set_game_variable_editor_widget.h"
 #include "change_background_editorwidget.h"
 #include "runscript_editorwidget.h"
 #include "changestate_editorwidget.h"
@@ -71,8 +71,8 @@ GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaTy
         return new PlaySoundEditorWidget;
     else if (type == GameObjectMetaType::StopSound)
         return new StopSoundEditorWidget;
-    else if (type == GameObjectMetaType::ChangeGameVariable)
-        return new ChangeGameVariableEditorWidget;
+    else if (type == GameObjectMetaType::SetGameVariable)
+        return new SetGameVariableEditorWidget;
     else if (type == GameObjectMetaType::ChangeBackground)
         return new ChangeBackgroundEditorWidget;
     else if (type == GameObjectMetaType::RunScript)

@@ -42,7 +42,7 @@ public:
         ChangeColor,
         PlaySound,
         StopSound,
-        ChangeGameVariable,
+        SetGameVariable,
         ChangeBackground,
         RunScript,
         ChangeState,

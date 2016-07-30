@@ -14,17 +14,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "change_game_variable.h"
-
+#include "set_game_variable.h"
 #include "utils.h"
 
-ChangeGameVariable::ChangeGameVariable(QObject *parent) :
+SetGameVariable::SetGameVariable(QObject *parent) :
     Action(parent)
 {
     init();
 }
 
-ChangeGameVariable::ChangeGameVariable(const QVariantMap& data, QObject *parent) :
+SetGameVariable::SetGameVariable(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
@@ -42,9 +41,9 @@ ChangeGameVariable::ChangeGameVariable(const QVariantMap& data, QObject *parent)
     }
 }
 
-void ChangeGameVariable::init()
+void SetGameVariable::init()
 {
-    setType(GameObjectMetaType::ChangeGameVariable);
+    setType(GameObjectMetaType::SetGameVariable);
 
     mOperators.append("assign");
     mOperators.append("add");
@@ -56,12 +55,12 @@ void ChangeGameVariable::init()
     mOperatorIndex = 0;
 }
 
-int ChangeGameVariable::operatorIndex()
+int SetGameVariable::operatorIndex()
 {
     return mOperatorIndex;
 }
 
-void ChangeGameVariable::setOperatorIndex(int index)
+void SetGameVariable::setOperatorIndex(int index)
 {
     if (index >= 0 && index < mOperators.size()) {
         mOperatorIndex = index;
@@ -69,29 +68,29 @@ void ChangeGameVariable::setOperatorIndex(int index)
     }
 }
 
-QString ChangeGameVariable::variable()
+QString SetGameVariable::variable()
 {
     return mVariable;
 }
 
-void ChangeGameVariable::setVariable(const QString & var)
+void SetGameVariable::setVariable(const QString & var)
 {
     mVariable = var;
     emit dataChanged();
 }
 
-QString ChangeGameVariable::value()
+QString SetGameVariable::value()
 {
     return mValue;
 }
 
-void ChangeGameVariable::setValue(const QString & val)
+void SetGameVariable::setValue(const QString & val)
 {
     mValue = val;
     emit dataChanged();
 }
 
-QString ChangeGameVariable::displayText() const
+QString SetGameVariable::displayText() const
 {
     QString variable = tr("Nothing");
     QString value = variable;
@@ -111,7 +110,7 @@ QString ChangeGameVariable::displayText() const
                                  .arg(variable);
 }
 
-QVariantMap ChangeGameVariable::toJsonObject(bool internal) const
+QVariantMap SetGameVariable::toJsonObject(bool internal) const
 {
     QVariantMap data = Action::toJsonObject(internal);
 

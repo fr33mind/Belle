@@ -14,47 +14,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GAME_VARIABLE_H
-#define GAME_VARIABLE_H
+#ifndef SET_GAME_VARIABLE_EDITOR_WIDGET_H
+#define SET_GAME_VARIABLE_EDITOR_WIDGET_H
 
-#include "action.h"
+#include <QComboBox>
 
-class ChangeGameVariableEditorWidget;
+#include "action_editor_widget.h"
+#include "set_game_variable.h"
 
-class ChangeGameVariable : public Action
+class SetGameVariable;
+
+class SetGameVariableEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    QString mVariable;
-    QString mValue;
-    int mOperatorIndex;
-    QStringList mOperators;
+    QLineEdit* mVariableEdit;
+    QComboBox* mOperatorChooser;
+    QLineEdit* mValueEdit;
 
 public:
-    explicit ChangeGameVariable(QObject *parent = 0);
-    ChangeGameVariable(const QVariantMap& data, QObject *parent = 0);
-
-    int operatorIndex();
-    void setOperatorIndex(int);
-
-    QString value();
-    void setValue(const QString&);
-
-    QString variable();
-    void setVariable(const QString&);
-
-    QString displayText() const;
-
-    virtual QVariantMap toJsonObject(bool internal=true) const;
+    explicit SetGameVariableEditorWidget(ActionEditorWidget *parent = 0);
+    QStringList operatorsText();
     
 signals:
     
-public slots:
+protected:
+    virtual void updateData(GameObject*);
 
-private:
-    void init();
-
-    
+private slots:
+    void onVariableEdited(const QString&);
+    void onOperatorChanged(int);
+    void onValueEdited(const QString&);
 };
 
-#endif // SET_GAME_VARIABLE_H
+#endif // SET_GAME_VARIABLE_EDITOR_WIDGET_H

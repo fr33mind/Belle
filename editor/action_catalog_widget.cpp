@@ -34,7 +34,7 @@
 #include "stopsound.h"
 #include "show_menu.h"
 #include "end.h"
-#include "change_game_variable.h"
+#include "set_game_variable.h"
 #include "change_background.h"
 #include "runscript.h"
 #include "changestate.h"
@@ -73,7 +73,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
 
     beginGroup(tr("Scripting"));
     _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::GetUserInput));
-    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ChangeGameVariable));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::SetGameVariable));
     _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::RunScript));
     endGroup();
 

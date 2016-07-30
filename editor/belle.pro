@@ -86,8 +86,6 @@ HEADERS      += belle.h\
     actions/hide.h \
     actions/show_editor_widget.h \
     actions/hide_editor_widget.h \
-    actions/change_game_variable.h \
-    actions/change_game_variable_editor_widget.h \
     actions/change_background.h \
     actions/change_background_editorwidget.h \
     clipboard.h \
@@ -131,7 +129,9 @@ HEADERS      += belle.h\
     conditions/literalcondition.h \
     conditions/conditiontokenfactory.h \
     conditions/conditiontokenmetatype.h \
-    conditions/conditionlogicaloperator.h
+    conditions/conditionlogicaloperator.h \
+    actions/set_game_variable.h \
+    actions/set_game_variable_editor_widget.h
                 
 
 SOURCES      += main.cpp\
@@ -200,8 +200,6 @@ SOURCES      += main.cpp\
     actions/hide.cpp \
     actions/show_editor_widget.cpp \
     actions/hide_editor_widget.cpp \
-    actions/change_game_variable.cpp \
-    actions/change_game_variable_editor_widget.cpp \
     actions/change_background.cpp \
     actions/change_background_editorwidget.cpp \
     clipboard.cpp \
@@ -244,6 +242,8 @@ SOURCES      += main.cpp\
     conditions/complexcondition.cpp \
     conditions/literalcondition.cpp \
     conditions/conditiontokenfactory.cpp \
-    conditions/conditionlogicaloperator.cpp
+    conditions/conditionlogicaloperator.cpp \
+    actions/set_game_variable.cpp \
+    actions/set_game_variable_editor_widget.cpp
 
 RESOURCES += media.qrc

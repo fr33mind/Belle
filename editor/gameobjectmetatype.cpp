@@ -72,8 +72,8 @@ void GameObjectMetaType::init()
     mGameObjectMetaTypes.insert(ChangeColor, new GameObjectMetaType(ChangeColor, "ChangeColor", tr("Change Color"), QIcon(":/media/color.png")));
     mGameObjectMetaTypes.insert(PlaySound, new GameObjectMetaType(PlaySound, "PlaySound", tr("Play Sound"), QIcon(":/media/sound.png")));
     mGameObjectMetaTypes.insert(StopSound, new GameObjectMetaType(StopSound, "StopSound", tr("Stop Sound"), QIcon(":/media/no-sound.png")));
-    mGameObjectMetaTypes.insert(ChangeGameVariable, new GameObjectMetaType(ChangeGameVariable, "ChangeGameVariable",
-                                                                           tr("Change Game Variable"), QIcon(":/media/script.png")));
+    mGameObjectMetaTypes.insert(SetGameVariable, new GameObjectMetaType(SetGameVariable, "SetGameVariable",
+                                                                           tr("Set Game Variable"), QIcon(":/media/script.png")));
     mGameObjectMetaTypes.insert(ChangeBackground, new GameObjectMetaType(ChangeBackground, "ChangeBackground", tr("Change Background"), QIcon(":/media/image.png")));
     mGameObjectMetaTypes.insert(RunScript, new GameObjectMetaType(RunScript, "RunScript", tr("Run Script"), QIcon(":/media/script.png")));
     mGameObjectMetaTypes.insert(ChangeState, new GameObjectMetaType(ChangeState, "ChangeState", tr("Change State"), QIcon(":/media/user-group.png")));
@@ -103,6 +103,10 @@ GameObjectMetaType::Type GameObjectMetaType::typeFromString(const QString& typeS
 {
     QHashIterator<GameObjectMetaType::Type, GameObjectMetaType*> it(mGameObjectMetaTypes);
     QString typeStringLower = typeString.toLower();
+
+    //For backwards compatibility. Remove at some point.
+    if(typeStringLower == "changegamevariable")
+        typeStringLower = "setgamevariable";
 
     while(it.hasNext()) {
         it.next();
