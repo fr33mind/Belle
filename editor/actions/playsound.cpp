@@ -52,6 +52,9 @@ void PlaySound::setSoundPath(const QString & path)
     if (mSound && mSound->path() == path)
         return;
 
+    if (mSound)
+        AssetManager::instance()->releaseAsset(mSound);
+
     mSound = AssetManager::instance()->loadAsset(path, Asset::Audio);
     emit dataChanged();
 }
