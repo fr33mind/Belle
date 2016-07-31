@@ -47,6 +47,7 @@ ResourcesView::ResourcesView(QWidget *parent) :
     connect(ResourceManager::instance(), SIGNAL(objectAdded(GameObject*)), this, SLOT(addObject(GameObject*)));
     connect(ResourceManager::instance(), SIGNAL(objectRemoved(GameObject*)), this, SLOT(onResourceRemoved(GameObject*)));
     this->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::SelectedClicked);
+    setIndentation(indentation()/2);
 }
 
 void ResourcesView::contextMenuRequested(const QPoint & point)
