@@ -50,7 +50,7 @@ public:
     void setX(int);
     void setY(int);
 
-    bool editingMode();
+    bool editingMode() const;
     void setEditingMode(bool);
 
 signals:
@@ -64,6 +64,7 @@ private slots:
 
 protected:
     void _append(Object*);
+    QVariantMap prepareObjectData(int, const QVariantMap&);
 
 private:
     QList<Object*> mObjects;
@@ -77,6 +78,7 @@ private:
     void alignObjectsVertically();
     void checkStickyObjects();
     void addStickyObject(Object*);
+    QVariantList objectsRelativeRectsData();
 };
 
 #endif // OBJECTGROUP_H

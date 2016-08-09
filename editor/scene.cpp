@@ -144,15 +144,19 @@ QList<Object*> Scene::temporaryObjects() const
 
 Object* Scene::objectAt (qreal x, qreal y)
 {
+    Object* obj = 0;
+
     QList<Object*> tempObjects = temporaryObjects();
     for(int i=tempObjects.size()-1; i >= 0; --i)
         if (tempObjects[i]->contains(x, y))
             return tempObjects[i]->objectAt(x, y);
 
     QList<Object*> objects = this->objects();
-    for(int i=objects.size()-1; i >= 0; --i)
-        if (objects[i]->contains(x, y))
-            return objects[i]->objectAt(x, y);
+    for(int i=objects.size()-1; i >= 0; --i) {
+        obj = objects[i]->objectAt(x, y);
+        if (obj)
+            return obj;
+    }
 
     return 0;
 }
