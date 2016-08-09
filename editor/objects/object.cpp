@@ -231,6 +231,9 @@ void Object::setHeight(int h, bool percent)
 
 void Object::setY(int y)
 {
+    if (y == mSceneRect.y() - mPadding.top())
+        return;
+
     mSceneRect.moveTo(mSceneRect.x(), y + mPadding.top());
     updateResizeRects();
     //FIXME: Implement proper relative positions.
@@ -239,6 +242,9 @@ void Object::setY(int y)
 
 void Object::setX(int x)
 {
+    if(x == mSceneRect.x() - mPadding.left())
+        return;
+
     mSceneRect.moveTo(x + padding("left"), mSceneRect.y());
     updateResizeRects();
     notify("x", this->x());
