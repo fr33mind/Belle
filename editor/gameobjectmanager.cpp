@@ -49,6 +49,18 @@ QList<GameObject*> GameObjectManager::objects() const
     return mGameObjects;
 }
 
+QList<GameObject*> GameObjectManager::objects(GameObjectMetaType::Type type) const
+{
+    QList<GameObject*> objects;
+
+    foreach(GameObject* obj, mGameObjects) {
+        if (obj->type() == type)
+            objects.append(obj);
+    }
+
+    return objects;
+}
+
 GameObject* GameObjectManager::takeAt(int index)
 {
     if (index < 0 || index >= mGameObjects.size())

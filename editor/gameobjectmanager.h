@@ -18,6 +18,7 @@ public:
     GameObject* objectAt(int) const;
     GameObject* object(const QString&) const;
     QList<GameObject*> objects() const;
+    QList<GameObject*> objects(GameObjectMetaType::Type) const;
     GameObject* takeAt(int);
     void insert(int, GameObject*);
     bool remove(GameObject*, bool del=false);
