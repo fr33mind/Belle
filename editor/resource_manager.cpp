@@ -47,7 +47,7 @@ void ResourceManager::add(GameObject * obj)
 
 void ResourceManager::add(const QVariantMap& data)
 {
-    add(createObject(data, this));
+    add(createGameObject(data, this));
 }
 
 GameObject* ResourceManager::createGameObject(const QVariantMap& info, QObject* parent)
