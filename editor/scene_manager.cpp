@@ -75,7 +75,7 @@ void SceneManager::removeSceneAt(int i, bool del)
 
     Scene* scene = takeAt(i);
     if (scene && del) {
-        scene->deleteLater();
+        delete scene;
     }
 
     if (size() == 0)

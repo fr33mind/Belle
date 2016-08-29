@@ -88,7 +88,7 @@ void GameObjectManager::removeAt(int index, bool del)
     if (index >= 0 && index < mGameObjects.size()) {
         GameObject* obj = takeAt(index);
         if (del)
-            obj->deleteLater();
+            delete obj;
     }
 }
 
