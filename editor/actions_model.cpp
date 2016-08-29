@@ -53,6 +53,10 @@ void ActionsModel::removeAction(int index)
 void ActionsModel::clear()
 {
     QStandardItemModel::clear();
+    foreach(Action* action, mActions) {
+        if (action)
+            action->disconnect(this);
+    }
     mActions.clear();
     mCurrentAction = 0;
 }
@@ -165,7 +169,6 @@ void ActionsModel::setCurrentAction(Action* action)
 
     if (mCurrentAction) {
         mCurrentAction->focusOut();
-        mCurrentAction->disconnect(this);
     }
 
     if (action)
@@ -175,7 +178,6 @@ void ActionsModel::setCurrentAction(Action* action)
 
     if (mCurrentAction) {
         connect(mCurrentAction, SIGNAL(destroyed()), this, SLOT(onCurrentActionDestroyed()), Qt::UniqueConnection);
-        connect(mCurrentAction, SIGNAL(dataChanged()), this, SLOT(updateView()), Qt::UniqueConnection);
     }
 }
 
