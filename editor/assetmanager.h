@@ -49,8 +49,10 @@ protected:
     QVariantMap readAssetsFile(const QString&);
     void saveFontFaces(const QList<Asset*>&, const QDir&);
     void updateRefCount();
-    Asset* _loadAsset(const QString&, Asset::Type) const;
+    Asset* _loadAsset(const QString&, Asset::Type);
+    Asset* _loadAsset(const QVariantMap&, Asset::Type);
     Asset::Type guessType(const QString&) const;
+    void addAsset(Asset*, Asset::Type);
 
 private:
     void cleanup();

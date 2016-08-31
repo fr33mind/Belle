@@ -8,6 +8,7 @@
 
 #include "utils.h"
 #include "fontfile.h"
+#include "soundasset.h"
 
 static AssetManager* mInstance = new AssetManager();
 static QScopedPointer<AssetManager> mInstanceScopedPointer(mInstance);
@@ -42,6 +43,9 @@ void AssetManager::setLoadPath(const QString & path)
 
 QString AssetManager::absoluteFilePath(const QString & name, Asset::Type type)
 {
+    if (QFileInfo(name).isAbsolute())
+        return name;
+
     if (! mLoadPath.isEmpty()) {
          QDir dir(mLoadPath);
          if (! mTypeToPath[type].isEmpty() && dir.exists(mTypeToPath[type]))
@@ -86,6 +90,9 @@ QList<Asset*> AssetManager::assets(Asset::Type type) const
 
 Asset* AssetManager::loadAsset(QString path, Asset::Type type)
 {
+    if (path.isEmpty())
+        return 0;
+
     path = absoluteFilePath(path);
     Asset* asset = this->asset(path, type);
     if (asset) {
@@ -95,19 +102,33 @@ Asset* AssetManager::loadAsset(QString path, Asset::Type type)
     }
 
     asset = _loadAsset(path, type);
-    if (asset) {
-        mAssets.insert(asset, 1);
-        if (mFilesToRemove.contains(asset->path())) {
-            mFilesToRemove.remove(asset->path());
-            asset->setRemovable(true);
-        }
+    if (asset && mFilesToRemove.contains(asset->path())) {
+        mFilesToRemove.remove(asset->path());
+        asset->setRemovable(true);
     }
 
     return asset;
 }
 
-Asset* AssetManager::_loadAsset(const QString& path, Asset::Type type) const
+Asset* AssetManager::_loadAsset(const QVariantMap& data, Asset::Type type)
 {
+    Asset* asset = 0;
+
+    if (type == Asset::Audio) {
+        asset = new SoundAsset(data);
+        addAsset(asset, type);
+    }
+    else {
+        asset = _loadAsset(data.value("name").toString(), type);
+    }
+
+    return asset;
+}
+
+Asset* AssetManager::_loadAsset(const QString& name, Asset::Type type)
+{
+    QString path = absoluteFilePath(name);
+
     if (! QFile::exists(path))
         return 0;
 
@@ -116,12 +137,12 @@ Asset* AssetManager::_loadAsset(const QString& path, Asset::Type type) const
         asset = ImageFile::create(path);
     else if (type == Asset::Font)
         asset = new FontFile(path);
+    else if (type == Asset::Audio)
+        asset = new SoundAsset(path);
     else
         asset = new Asset(path, type);
 
-    QString destPath = mTypeToPath.value(type, "");
-    if (asset && ! isNameUnique(asset->name(), destPath))
-        asset->setName(uniqueName(asset->name(), destPath));
+    addAsset(asset, type);
     return asset;
 }
 
@@ -144,7 +165,7 @@ void AssetManager::releaseAsset(Asset* asset)
 
 void AssetManager::removeAsset(Asset* asset)
 {
-    if (!asset)
+    if (!asset || !mAssets.contains(asset))
         return;
 
     mAssets.remove(asset);
@@ -155,13 +176,12 @@ void AssetManager::removeAsset(Asset* asset)
 
 void AssetManager::clearAssets()
 {
-    QHashIterator<Asset*, int> it(mAssets);
-    while(it.hasNext()) {
-        it.next();
-        if (it.key())
-            delete it.key();
+    QList<Asset*> assets = mAssets.keys();
+    for(int i=0; i < assets.size(); i++) {
+        removeAsset(assets.at(i));
     }
     mAssets.clear();
+    mFilesToRemove.clear();
 }
 
 ImageFile* AssetManager::image(const QString & name)
@@ -171,6 +191,9 @@ ImageFile* AssetManager::image(const QString & name)
 
 bool AssetManager::isNameUnique(const QString& name, const QString& destPath) const
 {
+    if (name.isEmpty())
+        return false;
+
     QList<Asset*> assets = mAssets.keys();
     for(int i=0; i < assets.size(); i++)
         if (assets[i]->name() == name && mTypeToPath.value(assets[i]->type(), "") == destPath)
@@ -247,7 +270,7 @@ void AssetManager::load(const QDir & dir, bool fromProject)
     QVariantList imagesData = data.value("images").toList();
     for(int i=0; i < imagesData.size(); i++) {
         item = imagesData[i].toMap();
-        asset = loadAsset(item.value("name", "").toString(), Asset::Image);
+        asset = _loadAsset(item.value("name", "").toString(), Asset::Image);
         if (asset && fromProject)
             asset->setRemovable(true);
     }
@@ -255,7 +278,13 @@ void AssetManager::load(const QDir & dir, bool fromProject)
     QVariantList audioData = data.value("sounds").toList();
     for(int i=0; i < audioData.size(); i++) {
         item = audioData[i].toMap();
-        asset = loadAsset(item.value("name", "").toString(), Asset::Audio);
+        if (item.contains("sources")) {
+            asset = _loadAsset(item, Asset::Audio);
+        }
+        else {
+            //for backwards compatibility
+            asset = _loadAsset(item.value("name").toString(), Asset::Audio);
+        }
         if (asset && fromProject)
             asset->setRemovable(true);
     }
@@ -263,7 +292,7 @@ void AssetManager::load(const QDir & dir, bool fromProject)
     QVariantList fontsData = data.value("fonts").toList();
     for(int i=0; i < fontsData.size(); i++) {
         item = fontsData[i].toMap();
-        asset = loadAsset(item.value("name", "").toString(), Asset::Font);
+        asset = _loadAsset(item.value("name", "").toString(), Asset::Font);
         if (asset && fromProject)
             asset->setRemovable(true);
     }
@@ -382,5 +411,13 @@ void AssetManager::clear()
 {
     setLoadPath("");
     clearAssets();
-    mFilesToRemove.clear();
+}
+
+void AssetManager::addAsset(Asset * asset, Asset::Type type)
+{
+    QString destPath = mTypeToPath.value(type, "");
+    if (asset && ! isNameUnique(asset->name(), destPath))
+        asset->setName(uniqueName(asset->name(), destPath));
+
+    mAssets.insert(asset, 1);
 }
