@@ -132,7 +132,8 @@ HEADERS      += belle.h\
     conditions/conditionlogicaloperator.h \
     actions/set_game_variable.h \
     actions/set_game_variable_editor_widget.h \
-    widgets/variablevalidator.h
+    widgets/variablevalidator.h \
+    multisourceasset.h
                 
 
 SOURCES      += main.cpp\
@@ -246,6 +247,7 @@ SOURCES      += main.cpp\
     conditions/conditionlogicaloperator.cpp \
     actions/set_game_variable.cpp \
     actions/set_game_variable_editor_widget.cpp \
-    widgets/variablevalidator.cpp
+    widgets/variablevalidator.cpp \
+    multisourceasset.cpp
 
 RESOURCES += media.qrc
