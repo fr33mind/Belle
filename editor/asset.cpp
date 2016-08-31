@@ -50,14 +50,14 @@ bool Asset::isNull() const
 
 bool Asset::save(const QDir& dir, bool updatePath)
 {
-    bool success = onSave(dir);
+    bool success = doSave(dir);
     if (success && updatePath) {
         mPath = dir.absoluteFilePath(mName);
     }
     return success;
 }
 
-bool Asset::onSave(const QDir & dir)
+bool Asset::doSave(const QDir & dir)
 {
     if (isValid())
         return QFile::copy(mPath, dir.absoluteFilePath(mName));
@@ -73,7 +73,7 @@ QVariantMap Asset::toJsonObject()
 
 bool Asset::isRemovable() const
 {
-    return mRemovable && QFile::exists(mPath);
+    return mRemovable;
 }
 
 void Asset::setRemovable(bool removable)
@@ -83,7 +83,7 @@ void Asset::setRemovable(bool removable)
 
 bool Asset::remove()
 {
-    if (isRemovable())
+    if (isRemovable() && QFile::exists(mPath))
         return QFile::remove(mPath);
     return false;
 }

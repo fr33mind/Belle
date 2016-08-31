@@ -10,11 +10,14 @@ class Asset
 
 public:
     enum Type {
+        Unknown=0,
         Image,
         Audio,
         Video,
         Font,
-        Unknown
+        AudioSource=16,
+        VideoSource,
+        FontSource
     };
 
 public:
@@ -24,16 +27,16 @@ public:
     QString name() const;
     QString path() const;
     Type type() const;
-    bool isValid() const;
+    virtual bool isValid() const;
     virtual bool isNull() const;
-    bool save(const QDir&, bool updatePath=false);
+    virtual bool save(const QDir&, bool updatePath=false);
     virtual QVariantMap toJsonObject();
     bool isRemovable() const;
     void setRemovable(bool);
     bool remove();
 
 protected:
-    virtual bool onSave(const QDir&);
+    virtual bool doSave(const QDir&);
 
 private:
     void init();
