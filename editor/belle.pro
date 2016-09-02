@@ -252,6 +252,7 @@ SOURCES      += main.cpp\
     widgets/variablevalidator.cpp \
     objects/sound.cpp \
     multisourceasset.cpp \
-    soundasset.cpp
+    soundasset.cpp \
+    utils.cpp
 
 RESOURCES += media.qrc
