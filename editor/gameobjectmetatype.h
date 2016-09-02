@@ -62,6 +62,7 @@ public:
     static void init();
     static void destroy();
     static const GameObjectMetaType* metaType(Type);
+    static const QIcon& icon(Type);
     static GameObjectMetaType::Type typeFromString(const QString&);
 
 signals:

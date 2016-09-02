@@ -100,6 +100,14 @@ const GameObjectMetaType* GameObjectMetaType::metaType(Type type)
     return mGameObjectMetaTypes.value(type, 0);
 }
 
+const QIcon& GameObjectMetaType::icon(Type type)
+{
+    const GameObjectMetaType* metaType = GameObjectMetaType::metaType(type);
+    if (metaType)
+        return metaType->icon();
+    return QIcon();
+}
+
 GameObjectMetaType::Type GameObjectMetaType::typeFromString(const QString& typeString)
 {
     QHashIterator<GameObjectMetaType::Type, GameObjectMetaType*> it(mGameObjectMetaTypes);
