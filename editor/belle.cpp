@@ -59,6 +59,7 @@
 #include "objectsview.h"
 #include "editorwidgetfactory.h"
 #include "gameobjectfactory.h"
+#include "sound.h"
 
 static Belle* mInstance = 0;
 
@@ -135,12 +136,14 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Image")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Dialogue Box")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Button")));
+    mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Sound")));
 
     mUi.twObjects->topLevelItem(0)->setIcon(0, QIcon(":/media/user.png"));
     mUi.twObjects->topLevelItem(1)->setIcon(0, QIcon(":/media/text.png"));
     mUi.twObjects->topLevelItem(2)->setIcon(0, QIcon(":/media/image.png"));
     mUi.twObjects->topLevelItem(3)->setIcon(0, QIcon(":/media/talk-baloon.png"));
     mUi.twObjects->topLevelItem(4)->setIcon(0, QIcon(":/media/button.png"));
+    mUi.twObjects->topLevelItem(5)->setIcon(0, QIcon(":/media/sound.png"));
 
 
     //scenes' widget
@@ -326,7 +329,7 @@ void Belle::onEditResource(GameObject* obj)
     removeWidgetsInPropertiesWidget();
     GameObjectEditorWidget* editor = EditorWidgetFactory::editorWidget(obj->type());
     if(editor) {
-        editor->setGameObject(object);
+        editor->setGameObject(obj);
         addWidgetToPropertiesWidget(editor);
     }
 }
@@ -586,6 +589,16 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         //Button
     case 4:
         resource = new Button(ResourceManager::instance());
+        ResourceManager::instance()->add(resource);
+        break;
+    //Sound
+    case 5:
+        if (QDir(RESOURCES_DEFAULT_PATH).exists())
+            startPath = RESOURCES_DEFAULT_PATH;
+        path = FileDialogUtils::getOpenSoundFileName(this, startPath);
+        if (path.isEmpty())
+            break;
+        resource = new Sound(path, ResourceManager::instance());
         ResourceManager::instance()->add(resource);
         break;
     }
