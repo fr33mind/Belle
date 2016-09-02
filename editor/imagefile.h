@@ -25,6 +25,7 @@ public:
     static bool isAnimated(const QString&);
     static ImageFile* create(const QString&);
     static bool isTransparent(const QImage&);
+    static QStringList supportedFormats();
 
 protected:
     bool mTransparent;

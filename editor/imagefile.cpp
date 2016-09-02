@@ -105,3 +105,10 @@ bool ImageFile::isTransparent(const QImage& image)
 
     return useAlpha;
 }
+
+QStringList ImageFile::supportedFormats()
+{
+    QStringList formats;
+    formats << "png" << "xpm" << "jpg" << "jpeg" << "gif" << "svg" << "svgz" << "bmp";
+    return formats;
+}
