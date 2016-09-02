@@ -51,6 +51,7 @@ void GameObjectMetaType::init()
     mGameObjectMetaTypes.insert(DialogueBox, new GameObjectMetaType(DialogueBox, "DialogueBox", tr("Dialogue Box"), QIcon(":/media/talk-baloon.png")));
     mGameObjectMetaTypes.insert(Menu, new GameObjectMetaType(Menu, "Menu", tr("Menu")));
     mGameObjectMetaTypes.insert(MenuOption, new GameObjectMetaType(MenuOption, "MenuOption", tr("Menu Option")));
+    mGameObjectMetaTypes.insert(Sound, new GameObjectMetaType(Sound, "Sound", tr("Sound"), QIcon(":/media/sound.png")));
 
     //scene
     mGameObjectMetaTypes.insert(Scene, new GameObjectMetaType(Scene, "Scene", tr("Scene")));

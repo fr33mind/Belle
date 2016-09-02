@@ -13,8 +13,10 @@ public:
     enum Type {
         UnknownType=0,
         GameObject,
+        Scene,
+        Sound,
         //objects
-        Object,
+        Object=32,
         TextBox,
         Button,
         Image,
@@ -23,10 +25,8 @@ public:
         DialogueBox,
         Menu,
         MenuOption,
-        //scene
-        Scene,
         //actions
-        Action=64,
+        Action=128,
         Show,
         Hide,
         Wait,

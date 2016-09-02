@@ -27,6 +27,7 @@
 #include "change_background.h"
 #include "runscript.h"
 #include "changestate.h"
+#include "sound.h"
 
 void GameObjectFactory::init()
 {
@@ -46,6 +47,8 @@ GameObject* GameObjectFactory::createGameObject(GameObjectMetaType::Type type, c
         obj = createAction(type, data, parent);
     else if (type >= GameObjectMetaType::firstObjectType && type <= GameObjectMetaType::lastObjectType)
         obj = createObject(type, data, parent);
+    else if (type == GameObjectMetaType::Sound)
+        obj = data.isEmpty() ? new Sound("", parent) : new Sound(data, parent);
     else if (type == GameObjectMetaType::Scene)
         obj = createScene(data, parent);
 
