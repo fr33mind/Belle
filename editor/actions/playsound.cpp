@@ -29,8 +29,9 @@ PlaySound::PlaySound(const QVariantMap& data,QObject *parent) :
 {
     init();
 
-    if (data.contains("sound") && data.value("sound").type() == QVariant::String)
-        setSoundPath(data.value("sound").toString());
+    if (data.contains("sound") && data.value("sound").type() == QVariant::String) {
+        setSound(data.value("sound").toString());
+    }
 
     if (data.contains("volume") && data.value("volume").canConvert(QVariant::Int))
         mVolume = data.value("volume").toInt();
@@ -47,30 +48,35 @@ void PlaySound::init()
     mLoop = false;
 }
 
-void PlaySound::setSoundPath(const QString & path)
+void PlaySound::setSound(const QString& soundName)
 {
-    if (mSound && mSound->path() == path)
+    GameObject* obj = ResourceManager::instance()->object(soundName);
+    Sound* sound = qobject_cast<Sound*>(obj);
+    setSound(sound);
+}
+
+void PlaySound::setSound(Sound* sound)
+{
+    if (mSound == sound)
         return;
 
     if (mSound)
-        AssetManager::instance()->releaseAsset(mSound);
+        mSound->disconnect(this);
 
-    mSound = AssetManager::instance()->loadAsset(path, Asset::Audio);
-    emit dataChanged();
+    mSound = sound;
+    QString name;
+
+    if (mSound) {
+        connect(mSound, SIGNAL(destroyed()), this, SLOT(onSoundDestroyed()));
+        name = mSound->name();
+    }
+
+    setDisplayText(name);
 }
 
-QString PlaySound::soundPath()
+Sound* PlaySound::sound() const
 {
-    if (mSound)
-        return mSound->path();
-    return "";
-}
-
-QString PlaySound::soundName()
-{
-    if (mSound)
-        return mSound->name();
-    return "";
+    return mSound;
 }
 
 void PlaySound::setVolume(int vol)
@@ -102,15 +108,7 @@ QVariantMap PlaySound::toJsonObject(bool internal) const
     return action;
 }
 
-QString PlaySound::displayText() const
+void PlaySound::onSoundDestroyed()
 {
-    if (! mSound)
-        return "";
-
-    QString displayText = objectName();
-    if (! displayText.isEmpty())
-        displayText += ": ";
-    displayText += mSound->name();
-
-    return displayText;
+    setSound(0);
 }

@@ -18,22 +18,25 @@
 #define PLAYSOUND_H
 
 #include "action.h"
+#include "sound.h"
+
+class Sound;
 
 class PlaySound : public Action
 {
     Q_OBJECT
 
     int mVolume;
-    Asset* mSound;
+    Sound* mSound;
     bool mLoop;
 
 public:
     explicit PlaySound(QObject *parent = 0);
     PlaySound(const QVariantMap&, QObject *parent = 0);
 
-    void setSoundPath(const QString&);
-    QString soundPath();
-    QString soundName();
+    void setSound(const QString&);
+    void setSound(Sound*);
+    Sound* sound() const;
 
     void setVolume(int);
     int volume();
@@ -42,7 +45,9 @@ public:
     bool loop();
 
     virtual QVariantMap toJsonObject(bool internal=true) const;
-    virtual QString displayText() const;
+
+private slots:
+    void onSoundDestroyed();
 
 private:
    void init();
