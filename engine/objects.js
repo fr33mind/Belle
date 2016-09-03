@@ -1215,6 +1215,22 @@ Menu.prototype.getOptionAt = function(index)
   return null;
 }
 
+/************** Sound ************/
+
+function Sound(data, parent)
+{
+  GameObject.call(this, data, parent);
+  this.asset = data.asset || null;
+
+  if (data.asset) {
+    var assetManager = this.getGame().getAssetManager();
+    if (assetManager)
+      this.asset = assetManager.loadAsset(data.asset, "Audio");
+  }
+}
+
+belle.extend(Sound, GameObject);
+
 // Expose the public methods
 
 objects.Object = Object;
@@ -1226,6 +1242,7 @@ objects.DialogueBox = DialogueBox;
 objects.Button = Button;
 objects.MenuOption = MenuOption;
 objects.Menu = Menu;
+objects.Sound = Sound;
 
 }(belle));
 
