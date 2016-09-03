@@ -104,7 +104,8 @@
       }
     }
     else if (type == "audio" || type == "sound" || type == "music") {
-      asset = new buzz.sound(path, {
+      var src = data.sources ? this.getFilePaths(data.sources, type) : path;
+      asset = new buzz.sound(src, {
                       preload: true
                   });
       asset.bind('canplay error', function() {
@@ -226,6 +227,26 @@
     var path = this.typeToPath[type] ? this.typeToPath[type] : "";
     path = path.length ? path + "/" : path;
     return path + name;
+  }
+
+  AssetManager.prototype.getFilePaths = function(paths, type)
+  {
+    if (!(paths instanceof Array))
+      return;
+
+    var full_paths = [],
+        path = "";
+
+    for(var i=0; i < paths.length; i++) {
+        if (typeof paths[i] == "string")
+          path = paths[i];
+        else if (paths[i] instanceof Object && typeof paths[i].name == "string")
+          path = paths[i].name;
+
+        full_paths.push(this.getFilePath(path, type));
+    }
+
+    return full_paths;
   }
 
 belle.AssetManager = AssetManager;
