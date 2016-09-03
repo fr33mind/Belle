@@ -27,6 +27,7 @@
 #include "character_properties_widget.h"
 #include "objectgroup_editor_widget.h"
 #include "scene_editor_widget.h"
+#include "soundeditorwidget.h"
 
 static QHash<GameObjectMetaType::Type, GameObjectEditorWidget*> mEditorWidgets;
 
@@ -98,6 +99,8 @@ GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaTy
         return new ObjectGroupEditorWidget;
     else if (type == GameObjectMetaType::Menu)
         return new ObjectGroupEditorWidget;
+    else if (type == GameObjectMetaType::Sound)
+        return new SoundEditorWidget;
     //scene
     else if (type == GameObjectMetaType::Scene)
         return new SceneEditorWidget;
