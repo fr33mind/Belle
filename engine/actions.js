@@ -952,9 +952,6 @@ ChangeColor.prototype.onExecute = function()
 function PlaySound(data, parent)
 {
     Action.call(this, data, parent);
-    
-    this.soundPath = "";
-    this.soundName = "";
     this.sound = null;
     this.loop = false;
     this.formats = [];
@@ -962,14 +959,7 @@ function PlaySound(data, parent)
     var ext = "";
     
     if ( "sound" in data) {
-        this.soundPath = belle.game.directory + data["sound"];
-        this.soundName = this.soundPath;
-        if (this.soundPath.indexOf("/") !== -1) {
-            var parts = this.soundPath.split("/");
-            this.soundName = parts[parts.length-1];
-        }
-        if (this.soundName.indexOf(".") !== -1)
-            this.soundName = this.soundName.split(".")[0];
+        this.sound = this.getGame().getResource(data["sound"]);
     }
     
     if ("loop" in data) {
@@ -989,7 +979,7 @@ belle.extend(PlaySound, Action);
 
 PlaySound.prototype.onExecute = function()
 {   
-    if (! this.soundPath) {
+    if (! this.sound) {
         this.setFinished(true);
         return;
     }
@@ -999,8 +989,8 @@ PlaySound.prototype.onExecute = function()
         "volume" : this.volume
     }
     
-    this.getGame().playSound(this.soundPath, options);
-    
+    this.getGame().playSound(this.sound.asset, options);
+
     this.setFinished(true);
 }
 
@@ -1013,9 +1003,8 @@ function StopSound(data, parent)
     this.fade = 0;
     this.sound = null;
     
-    //can be the name of the file or the name of the action playing it
     if ( "sound" in data) 
-        this.soundPath = data["sound"];
+        this.sound = this.getGame().getResource(data["sound"]);
     
     if ("fade" in data && typeof data["fade"] === "number") 
         this.fade = data["fade"] * 1000;
@@ -1027,8 +1016,8 @@ belle.extend(StopSound, Action);
 StopSound.prototype.onExecute = function()
 {
     var game = this.getGame();
-    if (this.soundPath)
-        game.stopSound(this.soundPath, this.fade);
+    if (this.sound)
+        game.stopSound(this.sound.asset, this.fade);
     
     this.setFinished(true);
 }
