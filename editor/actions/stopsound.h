@@ -18,12 +18,15 @@
 #define STOP_StopSound_H
 
 #include "action.h"
+#include "sound.h"
+
+class Sound;
 
 class StopSound : public Action
 {
     Q_OBJECT
 
-   QString mSound;
+   Sound* mSound;
    double mFadeTime;
 
 public:
@@ -31,7 +34,8 @@ public:
     StopSound(const QVariantMap&, QObject *parent = 0);
 
     void setSound(const QString&);
-    QString sound();
+    void setSound(Sound*);
+    Sound* sound() const;
 
     double fadeTime();
     void setFadeTime(double);
@@ -40,7 +44,8 @@ public:
 
 signals:
 
-public slots:
+private slots:
+    void onSoundDestroyed();
 
 private:
     void init();

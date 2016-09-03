@@ -39,19 +39,37 @@ StopSound::StopSound(const QVariantMap& data,QObject *parent) :
 void StopSound::init()
 {
     setType(GameObjectMetaType::StopSound);
-    mSound = "";
+    mSound = 0;
     mFadeTime = 0;
 }
 
-void StopSound::setSound(const QString & sound)
+void StopSound::setSound(const QString & soundName)
 {
-    if (mSound != sound) {
-        mSound = sound;
-        setDisplayText(sound);
-    }
+    GameObject* obj = ResourceManager::instance()->object(soundName);
+    Sound* sound = qobject_cast<Sound*>(obj);
+    setSound(sound);
 }
 
-QString StopSound::sound()
+void StopSound::setSound(Sound* sound)
+{
+    if (mSound == sound)
+        return;
+
+    if (mSound)
+        mSound->disconnect(this);
+
+    mSound = sound;
+    QString name;
+
+    if (mSound) {
+        connect(mSound, SIGNAL(destroyed()), this, SLOT(onSoundDestroyed()));
+        name = mSound->name();
+    }
+
+    setDisplayText(name);
+}
+
+Sound* StopSound::sound() const
 {
     return mSound;
 }
@@ -70,10 +88,15 @@ QVariantMap StopSound::toJsonObject(bool internal) const
 {
     QVariantMap data = Action::toJsonObject(internal);
 
-    data.insert("sound", mSound);
+    data.insert("sound", mSound ? mSound->name() : "");
 
     if (mFadeTime > 0.0)
         data.insert("fadeTime", mFadeTime);
 
     return data;
+}
+
+void StopSound::onSoundDestroyed()
+{
+    setSound(0);
 }
