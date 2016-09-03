@@ -23,19 +23,19 @@
 StopSoundEditorWidget::StopSoundEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mSoundEdit = new QComboBox(this);
-    mSoundEdit->setEditable(true);
+    mSoundComboBox = new GameObjectComboBox(this);
+    mSoundComboBox->setIconsEnabled(true);
 
     mFadeOutSpinBox = new QDoubleSpinBox(this);
     mFadeOutSpinBox->setMaximum(10);
     mFadeOutSpinBox->setSingleStep(0.1);
 
     beginGroup(tr("Stop Sound Editor"));
-    appendRow(tr("Sound"), mSoundEdit);
+    appendRow(tr("Sound"), mSoundComboBox);
     appendRow(QString("%1 %2").arg(tr("Fade out duration")).arg("(s)") , mFadeOutSpinBox);
     endGroup();
 
-    connect(mSoundEdit, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onSoundChanged(const QString&)));
+    connect(mSoundComboBox, SIGNAL(objectChanged(GameObject*)), this, SLOT(onSoundChanged(GameObject*)));
     connect(mFadeOutSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onFadeChanged(double)));
 
     resizeColumnToContents(0);
@@ -48,32 +48,18 @@ void StopSoundEditorWidget::updateData(GameObject* action)
     if (! stopSound)
         return;
 
-    QString currSound = stopSound->sound();
-    QList<Asset*> sounds = AssetManager::instance()->assets(Asset::Audio);
-
-    mSoundEdit->clear();
-    if (! currSound.isEmpty())
-        mSoundEdit->addItem(currSound);
-
-    for(int i=0; i < sounds.size(); i++) {
-        if (sounds[i]->name() != stopSound->sound())
-            mSoundEdit->insertItem(i, sounds[i]->name());
-    }
-    mSoundEdit->setCurrentIndex(0);
+    QList<GameObject*> sounds = ResourceManager::instance()->objects(GameObjectMetaType::Sound);
+    mSoundComboBox->setObjects(sounds, stopSound->sound());
     mFadeOutSpinBox->setValue(stopSound->fadeTime());
-
-    if (stopSound->sound().isEmpty() && ! sounds.isEmpty())
-        stopSound->setSound(sounds.first()->name());
 }
 
-
-void StopSoundEditorWidget::onSoundChanged(const QString& text)
+void StopSoundEditorWidget::onSoundChanged(GameObject* sound)
 {
     StopSound * stopSound = qobject_cast<StopSound*>(mGameObject);
     if (! stopSound)
         return;
 
-    stopSound->setSound(text);
+    stopSound->setSound(qobject_cast<Sound*>(sound));
 }
 
 

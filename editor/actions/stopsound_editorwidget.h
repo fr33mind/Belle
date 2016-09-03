@@ -17,19 +17,20 @@
 #ifndef STOPSOUND_EDITORWIDGET_H
 #define STOPSOUND_EDITORWIDGET_H
 
-#include <QComboBox>
 #include <QDoubleSpinBox>
 
 #include "action_editor_widget.h"
 #include "stopsound.h"
+#include "gameobjectcombobox.h"
 
 class StopSound;
+class GameObjectComboBox;
 
 class StopSoundEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    QComboBox * mSoundEdit;
+    GameObjectComboBox* mSoundComboBox;
     QDoubleSpinBox* mFadeOutSpinBox;
 
 public:
@@ -43,7 +44,7 @@ signals:
 public slots:
 
 private slots:
-    void onSoundChanged(const QString&);
+    void onSoundChanged(GameObject*);
     void onFadeChanged(double);
 
 };
