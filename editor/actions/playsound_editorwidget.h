@@ -21,16 +21,17 @@
 #include <QCheckBox>
 
 #include "action_editor_widget.h"
-#include "choosefilebutton.h"
 #include "playsound.h"
+#include "gameobjectcombobox.h"
 
 class PlaySound;
+class GameObjectComboBox;
 
 class PlaySoundEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    ChooseFileButton* mChooseFileButton;
+    GameObjectComboBox* mSoundComboBox;
     QSlider * mVolumeSlider;
     QCheckBox* mLoopCheckBox;
 
@@ -43,7 +44,7 @@ protected:
     virtual void updateData(GameObject*);
 
 private slots:
-    void onFileSelected(const QString&);
+    void onSoundChanged(GameObject*);
     void onVolumeChanged(int);
     void onLoopToggled(bool);
 

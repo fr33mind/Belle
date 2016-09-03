@@ -21,18 +21,19 @@
 PlaySoundEditorWidget::PlaySoundEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mChooseFileButton = new ChooseFileButton(ChooseFileButton::SoundFilter, this);
+    mSoundComboBox = new GameObjectComboBox(this);
+    mSoundComboBox->setIconsEnabled(true);
     mVolumeSlider = new QSlider(Qt::Horizontal);
     mVolumeSlider->setMinimum(0);
     mVolumeSlider->setMaximum(100);
     mLoopCheckBox = new QCheckBox(this);
 
-    connect(mChooseFileButton, SIGNAL(fileSelected(const QString&)), this, SLOT(onFileSelected(const QString&)));
+    connect(mSoundComboBox, SIGNAL(objectChanged(GameObject*)), this, SLOT(onSoundChanged(GameObject*)));
     connect(mVolumeSlider, SIGNAL(valueChanged(int)), this, SLOT(onVolumeChanged(int)));
     connect(mLoopCheckBox, SIGNAL(toggled(bool)), this, SLOT(onLoopToggled(bool)));
 
     beginGroup(tr("Play Sound Action"));
-    appendRow(tr("Sound"), mChooseFileButton);
+    appendRow(tr("Sound"), mSoundComboBox);
     appendRow(tr("Volume"), mVolumeSlider);
     appendRow(tr("Loop"), mLoopCheckBox);
     endGroup();
@@ -45,16 +46,18 @@ void PlaySoundEditorWidget::updateData(GameObject* action)
     if (! playSound)
         return;
 
-    mChooseFileButton->setFilePath(playSound->soundPath());
+    QList<GameObject*> sounds = ResourceManager::instance()->objects(GameObjectMetaType::Sound);
+    mSoundComboBox->setObjects(sounds, playSound->sound());
     mVolumeSlider->setValue(playSound->volume());
     mLoopCheckBox->setChecked(playSound->loop());
 }
 
-void PlaySoundEditorWidget::onFileSelected(const QString & path)
+void PlaySoundEditorWidget::onSoundChanged(GameObject* sound)
 {
     PlaySound* playSound = qobject_cast<PlaySound*>(mGameObject);
-    if (playSound)
-        playSound->setSoundPath(path);
+    if (playSound) {
+        playSound->setSound(qobject_cast<Sound*>(sound));
+    }
 }
 
 void PlaySoundEditorWidget::onVolumeChanged(int vol)
