@@ -73,7 +73,7 @@
       this.currentFrame = this.frames[0];
 
     if (typeof loadCallback == "function")
-      loadCallback();
+      loadCallback.call(this);
   }
 
   belle.extend(AnimatedImage, Image);
