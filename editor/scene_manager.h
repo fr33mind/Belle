@@ -39,6 +39,7 @@ class SceneManager : public QObject
         virtual ~SceneManager();
         Scene* addScene(const QString& name="");
         void addScene(Scene*) ;
+        Scene* scene(const QString&) const;
         Scene* sceneAt(int);
         Scene* takeAt(int);
         void removeScenes(bool del);

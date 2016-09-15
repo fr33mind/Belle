@@ -141,6 +141,11 @@ Scene* SceneManager::sceneAt(int i)
     return qobject_cast<Scene*>(mGameObjectManager.objectAt(i));
 }
 
+Scene* SceneManager::scene(const QString & name) const
+{
+    return qobject_cast<Scene*>(mGameObjectManager.object(name));
+}
+
 Scene* SceneManager::takeAt(int i)
 {
     Scene* scene = qobject_cast<Scene*>(mGameObjectManager.takeAt(i));
