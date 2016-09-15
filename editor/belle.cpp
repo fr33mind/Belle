@@ -976,6 +976,7 @@ void Belle::openFileOrProject(QString filepath)
         }
     }
 
+    emit projectLoaded();
 }
 
 //Temporary function that will fix new sync property in old projects

@@ -71,6 +71,7 @@ class Belle : public QMainWindow
 
     signals:
         void newAction(Action*);
+        void projectLoaded();
 
     private slots:
         void onSceneItemClicked(QTreeWidgetItem *, int);
