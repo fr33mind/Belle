@@ -773,18 +773,22 @@ function GoToScene(data, parent)
 {
     Action.call(this, data, parent);
     
-    this.TargetType = {
-      "Name" : 0,
-      "Position": 1
+    this.MetaTarget = {
+      "None": 0,
+      "Name": 1,
+      "Next": 2,
+      "Previous": 3,
+      "First": 4,
+      "Last": 5
     }
     
     this.target = "";
     if ("target" in data && typeof data["target"] === "string")
         this.target = data["target"];
     
-    this.targetType = this.TargetType.Name;
-    if ("targetType" in data && parseInt(data["targetType"]) !== NaN)
-        this.targetType = data["targetType"];
+    this.metaTarget = this.MetaTarget.None;
+    if ("metaTarget" in data && belle.isNumber(data["metaTarget"]))
+        this.metaTarget = data["metaTarget"];
 }
 
 belle.extend(GoToScene, Action);
@@ -793,22 +797,18 @@ GoToScene.prototype.goto = function(target)
 {
    var gameModel = this.getGameModel();
 
-   if (this.targetType == this.TargetType.Position) {
-     target = target.toLowerCase();
-     if(target == "next")
-       gameModel.setNextScene(gameModel.indexOf(gameModel.getScene())+1);
-     else if(target  == "previous")
-       gameModel.setNextScene(gameModel.indexOf(gameModel.getScene())-1);
-     else if (target == "first")
-       gameModel.setNextScene(0);
-     else if (target == "last")
-       gameModel.setNextScene(gameModel.getSize()-1);
-     else
-       return;
-   }
-   else {
-     gameModel.setNextScene(target);
-   }
+    if(this.metaTarget == this.MetaTarget.Next)
+      gameModel.setNextScene(gameModel.indexOf(gameModel.getScene())+1);
+    else if(this.metaTarget == this.MetaTarget.Previous)
+      gameModel.setNextScene(gameModel.indexOf(gameModel.getScene())-1);
+    else if (this.metaTarget == this.MetaTarget.First)
+      gameModel.setNextScene(0);
+    else if (this.metaTarget == this.MetaTarget.Last)
+      gameModel.setNextScene(gameModel.getSize()-1);
+    else if (target)
+      gameModel.setNextScene(target);
+    else
+      return;
 
    gameModel.nextScene();
    this.setFinished(true);
