@@ -1246,7 +1246,14 @@ bool Object::keepAspectRatio()
 
 void Object::setKeepAspectRatio(bool keep)
 {
+    if (mKeepAspectRatio == keep)
+        return;
+
     mKeepAspectRatio = keep;
+
+    if (mKeepAspectRatio && type() != GameObjectMetaType::Image)
+        updateAspectRatio();
+
     if (mKeepAspectRatio && mAspectRatio != 1) {
         int w = width();
         int h = round(w/mAspectRatio);
