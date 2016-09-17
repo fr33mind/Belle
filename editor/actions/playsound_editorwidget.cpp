@@ -15,13 +15,14 @@
  */
 
 #include "playsound_editorwidget.h"
+#include "soundresourcecombobox.h"
 
 #include <QtDebug>
 
 PlaySoundEditorWidget::PlaySoundEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mSoundComboBox = new GameObjectComboBox(this);
+    mSoundComboBox = new SoundResourceComboBox(this);
     mSoundComboBox->setIconsEnabled(true);
     mVolumeSlider = new QSlider(Qt::Horizontal);
     mVolumeSlider->setMinimum(0);

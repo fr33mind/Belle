@@ -19,11 +19,12 @@
 #include <QDebug>
 
 #include "resource_manager.h"
+#include "soundresourcecombobox.h"
 
 StopSoundEditorWidget::StopSoundEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mSoundComboBox = new GameObjectComboBox(this);
+    mSoundComboBox = new SoundResourceComboBox(this);
     mSoundComboBox->setIconsEnabled(true);
 
     mFadeOutSpinBox = new QDoubleSpinBox(this);
