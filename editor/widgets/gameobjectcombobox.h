@@ -12,11 +12,15 @@ class GameObjectComboBox : public QComboBox
     Q_OBJECT
 public:
     explicit GameObjectComboBox(QWidget *parent = 0);
+    void addObjects(const QList<GameObject*>&);
     void setObjects(const QList<GameObject*>&, GameObject* selectedObject=0);
     void insertObject(int, GameObject*);
     void addObject(GameObject*);
     void clear();
+    void setCurrentObject(GameObject*);
     GameObject* currentObject() const;
+    void removeObject(GameObject*);
+    void removeItem(int);
 
     void setIconsEnabled(bool);
     bool hasIconsEnabled() const;
@@ -37,7 +41,6 @@ private slots:
     void objectDestroyed(GameObject*);
 
 private:
-    QList<GameObject*> mObjects;
     bool mIconsEnabled;
     bool mTypeFilterActive;
     GameObjectMetaType::Type mTypeFilter;
