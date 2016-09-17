@@ -138,7 +138,8 @@ HEADERS      += belle.h\
     soundasset.h \
     widgets/filecombobox.h \
     objects/soundeditorwidget.h \
-    widgets/gameobjectcombobox.h
+    widgets/gameobjectcombobox.h \
+    widgets/soundresourcecombobox.h
                 
 
 SOURCES      += main.cpp\
@@ -259,6 +260,7 @@ SOURCES      += main.cpp\
     utils.cpp \
     widgets/filecombobox.cpp \
     objects/soundeditorwidget.cpp \
-    widgets/gameobjectcombobox.cpp
+    widgets/gameobjectcombobox.cpp \
+    widgets/soundresourcecombobox.cpp
 
 RESOURCES += media.qrc
