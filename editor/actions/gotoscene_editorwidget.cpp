@@ -22,17 +22,17 @@
 GoToSceneEditorWidget::GoToSceneEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mSceneEdit = new QComboBox(this);
-    mSceneEdit->addItem(tr("Next"), QVariant(GoToScene::Position));
-    mSceneEdit->addItem(tr("Previous"), QVariant(GoToScene::Position));
-    mSceneEdit->addItem(tr("First"), QVariant(GoToScene::Position));
-    mSceneEdit->addItem(tr("Last"), QVariant(GoToScene::Position));
-    mSceneEdit->insertSeparator(5);
+    mSceneComboBox = new GameObjectComboBox(this);
+    mSceneComboBox->addItem(tr("Next"), QVariant(GoToScene::Next));
+    mSceneComboBox->addItem(tr("Previous"), QVariant(GoToScene::Previous));
+    mSceneComboBox->addItem(tr("First"), QVariant(GoToScene::First));
+    mSceneComboBox->addItem(tr("Last"), QVariant(GoToScene::Last));
+    mSceneComboBox->insertSeparator(5);
 
-    connect(mSceneEdit, SIGNAL(currentIndexChanged(int)), this, SLOT(onSceneChanged(int)));
+    connect(mSceneComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onSceneChanged(int)));
 
     beginGroup(tr("Go to scene Editor"));
-    appendRow(tr("Scene"), mSceneEdit);
+    appendRow(tr("Scene"), mSceneComboBox);
     endGroup();
 
     resizeColumnToContents(0);
@@ -47,26 +47,26 @@ void GoToSceneEditorWidget::updateData(GameObject* action)
         return;
 
     //remove all scenes for update
-    for(int i=mSceneEdit->count()-1; i > 4; i--)
-        mSceneEdit->removeItem(i);
+    for(int i=mSceneComboBox->count()-1; i > 4; i--)
+        mSceneComboBox->removeItem(i);
 
     Scene * scene = goToScene->scene();
     if (scene && scene->sceneManager()) {
         QList<Scene*> scenes = scene->sceneManager()->scenes();
-        for(int i=0; i < scenes.size(); i++) {
-            mSceneEdit->addItem(scenes[i]->objectName(), QVariant(GoToScene::Name));
+        foreach(Scene* scene, scenes) {
+            mSceneComboBox->addObject(scene);
         }
     }
 
-    QString currScene = goToScene->targetScene();
-    int i=0;
-    for(; i < mSceneEdit->count(); i++) {
-        if (mSceneEdit->itemText(i) == currScene)
-            break;
+    Scene* targetScene = goToScene->targetScene();
+    if (targetScene) {
+        mSceneComboBox->setCurrentObject(targetScene);
     }
-
-    if (i >= 0 && i < mSceneEdit->count())
-        mSceneEdit->setCurrentIndex(i);
+    else {
+        int mtarget = static_cast<int>(goToScene->metaTarget());
+        int index = mSceneComboBox->findData(mtarget);
+        mSceneComboBox->setCurrentIndex(index);
+    }
 }
 
 void GoToSceneEditorWidget::onSceneChanged(int index)
@@ -75,8 +75,10 @@ void GoToSceneEditorWidget::onSceneChanged(int index)
     if (! goToScene)
         return;
 
-    QString name = mSceneEdit->itemText(index);
-    QVariant data = mSceneEdit->itemData(index);
+    QVariant data = mSceneComboBox->itemData(index);
 
-    goToScene->setTargetScene(name, static_cast<GoToScene::TargetType>(data.toInt()));
+    if (index < 4)
+        goToScene->setMetaTarget(static_cast<GoToScene::MetaTarget>(data.toInt()));
+    else
+        goToScene->setTargetScene(data.value<Scene*>());
 }

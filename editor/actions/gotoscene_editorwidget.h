@@ -17,18 +17,18 @@
 #ifndef GOTOSCENE_EDITORWIDGET_H
 #define GOTOSCENE_EDITORWIDGET_H
 
-#include <QComboBox>
-
 #include "action_editor_widget.h"
 #include "gotoscene.h"
+#include "gameobjectcombobox.h"
 
 class GoToScene;
+class GameObjectComboBox;
 
 class GoToSceneEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    QComboBox* mSceneEdit;
+    GameObjectComboBox* mSceneComboBox;
 
 public:
     explicit GoToSceneEditorWidget(QWidget *parent = 0);

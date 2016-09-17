@@ -18,36 +18,57 @@
 #define GOTOSCENE_H
 
 #include "action.h"
+#include "scene.h"
+
+class Scene;
 
 class GoToScene : public Action
 {
     Q_OBJECT
 
 public:
-    enum TargetType {
-        Name=0,
-        Position
+    enum MetaTarget {
+        None=0,
+        Name,
+        Next,
+        Previous,
+        First,
+        Last
     };
 
 public:
     explicit GoToScene(QObject *parent = 0);
     GoToScene(const QVariantMap&, QObject *parent);
 
-    void setTargetScene(const QString&, TargetType type=Name);
-    QString targetScene();
+    void setMetaTarget(MetaTarget);
+    MetaTarget metaTarget() const;
+
+    void setTargetScene(const QString&);
+    void setTargetScene(Scene*);
+    Scene* targetScene() const;
+    QString targetSceneName() const;
 
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
+    static QString metaTargetString(MetaTarget);
+    static MetaTarget metaTargetFromString(const QString&);
 
 signals:
 
 public slots:
 
+private slots:
+    void updateTargetScene();
+    void removeTargetScene();
+    void onTargetSceneNameChanged(const QString&);
+
 private:
     void init();
+    void updateDisplayText();
 
-    QString mTargetScene;
-    TargetType mTargetType;
+    QString mTargetSceneName;
+    Scene* mTargetScene;
+    MetaTarget mMetaTarget;
 
 };
 
