@@ -47,6 +47,7 @@ void SceneManager::insertScene(int index, Scene * scene)
 
     removeScene(scene);
 
+    scene->setParent(this);
     connect(scene, SIGNAL(nameChanged(const QString&)), this, SLOT(onSceneNameChanged(const QString&)), Qt::UniqueConnection);
     connect(scene, SIGNAL(dataChanged()), this, SIGNAL(updateDrawingSurfaceWidget()), Qt::UniqueConnection);
     connect(scene, SIGNAL(selectionChanged(Object*)), this, SIGNAL(selectionChanged(Object*)), Qt::UniqueConnection);
