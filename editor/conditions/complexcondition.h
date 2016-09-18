@@ -15,10 +15,13 @@ public:
     void addCondition(ConditionLogicalOperator::Type, AbstractCondition*);
     QList<AbstractCondition*> conditions() const;
     AbstractCondition* conditionAt(int) const;
+    ConditionToken* tokenAt(int) const;
+    int indexOfToken(ConditionToken*) const;
     bool removeCondition(AbstractCondition*, bool del=false);
     void setCondition(AbstractCondition*);
     void clear(bool del=false);
     QList<ConditionToken*> tokens() const;
+    bool isEmpty() const;
     virtual QString toString() const;
     virtual bool setValue(const QVariant &);
     virtual QVariant value() const;

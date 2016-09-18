@@ -57,6 +57,23 @@ AbstractCondition* ComplexCondition::conditionAt(int index) const
     return 0;
 }
 
+ConditionToken* ComplexCondition::tokenAt(int index) const
+{
+    if (index >= 0 && index < mTokens.size())
+        return mTokens.at(index);
+    return 0;
+}
+
+int ComplexCondition::indexOfToken(ConditionToken * token) const
+{
+    for(int i=0; i < mTokens.size(); i++) {
+        if (mTokens.at(i) == token)
+            return i;
+    }
+
+    return -1;
+}
+
 bool ComplexCondition::removeCondition(AbstractCondition * cond, bool del)
 {
     ConditionToken* token = static_cast<AbstractCondition*>(cond);
@@ -128,6 +145,11 @@ QString ComplexCondition::toString() const
 QList<ConditionToken*> ComplexCondition::tokens() const
 {
     return mTokens;
+}
+
+bool ComplexCondition::isEmpty() const
+{
+    return mTokens.isEmpty();
 }
 
 void ComplexCondition::cleanup(int index)
