@@ -47,6 +47,7 @@ ConditionWidget::ConditionWidget(ComplexCondition* condition, QWidget *parent) :
     setItemDelegate(new ConditionWidgetDelegate(this));
     setCondition(condition);
     setContextMenuPolicy(Qt::ActionsContextMenu);
+    mSelectedCondition = 0;
 
     QAction* deleteAction = new QAction(QIcon(":/media/delete.png"), tr("Delete"), this);
     deleteAction->setShortcut(QKeySequence::Delete);
@@ -109,6 +110,23 @@ void ConditionWidget::appendCondition(SimpleCondition* condition)
     appendCondition(ConditionLogicalOperator::And, condition);
 }
 
+QStandardItem* ConditionWidget::itemForCondition(AbstractCondition * condition)
+{
+    QHashIterator<QStandardItem*, AbstractCondition*> it(mItemToCondition);
+    while(it.hasNext()) {
+        it.next();
+        if (it.value() == condition)
+            return it.key();
+    }
+
+    return 0;
+}
+
+void ConditionWidget::reload()
+{
+    initFromCondition(mCondition);
+}
+
 void ConditionWidget::onDeleteTriggered()
 {
     QModelIndexList indexes = selectedIndexes();
@@ -124,11 +142,33 @@ void ConditionWidget::onDeleteTriggered()
         }
     }
 
-    initFromCondition(mCondition);
+    reload();
 }
 
 void ConditionWidget::clear()
 {
     mModel->clear();
     mItemToCondition.clear();
+    setCurrentIndex(QModelIndex());
+    if (mSelectedCondition) {
+        mSelectedCondition = 0;
+        emit selectedConditionChanged(mSelectedCondition);
+    }
+}
+
+void ConditionWidget::mouseReleaseEvent(QMouseEvent * event)
+{
+    QModelIndex index = indexAt(event->pos());
+    QListView::mouseReleaseEvent(event);
+    if (!index.isValid())
+        setCurrentIndex(QModelIndex());
+}
+
+void ConditionWidget::currentChanged(const QModelIndex & current, const QModelIndex & previous)
+{
+    QListView::currentChanged(current, previous);
+    QModelIndex index = currentIndex();
+    QStandardItem* item = mModel->itemFromIndex(index);
+    mSelectedCondition = mItemToCondition.value(item);
+    emit selectedConditionChanged(mSelectedCondition);
 }

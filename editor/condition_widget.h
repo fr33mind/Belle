@@ -51,11 +51,20 @@ public:
     void appendCondition(ConditionLogicalOperator::Type, SimpleCondition*);
     void setCondition(ComplexCondition*);
     void initFromCondition(ComplexCondition*);
+    QStandardItem* itemForCondition(AbstractCondition*);
+    void reload();
     
 protected:
     void clear();
+    virtual void mouseReleaseEvent(QMouseEvent*);
+
+signals:
+    void selectedConditionChanged(AbstractCondition*);
 
 public slots:
+
+protected slots:
+    virtual void currentChanged(const QModelIndex &, const QModelIndex &);
 
 private slots:
     void onDeleteTriggered();
@@ -64,6 +73,7 @@ private:
     QStandardItemModel* mModel;
     ComplexCondition* mCondition;
     QHash<QStandardItem*, AbstractCondition*> mItemToCondition;
+    AbstractCondition* mSelectedCondition;
 };
 
 #endif // Condition_WIDGET_H

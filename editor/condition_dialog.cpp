@@ -28,6 +28,7 @@
 #include <QStandardItem>
 #include <QDialogButtonBox>
 #include <QComboBox>
+#include <QApplication>
 
 #include "condition_widget.h"
 #include "utils.h"
@@ -36,6 +37,7 @@ ConditionDialog::ConditionDialog(ComplexCondition* condition, QWidget *parent) :
     QDialog(parent)
 {
     mCondition = condition;
+    mEditingCondition = 0;
     mVariableValidator = new VariableValidator(this);
     QVBoxLayout* vlayout1 = 0, * vlayout2 = 0;
     setWindowTitle(tr("Edit Condition"));
@@ -46,6 +48,7 @@ ConditionDialog::ConditionDialog(ComplexCondition* condition, QWidget *parent) :
     setLayout(mainLayout);
 
     mConditionWidget = new ConditionWidget(condition, this);
+    connect(mConditionWidget, SIGNAL(selectedConditionChanged(AbstractCondition*)), this, SLOT(setEditingCondition(AbstractCondition*)));
 
     //Create logical operator ComboBox
     mLogicalOperators = new QComboBox(this);
@@ -92,7 +95,8 @@ ConditionDialog::ConditionDialog(ComplexCondition* condition, QWidget *parent) :
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     //create add button
-    mAddButton = new QPushButton(QIcon(":/media/add.png"), "", this);
+    mAddIcon = QIcon(":/media/add.png");
+    mAddButton = new QPushButton(mAddIcon, "", this);
     mAddButton->setEnabled(false);
     connect(mAddButton, SIGNAL(clicked()), this, SLOT(onAddClicked()));
 
@@ -138,17 +142,32 @@ void ConditionDialog::onAddClicked()
         right = SimpleConditionToken(type, mRightMemberEdit->text());
     }
 
-    SimpleCondition* condition = new SimpleCondition(left, op, right);
-    if (mLogicalOperators->isVisible()) {
-        ConditionLogicalOperator::Type lop = (ConditionLogicalOperator::Type) mLogicalOperators->currentData().toInt();
-        mConditionWidget->appendCondition(lop, condition);
+    if (editMode() && mEditingCondition) {
+        if (mLogicalOperators->isVisible()) {
+            ConditionLogicalOperator::Type lop = (ConditionLogicalOperator::Type) mLogicalOperators->currentData().toInt();
+            ConditionToken* token = editingLogicalOperator();
+            if (token)
+                token->setValue(lop);
+        }
+
+        mEditingCondition->setLeftOperand(left);
+        mEditingCondition->setOperation(op);
+        mEditingCondition->setRightOperand(right);
+        mConditionWidget->reload();
     }
     else {
-        mConditionWidget->appendCondition(condition);
-    }
+        SimpleCondition* condition = new SimpleCondition(left, op, right);
+        if (mLogicalOperators->isVisible()) {
+            ConditionLogicalOperator::Type lop = (ConditionLogicalOperator::Type) mLogicalOperators->currentData().toInt();
+            mConditionWidget->appendCondition(lop, condition);
+        }
+        else {
+            mConditionWidget->appendCondition(condition);
+        }
 
-    if (mLogicalOperators->isHidden())
-        mLogicalOperators->setVisible(true);
+        if (mLogicalOperators->isHidden())
+            mLogicalOperators->setVisible(true);
+    }
 }
 
 void ConditionDialog::onCurrentOperatorChanged(int index)
@@ -235,4 +254,130 @@ void ConditionDialog::setLineEditType(QLineEdit * lineEdit, LineEditType type)
             break;
         default: break;
     }
+}
+
+void ConditionDialog::setDataType(QComboBox * combobox, ConditionTokenMetaType::Type type)
+{
+    int index = combobox->findData(QVariant(static_cast<int>(type)));
+    combobox->setCurrentIndex(index);
+}
+
+void ConditionDialog::setCurrentOperation(ConditionOperation::Type type)
+{
+    int index = mOperationsComboBox->findData(QVariant(static_cast<int>(type)));
+    mOperationsComboBox->setCurrentIndex(index);
+}
+
+void ConditionDialog::setCurrentLogicalOperator(int type)
+{
+    int index = mLogicalOperators->findData(QVariant(type));
+    mLogicalOperators->setCurrentIndex(index);
+}
+
+void ConditionDialog::setCurrentLogicalOperator(ConditionLogicalOperator::Type type)
+{
+    setCurrentLogicalOperator(static_cast<int>(type));
+}
+
+void ConditionDialog::reset()
+{
+    mEditingCondition = 0;
+    setEditMode(false);
+
+    if (mCondition && !mCondition->isEmpty()) {
+        mLogicalOperators->setVisible(true);
+        setCurrentLogicalOperator(ConditionLogicalOperator::And);
+    }
+    else
+        mLogicalOperators->setVisible(false);
+
+    mLeftMemberEdit->setText("");
+    mRightMemberEdit->setText("");
+    mOperationsComboBox->setCurrentIndex(0);
+    setDataType(mDataType1Chooser, ConditionTokenMetaType::Variable);
+    setDataType(mDataType2Chooser, ConditionTokenMetaType::Value);
+}
+
+void ConditionDialog::setEditingCondition(AbstractCondition * condition)
+{
+    if (!mCondition)
+        return;
+
+    if (!condition) {
+        reset();
+        return;
+    }
+
+    SimpleCondition* scondition = dynamic_cast<SimpleCondition*>(condition);
+    if (!scondition)
+        return;
+
+    mEditingCondition = scondition;
+
+    int index = mCondition->indexOfToken(condition);
+    if (index == 0)
+        mLogicalOperators->setVisible(false);
+    else if (index > 0) {
+        mLogicalOperators->setVisible(true);
+        ConditionToken* token = mCondition->tokenAt(index-1);
+        if (token && token->type() == ConditionTokenMetaType::LogicalOperator) {
+            setCurrentLogicalOperator(token->value().toInt());
+        }
+    }
+
+    ConditionToken leftToken = scondition->leftOperand();
+    ConditionOperation::Type op = scondition->operation();
+    ConditionToken rightToken = scondition->rightOperand();
+
+    mLeftMemberEdit->setText(leftToken.value().toString());
+    setDataType(mDataType1Chooser, leftToken.type());
+    setCurrentOperation(op);
+    mRightMemberEdit->setText(rightToken.value().toString());
+    setDataType(mDataType2Chooser, rightToken.type());
+
+    setEditMode(true);
+}
+
+AbstractCondition* ConditionDialog::editingCondition() const
+{
+    return mEditingCondition;
+}
+
+ConditionToken* ConditionDialog::editingLogicalOperator() const
+{
+    if (!mCondition)
+        return 0;
+
+    int index = mCondition->indexOfToken(mEditingCondition);
+    return mCondition->tokenAt(index-1);
+}
+
+void ConditionDialog::setEditMode(bool edit)
+{
+    if (mEditMode == edit)
+        return;
+
+    if (edit) {
+        mLeftMemberEdit->setStyleSheet(QString("background-color: %1").arg(EDIT_BG_COLOR));
+        mRightMemberEdit->setStyleSheet(QString("background-color: %1").arg(EDIT_BG_COLOR));
+        QIcon icon = QApplication::style()->standardIcon(QStyle::SP_DialogApplyButton);
+        mAddButton->setIcon(icon);
+        mAddButton->setEnabled(true);
+    }
+    else {
+        mLeftMemberEdit->setStyleSheet("");
+        mRightMemberEdit->setStyleSheet("");
+        mAddButton->setIcon(mAddIcon);
+    }
+}
+
+bool ConditionDialog::editMode() const
+{
+    return mEditMode;
+}
+
+void ConditionDialog::showEvent(QShowEvent * event)
+{
+    reset();
+    QDialog::showEvent(event);
 }

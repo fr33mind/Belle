@@ -24,6 +24,8 @@
 #include "complexcondition.h"
 #include "variablevalidator.h"
 
+#define EDIT_BG_COLOR "#FFE51A"
+
 class ConditionWidget;
 class ComplexCondition;
 class VariableValidator;
@@ -40,8 +42,20 @@ class ConditionDialog : public QDialog
 public:
     explicit ConditionDialog(ComplexCondition*, QWidget *parent = 0);
 
+protected:
+    virtual void showEvent(QShowEvent *);
+
 private:
     void setLineEditType(QLineEdit*, LineEditType);
+    void setDataType(QComboBox*, ConditionTokenMetaType::Type);
+    void setCurrentOperation(ConditionOperation::Type);
+    void setCurrentLogicalOperator(int);
+    void setCurrentLogicalOperator(ConditionLogicalOperator::Type);
+    void setEditMode(bool);
+    bool editMode() const;
+    AbstractCondition* editingCondition() const;
+    ConditionToken* editingLogicalOperator() const;
+    void reset();
     
 signals:
     
@@ -51,6 +65,7 @@ private slots:
     void onLeftMemberEdited(const QString&);
     void onRightMemberEdited(const QString&);
     void onTypeChanged(int);
+    void setEditingCondition(AbstractCondition*);
 
 private:
     ConditionWidget* mConditionWidget;
@@ -66,6 +81,9 @@ private:
     QComboBox* mDataType2Chooser;
     VariableValidator* mVariableValidator;
     ComplexCondition* mCondition;
+    SimpleCondition* mEditingCondition;
+    bool mEditMode;
+    QIcon mAddIcon;
 };
 
 #endif // Condition_DIALOG_H
