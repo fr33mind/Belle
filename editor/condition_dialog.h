@@ -77,6 +77,7 @@ private:
     QRadioButton * mOrRadioButton;
     QComboBox * mLogicalOperators;
     QPushButton* mAddButton;
+    QPushButton* mOkButton;
     QComboBox* mDataType1Chooser;
     QComboBox* mDataType2Chooser;
     VariableValidator* mVariableValidator;

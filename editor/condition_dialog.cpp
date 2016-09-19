@@ -93,6 +93,7 @@ ConditionDialog::ConditionDialog(ComplexCondition* condition, QWidget *parent) :
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    mOkButton = buttonBox->button(QDialogButtonBox::Ok);
 
     //create add button
     mAddIcon = QIcon(":/media/add.png");
@@ -167,6 +168,8 @@ void ConditionDialog::onAddClicked()
 
         if (mLogicalOperators->isHidden())
             mLogicalOperators->setVisible(true);
+
+        reset();
     }
 }
 
@@ -198,6 +201,8 @@ void ConditionDialog::onLeftMemberEdited(const QString & text)
         mAddButton->setEnabled(true);
     else
         mAddButton->setEnabled(false);
+
+    mAddButton->setDefault(mAddButton->isEnabled());
 }
 
 void ConditionDialog::onRightMemberEdited(const QString & text)
@@ -214,6 +219,8 @@ void ConditionDialog::onRightMemberEdited(const QString & text)
     }
     else
          mAddButton->setEnabled(false);
+
+    mAddButton->setDefault(mAddButton->isEnabled());
 }
 
 void ConditionDialog::onTypeChanged(int index)
@@ -296,6 +303,8 @@ void ConditionDialog::reset()
     mOperationsComboBox->setCurrentIndex(0);
     setDataType(mDataType1Chooser, ConditionTokenMetaType::Variable);
     setDataType(mDataType2Chooser, ConditionTokenMetaType::Value);
+    mAddButton->setDisabled(true);
+    mOkButton->setDefault(true);
 }
 
 void ConditionDialog::setEditingCondition(AbstractCondition * condition)
