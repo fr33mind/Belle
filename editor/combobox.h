@@ -22,40 +22,62 @@
 #include <QIcon>
 #include <QStyledItemDelegate>
 #include <QDialog>
+#include <QStandardItemModel>
+
+#define INVALID_DATA "__INVALID__"
+
+class QStandardItemModel;
 
 class ComboBoxItemDelegate : public QStyledItemDelegate
 {
    Q_OBJECT
 
    QIcon mDeleteIcon;
+   QStyleOptionViewItem mLastStyleOption;
+   QModelIndex mLastIndex;
 
 public:
-    explicit ComboBoxItemDelegate(QObject* parent = 0);
-    bool editorEvent (QEvent * event, QAbstractItemModel * model, const QStyleOptionViewItem & option, const QModelIndex & index);
+    ComboBoxItemDelegate(QObject* parent, QComboBox* cmb);
+    virtual bool editorEvent (QEvent * event, QAbstractItemModel * model, const QStyleOptionViewItem & option, const QModelIndex & index);
     void paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    virtual QSize sizeHint(const QStyleOptionViewItem &, const QModelIndex &) const;
+    bool mouseReleased(QEvent*);
+
+    static bool isSeparator(const QModelIndex &index) {
+        return index.data(Qt::AccessibleDescriptionRole).toString() == QLatin1String("separator");
+    }
+    static void setSeparator(QAbstractItemModel *model, const QModelIndex &index) {
+        model->setData(index, QString::fromLatin1("separator"), Qt::AccessibleDescriptionRole);
+        if (QStandardItemModel *m = qobject_cast<QStandardItemModel*>(model))
+            if (QStandardItem *item = m->itemFromIndex(index))
+                item->setFlags(item->flags() & ~(Qt::ItemIsSelectable|Qt::ItemIsEnabled));
+    }
 
 signals:
     void removeItem(int);
+
+private:
+    QStyleOptionMenuItem getStyleOption(const QStyleOptionViewItem &option,
+                                        const QModelIndex &index) const;
+    QComboBox *mCombo;
 };
 
 
 class ComboBox : public QComboBox
 {
-    bool mHidePopup;
-    QDialog *mDialog;
-    QString mDefaultValue;
+    QString mDefaultText;
+    ComboBoxItemDelegate* mItemDelegate;
 
     Q_OBJECT
 
 public:
-    explicit ComboBox(QWidget *parent = 0, const QString& defaultValue="");
+    explicit ComboBox(QWidget *parent = 0, const QString& defaultText="");
     void addItem(const QIcon &icon, const QString &text, const QVariant &userData=QVariant());
     void addItem(const QString &text, const QVariant &userData=QVariant());
     virtual bool eventFilter(QObject *, QEvent *);
     void removeItem(int);
-    void setDialog(QDialog*);
-    void setDefaultValue(const QString&);
-    //bool event(QEvent *event);
+    void setDefaultText(const QString&);
+    QString defaultText() const;
     virtual void wheelEvent(QWheelEvent *);
 
 signals:
@@ -68,25 +90,6 @@ public slots:
     void onRemoveItem(int);
     void onItemActivated(int);
     void clear();
-
 };
-
-
-/*class ActionComboBox : public ComboBox
-{
-    Events::InputEvent mInputEvent;
-
-    public:
-        ActionComboBox(Events::InputEvent event, QWidget *parent = 0):
-            ComboBox(parent)
-        {
-            mInputEvent = event;
-        }
-
-        Events::InputEvent event()
-        {
-            return mInputEvent;
-        }
-};*/
 
 #endif // COMBOBOX_H
