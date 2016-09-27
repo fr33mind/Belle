@@ -183,6 +183,11 @@ void Scene::_appendObject(Object* object, bool temporary)
     if (! object)
         return;
 
+    if (object->x() < 0)
+        object->setX(0);
+    if (object->y() < 0)
+        object->setY(0);
+
     if (temporary) {
         mTemporaryObjectManager.add(object);
     }

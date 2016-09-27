@@ -36,6 +36,7 @@ Button::Button(const QString&text, QObject *parent, const QString& name) :
 Button::Button(const QVariantMap& data, QObject *parent) :
     TextBox(data, parent)
 {
+    initRect(data);
     setType(GameObjectMetaType::Button);
 }
 
@@ -54,10 +55,7 @@ void Button::init()
     setBorderWidth(1);
     setType(GameObjectMetaType::Button);
 
-    int width = Scene::width();
-    int height = Scene::height();
-    setWidth(width/4);
-    setHeight(height/9);
+    initRect();
 
     ChangeColor *changeColor = new ChangeColor(this);
     changeColor->setColor(QColor(Qt::white));
@@ -65,6 +63,19 @@ void Button::init()
     changeColor->setChangeObjectBackgroundColor(true);
     appendEventAction(Interaction::MouseMove, changeColor);
     setText(tr("Button"));
+}
+
+void Button::initRect(const QVariantMap &data)
+{
+    if (!data.contains("width") && !data.contains("height")) {
+        setWidth(Scene::width()/4);
+        setHeight(Scene::height()/9);
+    }
+
+    if (!data.contains("x") && !data.contains("y")) {
+        setX(Scene::width()/2 - width()/2);
+        setY(Scene::height()/2 - height()/2);
+    }
 }
 
 void Button::move(int x, int y)

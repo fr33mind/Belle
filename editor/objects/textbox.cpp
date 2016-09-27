@@ -23,25 +23,19 @@
 TextBox::TextBox(QObject *parent, const QString& name) :
     Object(parent, name)
 {
-    mSceneRect.setY(Scene::height()-(Scene::height()/3));
-    mSceneRect.setHeight(Scene::height()/3);
-    mSceneRect.setWidth(Scene::width());
     init("");
 }
 
 TextBox::TextBox(const QString& text, QObject* parent, const QString& name) :
     Object(parent, name)
 {
-    mSceneRect.setY(Scene::height()-(Scene::height()/3));
-    mSceneRect.setHeight(Scene::height()/3);
-    mSceneRect.setWidth(Scene::width());
     init(text);
 }
 
 TextBox::TextBox(const QVariantMap & data, QObject * parent):
     Object(data, parent)
 {
-    init("");
+    init("", data);
     _load(data);
 }
 
@@ -103,7 +97,7 @@ void TextBox::load(const QVariantMap& data)
     this->_load(data);
 }
 
-void TextBox::init(const QString& text)
+void TextBox::init(const QString& text, const QVariantMap &data)
 {
     mText = text;
     setTextColor(QColor(Qt::black));
@@ -113,6 +107,21 @@ void TextBox::init(const QString& text)
     setType(GameObjectMetaType::TextBox);
     mFont.setFamily(Object::defaultFontFamily());
     mFont.setPixelSize(Object::defaultFontSize());
+
+    initRect(data);
+}
+
+void TextBox::initRect(const QVariantMap & data)
+{
+    if (!data.contains("width") && !data.contains("height")) {
+        setHeight(Scene::height()/3);
+        setWidth(Scene::width());
+    }
+
+    if (!data.contains("x") && !data.contains("y")) {
+        setX(0);
+        setY(Scene::height()-(Scene::height()/3));
+    }
 }
 
 TextBox::~TextBox()

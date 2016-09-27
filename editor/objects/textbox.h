@@ -64,7 +64,6 @@ public:
 
     void setTextRect(const QRect&);
     virtual void move(int, int);
-    void init(const QString&);
     virtual void paint(QPainter &);
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
@@ -86,6 +85,10 @@ private:
 
 public slots:
     virtual void load(const QVariantMap &);
+
+private:
+    void init(const QString&, const QVariantMap& data=QVariantMap());
+    void initRect(const QVariantMap& data=QVariantMap());
 
 };
 

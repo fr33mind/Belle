@@ -24,8 +24,6 @@ DialogueBox::DialogueBox(QObject *parent, const QString& name) :
 {
     init();
 
-    setY(Scene::height()- (Scene::height()/3));
-
     TextBox *speakerTextBox = new TextBox("", this);
     speakerTextBox->setPlaceholderText("Narrator");
     speakerTextBox->setObjectName("speakerTextBox");
@@ -45,12 +43,21 @@ DialogueBox::DialogueBox(QObject *parent, const QString& name) :
 DialogueBox::DialogueBox(const QVariantMap& data, QObject* parent):
     ObjectGroup(data, parent)
 {
-    init();
+    init(data);
 }
 
-void DialogueBox::init()
+void DialogueBox::init(const QVariantMap& data)
 {
     setType(GameObjectMetaType::DialogueBox);
+    initRect(data);
+}
+
+void DialogueBox::initRect(const QVariantMap& data)
+{
+    if (!data.contains("x") && !data.contains("y")) {
+        setX(0);
+        setY(Scene::height() - height());
+    }
 }
 
 DialogueBox::~DialogueBox()

@@ -550,8 +550,10 @@ bool Object::hasActionForEvent(Action* action, Interaction::InputEvent event)
 QVariantMap Object::toJsonObject(bool internal) const
 {
     QVariantMap object = GameObject::toJsonObject(internal);
-    object.insert("x", mSceneRect.x());
-    object.insert("y", mSceneRect.y());
+    if (!internal || !isResource()) {
+        object.insert("x", mSceneRect.x());
+        object.insert("y", mSceneRect.y());
+    }
     object.insert("opacity", mOpacity);
 
     if (mPercentWidth) object.insert("width", QString("%1\%").arg(mPercentWidth));

@@ -33,6 +33,7 @@ public:
 
 private:
     void init();
+    void initRect(const QVariantMap&data=QVariantMap());
 };
 
 #endif // BUTTON_H

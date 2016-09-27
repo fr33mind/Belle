@@ -44,7 +44,8 @@ protected:
         TextBox* textBox(const QString&) const;
 
     private:
-        void init();
+        void init(const QVariantMap &data=QVariantMap());
+        void initRect(const QVariantMap &data=QVariantMap());
 };
 
 
