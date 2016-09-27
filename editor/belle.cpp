@@ -606,6 +606,7 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     if (mResourcesView && resource) {
         mUi.resourcesTabWidget->setCurrentIndex(1);
         mResourcesView->select(resource->objectName());
+        onEditResource(resource);
     }
 
     if (dialog)
