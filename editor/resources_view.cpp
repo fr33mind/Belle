@@ -39,7 +39,10 @@ ResourcesView::ResourcesView(QWidget *parent) :
 
     //remove action
     mRemoveAction = new QAction(QIcon(":/media/delete.png"), tr("Remove"), this);
+    mRemoveAction->setShortcut(QKeySequence::Delete);
+    mRemoveAction->setShortcutContext(Qt::WidgetShortcut);
     connect(mRemoveAction, SIGNAL(triggered()), this, SLOT(onRemoveResource()));
+    addAction(mRemoveAction);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuRequested(const QPoint&)));
