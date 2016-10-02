@@ -619,8 +619,6 @@ QVariantMap Object::toJsonObject(bool internal) const
     if (mBorderColor.isValid() || internal)
         object.insert("borderColor", Utils::colorToList(mBorderColor));
 
-    object.insert("sync", isSynced());
-
     //remove attributes that are the same in the resource
     filterResourceData(object);
 
@@ -1099,10 +1097,6 @@ void Object::_load(const QVariantMap &data)
     if (data.contains("borderColor") && data.value("borderColor").type() == QVariant::List)
         setBorderColor(Utils::listToColor(data.value("borderColor").toList()));
 
-    if (data.contains("sync") && data.value("sync").type() == QVariant::Bool) {
-        setSync(data.value("sync").toBool());
-    }
-
     mPadding = Padding(data.value("padding").toMap());
 
     blockNotifications(false);
@@ -1116,7 +1110,6 @@ void Object::load(const QVariantMap &data)
     _data.remove("y");
     _data.remove("name");
     _data.remove("visible");
-    _data.remove("sync");
     this->_load(_data);
 }
 

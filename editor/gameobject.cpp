@@ -37,12 +37,16 @@ void GameObject::_load(const QVariantMap & data)
 
     if (data.contains("type") && data.value("type").type() == QVariant::String)
         setType(GameObjectMetaType::typeFromString(data.value("type").toString()));
+
+    if (data.contains("sync") && data.value("sync").type() == QVariant::Bool)
+        setSync(data.value("sync").toBool());
 }
 
 void GameObject::load(const QVariantMap & data)
 {
     QVariantMap _data = data;
     _data.remove("name");
+    _data.remove("sync");
     _load(_data);
 }
 
@@ -54,6 +58,7 @@ QVariantMap GameObject::toJsonObject(bool internal) const
     const GameObjectMetaType* metatype = GameObjectMetaType::metaType(type());
     if (metatype)
         data.insert("type", metatype->toString());
+    data.insert("sync", mSynced);
     return data;
 }
 
