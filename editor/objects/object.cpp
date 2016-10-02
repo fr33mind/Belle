@@ -49,7 +49,7 @@ void Object::init()
 {
     setType(GameObjectMetaType::Object);
     mOpacity = 255;
-    mBackground.setColor(QColor(255, 255, 255, 0));
+    mBackground.setOpacity(255);
     mCornerRadius = 0;
     mOriginalResizePointIndex = -1;
     mVisible = true;
