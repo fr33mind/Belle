@@ -156,7 +156,7 @@ void GameObject::blockNotifications(bool block)
 
 void GameObject::setSync(bool sync)
 {
-    if (! mResource || sync == mSynced)
+    if (sync == mSynced)
         return;
 
     mSynced = sync;
