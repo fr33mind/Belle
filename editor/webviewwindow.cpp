@@ -30,6 +30,8 @@ WebViewWindow::WebViewWindow(QWidget *parent) :
     QMenuBar* menuBar = this->menuBar();
     QMenu* fileMenu = menuBar->addMenu(tr("&File"));
     fileMenu->addAction(reloadAction);
+    QAction* quitAction = fileMenu->addAction(QIcon(":/media/application_exit.png"), tr("Quit"));
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
     QMenu* viewMenu = menuBar->addMenu(tr("&View"));
     viewMenu->addAction(toolBar->toggleViewAction());
     QMenu* debugMenu = menuBar->addMenu(tr("&Debug"));
