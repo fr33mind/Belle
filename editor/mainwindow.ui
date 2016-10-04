@@ -43,7 +43,7 @@
    </widget>
    <widget class="QMenu" name="menuNovel">
     <property name="title">
-     <string>Novel</string>
+     <string>Project</string>
     </property>
     <addaction name="runAction"/>
     <addaction name="propertiesAction"/>
