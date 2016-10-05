@@ -53,6 +53,10 @@ void ChangeBackground::setBackgroundImage(const QString & background)
     if (mBackgroundImage == image)
         return;
 
+    Scene* scene = this->scene();
+    if (scene && scene->temporaryBackgroundImage() == mBackgroundImage)
+        scene->setTemporaryBackgroundImage(0);
+
     AssetManager::instance()->releaseAsset(mBackgroundImage);
     mBackgroundImage = image;
 
@@ -60,7 +64,6 @@ void ChangeBackground::setBackgroundImage(const QString & background)
     setDisplayText(info.fileName());
     emit dataChanged();
 
-    Scene* scene = this->scene();
     if (scene && scene->temporaryBackgroundImage() != mBackgroundImage)
         focusIn();
 
