@@ -347,22 +347,25 @@ void Scene::setBackgroundImage(const QString & path)
     AssetManager* assetManager = AssetManager::instance();
     ImageFile* image = dynamic_cast<ImageFile*>(assetManager->loadAsset(path, Asset::Image));
 
-    if (mBackgroundImage != image) {
-        if (mBackgroundImage && mBackgroundImage->isAnimated()) {
-            mBackgroundImage->movie()->stop();
-            mBackgroundImage->movie()->disconnect(this);
-        }
-        assetManager->releaseAsset(mBackgroundImage);
-
-        if (image && image->isAnimated()) {
-            connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
-            image->movie()->setScaledSize(Scene::size());
-            image->movie()->start();
-        }
-
-        mBackgroundImage = image;
-        emit dataChanged();
+    if (mBackgroundImage == image) {
+        assetManager->releaseAsset(image);
+        return;
     }
+
+    if (mBackgroundImage && mBackgroundImage->isAnimated()) {
+        mBackgroundImage->movie()->stop();
+        mBackgroundImage->movie()->disconnect(this);
+    }
+    assetManager->releaseAsset(mBackgroundImage);
+
+    if (image && image->isAnimated()) {
+        connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+        image->movie()->setScaledSize(Scene::size());
+        image->movie()->start();
+    }
+
+    mBackgroundImage = image;
+    emit dataChanged();
 }
 
 ImageFile* Scene::backgroundImage()
