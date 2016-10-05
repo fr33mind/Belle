@@ -50,8 +50,10 @@ void ChangeBackground::init()
 void ChangeBackground::setBackgroundImage(const QString & background)
 { 
     ImageFile* image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(background, Asset::Image));
-    if (mBackgroundImage == image)
+    if (mBackgroundImage == image) {
+        AssetManager::instance()->releaseAsset(image);
         return;
+    }
 
     Scene* scene = this->scene();
     if (scene && scene->temporaryBackgroundImage() == mBackgroundImage)
