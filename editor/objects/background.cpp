@@ -111,3 +111,10 @@ void Background::paint(QPainter &p, const QRect &rect, int radius, float opacity
 
     p.restore();
 }
+
+bool Background::isValid() const
+{
+    if (mImage || mColor.isValid())
+        return true;
+    return false;
+}

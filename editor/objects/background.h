@@ -34,6 +34,8 @@ public:
     ImageTransform::TransformType positioning() const;
     void setPositioning(ImageTransform::TransformType);
 
+    bool isValid() const;
+
 private:
     ImageFile *mImage;
     ImageTransform mImageTransform;
