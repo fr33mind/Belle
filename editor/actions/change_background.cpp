@@ -40,6 +40,11 @@ ChangeBackground::ChangeBackground(const QVariantMap & data, QObject *parent):
 
 }
 
+ChangeBackground::~ChangeBackground()
+{
+    AssetManager::instance()->releaseAsset(mBackgroundImage);
+}
+
 void ChangeBackground::init()
 {
     setType(GameObjectMetaType::ChangeBackground);

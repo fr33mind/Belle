@@ -31,6 +31,7 @@ class ChangeBackground : public Action
 public:
     explicit ChangeBackground(QObject *parent = 0);
     ChangeBackground(const QVariantMap&, QObject *parent=0);
+    virtual ~ChangeBackground();
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
     void setBackgroundImage(const QString&);
