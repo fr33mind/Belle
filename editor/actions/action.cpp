@@ -135,8 +135,10 @@ void Action::setSceneObject(Object * object)
     if (mObject) {
         mObjectName = mObject->name();
         connect(mObject, SIGNAL(destroyed()), this, SLOT(onSceneObjectDestroyed()));
-        emit dataChanged();
     }
+
+    emit sceneObjectChanged(mObject);
+    emit dataChanged();
 }
 
 void Action::setSceneObject(const QString& name)

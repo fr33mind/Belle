@@ -73,6 +73,9 @@ public:
     virtual void focusIn();
     virtual void focusOut();
 
+signals:
+    void sceneObjectChanged(Object*);
+
 public slots:
     void onSceneObjectDestroyed();
 
