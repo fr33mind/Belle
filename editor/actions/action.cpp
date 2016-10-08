@@ -155,6 +155,7 @@ void Action::onSceneObjectDestroyed()
 {
     mObject = 0;
     mObjectName = "";
+    emit dataChanged();
 }
 
 void Action::paint(const QPainter & painter)
