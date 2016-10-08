@@ -106,7 +106,16 @@ void ObjectComboBox::indexChanged(int index)
 
 void ObjectComboBox::objectDestroyed(Object* object)
 {
+    removeObject(object);
+}
+
+void ObjectComboBox::removeObject(Object * object)
+{
     int index = mObjects.indexOf(object);
-    if (index != -1)
+    if (index != -1) {
         mObjects.removeAt(index);
+        if (currentIndex() == index)
+            setCurrentIndex(-1);
+        removeItem(index);
+    }
 }

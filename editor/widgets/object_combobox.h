@@ -26,6 +26,7 @@ public:
     void addObject(Object*);
     void clear();
     Object* currentObject() const;
+    void removeObject(Object*);
 
 protected:
     void setupConnections();
