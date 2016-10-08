@@ -56,6 +56,10 @@ Action::Action(const QVariantMap& data, QObject *parent) :
     setMouseClickOnFinish(data.contains("wait"));
 }
 
+Action::~Action()
+{
+}
+
 void Action::init()
 {
     setTitle("");
@@ -128,14 +132,13 @@ void Action::setSceneObject(Object * object)
     if (mObject == object)
         return;
 
-    if (mObject)
-        mObject->disconnect(this);
+    restoreSceneObject();
+    disconnectSceneObject();
 
     mObject = object;
-    if (mObject) {
-        mObjectName = mObject->name();
-        connect(mObject, SIGNAL(destroyed()), this, SLOT(onSceneObjectDestroyed()));
-    }
+
+    connectSceneObject();
+    loadSceneObject();
 
     emit sceneObjectChanged(mObject);
     emit dataChanged();
@@ -228,11 +231,13 @@ QVariantMap Action::toJsonObject(bool internal) const
 void Action::focusIn()
 {
     mActive = true;
+    loadSceneObject();
 }
 
 void Action::focusOut()
 {
     mActive = false;
+    restoreSceneObject();
 }
 
 bool Action::isActive()
@@ -249,4 +254,26 @@ void Action::sceneLoaded()
     if (scene) {
         setSceneObject(scene->object(mObjectName));
     }
+}
+
+void Action::loadSceneObject()
+{
+}
+
+void Action::restoreSceneObject()
+{
+}
+
+void Action::connectSceneObject()
+{
+    if (mObject) {
+        mObjectName = mObject->name();
+        connect(mObject, SIGNAL(destroyed()), this, SLOT(onSceneObjectDestroyed()), Qt::UniqueConnection);
+    }
+}
+
+void Action::disconnectSceneObject()
+{
+    if (mObject)
+        mObject->disconnect(this);
 }

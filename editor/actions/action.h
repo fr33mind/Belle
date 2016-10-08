@@ -39,6 +39,7 @@ public:
 
     explicit Action(QObject *parent = 0);
     Action(const QVariantMap&, QObject *parent = 0);
+    virtual ~Action();
     virtual Action* newAction(QObject* parent=0);
     Object* sceneObject() const;
     virtual void setSceneObject(Object*);
@@ -72,6 +73,12 @@ public:
 
     virtual void focusIn();
     virtual void focusOut();
+
+protected:
+    virtual void restoreSceneObject();
+    virtual void loadSceneObject();
+    virtual void connectSceneObject();
+    virtual void disconnectSceneObject();
 
 signals:
     void sceneObjectChanged(Object*);
