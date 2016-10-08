@@ -37,10 +37,13 @@ public:
     bool isValid() const;
 
 private:
+    void releaseImage();
+
     ImageFile *mImage;
     ImageTransform mImageTransform;
     QColor mColor;
     int mOpacity;
+    bool mReleaseImage;
 };
 
 #endif // BACKGROUND_H

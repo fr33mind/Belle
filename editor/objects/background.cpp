@@ -10,12 +10,12 @@ Background::Background()
     mImage = 0;
     mColor = QColor();
     mOpacity = 0;
+    mReleaseImage = false;
 }
 
 Background::~Background()
 {
-    if (mImage)
-        AssetManager::instance()->releaseAsset(mImage);
+    releaseImage();
 }
 
 qreal Background::opacityF() const
@@ -62,16 +62,22 @@ ImageFile* Background::image() const
 
 void Background::setImage(const QString& path)
 {
-    if (mImage && mImage->path() == path)
+    ImageFile* img = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(path, Asset::Image));
+    if (mImage == img) {
+        AssetManager::instance()->releaseAsset(img);
         return;
+    }
 
-    mImage = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(path, Asset::Image));
+    setImage(img);
+    mReleaseImage = true;
 }
 
 void Background::setImage(ImageFile* image)
 {
     if (mImage == image)
         return;
+
+    releaseImage();
     mImage = image;
 }
 
@@ -117,4 +123,13 @@ bool Background::isValid() const
     if (mImage || mColor.isValid())
         return true;
     return false;
+}
+
+void Background::releaseImage()
+{
+    if (mImage && mReleaseImage)
+        AssetManager::instance()->releaseAsset(mImage);
+
+    mImage = 0;
+    mReleaseImage = false;
 }
