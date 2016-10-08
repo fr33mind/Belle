@@ -145,6 +145,9 @@ void AddActionDialog::onClose(int c)
 {
     switchPropertyWidget(0);
 
+    if (mCurrentAction)
+        mCurrentAction->focusOut();
+
 
     /*for(int i=0; i < mActionsCatalog.size(); i++) {
         if (mActionsCatalog[i]->editorWidget())
@@ -218,7 +221,10 @@ void AddActionDialog::onNewAction(Action * action)
         //mActionsCatalog.insert(action, action->editorWidget()->copy());
     }
 
+    if (mCurrentAction)
+        mCurrentAction->focusOut();
     mCurrentAction = action;
+    mCurrentAction->focusIn();
     editor = EditorWidgetFactory::createEditorWidget(action->type());
     editor->setParent(this);
     switchPropertyWidget(editor);
