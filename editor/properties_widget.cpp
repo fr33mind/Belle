@@ -397,6 +397,9 @@ void PropertiesWidget::setFilters(const QStringList& filters)
     QModelIndexList _indexes;
     QModelIndexList indexes;
 
+    if (mFilters == filters)
+        return;
+
     //reset hidden rows
     for (int i=0; i < model->rowCount(); i++) {
         index = model->index(i, 0);
@@ -414,6 +417,13 @@ void PropertiesWidget::setFilters(const QStringList& filters)
 
     for(int i=0; i < indexes.size(); i++)
         this->setRowHidden(indexes[i].row(), indexes[i].parent(), true);
+
+    mFilters = filters;
+}
+
+QStringList PropertiesWidget::filters() const
+{
+    return mFilters;
 }
 
 void PropertiesWidget::clear(int from)
