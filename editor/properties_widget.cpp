@@ -393,7 +393,6 @@ void PropertiesWidget::append(PropertiesWidget* propertiesWidget, int startAt, c
 void PropertiesWidget::setFilters(const QStringList& filters)
 {
     QStandardItemModel *model = mModel;
-    QModelIndex index;
     QModelIndexList _indexes;
     QModelIndexList indexes;
 
@@ -401,10 +400,12 @@ void PropertiesWidget::setFilters(const QStringList& filters)
         return;
 
     //reset hidden rows
-    for (int i=0; i < model->rowCount(); i++) {
-        index = model->index(i, 0);
-        if (this->isRowHidden(index.row(), index.parent()))
-            this->setRowHidden(index.row(), index.parent(), false);
+    foreach(const QString& filter, mFilters) {
+        _indexes = model->match(model->index(0, 0), Qt::UserRole+1, filter, -1, Qt::MatchFixedString | Qt::MatchRecursive);
+        foreach(const QModelIndex& index, _indexes) {
+            if (this->isRowHidden(index.row(), index.parent()))
+                this->setRowHidden(index.row(), index.parent(), false);
+        }
     }
 
     foreach(const QString& filter, filters) {
