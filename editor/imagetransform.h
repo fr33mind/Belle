@@ -27,16 +27,18 @@ public:
 
     ImageFile* image() const;
     void setImage(ImageFile*);
+    void clearCache();
 
 private:
-    void updateCache(ImageFile* image, const QString&, int, int);
-    bool isCached(const QRect&, int) const;
+    void updateCache(ImageFile*, int, int);
+    bool isCached(ImageFile*, const QRect&, int) const;
 
 private:
     ImageFile* mImage;
     QPixmap mTransformedImage;
     TransformType mTransformType;
-    QHash<QString, QVariant> mCache;
+    int mCornerRadius;
+    int mFrameNumber;
 };
 
 #endif // IMAGETRANSFORM_H

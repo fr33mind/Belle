@@ -130,6 +130,7 @@ void Background::releaseImage()
     if (mImage && mReleaseImage)
         AssetManager::instance()->releaseAsset(mImage);
 
+    mImageTransform.clearCache();
     mImage = 0;
     mReleaseImage = false;
 }

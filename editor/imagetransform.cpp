@@ -4,7 +4,7 @@
 
 ImageTransform::ImageTransform()
 {
-    mImage = 0;
+    clearCache();
     mTransformType = Stretch;
 }
 
@@ -33,18 +33,20 @@ QPixmap ImageTransform::transformedImage() const
     return mTransformedImage;
 }
 
-void ImageTransform::updateCache(ImageFile* image, const QString& path, int frameNumber, int cornerRadius)
+void ImageTransform::updateCache(ImageFile* image, int frameNumber, int cornerRadius)
 {
     mImage = image;
-    mCache.insert("path", path);
-    mCache.insert("frameNumber", frameNumber);
-    mCache.insert("cornerRadius", cornerRadius);
+    mFrameNumber = frameNumber;
+    mCornerRadius = cornerRadius;
 }
 
-bool ImageTransform::isCached(const QRect & rect, int radius) const
+bool ImageTransform::isCached(ImageFile* image, const QRect & rect, int radius) const
 {
+    if (!mImage || mImage != image)
+        return false;
+
     if (! mTransformedImage.isNull() && mTransformedImage.width() == rect.width() && mTransformedImage.height() == rect.height() &&
-            mCache["cornerRadius"].toInt() == radius && mCache["path"].toString() == mImage->path() && mCache["frameNumber"].toInt() == mImage->frameNumber())
+            mCornerRadius == radius && image && mFrameNumber == image->frameNumber())
         return true;
     return false;
 }
@@ -65,10 +67,13 @@ bool ImageTransform::hasToBeTransformed(ImageFile* image, const QRect & rect, in
 
 QPixmap ImageTransform::transform(ImageFile* image, const QRect & rect, int radius)
 {
-    if (! hasToBeTransformed(image, rect, radius))
+    if (!image)
         return QPixmap();
 
-    if (isCached(rect, radius))
+    if (! hasToBeTransformed(image, rect, radius))
+        return image->pixmap();
+
+    if (isCached(image, rect, radius))
         return mTransformedImage;
 
     QImage out(rect.width(), rect.height(), QImage::Format_ARGB32_Premultiplied);
@@ -85,7 +90,14 @@ QPixmap ImageTransform::transform(ImageFile* image, const QRect & rect, int radi
     p.end();
     mTransformedImage = QPixmap::fromImage(out);
 
-    updateCache(image, image->path(), image->frameNumber(), radius);
+    updateCache(image, image->frameNumber(), radius);
 
     return mTransformedImage;
+}
+
+void ImageTransform::clearCache()
+{
+    mImage = 0;
+    mFrameNumber = 0;
+    mCornerRadius = 0;
 }
