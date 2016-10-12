@@ -66,6 +66,9 @@
 
   AssetManager.prototype.loadAsset = function(name, type)
   {
+    if (!name)
+      return null;
+
     var data = {
           name: name,
           path: name,
