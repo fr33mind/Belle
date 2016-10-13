@@ -18,34 +18,65 @@
 
 #include "changecolor.h"
 
+#include <QHBoxLayout>
+
 ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
+    QHBoxLayout* layout = 0;
+
     mObjectsComboBox = new ObjectComboBox(this);
-    mColorButton = new ColorPushButton(this);
-    mOpacitySlider = new QSlider(Qt::Horizontal, this);
-    mChangeObjectColorCheckBox = new QCheckBox(this);
-    mChangeObjectColorCheckBox->setChecked(true);
-    mChangeObjectBackgroundColorCheckBox = new QCheckBox(this);
+
+    QWidget* imageWidget = new QWidget(this);
+    mImageCheckBox = new QCheckBox(imageWidget);
+    mImageChooser = new ChooseFileButton(ChooseFileButton::ImageFilter, imageWidget);
+    mImageChooser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    layout = new QHBoxLayout(imageWidget);
+    layout->setContentsMargins(0, 2, 0, 1);
+    layout->addWidget(mImageCheckBox, 0, Qt::AlignLeft);
+    layout->addWidget(mImageChooser);
+
+    QWidget* colorWidget = new QWidget(this);
+    mColorCheckBox = new QCheckBox(colorWidget);
+    mColorButton = new ColorPushButton(colorWidget);
+    mColorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    layout = new QHBoxLayout(colorWidget);
+    layout->setContentsMargins(0, 1, 0, 1);
+    layout->addWidget(mColorCheckBox, 0, Qt::AlignLeft);
+    layout->addWidget(mColorButton);
+
+    QWidget* opacityWidget = new QWidget(this);
+    mOpacityCheckBox = new QCheckBox(opacityWidget);
+    mOpacitySlider = new QSlider(Qt::Horizontal, opacityWidget);
     mOpacitySlider->setMinimum(0);
     mOpacitySlider->setMaximum(255);
 
+    layout = new QHBoxLayout(opacityWidget);
+    layout->setContentsMargins(0, 1, 0, 2);
+    layout->addWidget(mOpacityCheckBox, 0, Qt::AlignLeft);
+    layout->addWidget(mOpacitySlider);
+
     beginGroup(tr("Change color editor"));
-    beginSubGroup(tr("Object"), mObjectsComboBox);
-    appendRow(tr("Object"), mChangeObjectColorCheckBox);
-    appendRow(tr("Object's background"), mChangeObjectBackgroundColorCheckBox);
-    endGroup();
-    appendRow(tr("Color"), mColorButton);
-    appendRow(tr("Opacity"), mOpacitySlider);
+    appendRow(tr("Object"), mObjectsComboBox);
+    appendRow(tr("Image"), imageWidget);
+    appendRow(tr("Color"), colorWidget);
+    appendRow(tr("Opacity"), opacityWidget);
     endGroup();
     resizeColumnToContents(0);
 
     connect(mObjectsComboBox, SIGNAL(objectChanged(Object*)), this, SLOT(onCurrentObjectChanged(Object*)));
-    connect(mChangeObjectColorCheckBox, SIGNAL(toggled(bool)), this, SLOT(onChangeObjectColorToggled(bool)));
-    connect(mChangeObjectBackgroundColorCheckBox, SIGNAL(toggled(bool)), this, SLOT(onChangeObjectBackgroundColorToggled(bool)));
+    connect(mColorCheckBox, SIGNAL(toggled(bool)), this, SLOT(onColorCheckBoxToggled(bool)));
     connect(mColorButton, SIGNAL(colorChosen(const QColor&)), this, SLOT(onColorChosen(const QColor&)));
+    connect(mOpacityCheckBox, SIGNAL(toggled(bool)), this, SLOT(onOpacityCheckBoxToggled(bool)));
     connect(mOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(onOpacityChanged(int)));
+    connect(mImageCheckBox, SIGNAL(toggled(bool)), this, SLOT(onImageCheckBoxToggled(bool)));
+    connect(mImageChooser, SIGNAL(fileSelected(const QString&)), this, SLOT(onFileSelected(const QString&)));
 
+    mImageChooser->setVisible(false);
+    mColorButton->setVisible(false);
+    mOpacitySlider->setVisible(false);
 }
 
 void ChangeColorEditorWidget::updateData(GameObject* action)
@@ -56,7 +87,11 @@ void ChangeColorEditorWidget::updateData(GameObject* action)
         return;
 
     mObjectsComboBox->loadFromAction(changeColor);
+    mImageCheckBox->setChecked(changeColor->isImageChangeEnabled());
+    mImageChooser->setImageFile(changeColor->image());
+    mColorCheckBox->setChecked(changeColor->isColorChangeEnabled());
     mColorButton->setColor(changeColor->color());
+    mOpacityCheckBox->setChecked(changeColor->isOpacityChangeEnabled());
     mOpacitySlider->setValue(changeColor->opacity());
 }
 
@@ -77,29 +112,43 @@ void ChangeColorEditorWidget::onCurrentObjectChanged(Object* object)
     changeColor->setSceneObject(object);
 }
 
-void ChangeColorEditorWidget::onChangeObjectColorToggled(bool checked)
-{
-    if (! checked && !mChangeObjectBackgroundColorCheckBox->isChecked())
-        mChangeObjectColorCheckBox->setChecked(true);
-
-    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
-    if(changeColor)
-        changeColor->setChangeObjectColor(mChangeObjectColorCheckBox->isChecked());
-}
-
-void ChangeColorEditorWidget::onChangeObjectBackgroundColorToggled(bool checked)
-{
-    if (! checked && ! mChangeObjectColorCheckBox->isChecked())
-        mChangeObjectBackgroundColorCheckBox->setChecked(true);
-
-    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
-    if(changeColor)
-        changeColor->setChangeObjectBackgroundColor(mChangeObjectBackgroundColorCheckBox->isChecked());
-}
-
 void ChangeColorEditorWidget::onOpacityChanged(int value)
 {
     ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
     if(changeColor)
         changeColor->setOpacity(value);
+}
+
+void ChangeColorEditorWidget::onFileSelected(const QString & filepath)
+{
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
+    if (changeColor)
+        changeColor->setImage(filepath);
+}
+
+void ChangeColorEditorWidget::onImageCheckBoxToggled(bool checked)
+{
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
+    if (changeColor)
+        changeColor->setImageChangeEnabled(checked);
+
+    mImageChooser->setVisible(checked);
+}
+
+void ChangeColorEditorWidget::onColorCheckBoxToggled(bool checked)
+{
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
+    if (changeColor)
+        changeColor->setColorChangeEnabled(checked);
+
+    mColorButton->setVisible(checked);
+}
+
+void ChangeColorEditorWidget::onOpacityCheckBoxToggled(bool checked)
+{
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mGameObject);
+    if (changeColor)
+        changeColor->setOpacityChangeEnabled(checked);
+
+    mOpacitySlider->setVisible(checked);
 }

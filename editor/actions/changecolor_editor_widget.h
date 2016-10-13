@@ -22,6 +22,7 @@
 #include "action_editor_widget.h"
 #include "widgets/object_combobox.h"
 #include "color_pushbutton.h"
+#include "choosefilebutton.h"
 
 class ChangeColor;
 
@@ -35,22 +36,25 @@ signals:
 
 protected:
     virtual void updateData(GameObject*);
-    
+
 private slots:
     void onCurrentObjectChanged(Object*);
-    void onChangeObjectColorToggled(bool);
-    void onChangeObjectBackgroundColorToggled(bool);
     void onColorChosen(const QColor&);
     void onOpacityChanged(int);
+    void onFileSelected(const QString&);
+    void onImageCheckBoxToggled(bool);
+    void onColorCheckBoxToggled(bool);
+    void onOpacityCheckBoxToggled(bool);
 
 private:
     ObjectComboBox* mObjectsComboBox;
     ColorPushButton* mColorButton;
     QSlider * mOpacitySlider;
-    QCheckBox * mChangeObjectColorCheckBox;
-    QCheckBox* mChangeObjectBackgroundColorCheckBox;
     QList<Object*> mObjects;
-    
+    ChooseFileButton* mImageChooser;
+    QCheckBox* mImageCheckBox;
+    QCheckBox* mColorCheckBox;
+    QCheckBox* mOpacityCheckBox;
 };
 
 #endif // CHANGECOLOR_EDITOR_WIDGET_H
