@@ -59,8 +59,7 @@ void Button::init()
 
     ChangeColor *changeColor = new ChangeColor(this);
     changeColor->setColor(QColor(Qt::white));
-    changeColor->setChangeObjectColor(false);
-    changeColor->setChangeObjectBackgroundColor(true);
+    changeColor->setImageChangeEnabled(false);
     appendEventAction(Interaction::MouseMove, changeColor);
     setText(tr("Button"));
 }
