@@ -119,7 +119,7 @@
 
   function Color(components)
   {
-    var comps = [0, 0, 0, 0];
+    var comps = [null, null, null, null];
     if (components && jQuery.isArray(components)) {
       for(var i=0; i < components.length && i < comps.length; i++) {
         comps[i] = components[i];
@@ -134,7 +134,12 @@
 
   Color.prototype.toString = function()
   {
-    return 'rgba(' + this.red + ',' + this.green + ',' + this.blue + ',' + this.alphaF() + ')';
+    if (!this.isValid())
+      return "#000000";
+
+    if (this.alpha !== null)
+      return 'rgba(' + this.red + ',' + this.green + ',' + this.blue + ',' + this.alphaF() + ')';
+    return this.toHex();
   }
 
   Color.prototype.componentToHex = function (c)
@@ -145,12 +150,16 @@
 
   Color.prototype.toHex = function()
   {
-    return "#" + this.componentToHex(this.red) + this.componentToHex(this.green) + this.componentToHex(this.blue);
+    if (this.isValid())
+      return "#" + this.componentToHex(this.red) + this.componentToHex(this.green) + this.componentToHex(this.blue);
+    return "#000000";
   }
 
   Color.prototype.alphaF = function()
   {
-    return this.alpha / 255;
+    if (this.alpha)
+      return this.alpha / 255;
+    return null;
   }
 
   Color.prototype.serialize = function()
@@ -158,11 +167,18 @@
     return [this.red, this.green, this.blue, this.alpha];
   }
 
-  function Background(image, color)
+  Color.prototype.isValid = function()
+  {
+    if (this.red === null || this.green === null || this.blue === null)
+      return false;
+    return true;
+  }
+
+  function Background(image, color, opacity)
   {
     this.image = image ? image : null;
     this.color = color ? color : null;
-    this.opacity = color ? color.alpha : 0;
+    this.opacity = opacity ? opacity : color ? color.alpha : 0;
   }
 
   /*** Background - Used for background in Scene and other objects ***/
@@ -173,7 +189,8 @@
       color = new Color(color);
 
     this.color = color;
-    this.setOpacity(color ? color.alpha : 0);
+    if (this.color)
+      this.color.alpha = this.opacity;
   }
 
   Background.prototype.setImage = function(image)
@@ -184,6 +201,8 @@
   Background.prototype.setOpacity = function(opacity)
   {
     this.opacity = opacity;
+    if (this.color)
+      this.color.alpha = opacity;
   }
 
   Background.prototype.isValid = function()
@@ -193,6 +212,11 @@
     if (! this.image && ! this.color)
       return false;
     return true;
+  }
+
+  Background.prototype.getOpacityF = function ()
+  {
+    return this.opacity / 255;
   }
 
   belle.graphics.AnimatedImage = AnimatedImage;

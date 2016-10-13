@@ -33,6 +33,7 @@
 
     var backgroundImage = null,
         backgroundColor = null,
+        backgroundOpacity = 255,
         assetManager = this.getGame().getAssetManager();
 
     if ("x" in data)
@@ -54,9 +55,12 @@
       backgroundImage = assetManager.loadAsset(data.backgroundImage, "Image");
     if ("backgroundColor" in data)
       backgroundColor = data.backgroundColor;
+    if ("backgroundOpacity" in data)
+      backgroundOpacity = data.backgroundOpacity;
 
     this.setBackgroundImage(backgroundImage);
     this.setBackgroundColor(backgroundColor);
+    this.setBackgroundOpacity(backgroundOpacity);
 
     return true;
   }
@@ -265,6 +269,9 @@
         if (assetManager)
           this.background.setImage(assetManager.loadAsset(image, "Image"));;
     }
+    else {
+      this.background.setImage(image);
+    }
 
     this._unbindImage(oldImage);
 
@@ -292,20 +299,26 @@
       return;
 
     var x = this.globalX(),
-        y = this.globalY();
+        y = this.globalY(),
+        origAlpha = ctx.globalAlpha;
+
+    ctx.globalAlpha = this.background.getOpacityF() * ctx.globalAlpha;
+
+    if (this.background.color && this.background.color.isValid()) {
+        ctx.fillStyle = this.background.color.toHex();
+        ctx.fillRect(x, y, this.width, this.height);
+    }
 
     if (this.background.image) {
-        ctx.drawImage(this.background.image.getElement(), x, y, this.width, this.height);
-    }
-    else if (this.background.color) {
-        ctx.fillStyle = this.background.color.toString();
-        ctx.fillRect(x, y, this.width, this.height);
+      ctx.drawImage(this.background.image.getElement(), x, y, this.width, this.height);
     }
 
     this.paintX = x;
     this.paintY = y;
     this.paintWidth = this.width;
     this.paintHeight = this.height;
+
+    ctx.globalAlpha = origAlpha;
   }
 
   Frame.prototype.clear = function (context)
@@ -339,6 +352,7 @@
       data["backgroundImage"] = this.background.image.getPath();
     if (this.background.color)
       data["backgroundColor"] = belle.serialize(this.background.color);
+    data["backgroundOpacity"] = this.background.opacity;
     data["width"] = this.width;
     data["height"] = this.height;
     return data;
