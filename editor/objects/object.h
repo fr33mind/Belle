@@ -70,6 +70,15 @@ class Object : public GameObject
 
         void fixPoint(int, int, int);
 
+        void setTemporaryBackgroundImage(ImageFile*);
+        ImageFile* temporaryBackgroundImage() const;
+
+        void setTemporaryBackgroundColor(const QColor&);
+        QColor temporaryBackgroundColor() const;
+
+        void setTemporaryBackgroundOpacity(int);
+        int temporaryBackgroundOpacity() const;
+
         /*int backgroundColorOpacity() const;
         void setBackgroundColorOpacity(int);
 
@@ -210,6 +219,7 @@ class Object : public GameObject
         int mCornerRadius;
         QPixmap* mScaledBackgroundImage;
         Background mBackground;
+        Background mTemporaryBackground;
 };
 
 

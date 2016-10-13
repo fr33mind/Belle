@@ -50,6 +50,7 @@ void Object::init()
     setType(GameObjectMetaType::Object);
     mOpacity = 255;
     mBackground.setOpacity(255);
+    mTemporaryBackground.setOpacity(255);
     mCornerRadius = 0;
     mOriginalResizePointIndex = -1;
     mVisible = true;
@@ -364,7 +365,10 @@ void Object::paint(QPainter & painter)
 
     qreal opacity =  opacityF() * painter.opacity();
     painter.setOpacity(opacity);
-    mBackground.paint(painter, rect, mCornerRadius, opacity);
+    if (mTemporaryBackground.isValid())
+        mTemporaryBackground.paint(painter, rect, mCornerRadius, opacity);
+    else
+        mBackground.paint(painter, rect, mCornerRadius, opacity);
 
     if (mBorderColor.isValid()) {
         if (mBorderWidth)
@@ -1269,6 +1273,59 @@ void Object::connectToResource()
     if (resource) {
         connect(resource, SIGNAL(eventActionInserted(Interaction::InputEvent,int,Action*)), this, SLOT(insertEventAction(Interaction::InputEvent,int,Action*)));
     }
+}
+
+void Object::setTemporaryBackgroundImage(ImageFile* image)
+{
+    ImageFile* currImage = mTemporaryBackground.image();
+    if (currImage != image) {
+        if (currImage && currImage->isAnimated()) {
+            AnimatedImage* anim = dynamic_cast<AnimatedImage*>(currImage);
+            anim->movie()->stop();
+            anim->movie()->disconnect(this);
+        }
+
+        if (image && image->isAnimated()) {
+            AnimatedImage* anim = dynamic_cast<AnimatedImage*>(image);
+            connect(anim->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+            anim->movie()->start();
+        }
+
+        mTemporaryBackground.setImage(image);
+        emit dataChanged();
+    }
+}
+
+ImageFile* Object::temporaryBackgroundImage() const
+{
+    return mTemporaryBackground.image();
+}
+
+void Object::setTemporaryBackgroundColor(const QColor& color)
+{
+    if (mTemporaryBackground.color() != color) {
+        mTemporaryBackground.setColor(color);
+        emit dataChanged();
+    }
+}
+
+QColor Object::temporaryBackgroundColor() const
+{
+    return mTemporaryBackground.color();
+}
+
+void Object::setTemporaryBackgroundOpacity(int alpha)
+{
+    int prevAlpha = mTemporaryBackground.opacity();
+    if (prevAlpha != alpha) {
+        mTemporaryBackground.setOpacity(alpha);
+        notify("temporaryBackgroundOpacity", alpha, prevAlpha);
+    }
+}
+
+int Object::temporaryBackgroundOpacity() const
+{
+    return mTemporaryBackground.opacity();
 }
 
 /*void Object::setEditorWidgetFilters(const QStringList& filters)
