@@ -26,31 +26,50 @@ class ChangeColor : public Action
 public:
     explicit ChangeColor(QObject *parent = 0);
     ChangeColor(const QVariantMap&, QObject *parent = 0);
+    virtual ~ChangeColor();
     virtual QVariantMap toJsonObject(bool internal=true) const;
     virtual QString displayText() const;
 
     QColor color() const;
     void setColor(const QColor&);
 
+    void setColorChangeEnabled(bool);
+    bool isColorChangeEnabled() const;
+
+    void setImage(const QString&);
+    void setImage(ImageFile*);
+    ImageFile* image() const;
+
+    void setImageChangeEnabled(bool);
+    bool isImageChangeEnabled() const;
+
     int opacity() const;
     void setOpacity(int);
 
-    void setChangeObjectColor(bool);
-    bool changeObjectColor();
+    void setOpacityChangeEnabled(bool);
+    bool isOpacityChangeEnabled() const;
 
-    void setChangeObjectBackgroundColor(bool);
-    bool changeObjectBackgroundColor();
+protected:
+    virtual void loadSceneObject();
+    virtual void restoreSceneObject();
+
+private:
+    void _loadSceneObject();
 
 signals:
     
 public slots:
-    
+
 private:
     QColor mColor;
-    bool mChangeObjectColor;
-    bool mChangeObjectBackgroundColor;
+    ImageFile* mImage;
+    bool mReleaseImage;
+    bool mImageChangeEnabled;
+    bool mColorChangeEnabled;
+    bool mOpacityChangeEnabled;
 
     void init();
+    void releaseImage();
 };
 
 #endif // CHANGECOLOR_H

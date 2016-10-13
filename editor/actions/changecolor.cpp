@@ -33,36 +33,58 @@ ChangeColor::ChangeColor(const QVariantMap& data, QObject *parent) :
 {
     init();
 
-    Object * object = qobject_cast<Object*>(parent);
-    if (object)
-        setSceneObject(object);
-
     if (data.contains("color") && data.value("color").type() == QVariant::List)
-        mColor = Utils::listToColor(data.value("color").toList());
+        setColor(Utils::listToColor(data.value("color").toList()));
 
-    if (data.contains("changeObjectColor") && data.value("changeObjectColor").type() == QVariant::Bool)
-        mChangeObjectColor = data.value("changeObjectColor").toBool();
+    if (data.contains("colorChangeEnabled") && data.value("colorChangeEnabled").type() == QVariant::Bool)
+        setColorChangeEnabled(data.value("colorChangeEnabled").toBool());
 
-    if (data.contains("changeObjectBackgroundColor") && data.value("changeObjectBackgroundColor").type() == QVariant::Bool)
-        mChangeObjectBackgroundColor = data.value("changeObjectBackgroundColor").toBool();
+    if (data.contains("image") && data.value("image").type() == QVariant::String)
+        setImage(data.value("image").toString());
 
+    if (data.contains("imageChangeEnabled") && data.value("imageChangeEnabled").type() == QVariant::Bool)
+        setImageChangeEnabled(data.value("imageChangeEnabled").toBool());
+
+    if (data.contains("opacity") && data.value("opacity").canConvert(QVariant::Int))
+        setOpacity(data.value("opacity").toInt());
+
+    if (data.contains("opacityChangeEnabled") && data.value("opacityChangeEnabled").type() == QVariant::Bool)
+        setOpacityChangeEnabled(data.value("opacityChangeEnabled").toBool());
+}
+
+ChangeColor::~ChangeColor()
+{
+    restoreSceneObject();
+    releaseImage();
 }
 
 void ChangeColor::init()
 {
     setType(GameObjectMetaType::ChangeColor);
-    mChangeObjectColor = true;
-    mChangeObjectBackgroundColor = false;
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease | Interaction::MouseMove);
     mColor = Qt::white;
+    mImage = 0;
+    mImageChangeEnabled = true;
+    mColorChangeEnabled = true;
+    mOpacityChangeEnabled = false;
 }
 
 QVariantMap ChangeColor::toJsonObject(bool internal) const
 {
     QVariantMap action = Action::toJsonObject(internal);
+
     action.insert("color", Utils::colorToList(mColor));
-    action.insert("changeObjectColor", mChangeObjectColor);
-    action.insert("changeObjectBackgroundColor", mChangeObjectBackgroundColor);
+    action.insert("colorChangeEnabled", mColorChangeEnabled);
+
+    QVariant name;
+    if (mImage)
+        name = mImage->name();
+    action.insert("image", name);
+    action.insert("imageChangeEnabled", mImageChangeEnabled);
+
+    action.insert("opacity", opacity());
+    action.insert("opacityChangeEnabled", mOpacityChangeEnabled);
+
     return action;
 }
 
@@ -73,7 +95,16 @@ int ChangeColor::opacity() const
 
 void ChangeColor::setOpacity(int a)
 {
+    if (mColor.alpha() == a)
+        return;
+
     mColor.setAlpha(a);
+
+    Object* obj = sceneObject();
+    if (obj)
+        obj->setTemporaryBackgroundOpacity(a);
+
+    emit dataChanged();
 }
 
 QColor ChangeColor::color() const
@@ -83,35 +114,158 @@ QColor ChangeColor::color() const
 
 void ChangeColor::setColor(const QColor & color)
 {
+    if (mColor == color)
+        return;
+
+    int alpha = opacity();
     mColor = color;
+    mColor.setAlpha(alpha);
+
+    Object* obj = sceneObject();
+    if (obj)
+        obj->setTemporaryBackgroundColor(mColor);
+
+    emit dataChanged();
+}
+
+ImageFile* ChangeColor::image() const
+{
+    return mImage;
+}
+
+void ChangeColor::setImage(const QString& path)
+{
+    ImageFile* image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(path, Asset::Image));
+    if (mImage == image) {
+        AssetManager::instance()->releaseAsset(image);
+        return;
+    }
+
+    setImage(image);
+    mReleaseImage = true;
+}
+
+void ChangeColor::setImage(ImageFile* image)
+{
+    if (mImage == image)
+        return;
+
+    Object* obj = sceneObject();
+    if (obj)
+        obj->setTemporaryBackgroundImage(image);
+
+    releaseImage();
+    mImage = image;
+    emit dataChanged();
 }
 
 QString ChangeColor::displayText() const
 {
-    QString name(tr("None"));
-    if (sceneObject())
-        name = sceneObject()->objectName();
+    Object* target = sceneObject();
+    QString text;
 
-    return tr("Change color of '%1' to %2").arg(name).arg(Utils::colorToString(mColor));
+    if (!target)
+        return text;
+
+    QString name = target->name();
+    QString opacity_str;
+    if (mOpacityChangeEnabled) {
+        double op = opacity() * 100.0 / 255;
+        opacity_str = QString("(%1%)").arg(QString::number(op, 'f', 1));
+    }
+
+    if (mImage && mImageChangeEnabled)
+        text = tr("\"%1\" to \"%2\" %3").arg(name, mImage->name(), opacity_str);
+    else if (mColor.isValid() && mColorChangeEnabled)
+        text = tr("\"%1\" to %2 %3").arg(name, mColor.name(QColor::HexRgb), opacity_str);
+
+    return text;
 }
 
-bool ChangeColor::changeObjectColor()
+void ChangeColor::loadSceneObject()
 {
-    return mChangeObjectColor;
+    Action::loadSceneObject();
+    _loadSceneObject();
 }
 
-
-void ChangeColor::setChangeObjectColor(bool change)
+void ChangeColor::restoreSceneObject()
 {
-    mChangeObjectColor = change;
+    Action::restoreSceneObject();
+
+    Object* obj = sceneObject();
+    if (obj) {
+        obj->setTemporaryBackgroundImage(0);
+        obj->setTemporaryBackgroundColor(QColor());
+        obj->setTemporaryBackgroundOpacity(0);
+    }
 }
 
-bool ChangeColor::changeObjectBackgroundColor()
+void ChangeColor::_loadSceneObject()
 {
-    return mChangeObjectBackgroundColor;
+    Object* obj = sceneObject();
+    if (obj) {
+        if (mImage) {
+            if (mImageChangeEnabled)
+                obj->setTemporaryBackgroundImage(mImage);
+            else
+                obj->setTemporaryBackgroundImage(0);
+        }
+
+        if (mColor.isValid()) {
+            if (mColorChangeEnabled)
+                obj->setTemporaryBackgroundColor(mColor);
+            else
+                obj->setTemporaryBackgroundColor(QColor());
+        }
+
+        if (mOpacityChangeEnabled)
+            obj->setTemporaryBackgroundOpacity(mColor.alpha());
+        else
+            obj->setTemporaryBackgroundOpacity(obj->backgroundOpacity());
+    }
 }
 
-void ChangeColor::setChangeObjectBackgroundColor(bool change)
+void ChangeColor::releaseImage()
 {
-    mChangeObjectBackgroundColor = change;
+    if (mImage && mReleaseImage)
+        AssetManager::instance()->releaseAsset(mImage);
+
+    mImage = 0;
+    mReleaseImage = false;
+}
+
+void ChangeColor::setImageChangeEnabled(bool enabled)
+{
+    mImageChangeEnabled = enabled;
+    _loadSceneObject();
+    emit dataChanged();
+}
+
+bool ChangeColor::isImageChangeEnabled() const
+{
+    return mImageChangeEnabled;
+}
+
+void ChangeColor::setColorChangeEnabled(bool enabled)
+{
+    mColorChangeEnabled = enabled;
+    _loadSceneObject();
+    emit dataChanged();
+}
+
+bool ChangeColor::isColorChangeEnabled() const
+{
+    return mColorChangeEnabled;
+}
+
+void ChangeColor::setOpacityChangeEnabled(bool enabled)
+{
+    mOpacityChangeEnabled = enabled;
+    _loadSceneObject();
+    emit dataChanged();
+}
+
+bool ChangeColor::isOpacityChangeEnabled() const
+{
+    return mOpacityChangeEnabled;
 }
