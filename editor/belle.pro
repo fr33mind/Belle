@@ -64,7 +64,7 @@ HEADERS      += belle.h\
     actions/get_user_input.h \
     actions/get_user_input_editor_widget.h \
     actions/changeobjectbackground.h \
-    actions/changecolor_editor_widget.h \
+    actions/changeobjectbackground_editorwidget.h \
     condition_widget.h \
     condition_dialog.h \
     objects/objectgroup.h \
@@ -186,7 +186,7 @@ SOURCES      += main.cpp\
     actions/get_user_input.cpp \
     actions/get_user_input_editor_widget.cpp \
     actions/changeobjectbackground.cpp \
-    actions/changecolor_editor_widget.cpp \
+    actions/changeobjectbackground_editorwidget.cpp \
     condition_widget.cpp \
     condition_dialog.cpp \
     objects/objectgroup.cpp \

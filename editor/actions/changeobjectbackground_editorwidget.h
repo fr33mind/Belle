@@ -14,8 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CHANGECOLOR_EDITOR_WIDGET_H
-#define CHANGECOLOR_EDITOR_WIDGET_H
+#ifndef CHANGEOBJECTBACKGROUND_EDITORWIDGET_H
+#define CHANGEOBJECTBACKGROUND_EDITORWIDGET_H
 
 #include <QCheckBox>
 
@@ -26,11 +26,11 @@
 
 class ChangeObjectBackground;
 
-class ChangeColorEditorWidget : public ActionEditorWidget
+class ChangeObjectBackgroundEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 public:
-    explicit ChangeColorEditorWidget(QWidget *parent = 0);
+    explicit ChangeObjectBackgroundEditorWidget(QWidget *parent = 0);
 
 signals:
 
@@ -57,4 +57,4 @@ private:
     QCheckBox* mOpacityCheckBox;
 };
 
-#endif // CHANGECOLOR_EDITOR_WIDGET_H
+#endif // CHANGEOBJECTBACKGROUND_EDITORWIDGET_H

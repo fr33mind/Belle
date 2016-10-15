@@ -15,7 +15,7 @@
 #include "branch_editor_widget.h"
 #include "get_user_input_editor_widget.h"
 #include "show_menu_editorwidget.h"
-#include "changecolor_editor_widget.h"
+#include "changeobjectbackground_editorwidget.h"
 #include "playsound_editorwidget.h"
 #include "stopsound_editorwidget.h"
 #include "set_game_variable_editor_widget.h"
@@ -67,7 +67,7 @@ GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaTy
     else if (type == GameObjectMetaType::ShowMenu)
         return new ShowMenuEditorWidget;
     else if (type == GameObjectMetaType::ChangeObjectBackground)
-        return new ChangeColorEditorWidget;
+        return new ChangeObjectBackgroundEditorWidget;
     else if (type == GameObjectMetaType::PlaySound)
         return new PlaySoundEditorWidget;
     else if (type == GameObjectMetaType::StopSound)

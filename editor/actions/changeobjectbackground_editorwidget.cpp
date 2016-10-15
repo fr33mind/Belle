@@ -14,13 +14,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "changecolor_editor_widget.h"
+#include "changeobjectbackground_editorwidget.h"
 
 #include "changeobjectbackground.h"
 
 #include <QHBoxLayout>
 
-ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
+ChangeObjectBackgroundEditorWidget::ChangeObjectBackgroundEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
     QHBoxLayout* layout = 0;
@@ -79,7 +79,7 @@ ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
     mOpacitySlider->setVisible(false);
 }
 
-void ChangeColorEditorWidget::updateData(GameObject* action)
+void ChangeObjectBackgroundEditorWidget::updateData(GameObject* action)
 {
     ActionEditorWidget::updateData(action);
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(action);
@@ -95,7 +95,7 @@ void ChangeColorEditorWidget::updateData(GameObject* action)
     mOpacitySlider->setValue(changeBackground->opacity());
 }
 
-void ChangeColorEditorWidget::onColorChosen(const QColor & color)
+void ChangeObjectBackgroundEditorWidget::onColorChosen(const QColor & color)
 {
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(mGameObject);
     if (changeBackground) {
@@ -103,7 +103,7 @@ void ChangeColorEditorWidget::onColorChosen(const QColor & color)
     }
 }
 
-void ChangeColorEditorWidget::onCurrentObjectChanged(Object* object)
+void ChangeObjectBackgroundEditorWidget::onCurrentObjectChanged(Object* object)
 {
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(mGameObject);
     if (! changeBackground)
@@ -112,21 +112,21 @@ void ChangeColorEditorWidget::onCurrentObjectChanged(Object* object)
     changeBackground->setSceneObject(object);
 }
 
-void ChangeColorEditorWidget::onOpacityChanged(int value)
+void ChangeObjectBackgroundEditorWidget::onOpacityChanged(int value)
 {
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(mGameObject);
     if(changeBackground)
         changeBackground->setOpacity(value);
 }
 
-void ChangeColorEditorWidget::onFileSelected(const QString & filepath)
+void ChangeObjectBackgroundEditorWidget::onFileSelected(const QString & filepath)
 {
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(mGameObject);
     if (changeBackground)
         changeBackground->setImage(filepath);
 }
 
-void ChangeColorEditorWidget::onImageCheckBoxToggled(bool checked)
+void ChangeObjectBackgroundEditorWidget::onImageCheckBoxToggled(bool checked)
 {
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(mGameObject);
     if (changeBackground)
@@ -135,7 +135,7 @@ void ChangeColorEditorWidget::onImageCheckBoxToggled(bool checked)
     mImageChooser->setVisible(checked);
 }
 
-void ChangeColorEditorWidget::onColorCheckBoxToggled(bool checked)
+void ChangeObjectBackgroundEditorWidget::onColorCheckBoxToggled(bool checked)
 {
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(mGameObject);
     if (changeBackground)
@@ -144,7 +144,7 @@ void ChangeColorEditorWidget::onColorCheckBoxToggled(bool checked)
     mColorButton->setVisible(checked);
 }
 
-void ChangeColorEditorWidget::onOpacityCheckBoxToggled(bool checked)
+void ChangeObjectBackgroundEditorWidget::onOpacityCheckBoxToggled(bool checked)
 {
     ChangeObjectBackground* changeBackground = qobject_cast<ChangeObjectBackground*>(mGameObject);
     if (changeBackground)
