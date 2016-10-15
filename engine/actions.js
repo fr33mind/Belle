@@ -907,22 +907,33 @@ Branch.prototype.skip = function()
 function ChangeColor(data, parent)
 {
     Action.call(this, data, parent);
-    this.color = new Color([255, 255, 255, 255]);
-    this.previousObjectColor = null;
-    this.previousObjectBackgroundColor = null;
-    this.changeObjectColor = true;
-    this.changeObjectBackgroundColor = false;
+    this.color = null;
+    this.image = null;
+    this.opacity = 0;
+    this.imageChangeEnabled = true;
+    this.colorChangeEnabled = true;
+    this.opacityChangeEnabled = false;
+
+    if ("imageChangeEnabled" in data)
+      this.imageChangeEnabled = data["imageChangeEnabled"];
+
+    if ("colorChangeEnabled" in data)
+      this.colorChangeEnabled = data["colorChangeEnabled"];
+
+    if ("opacityChangeEnabled" in data)
+      this.opacityChangeEnabled = data["opacityChangeEnabled"];
     
     if ( "color" in data) {
         this.color = new Color(data["color"]);
     }
     
-    if ( "changeObjectColor" in data) {
-        this.changeObjectColor = data["changeObjectColor"];
+    if ("image" in data) {
+      var assetManager = this.getGame().getAssetManager();
+      this.image = assetManager.loadAsset(data["image"], "Image");
     }
-    
-    if ( "changeObjectBackgroundColor" in data) {
-        this.changeObjectBackgroundColor = data["changeObjectBackgroundColor"];
+
+    if ("opacity" in data) {
+      this.opacity = data["opacity"];
     }
 }
 
@@ -936,13 +947,14 @@ ChangeColor.prototype.onExecute = function()
         return;
     }
     
-    if (this.changeObjectColor) {
-        object.color = this.color;
-    }
-    
-    if (this.changeObjectBackgroundColor) {
-        object.setBackgroundColor(this.color);
-    }
+    if (this.colorChangeEnabled)
+      object.setBackgroundColor(this.color);
+
+    if (this.imageChangeEnabled)
+      object.setBackgroundImage(this.image);
+
+    if (this.opacityChangeEnabled)
+      object.setBackgroundOpacity(this.opacity);
     
     this.setFinished(true);
 }
