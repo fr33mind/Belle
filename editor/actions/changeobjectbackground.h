@@ -14,19 +14,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CHANGECOLOR_H
-#define CHANGECOLOR_H
+#ifndef CHANGEOBJECTBACKGROUND_H
+#define CHANGEOBJECTBACKGROUND_H
 
 #include "action.h"
 
-class ChangeColor : public Action
+class ChangeObjectBackground : public Action
 {
     Q_OBJECT
 
 public:
-    explicit ChangeColor(QObject *parent = 0);
-    ChangeColor(const QVariantMap&, QObject *parent = 0);
-    virtual ~ChangeColor();
+    explicit ChangeObjectBackground(QObject *parent = 0);
+    ChangeObjectBackground(const QVariantMap&, QObject *parent = 0);
+    virtual ~ChangeObjectBackground();
     virtual QVariantMap toJsonObject(bool internal=true) const;
     virtual QString displayText() const;
 
@@ -72,4 +72,4 @@ private:
     void releaseImage();
 };
 
-#endif // CHANGECOLOR_H
+#endif // CHANGEOBJECTBACKGROUND_H

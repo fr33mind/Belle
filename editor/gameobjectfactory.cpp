@@ -18,7 +18,7 @@
 #include "hide.h"
 #include "branch.h"
 #include "get_user_input.h"
-#include "changecolor.h"
+#include "changeobjectbackground.h"
 #include "playsound.h"
 #include "stopsound.h"
 #include "show_menu.h"
@@ -111,8 +111,8 @@ Action* GameObjectFactory::createAction(GameObjectMetaType::Type type, const QVa
         case GameObjectMetaType::Branch:
             action = validData ? new Branch(data, parent) : new Branch(parent);
             break;
-        case GameObjectMetaType::ChangeColor:
-            action = validData ? new ChangeColor(data, parent) : new ChangeColor(parent);
+        case GameObjectMetaType::ChangeObjectBackground:
+            action = validData ? new ChangeObjectBackground(data, parent) : new ChangeObjectBackground(parent);
             break;
         case GameObjectMetaType::PlaySound:
             action = validData ? new PlaySound(data, parent) : new PlaySound(parent);

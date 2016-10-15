@@ -14,12 +14,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "changecolor.h"
+#include "changeobjectbackground.h"
 
 #include "resource_manager.h"
 #include "utils.h"
 
-ChangeColor::ChangeColor(QObject *parent) :
+ChangeObjectBackground::ChangeObjectBackground(QObject *parent) :
     Action(parent)
 {
     init();
@@ -28,7 +28,7 @@ ChangeColor::ChangeColor(QObject *parent) :
         setSceneObject(object);
 }
 
-ChangeColor::ChangeColor(const QVariantMap& data, QObject *parent) :
+ChangeObjectBackground::ChangeObjectBackground(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
@@ -52,15 +52,15 @@ ChangeColor::ChangeColor(const QVariantMap& data, QObject *parent) :
         setOpacityChangeEnabled(data.value("opacityChangeEnabled").toBool());
 }
 
-ChangeColor::~ChangeColor()
+ChangeObjectBackground::~ChangeObjectBackground()
 {
     restoreSceneObject();
     releaseImage();
 }
 
-void ChangeColor::init()
+void ChangeObjectBackground::init()
 {
-    setType(GameObjectMetaType::ChangeColor);
+    setType(GameObjectMetaType::ChangeObjectBackground);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease | Interaction::MouseMove);
     mColor = Qt::white;
     mImage = 0;
@@ -69,7 +69,7 @@ void ChangeColor::init()
     mOpacityChangeEnabled = false;
 }
 
-QVariantMap ChangeColor::toJsonObject(bool internal) const
+QVariantMap ChangeObjectBackground::toJsonObject(bool internal) const
 {
     QVariantMap action = Action::toJsonObject(internal);
 
@@ -88,12 +88,12 @@ QVariantMap ChangeColor::toJsonObject(bool internal) const
     return action;
 }
 
-int ChangeColor::opacity() const
+int ChangeObjectBackground::opacity() const
 {
     return mColor.alpha();
 }
 
-void ChangeColor::setOpacity(int a)
+void ChangeObjectBackground::setOpacity(int a)
 {
     if (mColor.alpha() == a)
         return;
@@ -107,12 +107,12 @@ void ChangeColor::setOpacity(int a)
     emit dataChanged();
 }
 
-QColor ChangeColor::color() const
+QColor ChangeObjectBackground::color() const
 {
     return mColor;
 }
 
-void ChangeColor::setColor(const QColor & color)
+void ChangeObjectBackground::setColor(const QColor & color)
 {
     if (mColor == color)
         return;
@@ -128,12 +128,12 @@ void ChangeColor::setColor(const QColor & color)
     emit dataChanged();
 }
 
-ImageFile* ChangeColor::image() const
+ImageFile* ChangeObjectBackground::image() const
 {
     return mImage;
 }
 
-void ChangeColor::setImage(const QString& path)
+void ChangeObjectBackground::setImage(const QString& path)
 {
     ImageFile* image = dynamic_cast<ImageFile*>(AssetManager::instance()->loadAsset(path, Asset::Image));
     if (mImage == image) {
@@ -145,7 +145,7 @@ void ChangeColor::setImage(const QString& path)
     mReleaseImage = true;
 }
 
-void ChangeColor::setImage(ImageFile* image)
+void ChangeObjectBackground::setImage(ImageFile* image)
 {
     if (mImage == image)
         return;
@@ -159,7 +159,7 @@ void ChangeColor::setImage(ImageFile* image)
     emit dataChanged();
 }
 
-QString ChangeColor::displayText() const
+QString ChangeObjectBackground::displayText() const
 {
     Object* target = sceneObject();
     QString text;
@@ -182,13 +182,13 @@ QString ChangeColor::displayText() const
     return text;
 }
 
-void ChangeColor::loadSceneObject()
+void ChangeObjectBackground::loadSceneObject()
 {
     Action::loadSceneObject();
     _loadSceneObject();
 }
 
-void ChangeColor::restoreSceneObject()
+void ChangeObjectBackground::restoreSceneObject()
 {
     Action::restoreSceneObject();
 
@@ -200,7 +200,7 @@ void ChangeColor::restoreSceneObject()
     }
 }
 
-void ChangeColor::_loadSceneObject()
+void ChangeObjectBackground::_loadSceneObject()
 {
     Object* obj = sceneObject();
     if (obj) {
@@ -225,7 +225,7 @@ void ChangeColor::_loadSceneObject()
     }
 }
 
-void ChangeColor::releaseImage()
+void ChangeObjectBackground::releaseImage()
 {
     if (mImage && mReleaseImage)
         AssetManager::instance()->releaseAsset(mImage);
@@ -234,38 +234,38 @@ void ChangeColor::releaseImage()
     mReleaseImage = false;
 }
 
-void ChangeColor::setImageChangeEnabled(bool enabled)
+void ChangeObjectBackground::setImageChangeEnabled(bool enabled)
 {
     mImageChangeEnabled = enabled;
     _loadSceneObject();
     emit dataChanged();
 }
 
-bool ChangeColor::isImageChangeEnabled() const
+bool ChangeObjectBackground::isImageChangeEnabled() const
 {
     return mImageChangeEnabled;
 }
 
-void ChangeColor::setColorChangeEnabled(bool enabled)
+void ChangeObjectBackground::setColorChangeEnabled(bool enabled)
 {
     mColorChangeEnabled = enabled;
     _loadSceneObject();
     emit dataChanged();
 }
 
-bool ChangeColor::isColorChangeEnabled() const
+bool ChangeObjectBackground::isColorChangeEnabled() const
 {
     return mColorChangeEnabled;
 }
 
-void ChangeColor::setOpacityChangeEnabled(bool enabled)
+void ChangeObjectBackground::setOpacityChangeEnabled(bool enabled)
 {
     mOpacityChangeEnabled = enabled;
     _loadSceneObject();
     emit dataChanged();
 }
 
-bool ChangeColor::isOpacityChangeEnabled() const
+bool ChangeObjectBackground::isOpacityChangeEnabled() const
 {
     return mOpacityChangeEnabled;
 }

@@ -24,7 +24,7 @@
 #include "color_pushbutton.h"
 #include "choosefilebutton.h"
 
-class ChangeColor;
+class ChangeObjectBackground;
 
 class ChangeColorEditorWidget : public ActionEditorWidget
 {

@@ -66,7 +66,7 @@ GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaTy
         return new GetUserInputEditorWidget;
     else if (type == GameObjectMetaType::ShowMenu)
         return new ShowMenuEditorWidget;
-    else if (type == GameObjectMetaType::ChangeColor)
+    else if (type == GameObjectMetaType::ChangeObjectBackground)
         return new ChangeColorEditorWidget;
     else if (type == GameObjectMetaType::PlaySound)
         return new PlaySoundEditorWidget;

@@ -904,7 +904,7 @@ Branch.prototype.skip = function()
 
 /************* Change Color *****************/
 
-function ChangeColor(data, parent)
+function ChangeObjectBackground(data, parent)
 {
     Action.call(this, data, parent);
     this.color = null;
@@ -937,9 +937,9 @@ function ChangeColor(data, parent)
     }
 }
 
-belle.extend(ChangeColor, Action);
+belle.extend(ChangeObjectBackground, Action);
 
-ChangeColor.prototype.onExecute = function()
+ChangeObjectBackground.prototype.onExecute = function()
 {    
     var object = this.getObject();
     if (! object) {
@@ -1351,7 +1351,7 @@ actions.GoToLabel = GoToLabel;
 actions.GoToScene = GoToScene;
 actions.Branch = Branch;
 actions.End = End;
-actions.ChangeColor = ChangeColor;
+actions.ChangeObjectBackground = ChangeObjectBackground;
 actions.PlaySound = PlaySound;
 actions.StopSound = StopSound;
 actions.ShowMenu = ShowMenu;

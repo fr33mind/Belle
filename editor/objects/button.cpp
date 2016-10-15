@@ -19,7 +19,7 @@
 #include <QDebug>
 
 #include "scene.h"
-#include "changecolor.h"
+#include "changeobjectbackground.h"
 
 Button::Button(QObject *parent, const QString& name) :
     TextBox(parent, name)
@@ -57,10 +57,10 @@ void Button::init()
 
     initRect();
 
-    ChangeColor *changeColor = new ChangeColor(this);
-    changeColor->setColor(QColor(Qt::white));
-    changeColor->setImageChangeEnabled(false);
-    appendEventAction(Interaction::MouseMove, changeColor);
+    ChangeObjectBackground *changeBackground = new ChangeObjectBackground(this);
+    changeBackground->setColor(QColor(Qt::white));
+    changeBackground->setImageChangeEnabled(false);
+    appendEventAction(Interaction::MouseMove, changeBackground);
     setText(tr("Button"));
 }
 

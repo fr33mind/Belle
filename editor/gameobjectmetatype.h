@@ -39,7 +39,7 @@ public:
         Branch,
         GetUserInput,
         ShowMenu,
-        ChangeColor,
+        ChangeObjectBackground,
         PlaySound,
         StopSound,
         SetGameVariable,

@@ -29,7 +29,7 @@
 #include "hide.h"
 #include "branch.h"
 #include "get_user_input.h"
-#include "changecolor.h"
+#include "changeobjectbackground.h"
 #include "playsound.h"
 #include "stopsound.h"
 #include "show_menu.h"
@@ -63,7 +63,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     beginGroup(tr("Transform"));
     _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Slide));
     _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::Fade));
-    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ChangeColor));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::ChangeObjectBackground));
     endGroup();
 
     beginGroup(tr("Audio"));

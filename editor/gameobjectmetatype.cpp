@@ -70,7 +70,7 @@ void GameObjectMetaType::init()
     mGameObjectMetaTypes.insert(Branch, new GameObjectMetaType(Branch, "Branch", tr("Branch"), QIcon(":/media/branch.png")));
     mGameObjectMetaTypes.insert(GetUserInput, new GameObjectMetaType(GetUserInput, "GetUserInput", tr("Get User Input"), QIcon(":/media/edit-clear.png")));
     mGameObjectMetaTypes.insert(ShowMenu, new GameObjectMetaType(ShowMenu, "ShowMenu", tr("Show Menu"), QIcon(":/media/menu.png")));
-    mGameObjectMetaTypes.insert(ChangeColor, new GameObjectMetaType(ChangeColor, "ChangeColor", tr("Change Color"), QIcon(":/media/color.png")));
+    mGameObjectMetaTypes.insert(ChangeObjectBackground, new GameObjectMetaType(ChangeObjectBackground, "ChangeObjectBackground", tr("Change Object Background"), QIcon(":/media/color.png")));
     mGameObjectMetaTypes.insert(PlaySound, new GameObjectMetaType(PlaySound, "PlaySound", tr("Play Sound"), QIcon(":/media/sound.png")));
     mGameObjectMetaTypes.insert(StopSound, new GameObjectMetaType(StopSound, "StopSound", tr("Stop Sound"), QIcon(":/media/no-sound.png")));
     mGameObjectMetaTypes.insert(SetGameVariable, new GameObjectMetaType(SetGameVariable, "SetGameVariable",
@@ -116,6 +116,8 @@ GameObjectMetaType::Type GameObjectMetaType::typeFromString(const QString& typeS
     //For backwards compatibility. Remove at some point.
     if(typeStringLower == "changegamevariable")
         typeStringLower = "setgamevariable";
+    if (typeStringLower == "changecolor")
+        typeStringLower = "changeobjectbackground";
 
     while(it.hasNext()) {
         it.next();
