@@ -409,7 +409,7 @@ void ObjectEditorWidget::onEventItemRemoved(int index)
     else if (name == "MouseReleaseComboBox") {
         object->removeEventActionAt(Interaction::MouseRelease, index);
     }
-    else {
+    else if (name == "MouseMoveComboBox") {
         object->removeEventActionAt(Interaction::MouseMove, index);
     }
 }
