@@ -259,7 +259,7 @@ void Belle::afterShow()
     if (!Engine::isValid()) {
         QMessageBox::warning(this, tr("Invalid engine"),
                              tr("No valid engine was found at \"%1\".\n"
-                                "Please select a valid engine in Novel > Properties > Project. "
+                                "Please select a valid engine in Project > Properties > Project. "
                                 "Otherwise you won't be able to run your game.").arg(Engine::path()));
     }
 }
@@ -786,7 +786,7 @@ void Belle::onRunTriggered()
 QString Belle::exportProject(const QString& _path, bool toRun)
 {
     if (! Engine::isValid()) {
-        QMessageBox::critical(this, tr("Invalid engine directory"), tr("Please, first set a valid engine directory through the menu Novel>Properties"));
+        QMessageBox::critical(this, tr("Invalid engine directory"), tr("Please, first set a valid engine directory through the menu Project > Properties"));
         return "";
     }
 
