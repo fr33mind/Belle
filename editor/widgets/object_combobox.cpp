@@ -58,9 +58,15 @@ void ObjectComboBox::loadFromAction(Action * action)
 
     this->blockSignals(false);
 
-    if (! action->sceneObject() && ! mObjects.isEmpty()) {
-        action->setSceneObject(mObjects.first());
-        currIndex = 0;
+    if (! action->sceneObject()) {
+        if (parent) {
+            action->setSceneObject(parent);
+            currIndex = pindex;
+        }
+        else if (!mObjects.isEmpty()) {
+            action->setSceneObject(mObjects.first());
+            currIndex = 0;
+        }
     }
 
     setCurrentIndex(currIndex);
