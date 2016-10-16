@@ -22,15 +22,13 @@ public:
     QList<Asset*> assets() const;
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
-
 signals:
 
-public slots:
-    virtual void load(const QVariantMap&);
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
 
 private:
     void init();
-    void _load(const QVariantMap&);
     SoundAsset* mSoundAsset;
 
 };

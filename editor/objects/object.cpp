@@ -40,7 +40,7 @@ Object::Object(const QVariantMap& data, QObject* parent):
     GameObject(data, parent)
 {
     init();
-    _load(data);
+    loadInternal(data);
     updateResizeRects();
     emit dataChanged();
 }
@@ -973,17 +973,15 @@ bool Object::hasObjectAsParent()
     return false;
 }
 
-void Object::_load(const QVariantMap &data)
+void Object::loadData(const QVariantMap &data, bool internal)
 {
+    if(!internal)
+        GameObject::loadData(data, internal);
+
     QVariantList eventActions;
     QVariantMap actionData;
     QList<Action*> actions;
     Action* action;
-
-    if (data.isEmpty())
-        return;
-
-    blockNotifications(true);
 
     if (data.contains("name") && data.value("name").type() == QVariant::String)
         setObjectName(data.value("name").toString());
@@ -1102,19 +1100,14 @@ void Object::_load(const QVariantMap &data)
         setBorderColor(Utils::listToColor(data.value("borderColor").toList()));
 
     mPadding = Padding(data.value("padding").toMap());
-
-    blockNotifications(false);
 }
 
-void Object::load(const QVariantMap &data)
+void Object::filterLoadData(QVariantMap &data)
 {
-    QVariantMap _data = data;
-    //properties that shouldn't be copied!
-    _data.remove("x");
-    _data.remove("y");
-    _data.remove("name");
-    _data.remove("visible");
-    this->_load(_data);
+    GameObject::filterLoadData(data);
+    data.remove("x");
+    data.remove("y");
+    data.remove("visible");
 }
 
 void Object::notify(const QString & key, const QVariant & value, const QVariant & prev)

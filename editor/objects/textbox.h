@@ -81,10 +81,9 @@ public:
 signals:
 
 private:
-    void _load(const QVariantMap &);
 
-public slots:
-    virtual void load(const QVariantMap &);
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
 
 private:
     void init(const QString&, const QVariantMap& data=QVariantMap());

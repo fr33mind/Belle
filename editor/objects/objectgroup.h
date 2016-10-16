@@ -55,9 +55,6 @@ public:
 
 signals:
 
-public slots:
-    virtual void load(const QVariantMap &);
-
 private slots:
     void objectDestroyed(Object*);
     void objectChanged(const QVariantMap&);
@@ -65,13 +62,13 @@ private slots:
 protected:
     void _append(Object*);
     QVariantMap prepareObjectData(int, const QVariantMap&);
+    virtual void loadData(const QVariantMap&, bool internal=false);
 
 private:
     QList<Object*> mObjects;
     QList<Object*> mStickyObjects;
     bool mEditingMode;
     void init();
-    void _load(const QVariantMap&);
     int indexOf(Object*);
     void alignObjects();
     void alignObjectsHorizontally();

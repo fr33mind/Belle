@@ -36,12 +36,13 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
     Object(data, parent)
 {
     init("", data);
-    _load(data);
+    loadInternal(data);
 }
 
-void TextBox::_load(const QVariantMap& data)
+void TextBox::loadData(const QVariantMap& data, bool internal)
 {
-    this->blockNotifications(true);
+    if (!internal)
+        Object::loadData(data, internal);
 
     if (data.contains("text") && data.value("text").type() == QVariant::String) {
         QTextCodec *codec = QTextCodec::codecForName("UTF-8");
@@ -87,14 +88,6 @@ void TextBox::_load(const QVariantMap& data)
 
     if (data.contains("placeholderTextColor") && data.value("placeholderTextColor").type() == QVariant::List)
         setPlaceholderTextColor(Utils::listToColor(data.value("placeholderTextColor").toList()));
-
-    this->blockNotifications(false);
-}
-
-void TextBox::load(const QVariantMap& data)
-{
-    Object::load(data);
-    this->_load(data);
 }
 
 void TextBox::init(const QString& text, const QVariantMap &data)

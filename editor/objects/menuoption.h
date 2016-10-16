@@ -27,6 +27,9 @@ public:
     QString condition() const;
     void setCondition(const QString&);
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private:
     void init();
 };

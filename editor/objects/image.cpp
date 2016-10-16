@@ -43,7 +43,7 @@ Image::Image(const QVariantMap& data, QObject* parent):
     Object(data, parent)
 {
     init();
-    _load(data);
+    loadInternal(data);
 
 }
 
@@ -52,9 +52,10 @@ Image::~Image()
     AssetManager::instance()->releaseAsset(mImage);
 }
 
-void Image::_load(const QVariantMap& data)
+void Image::loadData(const QVariantMap& data, bool internal)
 {
-    this->blockNotifications(true);
+    if(!internal)
+        Object::loadData(data, internal);
 
     if (data.contains("image")) {
         if (data.value("image").type() == QVariant::String)
@@ -65,14 +66,6 @@ void Image::_load(const QVariantMap& data)
                 setImage(img.value("src").toString());
         }
     }
-
-    this->blockNotifications(false);
-}
-
-void Image::load(const QVariantMap& data)
-{
-    Object::load(data);
-    _load(data);
 }
 
 void Image::init()

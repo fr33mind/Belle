@@ -26,12 +26,14 @@ ObjectGroup::ObjectGroup(const QVariantMap& data, QObject *parent) :
     Object(data, parent)
 {
     init();
-    this->_load(data);
+    loadInternal(data);
 }
 
-void ObjectGroup::_load(const QVariantMap& data)
+void ObjectGroup::loadData(const QVariantMap& data, bool internal)
 {
-    this->blockNotifications(true);
+    if (!internal)
+        Object::loadData(data, internal);
+
     ResourceManager * resourceManager = ResourceManager::instance();
     Object* obj = 0;
 
@@ -91,14 +93,6 @@ void ObjectGroup::_load(const QVariantMap& data)
     if (data.contains("alignObjects")) {
         alignObjects();
     }
-
-    this->blockNotifications(false);
-}
-
-void ObjectGroup::load(const QVariantMap& data)
-{
-    Object::load(data);
-    this->_load(data);
 }
 
 void ObjectGroup::init()

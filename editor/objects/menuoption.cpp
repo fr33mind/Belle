@@ -20,6 +20,17 @@ MenuOption::MenuOption(const QVariantMap& data, QObject* parent) :
     Button(data, parent)
 {
     init();
+}
+
+void MenuOption::init()
+{
+    setType(GameObjectMetaType::MenuOption);
+}
+
+void MenuOption::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Button::loadData(data, internal);
 
     if (data.contains("actions") && data.value("actions").type() == QVariant::List) {
         QVariantList actions = data.value("actions").toList();
@@ -30,11 +41,6 @@ MenuOption::MenuOption(const QVariantMap& data, QObject* parent) :
     if (data.contains("condition") && data.value("condition").type() == QVariant::String) {
         setCondition(data.value("condition").toString());
     }
-}
-
-void MenuOption::init()
-{
-    setType(GameObjectMetaType::MenuOption);
 }
 
 QList<Action *> MenuOption::actions() const

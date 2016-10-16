@@ -22,7 +22,7 @@ Sound::Sound(const QVariantMap& data, QObject *parent) :
     GameObject(data, parent)
 {
     init();
-    _load(data);
+    loadInternal(data);
 }
 
 Sound::~Sound()
@@ -36,21 +36,14 @@ void Sound::init()
     mSoundAsset = 0;
 }
 
-void Sound::_load(const QVariantMap& data)
+void Sound::loadData(const QVariantMap& data, bool internal)
 {
-    this->blockNotifications(true);
+    if (!internal)
+        GameObject::loadData(data, internal);
 
     if (data.value("asset").type() == QVariant::String) {
         setFile(data.value("asset").toString());
     }
-
-    this->blockNotifications(false);
-}
-
-void Sound::load(const QVariantMap& data)
-{
-    GameObject::load(data);
-    _load(data);
 }
 
 Asset* Sound::setFile(const QString& path)

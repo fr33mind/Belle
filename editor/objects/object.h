@@ -156,7 +156,6 @@ class Object : public GameObject
 
     public slots:
         void onResizeEvent(QResizeEvent*);
-        virtual void load(const QVariantMap &);
         void onParentResized(int, int);
         void appendEventAction(Interaction::InputEvent, Action*);
         void insertEventAction(Interaction::InputEvent, int, Action*);
@@ -182,7 +181,6 @@ class Object : public GameObject
         int parentWidth() const;
         int parentHeight() const;
         void updateScaledBackgroundImage();
-        void _load(const QVariantMap&);
         void replaceEventActions(Interaction::InputEvent, const QList<Action*> &);
         void copyResourceActions(Interaction::InputEvent);
         void sync();
@@ -204,6 +202,8 @@ class Object : public GameObject
         void notify(const QString&, const QVariant&, const QVariant& prev=QVariant());
         void updateAspectRatio();
         virtual void connectToResource();
+        virtual void loadData(const QVariantMap&, bool internal=false);
+        virtual void filterLoadData(QVariantMap&);
 
     private: //variables
         QList<QRect> mResizeRects;

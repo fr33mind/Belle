@@ -13,7 +13,7 @@ GameObject::GameObject(const QVariantMap & data, QObject *parent) :
     QObject(parent)
 {
     init();
-    _load(data);
+    loadInternal(data);
 }
 
 GameObject::~GameObject()
@@ -30,7 +30,42 @@ void GameObject::init()
     mManager = 0;
 }
 
-void GameObject::_load(const QVariantMap & data)
+void GameObject::load(const QVariantMap & data)
+{
+    if (data.isEmpty())
+        return;
+
+    QVariantMap _data = data;
+    filterLoadData(_data);
+    if (_data.isEmpty())
+        return;
+
+    blockNotifications(true);
+    beforeLoadData(_data);
+    loadData(_data);
+    afterLoadData(_data);
+    blockNotifications(false);
+}
+
+void GameObject::loadInternal(const QVariantMap & data)
+{
+    if (data.isEmpty())
+        return;
+
+    blockNotifications(true);
+    beforeLoadData(data);
+    loadData(data, true);
+    afterLoadData(data);
+    blockNotifications(false);
+}
+
+void GameObject::filterLoadData(QVariantMap & data)
+{
+    data.remove("name");
+    data.remove("sync");
+}
+
+void GameObject::loadData(const QVariantMap & data, bool internal)
 {
     if (data.contains("name") && data.value("name").type() == QVariant::String)
         setName(data.value("name").toString());
@@ -42,12 +77,12 @@ void GameObject::_load(const QVariantMap & data)
         setSync(data.value("sync").toBool());
 }
 
-void GameObject::load(const QVariantMap & data)
+void GameObject::beforeLoadData(const QVariantMap & data)
 {
-    QVariantMap _data = data;
-    _data.remove("name");
-    _data.remove("sync");
-    _load(_data);
+}
+
+void GameObject::afterLoadData(const QVariantMap & data)
+{
 }
 
 QVariantMap GameObject::toJsonObject(bool internal) const

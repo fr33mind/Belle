@@ -45,7 +45,7 @@ public:
     void setManager(GameObjectManager*);
 
 public slots:
-    virtual void load(const QVariantMap&);
+    void load(const QVariantMap&);
     void removeClone(GameObject*);
 
 private slots:
@@ -54,13 +54,17 @@ private slots:
 protected:
     virtual void connectToResource();
     virtual void disconnectFromResource();
+    virtual void filterLoadData(QVariantMap&);
+    virtual void beforeLoadData(const QVariantMap&);
+    virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void afterLoadData(const QVariantMap&);
     void notify(const QString&, const QVariant&);
     void blockNotifications(bool);
     void setType(GameObjectMetaType::Type);
+    void loadInternal(const QVariantMap&);
 
 private:
     void init();
-    void _load(const QVariantMap&);
 
 private:
     GameObject* mResource;

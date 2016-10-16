@@ -57,13 +57,12 @@ class Character : public Image
         void setTextColor(const QColor&);
         virtual QVariantMap toJsonObject(bool internal=true) const;
 
-   public slots:
-        virtual void load(const QVariantMap &);
+   protected:
+        virtual void loadData(const QVariantMap&, bool internal=false);
 
    private:
         void init(const QString &);
         void initStates();
-        void _load(const QVariantMap&);
 };
 
 

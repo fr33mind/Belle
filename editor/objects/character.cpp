@@ -39,7 +39,7 @@ Character::Character(const QVariantMap& data, QObject* parent) :
     Image(data, parent)
 {
     init(objectName());
-    _load(data);
+    loadInternal(data);
 }
 
 Character::~Character()
@@ -52,9 +52,10 @@ Character::~Character()
     mStateToImage.clear();
 }
 
-void Character::_load(const QVariantMap& data)
+void Character::loadData(const QVariantMap& data, bool internal)
 {
-    this->blockNotifications(true);
+    if (!internal)
+        Image::loadData(data, internal);
 
     QHash<QString, QString> states;
     if (data.contains("states") && data.value("states").type() == QVariant::Map) {
@@ -77,14 +78,6 @@ void Character::_load(const QVariantMap& data)
 
     if (data.contains("textColor") && data.value("textColor").type() == QVariant::List)
         setTextColor(Utils::listToColor(data.value("textColor").toList()));
-
-    this->blockNotifications(false);
-}
-
-void Character::load(const QVariantMap& data)
-{
-    Image::load(data);
-    _load(data);
 }
 
 void Character::init(const QString& name)
