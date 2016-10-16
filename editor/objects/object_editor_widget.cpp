@@ -404,13 +404,13 @@ void ObjectEditorWidget::onEventItemRemoved(int index)
     QString name = sender()->objectName();
 
     if (name == "MousePressComboBox") {
-        object->removeEventActionAt(Interaction::MousePress, index);
+        object->removeEventActionAt(Interaction::MousePress, index, true);
     }
     else if (name == "MouseReleaseComboBox") {
-        object->removeEventActionAt(Interaction::MouseRelease, index);
+        object->removeEventActionAt(Interaction::MouseRelease, index, true);
     }
     else if (name == "MouseMoveComboBox") {
-        object->removeEventActionAt(Interaction::MouseMove, index);
+        object->removeEventActionAt(Interaction::MouseMove, index, true);
     }
 }
 

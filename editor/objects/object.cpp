@@ -465,7 +465,7 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
    if (index >= 0 && index < actions.size()) {
        Action* action = actions.takeAt(index);
        if (del && action->parent() == this)
-            action->deleteLater();
+           delete action;
        mEventToActions.insert(event, actions);
 
        /*if (mSync) {
