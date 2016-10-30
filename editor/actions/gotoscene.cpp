@@ -28,8 +28,23 @@ GoToScene::GoToScene(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-
+    loadInternal(data);
     connect(Belle::instance(), SIGNAL(projectLoaded()), this, SLOT(updateTargetScene()), Qt::UniqueConnection);
+}
+
+void GoToScene::init()
+{
+    setType(GameObjectMetaType::GoToScene);
+    setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
+    mTargetSceneName = "";
+    mTargetScene = 0;
+    mMetaTarget = None;
+}
+
+void GoToScene::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
 
     //targetType is now deprecated. Remove at some point.
     if (data.contains("targetType") && data.value("targetType").canConvert(QVariant::Int)) {
@@ -48,15 +63,6 @@ GoToScene::GoToScene(const QVariantMap& data, QObject *parent) :
             setTargetScene(data.value("target").toString());
         }
     }
-}
-
-void GoToScene::init()
-{
-    setType(GameObjectMetaType::GoToScene);
-    setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
-    mTargetSceneName = "";
-    mTargetScene = 0;
-    mMetaTarget = None;
 }
 
 void GoToScene::updateTargetScene()

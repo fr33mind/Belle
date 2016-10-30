@@ -26,12 +26,7 @@ Fade::Fade(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-
-    if (data.contains("fadeType") && data.value("fadeType").type() == QVariant::String)
-        setFadeType(data.value("fadeType").toString());
-
-    if (data.contains("duration") && data.value("duration").canConvert(QVariant::Double))
-        mDuration = data.value("duration").toDouble();
+    loadInternal(data);
 }
 
 void Fade::init()
@@ -41,6 +36,18 @@ void Fade::init()
     Interaction::MouseMove);
     setFadeType(Fade::Out);
     mDuration = 1;
+}
+
+void Fade::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("fadeType") && data.value("fadeType").type() == QVariant::String)
+        setFadeType(data.value("fadeType").toString());
+
+    if (data.contains("duration") && data.value("duration").canConvert(QVariant::Double))
+        mDuration = data.value("duration").toDouble();
 }
 
 Fade::Type Fade::fadeType()

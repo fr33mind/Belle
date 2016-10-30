@@ -45,6 +45,9 @@ public slots:
     void setCondition(const QString&);
     void updateDisplayText();
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private:
     AbstractCondition* mCondition;
     QList<Action*> mTrueActions;

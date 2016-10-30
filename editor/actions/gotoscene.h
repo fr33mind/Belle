@@ -57,6 +57,9 @@ signals:
 
 public slots:
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private slots:
     void updateTargetScene();
     void removeTargetScene();

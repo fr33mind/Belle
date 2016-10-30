@@ -27,18 +27,7 @@ SetGameVariable::SetGameVariable(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-
-    if (data.contains("variable") && data.value("variable").type() == QVariant::String) {
-        mVariable = data.value("variable").toString();
-    }
-
-    if (data.contains("value") && data.value("value").type() == QVariant::String) {
-        mValue = data.value("value").toString();
-    }
-
-    if (data.contains("operator") && data.value("operator").type() == QVariant::String) {
-        mOperatorIndex = mOperators.indexOf(data.value("operator").toString());
-    }
+    loadInternal(data);
 }
 
 void SetGameVariable::init()
@@ -53,6 +42,24 @@ void SetGameVariable::init()
     mOperators.append("append");
 
     mOperatorIndex = 0;
+}
+
+void SetGameVariable::loadData(const QVariantMap & data, bool internal)
+{
+    if(!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("variable") && data.value("variable").type() == QVariant::String) {
+        mVariable = data.value("variable").toString();
+    }
+
+    if (data.contains("value") && data.value("value").type() == QVariant::String) {
+        mValue = data.value("value").toString();
+    }
+
+    if (data.contains("operator") && data.value("operator").type() == QVariant::String) {
+        mOperatorIndex = mOperators.indexOf(data.value("operator").toString());
+    }
 }
 
 int SetGameVariable::operatorIndex()

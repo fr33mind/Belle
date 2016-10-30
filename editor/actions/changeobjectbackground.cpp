@@ -32,6 +32,30 @@ ChangeObjectBackground::ChangeObjectBackground(const QVariantMap& data, QObject 
     Action(data, parent)
 {
     init();
+    loadInternal(data);
+}
+
+ChangeObjectBackground::~ChangeObjectBackground()
+{
+    restoreSceneObject();
+    releaseImage();
+}
+
+void ChangeObjectBackground::init()
+{
+    setType(GameObjectMetaType::ChangeObjectBackground);
+    setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease | Interaction::MouseMove);
+    mColor = Qt::white;
+    mImage = 0;
+    mImageChangeEnabled = true;
+    mColorChangeEnabled = true;
+    mOpacityChangeEnabled = false;
+}
+
+void ChangeObjectBackground::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
 
     if (data.contains("color") && data.value("color").type() == QVariant::List)
         setColor(Utils::listToColor(data.value("color").toList()));
@@ -50,23 +74,6 @@ ChangeObjectBackground::ChangeObjectBackground(const QVariantMap& data, QObject 
 
     if (data.contains("opacityChangeEnabled") && data.value("opacityChangeEnabled").type() == QVariant::Bool)
         setOpacityChangeEnabled(data.value("opacityChangeEnabled").toBool());
-}
-
-ChangeObjectBackground::~ChangeObjectBackground()
-{
-    restoreSceneObject();
-    releaseImage();
-}
-
-void ChangeObjectBackground::init()
-{
-    setType(GameObjectMetaType::ChangeObjectBackground);
-    setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease | Interaction::MouseMove);
-    mColor = Qt::white;
-    mImage = 0;
-    mImageChangeEnabled = true;
-    mColorChangeEnabled = true;
-    mOpacityChangeEnabled = false;
 }
 
 QVariantMap ChangeObjectBackground::toJsonObject(bool internal) const

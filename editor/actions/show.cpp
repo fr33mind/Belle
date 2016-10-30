@@ -20,10 +20,7 @@ Show::Show(const QVariantMap &data, QObject *parent):
     ChangeVisibility(data, parent)
 {
     init();
-
-    if (data.contains("state") && data.value("state").type() == QVariant::String) {
-        setCharacterState(data.value("state").toString());
-    }
+    loadInternal(data);
 }
 
 Show::Show(QObject *parent):
@@ -37,6 +34,16 @@ void Show::init()
     setType(GameObjectMetaType::Show);
     setToShow(true);
     mCharacterState = "";
+}
+
+void Show::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        ChangeVisibility::loadData(data, internal);
+
+    if (data.contains("state") && data.value("state").type() == QVariant::String) {
+        setCharacterState(data.value("state").toString());
+    }
 }
 
 void Show::setCharacterState(const QString& state)

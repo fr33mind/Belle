@@ -26,18 +26,7 @@ Slide::Slide(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-
-    if (data.contains("destX") && data.value("destX").canConvert(QVariant::String))
-        setDestX(data.value("destX").toString());
-
-    if (data.contains("destY") && data.value("destY").canConvert(QVariant::String))
-        setDestY(data.value("destY").toString());
-
-    if (data.contains("slideType") && data.value("slideType").canConvert(QVariant::String))
-        setSlideType(data.value("slideType").toString());
-
-    if (data.contains("duration") && data.value("duration").canConvert(QVariant::Double))
-        setDuration(data.value("duration").toDouble());
+    loadInternal(data);
 }
 
 
@@ -51,6 +40,24 @@ void Slide::init()
     mDestX = "";
     mDestY = "";
     mDuration = 1;
+}
+
+void Slide::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("destX") && data.value("destX").canConvert(QVariant::String))
+        setDestX(data.value("destX").toString());
+
+    if (data.contains("destY") && data.value("destY").canConvert(QVariant::String))
+        setDestY(data.value("destY").toString());
+
+    if (data.contains("slideType") && data.value("slideType").canConvert(QVariant::String))
+        setSlideType(data.value("slideType").toString());
+
+    if (data.contains("duration") && data.value("duration").canConvert(QVariant::Double))
+        setDuration(data.value("duration").toDouble());
 }
 
 QString Slide::displayText() const

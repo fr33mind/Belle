@@ -79,6 +79,7 @@ protected:
     virtual void loadSceneObject();
     virtual void connectSceneObject();
     virtual void disconnectSceneObject();
+    virtual void loadData(const QVariantMap&, bool internal=false);
 
 signals:
     void sceneObjectChanged(Object*);

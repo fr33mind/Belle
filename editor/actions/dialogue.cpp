@@ -28,6 +28,22 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
     Action(data, parent)
 {
     init();
+    loadInternal(data);
+}
+
+void Dialogue::init()
+{
+    setType(GameObjectMetaType::Dialogue);
+    mCharacter = 0;
+    mText = "";
+    mAppend = false;
+    setMouseClickOnFinish(true);
+}
+
+void Dialogue::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
 
     if (data.contains("character") && data.value("character").type() == QVariant::String) {
         Scene* scene = this->scene();
@@ -49,15 +65,6 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
     }
 
     setMouseClickOnFinish(data.contains("wait"));
-}
-
-void Dialogue::init()
-{
-    setType(GameObjectMetaType::Dialogue);
-    mCharacter = 0;
-    mText = "";
-    mAppend = false;
-    setMouseClickOnFinish(true);
 }
 
 void Dialogue::setCharacter(Character *character)

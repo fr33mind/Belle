@@ -31,11 +31,7 @@ ShowMenu::ShowMenu(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-
-    if (data.contains("object") && data.value("object").type() == QVariant::Map) {
-        Object* object = ResourceManager::instance()->createObject(data.value("object").toMap(), this);
-        setSceneObject(object);
-    }
+    loadInternal(data);
 
     //in case of an invalid Menu object
     if (sceneObject()) {
@@ -56,6 +52,17 @@ void ShowMenu::init()
 {
     setType(GameObjectMetaType::ShowMenu);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
+}
+
+void ShowMenu::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("object") && data.value("object").type() == QVariant::Map) {
+        Object* object = ResourceManager::instance()->createObject(data.value("object").toMap(), this);
+        setSceneObject(object);
+    }
 }
 
 void ShowMenu::setSceneObject(Object * obj)

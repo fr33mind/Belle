@@ -53,6 +53,9 @@ public:
 signals:
     void startPositionChanged(int, int);
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private slots:
     void objectPositionChanged(int, int);
 

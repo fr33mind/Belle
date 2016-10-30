@@ -28,6 +28,18 @@ GetUserInput::GetUserInput(const QVariantMap& data, QObject *parent):
     Action(data, parent)
 {
     init();
+    loadInternal(data);
+}
+
+void GetUserInput::init()
+{
+    setType(GameObjectMetaType::GetUserInput);
+}
+
+void GetUserInput::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
 
     QTextCodec * codec = QTextCodec::codecForName("utf-8");
     if (! codec)
@@ -41,12 +53,6 @@ GetUserInput::GetUserInput(const QVariantMap& data, QObject *parent):
 
     if (data.contains("defaultValue") && data.value("defaultValue").type() == QVariant::String)
         mDefaultValue = codec->toUnicode(data.value("defaultValue").toByteArray());
-
-}
-
-void GetUserInput::init()
-{
-    setType(GameObjectMetaType::GetUserInput);
 }
 
 QString GetUserInput::variable()

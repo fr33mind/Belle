@@ -29,6 +29,25 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
+    loadInternal(data);
+}
+
+Branch::~Branch()
+{
+    if (mCondition)
+        delete mCondition;
+}
+
+void Branch::init()
+{
+    setType(GameObjectMetaType::Branch);
+    mCondition = new ComplexCondition();
+}
+
+void Branch::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
 
     QVariantList actions;
 
@@ -57,18 +76,6 @@ Branch::Branch(const QVariantMap& data, QObject *parent) :
     if (data.contains("condition")) {
         setCondition(ConditionTokenFactory::createCondition(data.value("condition")));
     }
-}
-
-Branch::~Branch()
-{
-    if (mCondition)
-        delete mCondition;
-}
-
-void Branch::init()
-{
-    setType(GameObjectMetaType::Branch);
-    mCondition = new ComplexCondition();
 }
 
 QVariantMap Branch::toJsonObject(bool internal) const

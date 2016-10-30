@@ -26,6 +26,20 @@ Wait::Wait(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
+    loadInternal(data);
+}
+
+void Wait::init()
+{
+    setType(GameObjectMetaType::Wait);
+    setWaitType(Timed);
+    setTime(1);
+}
+
+void Wait::loadData(const QVariantMap & data, bool internal)
+{
+    if  (!internal)
+        Action::loadData(data, internal);
 
     if (data.contains("time") && data.value("time").canConvert(QVariant::Double))
         setTime(data.value("time").toDouble());
@@ -40,15 +54,6 @@ Wait::Wait(const QVariantMap& data, QObject *parent) :
         else
             setWaitType(Wait::MouseClick);
     }
-
-    //setValue(waitTypeToString(mWaitType));
-}
-
-void Wait::init()
-{
-    setType(GameObjectMetaType::Wait);
-    setWaitType(Timed);
-    setTime(1);
 }
 
 void Wait::setTime(double t)

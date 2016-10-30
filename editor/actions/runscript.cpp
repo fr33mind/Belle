@@ -10,6 +10,18 @@ RunScript::RunScript(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
+    loadInternal(data);
+}
+
+void RunScript::init()
+{
+    setType(GameObjectMetaType::RunScript);
+}
+
+void RunScript::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
 
     if (data.contains("script") && data.value("script").type() == QVariant::String) {
         mScript = data.value("script").toString();
@@ -18,11 +30,6 @@ RunScript::RunScript(const QVariantMap& data, QObject *parent) :
     if (data.contains("comment") && data.value("comment").type() == QVariant::String) {
         mComment = data.value("comment").toString();
     }
-}
-
-void RunScript::init()
-{
-    setType(GameObjectMetaType::RunScript);
 }
 
 QVariantMap RunScript::toJsonObject(bool internal) const

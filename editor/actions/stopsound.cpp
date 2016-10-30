@@ -29,11 +29,7 @@ StopSound::StopSound(const QVariantMap& data,QObject *parent) :
     Action(data, parent)
 {
     init();
-
-    if (data.contains("sound") && data.value("sound").type() == QVariant::String)
-        setSound(data.value("sound").toString());
-    if (data.contains("fadeTime") && data.value("fadeTime").type() == QVariant::Double)
-        setFadeTime(data.value("fadeTime").toDouble());
+    loadInternal(data);
 }
 
 void StopSound::init()
@@ -41,6 +37,17 @@ void StopSound::init()
     setType(GameObjectMetaType::StopSound);
     mSound = 0;
     mFadeTime = 0;
+}
+
+void StopSound::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("sound") && data.value("sound").type() == QVariant::String)
+        setSound(data.value("sound").toString());
+    if (data.contains("fadeTime") && data.value("fadeTime").type() == QVariant::Double)
+        setFadeTime(data.value("fadeTime").toDouble());
 }
 
 void StopSound::setSound(const QString & soundName)

@@ -12,15 +12,22 @@ ChangeState::ChangeState(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-
-    if (data.contains("state") && data.value("state").type() == QVariant::String)
-        setState(data.value("state").toString());
+    loadInternal(data);
 }
 
 void ChangeState::init()
 {
     setType(GameObjectMetaType::ChangeState);
     mState = "";
+}
+
+void ChangeState::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("state") && data.value("state").type() == QVariant::String)
+        setState(data.value("state").toString());
 }
 
 QString ChangeState::displayText() const

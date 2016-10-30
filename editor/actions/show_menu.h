@@ -34,6 +34,9 @@ public:
 
 signals:
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private slots:
     void updateDisplayText();
 

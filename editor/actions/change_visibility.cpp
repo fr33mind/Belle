@@ -36,6 +36,25 @@ ChangeVisibility::ChangeVisibility(const QVariantMap& data, QObject *parent) :
     else
         init(true);
 
+    loadInternal(data);
+}
+
+void ChangeVisibility::init(bool show)
+{
+    mToShow = show;
+    setType(mToShow ? GameObjectMetaType::Show : GameObjectMetaType::Hide);
+    mFadeAction = 0;
+    mSlideAction = 0;
+    setDescription(name() + "...");
+    setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |
+    Interaction::MouseMove);
+}
+
+void ChangeVisibility::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
     if (data.contains("transitions") && data.value("transitions").type() == QVariant::List ) {
         QVariantList transitions = data.value("transitions").toList();
         for(int i=0; i <transitions.size(); i++ ) {
@@ -48,17 +67,6 @@ ChangeVisibility::ChangeVisibility(const QVariantMap& data, QObject *parent) :
                 mSlideAction = qobject_cast<Slide*>(GameObjectFactory::createAction(data, this));
         }
     }
-}
-
-void ChangeVisibility::init(bool show)
-{
-    mToShow = show;
-    setType(mToShow ? GameObjectMetaType::Show : GameObjectMetaType::Hide);
-    mFadeAction = 0;
-    mSlideAction = 0;
-    setDescription(name() + "...");
-    setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease |
-    Interaction::MouseMove);
 }
 
 QString ChangeVisibility::displayText() const

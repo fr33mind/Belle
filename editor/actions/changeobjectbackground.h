@@ -52,6 +52,7 @@ public:
 protected:
     virtual void loadSceneObject();
     virtual void restoreSceneObject();
+    virtual void loadData(const QVariantMap&, bool internal=false);
 
 private:
     void _loadSceneObject();

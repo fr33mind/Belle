@@ -32,12 +32,7 @@ ChangeBackground::ChangeBackground(const QVariantMap & data, QObject *parent):
     Action(data, parent)
 {
     init();
-    if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String)
-        setBackgroundImage(data.value("backgroundImage").toString());
-
-    if (data.contains("backgroundColor") && data.value("backgroundColor").type() == QVariant::List)
-        setBackgroundColor(Utils::listToColor(data.value("backgroundColor").toList()));
-
+    loadInternal(data);
 }
 
 ChangeBackground::~ChangeBackground()
@@ -50,6 +45,18 @@ void ChangeBackground::init()
     setType(GameObjectMetaType::ChangeBackground);
 
     mBackgroundImage = 0;
+}
+
+void ChangeBackground::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String)
+        setBackgroundImage(data.value("backgroundImage").toString());
+
+    if (data.contains("backgroundColor") && data.value("backgroundColor").type() == QVariant::List)
+        setBackgroundColor(Utils::listToColor(data.value("backgroundColor").toList()));
 }
 
 void ChangeBackground::setBackgroundImage(const QString & background)

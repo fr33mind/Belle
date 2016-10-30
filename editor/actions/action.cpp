@@ -33,27 +33,13 @@ Action::Action(const QVariantMap& data, QObject *parent) :
     GameObject(data, parent)
 {
     init();
-    if (data.contains("object") && data.value("object").type() == QVariant::String) {
-        mObjectName = data.value("object").toString();
+    loadInternal(data);
 
-        //check if parent is the target object
-        Object* obj = qobject_cast<Object*>(parent);
-        if (obj && obj->name() == mObjectName) {
-            mObject = obj;
-        }
-
-        if (! mObject) {
-            Scene * scene = this->scene();
-            if (scene)
-                connect(scene, SIGNAL(loaded()), this, SLOT(sceneLoaded()));
-        }
+    if (!mObject && !mObjectName.isEmpty()) {
+        Scene * scene = this->scene();
+        if (scene)
+            connect(scene, SIGNAL(loaded()), this, SLOT(sceneLoaded()), Qt::UniqueConnection);
     }
-
-    if (data.contains("skippable") && data.value("skippable").type() == QVariant::Bool) {
-        mAllowSkipping = data.value("skippable").toBool();
-    }
-
-    setMouseClickOnFinish(data.contains("wait"));
 }
 
 Action::~Action()
@@ -70,6 +56,28 @@ void Action::init()
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
     setType(GameObjectMetaType::Action);
+}
+
+void Action::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        GameObject::loadData(data, internal);
+
+    if (data.contains("object") && data.value("object").type() == QVariant::String) {
+        mObjectName = data.value("object").toString();
+
+        //check if parent is the target object
+        Object* obj = qobject_cast<Object*>(parent());
+        if (obj && obj->name() == mObjectName) {
+            mObject = obj;
+        }
+    }
+
+    if (data.contains("skippable") && data.value("skippable").type() == QVariant::Bool) {
+        mAllowSkipping = data.value("skippable").toBool();
+    }
+
+    setMouseClickOnFinish(data.contains("wait"));
 }
 
 void Action::setTitle(const QString & title)

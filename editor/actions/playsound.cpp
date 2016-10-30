@@ -28,6 +28,21 @@ PlaySound::PlaySound(const QVariantMap& data,QObject *parent) :
     Action(data, parent)
 {
     init();
+    loadInternal(data);
+}
+
+void PlaySound::init()
+{
+    setType(GameObjectMetaType::PlaySound);
+    mVolume = 100;
+    mSound = 0;
+    mLoop = false;
+}
+
+void PlaySound::loadData(const QVariantMap & data, bool internal)
+{
+    if(!internal)
+        Action::loadData(data, internal);
 
     if (data.contains("sound") && data.value("sound").type() == QVariant::String) {
         setSound(data.value("sound").toString());
@@ -38,14 +53,6 @@ PlaySound::PlaySound(const QVariantMap& data,QObject *parent) :
 
     if (data.contains("loop") && data.value("loop").type() == QVariant::Bool)
         mLoop = data.value("loop").toBool();
-}
-
-void PlaySound::init()
-{
-    setType(GameObjectMetaType::PlaySound);
-    mVolume = 100;
-    mSound = 0;
-    mLoop = false;
 }
 
 void PlaySound::setSound(const QString& soundName)

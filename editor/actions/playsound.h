@@ -46,6 +46,9 @@ public:
 
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private slots:
     void onSoundDestroyed();
 

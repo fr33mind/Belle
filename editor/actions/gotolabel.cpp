@@ -29,10 +29,7 @@ GoToLabel::GoToLabel(const QVariantMap& data, QObject *parent) :
     Action(data, parent)
 {
     init();
-
-    if (data.contains("label") && data.value("label").type() == QVariant::String) {
-        setTargetLabel(data.value("label").toString());
-    }
+    loadInternal(data);
 }
 
 void GoToLabel::init()
@@ -41,6 +38,16 @@ void GoToLabel::init()
     mTargetLabel = 0;
     mTargetLabelName = "";
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
+}
+
+void GoToLabel::loadData(const QVariantMap & data, bool internal)
+{
+    if (!internal)
+        Action::loadData(data, internal);
+
+    if (data.contains("label") && data.value("label").type() == QVariant::String) {
+        setTargetLabel(data.value("label").toString());
+    }
 }
 
 void GoToLabel::setTargetLabel(Label* label)

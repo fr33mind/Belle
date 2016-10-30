@@ -49,6 +49,9 @@ signals:
 
 public slots:
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private:
     double mTime;
     WaitType mWaitType;

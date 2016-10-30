@@ -35,6 +35,9 @@ public:
     QString characterState() const;
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
+protected:
+    virtual void loadData(const QVariantMap&, bool internal=false);
+
 private:
     void init();
 };

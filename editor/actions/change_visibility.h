@@ -59,6 +59,7 @@ public:
 
 protected:
     void setToShow(bool);
+    virtual void loadData(const QVariantMap&, bool internal=false);
 
 private:
     void init(bool);
