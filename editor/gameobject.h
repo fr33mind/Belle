@@ -36,6 +36,9 @@ public:
     QList<GameObject*> clones() const;
     bool isResource() const;
 
+    bool blockLoad(bool);
+    bool loadBlocked() const;
+
     void sync();
     void setSync(bool);
     bool isSynced() const;
@@ -74,6 +77,7 @@ private:
     GameObjectMetaType::Type mType;
     QList<GameObject*> mClones;
     GameObjectManager* mManager;
+    bool mLoadBlocked;
 
 signals:
     void destroyed(GameObject*);

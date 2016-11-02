@@ -29,11 +29,12 @@ void GameObject::init()
     mSynced = true;
     mType = GameObjectMetaType::GameObject;
     mManager = 0;
+    mLoadBlocked = false;
 }
 
 void GameObject::load(const QVariantMap & data)
 {
-    if (data.isEmpty())
+    if (mLoadBlocked || data.isEmpty())
         return;
 
     QVariantMap _data = data;
@@ -50,7 +51,7 @@ void GameObject::load(const QVariantMap & data)
 
 void GameObject::loadInternal(const QVariantMap & data)
 {
-    if (data.isEmpty())
+    if (mLoadBlocked || data.isEmpty())
         return;
 
     blockNotifications(true);
@@ -259,7 +260,9 @@ void GameObject::notify(const QString & property, const QVariant & value)
 {
     QVariantMap data;
     data.insert(property, value);
+    bool loadBlocked = blockLoad(true);
     emit dataChanged(data);
+    blockLoad(loadBlocked);
 }
 
 GameObjectManager* GameObject::manager() const
@@ -284,4 +287,16 @@ bool GameObject::isResource() const
         return true;
 
     return false;
+}
+
+bool GameObject::blockLoad(bool block)
+{
+    bool oldBlock = mLoadBlocked;
+    mLoadBlocked = block;
+    return oldBlock;
+}
+
+bool GameObject::loadBlocked() const
+{
+    return mLoadBlocked;
 }
