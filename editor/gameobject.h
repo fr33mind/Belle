@@ -34,6 +34,7 @@ public:
     void addClone(GameObject*);
     bool hasClone(GameObject*);
     QList<GameObject*> clones() const;
+    bool isResource() const;
 
     void sync();
     void setSync(bool);

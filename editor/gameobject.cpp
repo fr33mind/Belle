@@ -1,6 +1,7 @@
 #include "gameobject.h"
 
 #include "scene.h"
+#include "resource_manager.h"
 
 GameObject::GameObject(QObject *parent, const QString& name) :
     QObject(parent)
@@ -271,3 +272,16 @@ void GameObject::setManager(GameObjectManager* manager)
     mManager = manager;
 }
 
+bool GameObject::isResource() const
+{
+    QObject* parent = this->parent();
+
+    if (parent == ResourceManager::instance())
+        return true;
+
+    GameObject* _parent = qobject_cast<GameObject*>(parent);
+    if (_parent && _parent->isResource())
+        return true;
+
+    return false;
+}

@@ -152,9 +152,8 @@ int Object::backgroundOpacity() const
 
 void Object::setBackgroundOpacity(int alpha)
 {
-    int prevAlpha = mBackground.opacity();
     mBackground.setOpacity(alpha);
-    notify("backgroundOpacity", alpha, prevAlpha);
+    notify("backgroundOpacity", mBackground.opacity());
 }
 
 int Object::opacity() const
@@ -175,9 +174,8 @@ void Object::setOpacity(int opacity)
         opacity = 0;
 
     if (opacity != mOpacity){
-        int prevOpacity = mOpacity;
         mOpacity = opacity;
-        notify("opacity", mOpacity, prevOpacity);
+        notify("opacity", mOpacity);
     }
 }
 
@@ -203,7 +201,7 @@ void Object::setWidth(int w, bool percent)
 
     updateResizeRects();
 
-    notify("width", mSceneRect.width(), width);
+    notify("width", mSceneRect.width());
 }
 
 void Object::setHeight(int h, bool percent)
@@ -227,7 +225,7 @@ void Object::setHeight(int h, bool percent)
 
     updateResizeRects();
 
-    notify("height", mSceneRect.height(), height);
+    notify("height", mSceneRect.height());
 }
 
 void Object::setY(int y)
@@ -1110,21 +1108,6 @@ void Object::filterLoadData(QVariantMap &data)
     data.remove("visible");
 }
 
-void Object::notify(const QString & key, const QVariant & value, const QVariant & prev)
-{
-    QVariantMap data;
-    data.insert(key, value);
-    if (prev.isValid())
-        data.insert("previousValue", prev);
-
-    emit dataChanged(data);
-}
-
-bool Object::isResource() const
-{
-    return this->parent() == ResourceManager::instance() ? true : false;
-}
-
 void Object::copyResourceActions(Interaction::InputEvent event)
 {
     QList<Action*> actions = mEventToActions.value(event);
@@ -1309,10 +1292,9 @@ QColor Object::temporaryBackgroundColor() const
 
 void Object::setTemporaryBackgroundOpacity(int alpha)
 {
-    int prevAlpha = mTemporaryBackground.opacity();
-    if (prevAlpha != alpha) {
+    if (mTemporaryBackground.opacity() != alpha) {
         mTemporaryBackground.setOpacity(alpha);
-        notify("temporaryBackgroundOpacity", alpha, prevAlpha);
+        notify("temporaryBackgroundOpacity", mTemporaryBackground.opacity());
     }
 }
 

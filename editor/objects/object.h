@@ -141,8 +141,6 @@ class Object : public GameObject
 
         void filterResourceData(QVariantMap&) const;
 
-        bool isResource() const;
-
         bool hasObjectAsParent();
         bool keepAspectRatio();
         void setKeepAspectRatio(bool);
@@ -199,7 +197,6 @@ class Object : public GameObject
         Padding mPadding;
         QList<QRect> mPreviousSceneRects;
         QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
-        void notify(const QString&, const QVariant&, const QVariant& prev=QVariant());
         void updateAspectRatio();
         virtual void connectToResource();
         virtual void loadData(const QVariantMap&, bool internal=false);
