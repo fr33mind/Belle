@@ -420,9 +420,12 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
         if (mEventToActions.contains(event))
             actions = mEventToActions.value(event);
 
+        GameObject* resource = this->resource();
         //copy action if it comes from the resource
-        if (resource() && action->parent() == resource()) {
+        if (resource && action->parent() == resource) {
             newAction = GameObjectFactory::createAction(action->toJsonObject(), this);
+            if (action->sceneObject() == resource)
+                newAction->setSceneObject(this);
             newAction->setResource(action);
             action = newAction;
         }
