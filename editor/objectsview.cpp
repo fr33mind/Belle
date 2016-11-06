@@ -55,7 +55,7 @@ void ObjectsView::addObject(Object * object)
     int rowCount = item->rowCount() ? item->rowCount()-1 : 0;
     item = item->child(rowCount);
     item->setEditable(false);
-    item->setData(qVariantFromValue((void*) object));
+    item->setData(QVariant::fromValue((void*) object));
     connect(object, SIGNAL(nameChanged(const QString&)), this, SLOT(objectNameChanged(const QString&)));
     connect(object, SIGNAL(destroyed(QObject*)), this, SLOT(removeObject(QObject*)));
 }

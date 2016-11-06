@@ -282,19 +282,19 @@ void ObjectEditorWidget::updateEventActions(Object* object)
     actions = object->actionsForEvent(Interaction::MousePress);
     for(int i=0; i < actions.size(); i++) {
         action = actions[i];
-        mMousePressComboBox->addItem(typeIcon, action->toString(), qVariantFromValue(qobject_cast<QObject*>(action)));
+        mMousePressComboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(qobject_cast<QObject*>(action)));
     }
 
     actions = object->actionsForEvent(Interaction::MouseRelease);
     for(int i=0; i < actions.size(); i++) {
         action = actions[i];
-        mMouseReleaseComboBox->addItem(typeIcon, action->toString(), qVariantFromValue(qobject_cast<QObject*>(action)));
+        mMouseReleaseComboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(qobject_cast<QObject*>(action)));
     }
 
     actions = object->actionsForEvent(Interaction::MouseMove);
     for(int i=0; i < actions.size(); i++) {
         action = actions[i];
-        mMouseMoveComboBox->addItem(typeIcon, action->toString(), qVariantFromValue(qobject_cast<QObject*>(action)));
+        mMouseMoveComboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(qobject_cast<QObject*>(action)));
     }
 }
 
@@ -315,7 +315,7 @@ void ObjectEditorWidget::onAddItemActivated()
         if(comboBox) {
             const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
             const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
-            comboBox->addItem(typeIcon, action->toString(), qVariantFromValue(static_cast<QObject*>(action)));
+            comboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(static_cast<QObject*>(action)));
         }
     }
 }
