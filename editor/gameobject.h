@@ -22,7 +22,6 @@ public:
 
     GameObjectMetaType::Type type() const;
 
-    bool setName(const QString&);
     QString name() const;
 
     void setNameEditable(bool);
@@ -51,6 +50,7 @@ public:
 public slots:
     void load(const QVariantMap&);
     void removeClone(GameObject*);
+    bool setName(const QString&);
 
 private slots:
     void resourceDestroyed();
