@@ -157,14 +157,17 @@ class Object : public GameObject
         void onParentResized(int, int);
         void appendEventAction(Interaction::InputEvent, Action*);
         void insertEventAction(Interaction::InputEvent, int, Action*);
-        void removeEventAction(Interaction::InputEvent, Action *);
+        void removeEventAction(Interaction::InputEvent, Action *, bool del=false);
+
+    private slots:
+        void removeEventActionSync(Interaction::InputEvent, Action *, bool del=false);
 
 //    private slots:
 //        void eventActionChanged();
 
     signals:
         void eventActionAdded(Interaction::InputEvent, Action*);
-        void eventActionRemoved(Interaction::InputEvent, Action*);
+        void eventActionRemoved(Interaction::InputEvent, Action*, bool);
         void positionChanged(int, int);
         void resized(int, int);
         void destroyed(Object* object=0);
@@ -180,6 +183,9 @@ class Object : public GameObject
         int parentHeight() const;
         void updateScaledBackgroundImage();
         void replaceEventActions(Interaction::InputEvent, const QList<Action*> &);
+        void addEventActions(Interaction::InputEvent, const QVariantList&);
+        void clearEventActions(Interaction::InputEvent, const QList<Action*>&);
+        void connectEventActions(Interaction::InputEvent, Object*);
         void copyResourceActions(Interaction::InputEvent);
         void sync();
         void unsync();

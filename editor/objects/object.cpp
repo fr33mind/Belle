@@ -385,20 +385,47 @@ Object* Object::copy()
     return ResourceManager::instance()->createObject(toJsonObject(true), this->parent());
 }
 
-void Object::replaceEventActions(Interaction::InputEvent event, const QList<Action*>& actions)
+void Object::addEventActions(Interaction::InputEvent event, const QVariantList & actions)
 {
-    QList<Action*> delActions;
-    QList<Action*> currActions = mEventToActions.value(event);
-    for(int i=0; i < currActions.size(); i++) {
-        if (! actions.contains(currActions[i])) {
-            delActions.append(currActions[i]);
+    QList<Action*> newActions;
+    Action* action = 0;
+    QVariantMap actionData;
+
+    for(int i=0; i < actions.size(); i++) {
+        if (actions[i].type() == QVariant::Map) {
+            actionData = actions[i].toMap();
+            action = GameObjectFactory::createAction(actionData, this);
+            newActions.append(action);
+        }
+        else if (actions[i].type() == QMetaType::QObjectStar) {
+            action = actions[i].value<Action*>();
+            if (action) {
+                action = GameObjectFactory::createAction(action->toJsonObject(), this);
+                if (action)
+                    newActions.append(action);
+            }
         }
     }
 
-    for(int i=0; i < delActions.size(); i++) {
-        removeEventAction(event, delActions[i]);
+    replaceEventActions(event, newActions);
+}
+
+void Object::clearEventActions(Interaction::InputEvent event, const QList<Action *> & newActions)
+{
+    QList<Action*> currActions = mEventToActions.value(event);
+    for(int i=currActions.size()-1; i >= 0; i--) {
+        if (newActions.contains(currActions.at(i)))
+            removeEventActionAt(event, i, false);
+        else
+            removeEventActionAt(event, i, true);
     }
 
+    mEventToActions.insert(event, QList<Action*>());
+}
+
+void Object::replaceEventActions(Interaction::InputEvent event, const QList<Action*>& actions)
+{
+    clearEventActions(event, actions);
     mEventToActions.insert(event, actions);
 }
 
@@ -424,9 +451,8 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
         //copy action if it comes from the resource
         if (resource && action->parent() == resource) {
             newAction = GameObjectFactory::createAction(action->toJsonObject(), this);
-            if (action->sceneObject() == resource)
-                newAction->setSceneObject(this);
             newAction->setResource(action);
+            connect(this, SIGNAL(syncChanged(bool)), newAction, SLOT(setSync(bool)));
             action = newAction;
         }
 
@@ -445,47 +471,34 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
         if (isSynced() && isResource()) {
             emit eventActionInserted(event, index, action);
         }
-
-        /*if (mSync) {
-            if (mResource)
-                action->setParent(mResource);
-
-            QVariantList actionsVariant;
-            for(int i=0; i < actions.size(); i++) {
-                actionsVariant.append(qVariantFromValue((QObject*)actions[i]));
-            }
-
-            this->notify(Interaction::toString(event), actionsVariant);
-        }*/
     }
 }
 
 void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool del)
 {
+   if (loadBlocked())
+       return;
+
    QList<Action*> actions = mEventToActions.value(event);
    if (index >= 0 && index < actions.size()) {
        Action* action = actions.takeAt(index);
-       if (del && action->parent() == this)
-           delete action;
        mEventToActions.insert(event, actions);
 
-       /*if (mSync) {
-           QVariantList actionsVariant;
-           for(int i=0; i < actions.size(); i++) {
-               actionsVariant.append(qVariantFromValue((QObject*)actions[i]));
-           }
+       bool loadBlocked = blockLoad(true);
+       emit eventActionRemoved(event, action, del);
+       blockLoad(loadBlocked);
 
-           this->notify(Interaction::toString(event), actionsVariant);
-       }*/
+       if (del && action && action->parent() == this)
+           delete action;
    }
 }
 
-void Object::removeEventAction(Interaction::InputEvent event, Action* action)
+void Object::removeEventAction(Interaction::InputEvent event, Action* action, bool del)
 {
     if (! action)
         return;
     QList<Action*> actions = mEventToActions.value(event);
-    this->removeEventActionAt(event, actions.indexOf(action));
+    this->removeEventActionAt(event, actions.indexOf(action), del);
 }
 
 void Object::removeEventActions(Interaction::InputEvent event, bool del)
@@ -500,6 +513,23 @@ void Object::removeEventActions(Interaction::InputEvent event, bool del)
 
     actions.clear();
     mEventToActions.insert(event, actions);
+}
+
+void Object::removeEventActionSync(Interaction::InputEvent event, Action * action, bool del)
+{
+    if (!action)
+        return;
+
+    if (isResource()) {
+        removeEventAction(event, qobject_cast<Action*>(action->resource()), del);
+    }
+    else {
+        QList<Action*> actions = mEventToActions.value(event);
+        foreach(Action* _action, actions) {
+            if (_action && _action->resource() == action)
+                removeEventAction(event, _action, del);
+        }
+    }
 }
 
 void Object::setBackgroundImage(const QString & path)
@@ -578,26 +608,28 @@ QVariantMap Object::toJsonObject(bool internal) const
 
     QVariantList jsonActions;
     QList<Action*> actions = mEventToActions.value(Interaction::MousePress);
-    /*if (internal) {
+    if (internal) {
         for(int i=0; i < actions.size(); i++)
-            jsonActions.append(qVariantFromValue((QObject*)actions[i]));
-    }*/
-
-    for(int i=0; i < actions.size(); i++)
-        jsonActions.append(actions[i]->toJsonObject(internal));
+            jsonActions.append(QVariant::fromValue(qobject_cast<QObject*>(actions[i])));
+    }
+    else {
+        for(int i=0; i < actions.size(); i++)
+            jsonActions.append(actions[i]->toJsonObject(internal));
+    }
 
     if (jsonActions.size() || internal)
         object.insert("onMousePress", jsonActions);
 
     jsonActions.clear();
     actions = mEventToActions.value(Interaction::MouseRelease);
-    /*if (internal) {
+    if (internal) {
         for(int i=0; i < actions.size(); i++)
-            jsonActions.append(qVariantFromValue((QObject*)actions[i]));
-    }*/
-
-    for(int i=0; i < actions.size(); i++)
-        jsonActions.append(actions[i]->toJsonObject(internal));
+            jsonActions.append(QVariant::fromValue(qobject_cast<QObject*>(actions[i])));
+    }
+    else {
+        for(int i=0; i < actions.size(); i++)
+            jsonActions.append(actions[i]->toJsonObject(internal));
+    }
 
     if (jsonActions.size() || internal)
         object.insert("onMouseRelease", jsonActions);
@@ -605,13 +637,14 @@ QVariantMap Object::toJsonObject(bool internal) const
     jsonActions.clear();
     actions = mEventToActions.value(Interaction::MouseMove);
 
-    /*if (internal) {
+    if (internal) {
         for(int i=0; i < actions.size(); i++)
-            jsonActions.append(qVariantFromValue((QObject*)actions[i]));
-    }*/
-
-    for(int i=0; i < actions.size(); i++)
-        jsonActions.append(actions[i]->toJsonObject(internal));
+            jsonActions.append(QVariant::fromValue(qobject_cast<QObject*>(actions[i])));
+    }
+    else {
+        for(int i=0; i < actions.size(); i++)
+            jsonActions.append(actions[i]->toJsonObject(internal));
+    }
 
     if (jsonActions.size() || internal)
         object.insert("onMouseMove", jsonActions);
@@ -1037,61 +1070,15 @@ void Object::loadData(const QVariantMap &data, bool internal)
 
 
     if (data.contains("onMouseMove") && data.value("onMouseMove").type() == QVariant::List) {
-        actions.clear();
-        eventActions = data.value("onMouseMove").toList();
-        for(int i=0; i < eventActions.size(); i++) {
-            action = 0;
-            if (eventActions[i].type() == QVariant::Map) {
-                actionData = eventActions[i].toMap();
-                action = GameObjectFactory::createAction(actionData, this);
-            }
-            else if (eventActions[i].type() == QMetaType::QObjectStar) {
-                action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
-            }
-
-            if (action)
-                actions.append(action);
-        }
-
-        replaceEventActions(Interaction::MouseMove, actions);
+        addEventActions(Interaction::MouseMove, data.value("onMouseMove").toList());
     }
 
     if (data.contains("onMousePress") && data.value("onMousePress").type() == QVariant::List) {
-        actions.clear();
-        eventActions = data.value("onMousePress").toList();
-
-        for(int i=0; i < eventActions.size(); i++) {
-            if (eventActions[i].type() == QVariant::Map) {
-                actionData = eventActions[i].toMap();
-                action = GameObjectFactory::createAction(actionData, this);
-            }
-            else if (eventActions[i].type() == QMetaType::QObjectStar) {
-                action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
-            }
-
-            if (action)
-                actions.append(action);
-        }
-        replaceEventActions(Interaction::MousePress, actions);
+        addEventActions(Interaction::MousePress, data.value("onMousePress").toList());
     }
 
     if (data.contains("onMouseRelease") && data.value("onMouseRelease").type() == QVariant::List) {
-        actions.clear();
-        eventActions = data.value("onMouseRelease").toList();
-
-        for(int i=0; i < eventActions.size(); i++) {
-            if (eventActions[i].type() == QVariant::Map) {
-                actionData = eventActions[i].toMap();
-                action = GameObjectFactory::createAction(actionData, this);
-            }
-            else if (eventActions[i].type() == QMetaType::QObjectStar) {
-                action = qobject_cast<Action*>(eventActions[i].value<QObject*>());
-            }
-
-            if (action)
-                actions.append(action);
-        }
-        replaceEventActions(Interaction::MouseRelease, actions);
+        addEventActions(Interaction::MouseRelease, data.value("onMouseRelease").toList());
     }
 
     if (data.contains("borderWidth") && data.value("borderWidth").canConvert(QVariant::Int))
@@ -1250,7 +1237,33 @@ void Object::connectToResource()
     GameObject::connectToResource();
     Object * resource = qobject_cast<Object*>(this->resource());
     if (resource) {
-        connect(resource, SIGNAL(eventActionInserted(Interaction::InputEvent,int,Action*)), this, SLOT(insertEventAction(Interaction::InputEvent,int,Action*)));
+        connect(resource, SIGNAL(eventActionInserted(Interaction::InputEvent,int,Action*)), this, SLOT(insertEventAction(Interaction::InputEvent,int,Action*)), Qt::UniqueConnection);
+        connect(this, SIGNAL(eventActionRemoved(Interaction::InputEvent,Action*,bool)), resource, SLOT(removeEventActionSync(Interaction::InputEvent,Action*,bool)), Qt::UniqueConnection);
+        connect(resource, SIGNAL(eventActionRemoved(Interaction::InputEvent,Action*,bool)), this, SLOT(removeEventActionSync(Interaction::InputEvent,Action*,bool)), Qt::UniqueConnection);
+        connectEventActions(Interaction::MouseMove, resource);
+        connectEventActions(Interaction::MousePress, resource);
+        connectEventActions(Interaction::MouseRelease, resource);
+    }
+}
+
+void Object::connectEventActions(Interaction::InputEvent event, Object * resource)
+{
+    if (!resource)
+        return;
+
+    QList<Action*> resActions, currActions;
+    resActions = resource->actionsForEvent(event);
+    currActions = actionsForEvent(event);
+
+    for(int i=0; i < resActions.size() && i < currActions.size(); i++) {
+        if (!resActions.at(i) || !currActions.at(i))
+            break;
+
+        if (resActions.at(i)->type() != currActions.at(i)->type())
+            break;
+
+        currActions.at(i)->setResource(resActions.at(i));
+        connect(this, SIGNAL(syncChanged(bool)), currActions.at(i), SLOT(setSync(bool)));
     }
 }
 
