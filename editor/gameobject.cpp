@@ -139,15 +139,19 @@ bool GameObject::nameEditable() const
 
 void GameObject::setResource(GameObject * resource)
 {
-    if (! resource || resource == mResource)
+    if (resource == mResource)
         return;
 
-    if (mResource)
-        mResource->disconnect(this);
-
+    disconnectFromResource();
     mResource = resource;
-    mResource->addClone(this);
-    connectToResource();
+
+    if (mResource) {
+        mResource->addClone(this);
+        connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()), Qt::UniqueConnection);
+        connect(this, SIGNAL(destroyed(GameObject*)), mResource, SLOT(removeClone(GameObject*)), Qt::UniqueConnection);
+        if (mSynced)
+            connectToResource();
+    }
 }
 
 GameObject* GameObject::resource() const
@@ -207,11 +211,14 @@ void GameObject::setSync(bool sync)
         connectToResource();
     else
         disconnectFromResource();
+
+    emit syncChanged(sync);
 }
 
 void GameObject::sync()
 {
-    load(mResource->toJsonObject());
+    if (mResource)
+        load(mResource->toJsonObject());
 }
 
 bool GameObject::isSynced() const
@@ -222,13 +229,8 @@ bool GameObject::isSynced() const
 void GameObject::connectToResource()
 {
     if (mResource) {
-        if (mSynced) {
-            connect(mResource, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
-            connect(this, SIGNAL(dataChanged(const QVariantMap&)), mResource, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
-        }
-
-        connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()), Qt::UniqueConnection);
-        connect(this, SIGNAL(destroyed(GameObject*)), mResource, SLOT(removeClone(GameObject*)), Qt::UniqueConnection);
+        connect(mResource, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
+        connect(this, SIGNAL(dataChanged(const QVariantMap&)), mResource, SLOT(load(const QVariantMap&)), Qt::UniqueConnection);
     }
 }
 

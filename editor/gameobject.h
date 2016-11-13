@@ -39,7 +39,6 @@ public:
     bool loadBlocked() const;
 
     void sync();
-    void setSync(bool);
     bool isSynced() const;
 
     Scene* scene() const;
@@ -51,6 +50,7 @@ public slots:
     void load(const QVariantMap&);
     void removeClone(GameObject*);
     bool setName(const QString&);
+    void setSync(bool);
 
 private slots:
     void resourceDestroyed();
@@ -83,6 +83,7 @@ signals:
     void destroyed(GameObject*);
     void dataChanged(const QVariantMap&data=QVariantMap());
     void nameChanged(const QString&);
+    void syncChanged(bool);
 
 public slots:
 
