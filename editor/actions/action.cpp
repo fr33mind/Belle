@@ -286,3 +286,39 @@ void Action::disconnectSceneObject()
     if (mObject)
         mObject->disconnect(this);
 }
+
+void Action::connectToResource()
+{
+    GameObject::connectToResource();
+    Action* resource =  qobject_cast<Action*>(this->resource());
+    if (!resource)
+        return;
+
+    //TODO: Add an option to check if we should connect names aswell
+    connect(this, SIGNAL(nameChanged(const QString&)), resource, SLOT(setName(const QString&)));
+    connect(resource, SIGNAL(nameChanged(const QString&)), this, SLOT(setName(const QString&)));
+
+    if (!mObject && resource->isParentTargeted()) {
+        setSceneObject(parentObject());
+    }
+}
+
+Object* Action::parentObject() const
+{
+    Object* parent = 0;
+    QObject* obj = this->parent();
+
+    while(obj) {
+        parent = qobject_cast<Object*>(obj);
+        if (parent)
+            break;
+        obj = obj->parent();
+    }
+
+    return parent;
+}
+
+bool Action::isParentTargeted() const
+{
+    return parentObject() == sceneObject();
+}

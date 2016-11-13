@@ -74,12 +74,16 @@ public:
     virtual void focusIn();
     virtual void focusOut();
 
+    Object* parentObject() const;
+    bool isParentTargeted() const;
+
 protected:
     virtual void restoreSceneObject();
     virtual void loadSceneObject();
     virtual void connectSceneObject();
     virtual void disconnectSceneObject();
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void connectToResource();
 
 signals:
     void sceneObjectChanged(Object*);
