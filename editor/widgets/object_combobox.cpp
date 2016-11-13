@@ -32,9 +32,11 @@ void ObjectComboBox::loadFromAction(Action * action)
     this->clear();
     int currIndex = -1, pindex = -1;
 
-    this->loadFromScene(action->scene());
+    //only load from scene if action is not synced to any resource
+    if (!action->isSynced() || !action->resource())
+        this->loadFromScene(action->scene());
 
-    Object* parent = qobject_cast<Object*>(action->parent());
+    Object* parent = action->parentObject();
     if (parent) {
         pindex = mObjects.indexOf(parent);
         if (pindex == -1) {
