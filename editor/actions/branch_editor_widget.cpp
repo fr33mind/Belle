@@ -63,7 +63,7 @@ void BranchEditorWidget::updateData(GameObject* action)
     if (! branch)
         return;
 
-    connect(mConditionEdit, SIGNAL(conditionChanged()), branch, SLOT(updateDisplayText()), Qt::UniqueConnection);
+    connect(mConditionEdit, SIGNAL(conditionChanged()), branch, SLOT(onConditionChanged()), Qt::UniqueConnection);
     connect(mConditionEdit, SIGNAL(conditionChanged(AbstractCondition*)), branch, SLOT(setCondition(AbstractCondition*)), Qt::UniqueConnection);
 
     mTrueActionsChooser->clear();

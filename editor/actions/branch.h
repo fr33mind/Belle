@@ -35,8 +35,6 @@ public:
     virtual QVariantMap toJsonObject(bool internal=true) const;
     QList<Action*> actions(bool) const;
     Action* action(int, bool) const;
-    void appendAction(Action*, bool);
-    void removeAction(int, bool, bool del = false);
 
 signals:
     
@@ -44,16 +42,21 @@ public slots:
     void setCondition(AbstractCondition*);
     void setCondition(const QString&);
     void updateDisplayText();
+    void appendAction(Action*, bool);
+    void removeAction(int, bool, bool del = false);
+    void removeAction(Action*, bool, bool del=false);
+    void onConditionChanged();
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void connectToResource();
 
 private:
     AbstractCondition* mCondition;
     QList<Action*> mTrueActions;
     QList<Action*> mFalseActions;
     void init();
-    
+    void connectActions(Branch*, bool);
 };
 
 #endif // BRANCH_H

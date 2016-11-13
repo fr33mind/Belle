@@ -76,6 +76,46 @@ void Branch::loadData(const QVariantMap & data, bool internal)
     if (data.contains("condition")) {
         setCondition(ConditionTokenFactory::createCondition(data.value("condition")));
     }
+
+    //internal data passed between resources and clones
+    if (data.contains("_appendAction") && data.value("_appendAction").type() == QVariant::Map) {
+        QVariantMap actionMap = data.value("_appendAction").toMap();
+        QVariant actionData = actionMap.value("actionData");
+        QVariant condition = actionMap.value("condition");
+        Action* newAction = 0;
+        Action* action = actionMap.value("action").value<Action*>();
+
+        if (action && actionData.type() == QVariant::Map && condition.type() == QVariant::Bool) {
+            newAction = GameObjectFactory::createAction(actionData.toMap(), this);
+            if(action->isResource())
+                newAction->setResource(action);
+            else if (isResource())
+                action->setResource(newAction);
+
+            appendAction(newAction, condition.toBool());
+        }
+    }
+
+    if (data.contains("_removeAction") && data.value("_removeAction").type() == QVariant::Map) {
+        QVariantMap actionMap = data.value("_removeAction").toMap();
+        QVariant condition = actionMap.value("condition");
+        bool del = actionMap.value("delete", false).toBool();
+        Action* action = actionMap.value("action").value<Action*>();
+
+        if (action && condition.type() == QVariant::Bool) {
+            bool cond = condition.toBool();
+            if (isResource()) {
+                removeAction(qobject_cast<Action*>(action->resource()), cond, del);
+            }
+            else {
+                QList<Action*> _actions = this->actions(cond);
+                foreach(Action* _action, _actions) {
+                    if (_action && _action->resource() == action)
+                        removeAction(_action, cond, del);
+                }
+            }
+        }
+    }
 }
 
 QVariantMap Branch::toJsonObject(bool internal) const
@@ -101,6 +141,36 @@ QVariantMap Branch::toJsonObject(bool internal) const
     return data;
 }
 
+void Branch::connectToResource()
+{
+    Action::connectToResource();
+    Branch * resource = qobject_cast<Branch*>(this->resource());
+    if (resource) {
+        connectActions(resource, true);
+        connectActions(resource, false);
+    }
+}
+
+void Branch::connectActions(Branch* resource, bool cond)
+{
+    if (!resource)
+        return;
+
+    QList<Action*> resActions, currActions;
+    resActions = resource->actions(cond);
+    currActions = actions(cond);
+
+    for(int i=0; i < resActions.size() && i < currActions.size(); i++) {
+        if (!currActions.at(i) || !resActions.at(i))
+            continue;
+
+        if (currActions.at(i)->type() == resActions.at(i)->type()) {
+            currActions.at(i)->setResource(resActions.at(i));
+            connect(this, SIGNAL(syncChanged(bool)), currActions.at(i), SLOT(setSync(bool)));
+        }
+    }
+}
+
 AbstractCondition* Branch::condition() const
 {
     return mCondition;
@@ -115,6 +185,11 @@ void Branch::setCondition(AbstractCondition *condition)
         delete mCondition;
     mCondition = condition;
     updateDisplayText();
+
+    QVariantMap data;
+    if (mCondition)
+        data = mCondition->toMap();
+    notify("condition", data);
 }
 
 void Branch::setCondition(const QString& condition)
@@ -131,11 +206,22 @@ QList<Action*> Branch::actions(bool cond) const
 
 void Branch::appendAction(Action* action, bool cond)
 {
+    if (!action)
+        return;
+
     if (cond)
         mTrueActions.append(action);
     else
         mFalseActions.append(action);
+
+    connect(this, SIGNAL(syncChanged(bool)), action, SLOT(setSync(bool)));
     updateDisplayText();
+
+    QVariantMap data;
+    data.insert("action", QVariant::fromValue(qobject_cast<QObject*>(action)));
+    data.insert("actionData", action->toJsonObject());
+    data.insert("condition", cond);
+    notify("_appendAction", data);
 }
 
 Action* Branch::action(int index, bool cond) const
@@ -151,6 +237,9 @@ Action* Branch::action(int index, bool cond) const
 }
 
 void Branch::removeAction(int index, bool cond, bool del){
+    if (loadBlocked())
+        return;
+
     Action* action = 0;
 
     if (cond) {
@@ -160,8 +249,31 @@ void Branch::removeAction(int index, bool cond, bool del){
     else if (index < mFalseActions.size())
         action = mFalseActions.takeAt(index);
 
-    if (action && del)
-        action->deleteLater();
+    if (action) {
+        action->disconnect(this);
+        disconnect(action);
+
+        QVariantMap data;
+        data.insert("action", QVariant::fromValue(qobject_cast<QObject*>(action)));
+        data.insert("condition", cond);
+        data.insert("delete", del);
+        notify("_removeAction", data);
+
+        if (del)
+            delete action;
+    }
+}
+
+void Branch::removeAction(Action* action, bool cond, bool del)
+{
+    int index = -1;
+
+    if (cond)
+        index = mTrueActions.indexOf(action);
+    else
+        index = mFalseActions.indexOf(action);
+
+    removeAction(index, cond, del);
 }
 
 void Branch::updateDisplayText()
@@ -196,5 +308,12 @@ void Branch::updateDisplayText()
 
     QString text = QString(tr("If %1\nThen: %2\nElse: %3")).arg(condition).arg(trueAction).arg(falseAction);
     setDisplayText(text);
-    emit dataChanged();
+}
+
+void Branch::onConditionChanged()
+{
+    updateDisplayText();
+
+    if (mCondition)
+        notify("condition", mCondition->toMap());
 }
