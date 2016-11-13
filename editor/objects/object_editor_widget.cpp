@@ -266,9 +266,6 @@ void ObjectEditorWidget::updateData(GameObject* obj)
 
 void ObjectEditorWidget::updateEventActions(Object* object)
 {
-    QList<Action*> actions;
-    Action *action;
-
     mMousePressComboBox->clear();
     mMouseReleaseComboBox->clear();
     mMouseMoveComboBox->clear();
@@ -276,26 +273,57 @@ void ObjectEditorWidget::updateEventActions(Object* object)
     if (! object)
         return;
 
-    const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
-    const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
+    QList<Action*> actions;
 
     actions = object->actionsForEvent(Interaction::MousePress);
     for(int i=0; i < actions.size(); i++) {
-        action = actions[i];
-        mMousePressComboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(qobject_cast<QObject*>(action)));
+        addEventActionItem(mMousePressComboBox, actions[i]);
     }
 
     actions = object->actionsForEvent(Interaction::MouseRelease);
     for(int i=0; i < actions.size(); i++) {
-        action = actions[i];
-        mMouseReleaseComboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(qobject_cast<QObject*>(action)));
+        addEventActionItem(mMouseReleaseComboBox, actions[i]);
     }
 
     actions = object->actionsForEvent(Interaction::MouseMove);
     for(int i=0; i < actions.size(); i++) {
-        action = actions[i];
-        mMouseMoveComboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(qobject_cast<QObject*>(action)));
+        addEventActionItem(mMouseMoveComboBox, actions[i]);
     }
+}
+
+QString ObjectEditorWidget::eventActionItemText(Action * action)
+{
+    QString text;
+
+    if (!action)
+        return text;
+
+    QString syncedText = tr("Synced");
+    QString notSyncedText = tr("Not Synced");
+    QString syncStatusText = "";
+    GameObject* actionResource = action->resource();
+
+    if (actionResource || (mGameObject && mGameObject->resource())) {
+        if (actionResource && action->isSynced())
+            syncStatusText = syncedText;
+        else
+            syncStatusText = notSyncedText;
+
+        syncStatusText = QString(" (%1)").arg(syncStatusText);
+    }
+    text = action->toString() + syncStatusText;
+
+    return text;
+}
+
+void ObjectEditorWidget::addEventActionItem(ComboBox * comboBox, Action * action)
+{
+    if (!comboBox || !action)
+        return;
+
+    const QIcon typeIcon = GameObjectMetaType::icon(action->type());
+    QString text = eventActionItemText(action);
+    comboBox->addItem(typeIcon, text, QVariant::fromValue(qobject_cast<QObject*>(action)));
 }
 
 void ObjectEditorWidget::onAddItemActivated()
@@ -313,9 +341,7 @@ void ObjectEditorWidget::onAddItemActivated()
         object->appendEventAction(event, action);
         ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
         if(comboBox) {
-            const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
-            const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
-            comboBox->addItem(typeIcon, action->toString(), QVariant::fromValue(static_cast<QObject*>(action)));
+            addEventActionItem(comboBox, action);
         }
     }
 }
@@ -337,7 +363,7 @@ void ObjectEditorWidget::onItemActivated(int index)
 
     ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
     if(comboBox) {
-        comboBox->setItemText(index, action->toString());
+        comboBox->setItemText(index, eventActionItemText(action));
     }
 }
 

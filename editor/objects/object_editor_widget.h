@@ -67,6 +67,8 @@ private slots:
 
 private:
     void updateEventActions(Object*);
+    void addEventActionItem(ComboBox*, Action*);
+    QString eventActionItemText(Action*);
 
 private:
     ColorPushButton* mColorButton;
