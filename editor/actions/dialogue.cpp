@@ -69,23 +69,19 @@ void Dialogue::loadData(const QVariantMap & data, bool internal)
 
 void Dialogue::setCharacter(Character *character)
 {
-    if (mCharacter)
-        mCharacter->disconnect(this);
+    if (mCharacter == character)
+        return;
 
+    removeCharacter();
     mCharacter = character;
 
-    if (mCharacter)
+    if (mCharacter) {
         connect(mCharacter, SIGNAL(destroyed()), this, SLOT(onCharacterDestroyed()));
-
-    if (character) {
-        this->blockSignals(true); //avoid calling dataChanged() twice
-        setCharacterName(character->objectName());
-        this->blockSignals(false);
+        mCharacterName = "";
     }
 
     //update DialogueBox or TextBox
     updateTextBox();
-
     emit dataChanged();
 }
 
@@ -96,8 +92,7 @@ Character* Dialogue::character()
 
 void Dialogue::setCharacterName(const QString & name)
 {
-    if (mCharacter && mCharacter->objectName() != name)
-        mCharacter = 0;
+    removeCharacter();
     mCharacterName = name;
 
     //update dialoguebox if any
@@ -233,4 +228,12 @@ bool Dialogue::append() const
 void Dialogue::setAppend(bool append)
 {
     mAppend = append;
+}
+
+void Dialogue::removeCharacter()
+{
+    if (mCharacter) {
+        mCharacter->disconnect(this);
+        mCharacter = 0;
+    }
 }

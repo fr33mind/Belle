@@ -72,6 +72,7 @@ private slots:
 
 private:
     void init();
+    void removeCharacter();
 
 };
 
