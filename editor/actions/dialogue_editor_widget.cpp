@@ -19,14 +19,19 @@
 #include "character.h"
 #include "dialoguebox.h"
 
-#include <QDebug>
+#include <QCompleter>
 
 DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mChooseCharacterWidget = new QComboBox(this);
-    mChooseTextBoxWidget = new QComboBox(this);
+    mChooseCharacterWidget = new ObjectComboBox(this);
+    mChooseCharacterWidget->addTypeFilter(GameObjectMetaType::Character);
+    mChooseTextBoxWidget = new ObjectComboBox(this);
+    mChooseTextBoxWidget->addTypeFilter(GameObjectMetaType::TextBox);
+    mChooseTextBoxWidget->addTypeFilter(GameObjectMetaType::DialogueBox);
     mChooseCharacterWidget->setEditable(true);
+    if (mChooseCharacterWidget->completer())
+        mChooseCharacterWidget->completer()->setCompletionMode(QCompleter::PopupCompletion);
     mTextEdit = new QTextEdit(this);
     mWaitCheckBox = new QCheckBox(this);
     mAppendCheckbox = new QCheckBox(this);
@@ -42,11 +47,11 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
 
     connect(mTextEdit, SIGNAL(textChanged()), this, SLOT(onTextEdited()));
-    connect(mChooseTextBoxWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(onTextBoxChanged(int)));
-    connect(mChooseTextBoxWidget, SIGNAL(highlighted(int)), this, SLOT(onTextBoxHighlighted(int)));
-    connect(mChooseCharacterWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(onCharacterChanged(int)));
-    connect(mChooseCharacterWidget, SIGNAL(highlighted(int)), this, SLOT(onCharacterHighlighted(int)));
-    connect(mChooseCharacterWidget, SIGNAL(editTextChanged(const QString&)), this, SLOT(onCharacterNameChanged(const QString&)));
+    connect(mChooseTextBoxWidget, SIGNAL(objectChanged(Object*)), this, SLOT(onTextBoxChanged(Object*)));
+    connect(mChooseTextBoxWidget, SIGNAL(objectHighlighted(Object*)), this, SLOT(onTextBoxHighlighted(Object*)));
+    connect(mChooseCharacterWidget, SIGNAL(objectChanged(Object*)), this, SLOT(onCharacterChanged(Object*)));
+    connect(mChooseCharacterWidget, SIGNAL(objectHighlighted(Object*)), this, SLOT(onCharacterHighlighted(Object*)));
+    connect(mChooseCharacterWidget, SIGNAL(objectChanged(const QString&)), this, SLOT(onCharacterChanged(const QString&)));
     connect(mWaitCheckBox, SIGNAL(clicked(bool)), this, SLOT(onWaitOnFinishedChanged(bool)));
     connect(mAppendCheckbox, SIGNAL(toggled(bool)), this, SLOT(appendToggled(bool)));
 
@@ -67,64 +72,17 @@ void DialogueEditorWidget::updateData(GameObject* action)
     if (! dialogue)
         return;
 
-    Character* character = 0;
-    Object* object = 0;
-
-    mChooseCharacterWidget->clear();
     mChooseCharacterWidget->clearEditText();
-    mChooseTextBoxWidget->clear();
-    mOutputBoxes.clear();
-    mCharacters.clear();
-
-    if (! dialogue->characterName().isEmpty()) {
-        if (dialogue->character()) {
-            mChooseCharacterWidget->addItem(dialogue->characterName());
-            mCharacters.append(dialogue->character());
-        }
-        else {
-            mChooseCharacterWidget->setEditText(dialogue->characterName());
-        }
-    }
-
-    if (dialogue->sceneObject()) {
-        object = dialogue->sceneObject();
-        if (isValidOutputBox(object)) {
-            mChooseTextBoxWidget->addItem(object->objectName());
-            mOutputBoxes.append(object);
-        }
-    }
-
-    Scene * scene = dialogue->scene();
-    if (! scene)
-        return;
-    QList<Object*> objects = scene->objects();
-    for (int i=0; i < objects.size(); i++) {
-        character = qobject_cast<Character*>(objects[i]);
-        if (character && character != dialogue->character()) {
-            mChooseCharacterWidget->addItem(character->objectName());
-            mCharacters.append(character);
-            continue;
-        }
-
-        if (dialogue->sceneObject() != objects[i] && isValidOutputBox(objects[i])){
-            mChooseTextBoxWidget->addItem(objects[i]->objectName());
-            mOutputBoxes.append(objects[i]);
-        }
-    }
+    mChooseCharacterWidget->loadFromScene(dialogue->scene());
+    mChooseCharacterWidget->setEditText(dialogue->characterName());
+    mChooseTextBoxWidget->loadFromAction(dialogue);
 
     if (! mChooseTextBoxWidget->count())
         mTextEdit->setEnabled(false);
-    else {
-        mTextEdit->setEnabled(true);
-        dialogue->setSceneObject(mOutputBoxes[mChooseTextBoxWidget->currentIndex()]);
-        mTextEdit->setText(dialogue->text());
-    }
-
-    if (dialogue->character())
-        mChooseCharacterWidget->setCurrentIndex(0);
     else
-        mChooseCharacterWidget->setEditText(dialogue->characterName());
+        mTextEdit->setEnabled(true);
 
+    mTextEdit->setText(dialogue->text());
     mWaitCheckBox->setChecked(dialogue->mouseClickOnFinish());
     mAppendCheckbox->setChecked(dialogue->append());
 }
@@ -144,52 +102,43 @@ void DialogueEditorWidget::onTextEdited()
     dialogue->setText(mTextEdit->toPlainText());
 }
 
-void DialogueEditorWidget::onTextBoxChanged(int index)
+void DialogueEditorWidget::onTextBoxChanged(Object* object)
 {
     Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
-    if (dialogue && index >= 0 && index < mOutputBoxes.size()) {
-        dialogue->setSceneObject(mOutputBoxes[index]);
+    if (dialogue) {
+        dialogue->setSceneObject(object);
         //onTextEdited();
     }
 }
 
-void DialogueEditorWidget::onCharacterChanged(int index)
+void DialogueEditorWidget::onCharacterChanged(Object* obj)
 {
     Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
-    if (dialogue && index >= 0 && index < mCharacters.size() && mCharacters[index]) {
-        dialogue->setCharacter(mCharacters[index]);
+    Character* character = qobject_cast<Character*>(obj);
+    if (dialogue && character) {
+        dialogue->setCharacter(character);
     }
 }
 
-void DialogueEditorWidget::onCharacterNameChanged(const QString & name)
+void DialogueEditorWidget::onCharacterChanged(const QString& name)
 {
     Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
     if (dialogue) {
-        int i;
-        for (i=0; i < mCharacters.size(); i++) {
-            if (mCharacters[i]->objectName() == name) {
-                dialogue->setCharacter(mCharacters[i]);
-                break;
-            }
-        }
-
-        //if no character with name <name> found, set just the name
-        if (i == mCharacters.size())
-            dialogue->setCharacterName(name);
+        dialogue->setCharacterName(name);
     }
 }
 
-void DialogueEditorWidget::onTextBoxHighlighted(int index)
+void DialogueEditorWidget::onTextBoxHighlighted(Object* obj)
 {
-    if (index >= 0 && index < mOutputBoxes.size() && mGameObject && mGameObject->scene()) {
-        mGameObject->scene()->highlightObject(mOutputBoxes[index]);
+    if (mGameObject && mGameObject->scene()) {
+        mGameObject->scene()->highlightObject(obj);
     }
 }
 
-void DialogueEditorWidget::onCharacterHighlighted(int index)
+void DialogueEditorWidget::onCharacterHighlighted(Object* obj)
 {
-    if (index >= 0 && index < mCharacters.size() && mGameObject && mGameObject->scene()) {
-        mGameObject->scene()->highlightObject(mCharacters[index]);
+    if (mGameObject && mGameObject->scene() && obj) {
+        mGameObject->scene()->highlightObject(obj);
     }
 }
 
@@ -197,6 +146,7 @@ void DialogueEditorWidget::onCharacterHighlighted(int index)
 bool DialogueEditorWidget::eventFilter(QObject *obj, QEvent *event)
 {
     Scene* scene = 0;
+    Object* object = 0;
     if (mGameObject)
         scene = mGameObject->scene();
 
@@ -207,28 +157,18 @@ bool DialogueEditorWidget::eventFilter(QObject *obj, QEvent *event)
     }
 
     if (obj == mChooseTextBoxWidget->view() && event->type() == QEvent::Show && scene) {
-        if (mChooseTextBoxWidget->count() == 1 && ! mOutputBoxes.isEmpty())
-            scene->highlightObject(mOutputBoxes.first());
+        object = mChooseTextBoxWidget->objectAt(0);
+        if (object)
+            scene->highlightObject(object);
     }
     else if (obj == mChooseCharacterWidget->view() && event->type() == QEvent::Show && scene) {
-      if (mChooseCharacterWidget->count() == 1 && ! mCharacters.isEmpty())
-           scene->highlightObject(mCharacters.first());
+        object = mChooseCharacterWidget->objectAt(0);
+        if (object)
+            scene->highlightObject(object);
     }
 
 
    return false;
-}
-
-bool DialogueEditorWidget::isValidOutputBox(Object* object)
-{
-    if (! object)
-        return false;
-
-    QString className = object->metaObject()->className();
-    if (className == "TextBox" || className == "DialogueBox")
-        return true;
-
-    return false;
 }
 
 void DialogueEditorWidget::setTextInOutputBox()

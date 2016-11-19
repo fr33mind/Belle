@@ -26,6 +26,7 @@
 #include "scene_manager.h"
 #include "textbox.h"
 #include "character.h"
+#include "object_combobox.h"
 
 class Dialogue;
 class TextBox;
@@ -34,12 +35,10 @@ class DialogueEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    QComboBox* mChooseCharacterWidget;
-    QComboBox* mChooseTextBoxWidget;
+    ObjectComboBox* mChooseCharacterWidget;
+    ObjectComboBox* mChooseTextBoxWidget;
     QCheckBox* mAppendCheckbox;
     QTextEdit* mTextEdit;
-    QList<Object*> mOutputBoxes;
-    QList<Character*> mCharacters;
     QCheckBox* mWaitCheckBox;
 
 public:
@@ -54,16 +53,15 @@ protected:
 
 private slots:
     void onTextEdited();
-    void onTextBoxChanged(int);
-    void onCharacterChanged(int);
-    void onTextBoxHighlighted(int);
-    void onCharacterHighlighted(int);
-    void onCharacterNameChanged(const QString&);
+    void onTextBoxChanged(Object*);
+    void onCharacterChanged(Object*);
+    void onCharacterChanged(const QString&);
+    void onTextBoxHighlighted(Object*);
+    void onCharacterHighlighted(Object*);
     void onWaitOnFinishedChanged(bool);
     void appendToggled(bool);
 
 private:
-    bool isValidOutputBox(Object*);
     void  setTextInOutputBox();
 
 };
