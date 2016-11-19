@@ -4,6 +4,10 @@ ObjectComboBox::ObjectComboBox(QWidget *parent) :
     QComboBox(parent)
 {
     connect(this, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
+    connect(this, SIGNAL(highlighted(int)), this, SLOT(onHighlighted(int)));
+    connect(this, SIGNAL(editTextChanged(const QString&)), this, SLOT(onEditTextChanged(const QString&)));
+
+    setInsertPolicy(QComboBox::NoInsert);
 }
 
 void ObjectComboBox::clear()
@@ -78,13 +82,16 @@ void ObjectComboBox::setObjects(const QList<Object*>& objects)
 {
     this->clear();
     for(int i=0; i < objects.size(); i++) {
+        if (!objects[i])
+            continue;
+
         addObject(objects[i]);
     }
 }
 
 void ObjectComboBox::insertObject(int index, Object* object)
 {
-    if (! object)
+    if (! object || (!mTypeFilters.isEmpty() && !mTypeFilters.contains(object->type())))
         return;
 
     insertItem(index, object->name());
@@ -104,6 +111,28 @@ Object* ObjectComboBox::currentObject() const
     if (currIndex >= 0 && currIndex < mObjects.size())
         return mObjects[currIndex];
     return 0;
+}
+
+Object* ObjectComboBox::objectAt(int index) const
+{
+    if (index >= 0 && index < mObjects.size())
+        return mObjects.at(index);
+    return 0;
+}
+
+Object* ObjectComboBox::object(const QString & name) const
+{
+    foreach(Object* obj, mObjects) {
+        if (obj && obj->name() == name)
+            return obj;
+    }
+
+    return 0;
+}
+
+QList<Object*> ObjectComboBox::objects() const
+{
+    return mObjects;
 }
 
 void ObjectComboBox::indexChanged(int index)
@@ -126,4 +155,34 @@ void ObjectComboBox::removeObject(Object * object)
             setCurrentIndex(-1);
         removeItem(index);
     }
+}
+
+void ObjectComboBox::addTypeFilter(GameObjectMetaType::Type type)
+{
+    mTypeFilters.append(type);
+}
+
+QList<GameObjectMetaType::Type> ObjectComboBox::typeFilters() const
+{
+    return mTypeFilters;
+}
+
+void ObjectComboBox::clearTypeFilters()
+{
+    mTypeFilters.clear();
+}
+
+void ObjectComboBox::onHighlighted(int index)
+{
+    if (index >= 0 && index < mObjects.size())
+        emit objectHighlighted(mObjects.at(index));
+}
+
+void ObjectComboBox::onEditTextChanged(const QString & text)
+{
+    Object* obj = object(text);
+    if (obj)
+        emit objectChanged(obj);
+    else
+        emit objectChanged(text);
 }

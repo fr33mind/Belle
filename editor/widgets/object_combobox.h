@@ -25,18 +25,32 @@ public:
     void insertObject(int, Object*);
     void addObject(Object*);
     void clear();
+    QList<Object*> objects() const;
     Object* currentObject() const;
+    Object* objectAt(int) const;
+    Object* object(const QString&) const;
     void removeObject(Object*);
+
+    void addTypeFilter(GameObjectMetaType::Type);
+    QList<GameObjectMetaType::Type> typeFilters() const;
+    void clearTypeFilters();
 
 protected:
     void setupConnections();
 
 signals:
     void objectChanged(Object*);
+    void objectChanged(const QString&);
+    void objectHighlighted(Object*);
 
 private slots:
     void indexChanged(int);
     void objectDestroyed(Object*);
+    void onHighlighted(int);
+    void onEditTextChanged(const QString&);
+
+private:
+    QList<GameObjectMetaType::Type> mTypeFilters;
 
 };
 
