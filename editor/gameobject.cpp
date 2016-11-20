@@ -262,6 +262,11 @@ void GameObject::notify(const QString & property, const QVariant & value)
 {
     QVariantMap data;
     data.insert(property, value);
+    notify(data);
+}
+
+void GameObject::notify(const QVariantMap & data)
+{
     bool loadBlocked = blockLoad(true);
     emit dataChanged(data);
     blockLoad(loadBlocked);

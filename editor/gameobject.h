@@ -63,6 +63,7 @@ protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
     virtual void afterLoadData(const QVariantMap&);
     void notify(const QString&, const QVariant&);
+    void notify(const QVariantMap&);
     void blockNotifications(bool);
     void setType(GameObjectMetaType::Type);
     void loadInternal(const QVariantMap&);
