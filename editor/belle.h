@@ -68,6 +68,8 @@ class Belle : public QMainWindow
         Scene* currentScene();
         static Belle* instance();
         Clipboard * clipboard() const;
+        SceneManager* currentSceneManager() const;
+        SceneManager* sceneManager(const QString&) const;
 
     signals:
         void newAction(Action*);
@@ -132,7 +134,6 @@ private:
         void importScenes(const QVariantList&, SceneManager*);
         QTreeWidget* scenesWidget(const QString&);
         QTreeWidget* scenesWidget(SceneManager*);
-        SceneManager* sceneManager(const QString&);
         void updateGameElements(int, int);
         void checkGameSize(const QVariantMap&);
         QVariantMap createGameFile() const;

@@ -1337,7 +1337,12 @@ Scene* Belle::currentScene()
     return 0;
 }
 
-SceneManager* Belle::sceneManager(const QString& name)
+SceneManager* Belle::currentSceneManager() const
+{
+    return mCurrentSceneManager;
+}
+
+SceneManager* Belle::sceneManager(const QString& name) const
 {
     if (name.contains("pause", Qt::CaseInsensitive))
         return mPauseSceneManager;
