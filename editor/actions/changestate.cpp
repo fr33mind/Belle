@@ -57,7 +57,7 @@ void ChangeState::setState(const QString & state)
         return;
 
     mState = state;
-    emit dataChanged();
+    notify("state", mState);
 }
 
 QVariantMap ChangeState::toJsonObject(bool internal) const
