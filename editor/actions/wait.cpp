@@ -61,6 +61,7 @@ void Wait::setTime(double t)
     mTime = t;
     if (mWaitType == Timed)
         setDisplayText(QString::number(mTime) + tr(" second(s)"));
+    notify("time", t);
 }
 
 double Wait::time()
@@ -78,6 +79,7 @@ void Wait::setWaitType(WaitType type)
         setDisplayText(tr("Until mouse button is clicked"));
     else
         setDisplayText(tr("Forever"));
+    notify("waitType", waitTypeToString(mWaitType));
 }
 
 QString Wait::waitTypeToString(WaitType type) const
