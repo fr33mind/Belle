@@ -121,7 +121,7 @@ Action* GameObjectFactory::createAction(GameObjectMetaType::Type type, const QVa
             action = validData ? new StopSound(data, parent) : new StopSound(parent);
             break;
         case GameObjectMetaType::End:
-            action = new End(parent);
+            action = validData ? new End(data, parent) : new End(parent);
             break;
         case GameObjectMetaType::GetUserInput:
             action = validData ? new GetUserInput(data, parent) : new GetUserInput(parent);

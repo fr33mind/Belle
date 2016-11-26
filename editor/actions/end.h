@@ -25,6 +25,7 @@ class End : public Action
 
 public:
     explicit End(QObject *parent = 0);
+    End(const QVariantMap&, QObject *parent = 0);
 
 signals:
     

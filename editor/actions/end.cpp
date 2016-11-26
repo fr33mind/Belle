@@ -21,3 +21,9 @@ End::End(QObject *parent) :
 {
     setType(GameObjectMetaType::End);
 }
+
+End::End(const QVariantMap& data, QObject *parent) :
+    Action(data, parent)
+{
+    setType(GameObjectMetaType::End);
+}
