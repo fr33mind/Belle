@@ -41,18 +41,14 @@ void GetUserInput::loadData(const QVariantMap & data, bool internal)
     if (!internal)
         Action::loadData(data, internal);
 
-    QTextCodec * codec = QTextCodec::codecForName("utf-8");
-    if (! codec)
-        codec = QTextCodec::codecForLocale();
-
     if (data.contains("message") && data.value("message").type() == QVariant::String)
-        mMessage = codec->toUnicode( data.value("message").toByteArray());
+        setMessage(data.value("message").toString());
 
     if (data.contains("variable") && data.value("variable").type() == QVariant::String)
-        mVariable = data.value("variable").toString();
+        setVariable(data.value("variable").toString());
 
     if (data.contains("defaultValue") && data.value("defaultValue").type() == QVariant::String)
-        mDefaultValue = codec->toUnicode(data.value("defaultValue").toByteArray());
+        setDefaultValue(data.value("defaultValue").toString());
 }
 
 QString GetUserInput::variable()
@@ -64,7 +60,7 @@ void GetUserInput::setVariable(const QString & var)
 {
     if (var != mVariable) {
         mVariable = var;
-        emit dataChanged();
+        notify("variable", mVariable);
     }
 }
 
@@ -77,7 +73,7 @@ void GetUserInput::setMessage(const QString & msg)
 {
     if (msg != mMessage) {
         mMessage = msg;
-        emit dataChanged();
+        notify("message", mMessage);
     }
 }
 
@@ -90,7 +86,7 @@ void GetUserInput::setDefaultValue(const QString & value)
 {
     if (value != mDefaultValue) {
         mDefaultValue = value;
-        emit dataChanged();
+        notify("defaultValue", mDefaultValue);
     }
 }
 
