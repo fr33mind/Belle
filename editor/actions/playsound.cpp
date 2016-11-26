@@ -49,10 +49,10 @@ void PlaySound::loadData(const QVariantMap & data, bool internal)
     }
 
     if (data.contains("volume") && data.value("volume").canConvert(QVariant::Int))
-        mVolume = data.value("volume").toInt();
+        setVolume(data.value("volume").toInt());
 
     if (data.contains("loop") && data.value("loop").type() == QVariant::Bool)
-        mLoop = data.value("loop").toBool();
+        setLoop(data.value("loop").toBool());
 }
 
 void PlaySound::setSound(const QString& soundName)
@@ -79,6 +79,7 @@ void PlaySound::setSound(Sound* sound)
     }
 
     setDisplayText(name);
+    notify("sound", name);
 }
 
 Sound* PlaySound::sound() const
@@ -88,7 +89,11 @@ Sound* PlaySound::sound() const
 
 void PlaySound::setVolume(int vol)
 {
+    if (mVolume == vol)
+        return;
+
     mVolume = vol;
+    notify("volume", mVolume);
 }
 
 int PlaySound::volume()
@@ -98,7 +103,11 @@ int PlaySound::volume()
 
 void PlaySound::setLoop(bool loop)
 {
+    if (mLoop == loop)
+        return;
+
     mLoop = loop;
+    notify("loop", mLoop);
 }
 
 bool PlaySound::loop()
