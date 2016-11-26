@@ -61,8 +61,12 @@ void GoToLabel::setTargetLabel(Label* label)
 
 void GoToLabel::setTargetLabel(const QString& name)
 {
+    if (mTargetLabelName == name)
+        return;
+
     mTargetLabelName = name;
     setDisplayText(name);
+    notify("label", mTargetLabelName);
 }
 
 bool GoToLabel::isValidLabel(const QString& name)
