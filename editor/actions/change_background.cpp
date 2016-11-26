@@ -76,7 +76,9 @@ void ChangeBackground::setBackgroundImage(const QString & background)
 
     QFileInfo info(background);
     setDisplayText(info.fileName());
-    emit dataChanged();
+
+    QString name = mBackgroundImage ? mBackgroundImage->name() : "";
+    notify("backgroundImage", name);
 
     if (scene && scene->temporaryBackgroundImage() != mBackgroundImage)
         focusIn();
@@ -101,7 +103,7 @@ void ChangeBackground::setBackgroundColor(const QColor& color)
     mBackgroundColor = color;
     if (color.isValid())
         setDisplayText(color.name());
-    emit dataChanged();
+    notify("backgroundColor", Utils::colorToList(color));
 
     Scene* scene = this->scene();
     if (scene && scene->temporaryBackgroundColor() != color)
