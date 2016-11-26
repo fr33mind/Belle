@@ -92,6 +92,7 @@ void GoToScene::setMetaTarget(MetaTarget target)
         removeTargetScene();
 
     updateDisplayText();
+    notify("metaTarget", static_cast<int>(mMetaTarget));
 }
 
 GoToScene::MetaTarget GoToScene::metaTarget() const
@@ -108,21 +109,26 @@ QString GoToScene::targetSceneName() const
 
 void GoToScene::setTargetScene(const QString & name)
 {
-    if (mTargetSceneName != name) {
+    if (mTargetSceneName == name)
+        return;
+
+    Scene* targetScene = 0;
+    Scene* scene = this->scene();
+
+    if (scene) {
+        SceneManager* sceneManager = scene->sceneManager();
+        if (sceneManager) {
+            targetScene = sceneManager->scene(name);
+        }
+    }
+
+    setTargetScene(targetScene);
+    if (!mTargetScene) {
         mTargetSceneName = name;
         setMetaTarget(GoToScene::Name);
         updateDisplayText();
+        notify("target", mTargetSceneName);
     }
-
-    Scene* scene = this->scene();
-    if (!scene)
-        return;
-    SceneManager* sceneManager = scene->sceneManager();
-    if (!sceneManager)
-        return;
-    Scene* targetScene = sceneManager->scene(name);
-    if (targetScene)
-        setTargetScene(targetScene);
 }
 
 void GoToScene::setTargetScene(Scene* scene)
@@ -133,18 +139,18 @@ void GoToScene::setTargetScene(Scene* scene)
     removeTargetScene();
 
     mTargetScene = scene;
-    mTargetSceneName = "";
-    setMetaTarget(GoToScene::Name);
+    mTargetSceneName = scene ? scene->name() : "";
 
     if (mTargetScene) {
         connect(mTargetScene, SIGNAL(destroyed()), this, SLOT(removeTargetScene()));
         connect(mTargetScene, SIGNAL(nameChanged(const QString&)), this, SLOT(onTargetSceneNameChanged(const QString&)));
+        setMetaTarget(GoToScene::Name);
+        updateDisplayText();
+        notify("target", mTargetScene->name());
     }
     else {
         setMetaTarget(GoToScene::None);
     }
-
-    updateDisplayText();
 }
 
 Scene* GoToScene::targetScene() const
