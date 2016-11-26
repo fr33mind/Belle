@@ -67,6 +67,51 @@ void ChangeVisibility::loadData(const QVariantMap & data, bool internal)
                 mSlideAction = qobject_cast<Slide*>(GameObjectFactory::createAction(data, this));
         }
     }
+
+    if (data.contains("_enableFadeAction") && data.value("_enableFadeAction").type() == QMetaType::QObjectStar) {
+        setFadeActionEnabled(true);
+        Fade* action = data.value("_enableFadeAction").value<Fade*>();
+        if (mFadeAction && action) {
+            if (action->isResource())
+                mFadeAction->setResource(action);
+            else if (isResource())
+                action->setResource(mFadeAction);
+        }
+    }
+
+    if (data.contains("_disableFadeAction")) {
+        setFadeActionEnabled(false);
+    }
+
+    if (data.contains("_enableSlideAction") && data.value("_enableSlideAction").type() == QMetaType::QObjectStar) {
+        setSlideActionEnabled(true);
+        Slide* action = data.value("_enableSlideAction").value<Slide*>();
+        if (mSlideAction && action) {
+            if (action->isResource())
+                mSlideAction->setResource(action);
+            else if (isResource())
+                action->setResource(mSlideAction);
+        }
+    }
+
+    if (data.contains("_disableSlideAction")) {
+        setSlideActionEnabled(false);
+    }
+}
+
+void ChangeVisibility::connectToResource()
+{
+    Action::connectToResource();
+    ChangeVisibility* resource = qobject_cast<ChangeVisibility*>(this->resource());
+    if (resource) {
+        if (mFadeAction) {
+            mFadeAction->setResource(resource->fadeAction());
+        }
+
+        if (mSlideAction) {
+            mSlideAction->setResource(resource->slideAction());
+        }
+    }
 }
 
 QString ChangeVisibility::displayText() const
@@ -116,19 +161,18 @@ QString ChangeVisibility::displayText() const
 
 void ChangeVisibility::setSceneObject(Object* obj)
 {
-    if (! obj)
-        return;
-
     Action::setSceneObject(obj);
-    if (qobject_cast<Character*>(obj))
-        setDisplayText(obj->objectName() + " (" + qobject_cast<Character*>(obj)->currentState() + ")");
-    else
-        setDisplayText(obj->objectName());
+
     if (mFadeAction)
         mFadeAction->setSceneObject(obj);
     if (mSlideAction)
         mSlideAction->setSceneObject(obj);
-    emit dataChanged();
+
+    Character* character = qobject_cast<Character*>(obj);
+    if (character)
+        setDisplayText(obj->objectName() + " (" + character->currentState() + ")");
+    else
+        setDisplayText(obj->objectName());
 }
 
 bool ChangeVisibility::toShow() const
@@ -155,11 +199,14 @@ void ChangeVisibility::setFadeActionEnabled(bool enable)
             else {
                 mFadeAction->setFadeType(Fade::Out);
             }
+
+            notify("_enableFadeAction", QVariant::fromValue(qobject_cast<QObject*>(mFadeAction)));
         }
     }
     else if (mFadeAction) {
-        mFadeAction->deleteLater();
+        delete mFadeAction;
         mFadeAction = 0;
+        notify("_disableFadeAction", true);
     }
 }
 
@@ -186,11 +233,13 @@ void ChangeVisibility::setSlideActionEnabled(bool enable)
             mSlideAction = static_cast<Slide*>(slideAction);
             mSlideAction->setDuration(0);
             connect(mSlideAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()), Qt::UniqueConnection);
+            notify("_enableSlideAction", QVariant::fromValue(qobject_cast<QObject*>(mSlideAction)));
         }
     }
     else if (mSlideAction) {
         mSlideAction->deleteLater();
         mSlideAction = 0;
+        notify("_disableSlideAction", true);
     }
 }
 

@@ -60,6 +60,7 @@ public:
 protected:
     void setToShow(bool);
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void connectToResource();
 
 private:
     void init(bool);
