@@ -26,11 +26,11 @@ class Label : public Action
 public:
     explicit Label(const QString&, QObject *parent = 0);
     Label(const QVariantMap&, QObject *parent);
-    void setObjectName(const QString &);
     
 signals:
     
-public slots:
+private slots:
+    void updateDisplayText(const QString&);
 
 private:
     void init();

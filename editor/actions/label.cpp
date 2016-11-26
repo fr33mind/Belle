@@ -33,10 +33,10 @@ Label::Label(const QVariantMap& data, QObject *parent) :
 void Label::init()
 {
     setType(GameObjectMetaType::Label);
+    connect(this, SIGNAL(nameChanged(const QString&)), this, SLOT(updateDisplayText(const QString&)));
 }
 
-void Label::setObjectName(const QString & name)
+void Label::updateDisplayText(const QString & text)
 {
-    QObject::setObjectName(name);
-    setDisplayText(name);
+    setDisplayText(text);
 }
