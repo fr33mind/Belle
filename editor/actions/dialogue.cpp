@@ -47,13 +47,14 @@ void Dialogue::loadData(const QVariantMap & data, bool internal)
 
     if (data.contains("character") && data.value("character").type() == QVariant::String) {
         Scene* scene = this->scene();
+        Character* character = 0;
+        QString charName = data.value("character").toString();
         if (scene)
-            mCharacter = qobject_cast<Character*>(scene->object(data.value("character").toString()));
+            character = qobject_cast<Character*>(scene->object(charName));
+        setCharacter(character);
 
-        if (mCharacter)
-            mCharacterName = mCharacter->name();
-        else
-            mCharacterName = data.value("character").toString();
+        if (!mCharacter)
+            setCharacterName(charName);
     }
 
     if (data.contains("text") && data.value("text").type() == QVariant::String) {
@@ -63,8 +64,6 @@ void Dialogue::loadData(const QVariantMap & data, bool internal)
     if (data.contains("append") && data.value("append").type() == QVariant::Bool) {
         setAppend(data.value("append").toBool());
     }
-
-    setMouseClickOnFinish(data.contains("wait"));
 }
 
 void Dialogue::setCharacter(Character *character)
@@ -74,15 +73,16 @@ void Dialogue::setCharacter(Character *character)
 
     removeCharacter();
     mCharacter = character;
+    mCharacterName = "";
 
     if (mCharacter) {
         connect(mCharacter, SIGNAL(destroyed()), this, SLOT(onCharacterDestroyed()));
-        mCharacterName = "";
+        mCharacterName = mCharacter->name();
     }
 
     //update DialogueBox or TextBox
     updateTextBox();
-    emit dataChanged();
+    notify("character", characterName());
 }
 
 Character* Dialogue::character()
@@ -92,12 +92,15 @@ Character* Dialogue::character()
 
 void Dialogue::setCharacterName(const QString & name)
 {
+    if (mCharacterName == name)
+        return;
+
     removeCharacter();
     mCharacterName = name;
 
     //update dialoguebox if any
     updateTextBox();
-    emit dataChanged();
+    notify("character", characterName());
 }
 
 QString Dialogue::characterName() const
@@ -113,7 +116,7 @@ void Dialogue::setText(const QString & text)
 {
     mText = text;
     updateTextBox();
-    emit dataChanged();
+    notify("text", mText);
 }
 
 QString Dialogue::text()
@@ -228,6 +231,7 @@ bool Dialogue::append() const
 void Dialogue::setAppend(bool append)
 {
     mAppend = append;
+    notify("append", mAppend);
 }
 
 void Dialogue::removeCharacter()
