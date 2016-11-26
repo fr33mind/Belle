@@ -50,17 +50,25 @@ void GoToSceneEditorWidget::updateData(GameObject* action)
     for(int i=mSceneComboBox->count()-1; i > 4; i--)
         mSceneComboBox->removeItem(i);
 
-    Scene * scene = goToScene->scene();
-    if (scene && scene->sceneManager()) {
-        QList<Scene*> scenes = scene->sceneManager()->scenes();
-        foreach(Scene* scene, scenes) {
-            mSceneComboBox->addObject(scene);
+    if (!goToScene->isSynced() || !goToScene->resource()) {
+        Scene * scene = goToScene->scene();
+        if (scene && scene->sceneManager()) {
+            QList<Scene*> scenes = scene->sceneManager()->scenes();
+            foreach(Scene* scene, scenes) {
+                mSceneComboBox->addObject(scene);
+            }
         }
     }
+
+    //Remove separator if there are no scenes
+    if (mSceneComboBox->count() == 5)
+        mSceneComboBox->removeItem(4);
 
     Scene* targetScene = goToScene->targetScene();
     if (targetScene) {
         mSceneComboBox->setCurrentObject(targetScene);
+        if (mSceneComboBox->currentObject() != targetScene)
+            mSceneComboBox->setCurrentIndex(-1);
     }
     else {
         int mtarget = static_cast<int>(goToScene->metaTarget());
