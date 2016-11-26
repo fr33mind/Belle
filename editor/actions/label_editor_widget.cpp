@@ -45,7 +45,8 @@ void LabelEditorWidget::updateData(GameObject* action)
     if (! label)
         return;
 
-    mLabelEdit->setText(label->objectName());
+    mLabelEdit->setText(label->name());
+    validateLabelEdit(label);
 }
 
 void LabelEditorWidget::onLabelEdited(const QString & text)
@@ -54,23 +55,34 @@ void LabelEditorWidget::onLabelEdited(const QString & text)
     if (! label)
         return;
 
-    Scene* scene = label->scene();
-    if (! scene)
-        return;
+    bool valid = validateLabelEdit(label);
+    if (valid)
+        label->setName(text);
+}
 
-    QList<Action*> actions = scene->actions();
+bool LabelEditorWidget::validateLabelEdit(Label* label)
+{
+    QString text = mLabelEdit->text();
+    Scene* scene = label->scene();
+    QList<Action*> actions;
+    if (scene)
+        actions = scene->actions();
+
     bool validName = true;
+    Label* _label = 0;
     for(int i=0; i < actions.size(); i++) {
-        if (qobject_cast<Label*>(actions[i]) && actions[i]->objectName() == text) {
+        _label = qobject_cast<Label*>(actions[i]);
+        if (_label && _label != label && _label->name() == text) {
             validName = false;
             break;
         }
     }
 
     if (validName) {
-        label->setObjectName(text);
         mLabelEdit->setStyleSheet("");
+        return true;
     }
-    else
-        mLabelEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
+
+    mLabelEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
+    return false;
 }

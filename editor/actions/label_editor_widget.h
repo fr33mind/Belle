@@ -38,6 +38,9 @@ protected:
 private slots:
     void onLabelEdited(const QString&);
 
+private:
+    bool validateLabelEdit(Label*);
+
 };
 
 #endif // LABEL_EDITOR_WIDGET_H
