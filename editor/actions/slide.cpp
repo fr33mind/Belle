@@ -93,21 +93,18 @@ void Slide::setSlideType(Slide::Type type)
         return;
 
     mSlideType = type;
-    emit dataChanged();
+    notify("slideType", slideTypeAsString());
 }
 
 void Slide::setSlideType(const QString& type)
 {
     QString t = type.toLower();
     if (t == "in")
-        mSlideType = Slide::In;
+        setSlideType(mSlideType = Slide::In);
     else if (t == "out")
-        mSlideType = Slide::Out;
+        setSlideType(Slide::Out);
     else if(t == "custom")
-        mSlideType = Slide::Custom;
-    else
-        return;
-    emit dataChanged();
+        setSlideType(Slide::Custom);
 }
 
 void Slide::updateSlideType()
@@ -127,7 +124,7 @@ void Slide::setDestX(const QString& pos)
         return;
 
     mDestX = pos;
-    emit dataChanged();
+    notify("destX", mDestX);
 }
 
 void Slide::setDestX(int x)
@@ -147,7 +144,7 @@ void Slide::setDestY(const QString& pos)
         return;
 
     mDestY = pos;
-    emit dataChanged();
+    notify("destY", mDestY);
 }
 
 void Slide::setDestY(int y)
@@ -183,7 +180,7 @@ double Slide::duration() const
 void Slide::setDuration(double dur) {
     if (mDuration != dur) {
         mDuration = dur;
-        emit dataChanged();
+        notify("duration", mDuration);
     }
 }
 
