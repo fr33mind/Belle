@@ -42,8 +42,10 @@ public:
     virtual ~Action();
     virtual Action* newAction(QObject* parent=0);
     Object* sceneObject() const;
+    QString sceneObjectName() const;
     virtual void setSceneObject(Object*);
     void setSceneObject(const QString&);
+    void setSceneObjectName(const QString&);
     bool isActive();
 
     void setTitle(const QString&);
@@ -104,8 +106,10 @@ private:
     Interaction::InputEvents mSupportedEvents;
     bool mMouseClickOnFinish;
     bool mActive;
+    bool mTargetParent;
 
     void init();
+    void removeSceneObject();
 
 };
 

@@ -35,7 +35,7 @@ Action::Action(const QVariantMap& data, QObject *parent) :
     init();
     loadInternal(data);
 
-    if (!mObject && !mObjectName.isEmpty()) {
+    if (!mTargetParent && !mObject && !mObjectName.isEmpty()) {
         Scene * scene = this->scene();
         if (scene)
             connect(scene, SIGNAL(loaded()), this, SLOT(sceneLoaded()), Qt::UniqueConnection);
@@ -55,6 +55,7 @@ void Action::init()
     mAllowSkipping = true;
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
+    mTargetParent = false;
     setType(GameObjectMetaType::Action);
 }
 
@@ -64,20 +65,39 @@ void Action::loadData(const QVariantMap & data, bool internal)
         GameObject::loadData(data, internal);
 
     if (data.contains("object") && data.value("object").type() == QVariant::String) {
-        mObjectName = data.value("object").toString();
+        QString objName = data.value("object").toString();
+        Object* obj = 0;
+        mTargetParent = false;
 
-        //check if parent is the target object
-        Object* obj = qobject_cast<Object*>(parent());
-        if (obj && obj->name() == mObjectName) {
-            mObject = obj;
+        if (data.contains("targetParent") && data.value("targetParent").type() == QVariant::Bool) {
+            mTargetParent = data.value("targetParent").toBool();
         }
+
+        if (mTargetParent) {
+            obj = parentObject();
+        }
+        else {
+            Scene* scene = this->scene();
+            if (scene) {
+                obj = scene->object(objName);
+            }
+        }
+
+        setSceneObject(obj);
+        if (!mObject)
+            setSceneObjectName(objName);
     }
 
     if (data.contains("skippable") && data.value("skippable").type() == QVariant::Bool) {
-        mAllowSkipping = data.value("skippable").toBool();
+        setAllowSkipping(data.value("skippable").toBool());
     }
 
-    setMouseClickOnFinish(data.contains("wait"));
+    if (data.contains("wait")) {
+        setMouseClickOnFinish(true);
+    }
+    else if (data.contains("waitOnFinished") && data.value("waitOnFinished").type() == QVariant::Bool) {
+        setMouseClickOnFinish(data.value("waitOnFinished").toBool());
+    }
 }
 
 void Action::setTitle(const QString & title)
@@ -108,7 +128,11 @@ bool Action::allowSkipping() const
 
 void Action::setAllowSkipping(bool skip)
 {
+    if (mAllowSkipping == skip)
+        return;
+
     mAllowSkipping = skip;
+    notify("skippable", mAllowSkipping);
 }
 
 Action* Action::newAction(QObject *parent)
@@ -123,16 +147,14 @@ void Action::setDescription(const QString& desc)
 
 Object* Action::sceneObject() const
 {
+    return mObject;
+}
+
+QString Action::sceneObjectName() const
+{
     if (mObject)
-        return mObject;
-
-    if (! mObjectName.isEmpty()) {
-        Scene * scene = this->scene();
-        if (scene)
-          return scene->object(mObjectName);
-    }
-
-    return 0;
+        return mObject->name();
+    return mObjectName;
 }
 
 void Action::setSceneObject(Object * object)
@@ -140,16 +162,20 @@ void Action::setSceneObject(Object * object)
     if (mObject == object)
         return;
 
-    restoreSceneObject();
-    disconnectSceneObject();
-
+    removeSceneObject();
     mObject = object;
+    mObjectName = mObject ? mObject->name() : "";
+    mTargetParent = isParentTargeted();
 
     connectSceneObject();
     loadSceneObject();
 
     emit sceneObjectChanged(mObject);
-    emit dataChanged();
+    QVariantMap data;
+    data.insert("object", mObjectName);
+    if (mTargetParent)
+        data.insert("targetParent", true);
+    notify(data);
 }
 
 void Action::setSceneObject(const QString& name)
@@ -157,6 +183,16 @@ void Action::setSceneObject(const QString& name)
     Scene* scene = this->scene();
     if (scene)
         setSceneObject(scene->object(name));
+}
+
+void Action::setSceneObjectName(const QString & name)
+{
+    if (mObjectName == name)
+        return;
+
+    removeSceneObject();
+    mObjectName = name;
+    notify("object", mObjectName);
 }
 
 void Action::onSceneObjectDestroyed()
@@ -207,7 +243,11 @@ bool Action::mouseClickOnFinish()
 
 void Action::setMouseClickOnFinish(bool mouseClick)
 {
+    if (mMouseClickOnFinish == mouseClick)
+        return;
+
     mMouseClickOnFinish = mouseClick;
+    notify("waitOnFinished", mMouseClickOnFinish);
 }
 
 void Action::initFrom(Action* action)
@@ -229,8 +269,11 @@ QVariantMap Action::toJsonObject(bool internal) const
     }
 
     Object* object = sceneObject();
-    if (object)
+    if (object) {
         action.insert("object", object->name());
+        if (mTargetParent)
+            action.insert("targetParent", true);
+    }
     else if (! mObjectName.isEmpty())
         action.insert("object", mObjectName);
 
@@ -320,5 +363,18 @@ Object* Action::parentObject() const
 
 bool Action::isParentTargeted() const
 {
-    return parentObject() == sceneObject();
+    Object* sceneObj = sceneObject();
+    if (!sceneObj)
+        return false;
+
+    return parentObject() == sceneObj;
+}
+
+void Action::removeSceneObject()
+{
+    restoreSceneObject();
+    disconnectSceneObject();
+    mObject = 0;
+    mObjectName = "";
+    mTargetParent = false;
 }
