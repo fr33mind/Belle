@@ -24,11 +24,11 @@ void RunScript::loadData(const QVariantMap & data, bool internal)
         Action::loadData(data, internal);
 
     if (data.contains("script") && data.value("script").type() == QVariant::String) {
-        mScript = data.value("script").toString();
+        setScript(data.value("script").toString());
     }
 
     if (data.contains("comment") && data.value("comment").type() == QVariant::String) {
-        mComment = data.value("comment").toString();
+        setComment(data.value("comment").toString());
     }
 }
 
@@ -47,9 +47,11 @@ QString RunScript::script() const
 
 void RunScript::setScript(const QString& text)
 {
+   if (mScript == text)
+       return;
+
    mScript = text;
-   if (mComment.isEmpty() && mScript == displayText())
-    emit dataChanged();
+   notify("script", mScript);
 }
 
 QString RunScript::comment() const
@@ -59,8 +61,11 @@ QString RunScript::comment() const
 
 void RunScript::setComment(const QString& text)
 {
+   if (mComment == text)
+       return;
+
    mComment = text;
-   emit dataChanged();
+   notify("comment", mComment);
 }
 
 QString RunScript::displayText() const
