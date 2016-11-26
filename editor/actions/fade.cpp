@@ -47,7 +47,7 @@ void Fade::loadData(const QVariantMap & data, bool internal)
         setFadeType(data.value("fadeType").toString());
 
     if (data.contains("duration") && data.value("duration").canConvert(QVariant::Double))
-        mDuration = data.value("duration").toDouble();
+        setDuration(data.value("duration").toDouble());
 }
 
 Fade::Type Fade::fadeType()
@@ -69,7 +69,7 @@ void Fade::setFadeType(Fade::Type type)
         namepart = tr("in");
 
     setTitle(QString("%1 %2").arg(tr("Fade")).arg(namepart));
-    emit dataChanged();
+    notify("fadeType", fadeTypeToString(type));
 }
 
 void Fade::setFadeType(const QString& type)
@@ -97,7 +97,7 @@ void Fade::setDuration(double duration)
 {
     if (duration != mDuration) {
         mDuration = duration;
-        emit dataChanged();
+        notify("duration", duration);
     }
 }
 
