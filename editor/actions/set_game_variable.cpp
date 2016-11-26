@@ -50,15 +50,15 @@ void SetGameVariable::loadData(const QVariantMap & data, bool internal)
         Action::loadData(data, internal);
 
     if (data.contains("variable") && data.value("variable").type() == QVariant::String) {
-        mVariable = data.value("variable").toString();
+        setVariable(data.value("variable").toString());
     }
 
     if (data.contains("value") && data.value("value").type() == QVariant::String) {
-        mValue = data.value("value").toString();
+        setValue(data.value("value").toString());
     }
 
     if (data.contains("operator") && data.value("operator").type() == QVariant::String) {
-        mOperatorIndex = mOperators.indexOf(data.value("operator").toString());
+        setOperatorIndex(mOperators.indexOf(data.value("operator").toString()));
     }
 }
 
@@ -69,10 +69,11 @@ int SetGameVariable::operatorIndex()
 
 void SetGameVariable::setOperatorIndex(int index)
 {
-    if (index >= 0 && index < mOperators.size()) {
-        mOperatorIndex = index;
-        emit dataChanged();
-    }
+    if (mOperatorIndex == index || index < 0 || index >= mOperators.size())
+        return;
+
+    mOperatorIndex = index;
+    notify("operator", mOperators[mOperatorIndex]);
 }
 
 QString SetGameVariable::variable()
@@ -82,8 +83,11 @@ QString SetGameVariable::variable()
 
 void SetGameVariable::setVariable(const QString & var)
 {
+    if (mVariable == var)
+        return;
+
     mVariable = var;
-    emit dataChanged();
+    notify("variable", mVariable);
 }
 
 QString SetGameVariable::value()
@@ -93,8 +97,11 @@ QString SetGameVariable::value()
 
 void SetGameVariable::setValue(const QString & val)
 {
+    if (mValue == val)
+        return;
+
     mValue = val;
-    emit dataChanged();
+    notify("value", mValue);
 }
 
 QString SetGameVariable::displayText() const
