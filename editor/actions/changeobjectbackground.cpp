@@ -111,7 +111,7 @@ void ChangeObjectBackground::setOpacity(int a)
     if (obj)
         obj->setTemporaryBackgroundOpacity(a);
 
-    emit dataChanged();
+    notify("opacity", mColor.alpha());
 }
 
 QColor ChangeObjectBackground::color() const
@@ -132,7 +132,7 @@ void ChangeObjectBackground::setColor(const QColor & color)
     if (obj)
         obj->setTemporaryBackgroundColor(mColor);
 
-    emit dataChanged();
+    notify("color", Utils::colorToList(color));
 }
 
 ImageFile* ChangeObjectBackground::image() const
@@ -163,7 +163,8 @@ void ChangeObjectBackground::setImage(ImageFile* image)
 
     releaseImage();
     mImage = image;
-    emit dataChanged();
+    QString name = mImage ? mImage->name() : "";
+    notify("image", name);
 }
 
 QString ChangeObjectBackground::displayText() const
@@ -245,7 +246,7 @@ void ChangeObjectBackground::setImageChangeEnabled(bool enabled)
 {
     mImageChangeEnabled = enabled;
     _loadSceneObject();
-    emit dataChanged();
+    notify("imageChangeEnabled", enabled);
 }
 
 bool ChangeObjectBackground::isImageChangeEnabled() const
@@ -257,7 +258,7 @@ void ChangeObjectBackground::setColorChangeEnabled(bool enabled)
 {
     mColorChangeEnabled = enabled;
     _loadSceneObject();
-    emit dataChanged();
+    notify("colorChangeEnabled", enabled);
 }
 
 bool ChangeObjectBackground::isColorChangeEnabled() const
@@ -269,7 +270,7 @@ void ChangeObjectBackground::setOpacityChangeEnabled(bool enabled)
 {
     mOpacityChangeEnabled = enabled;
     _loadSceneObject();
-    emit dataChanged();
+    notify("opacityChangeEnabled", enabled);
 }
 
 bool ChangeObjectBackground::isOpacityChangeEnabled() const
