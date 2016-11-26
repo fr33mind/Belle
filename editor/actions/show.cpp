@@ -48,10 +48,11 @@ void Show::loadData(const QVariantMap & data, bool internal)
 
 void Show::setCharacterState(const QString& state)
 {
-    if (mCharacterState != state) {
-        mCharacterState = state;
-        emit dataChanged();
-    }
+    if (mCharacterState == state)
+        return;
+
+    mCharacterState = state;
+    notify("state", mCharacterState);
 }
 
 QString Show::characterState() const
