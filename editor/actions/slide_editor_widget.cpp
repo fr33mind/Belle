@@ -178,7 +178,9 @@ void SlideEditorWidget::setupDestChooser(int type)
     mDestXChooser->setEditable(custom);
     mDestYChooser->setEditable(custom);
     mDestXChooser->clear();
+    mDestXChooser->clearEditText();
     mDestYChooser->clear();
+    mDestYChooser->clearEditText();
 
     if (type == Slide::Custom) {
         mDestXChooser->lineEdit()->setPlaceholderText("X");
