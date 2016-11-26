@@ -74,6 +74,7 @@ void StopSound::setSound(Sound* sound)
     }
 
     setDisplayText(name);
+    notify("sound", name);
 }
 
 Sound* StopSound::sound() const
@@ -83,7 +84,11 @@ Sound* StopSound::sound() const
 
 void StopSound::setFadeTime(double time)
 {
+    if (mFadeTime == time)
+        return;
+
     mFadeTime = time;
+    notify("fadeTime", mFadeTime);
 }
 
 double StopSound::fadeTime()
