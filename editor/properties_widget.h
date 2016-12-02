@@ -32,7 +32,7 @@ class PropertiesWidget : public QTreeView
 
     QStandardItemModel *mModel;
     QStandardItem * mLastItem;
-    QStringList mFilters;
+    QVariantList mFilters;
 
 public:
     explicit PropertiesWidget(QWidget *parent = 0, int columns=2);
@@ -55,8 +55,8 @@ public:
     void setLastItem(const QString&);
     void append(PropertiesWidget*, int startAt=0, const QStringList& filters=QStringList());
     void clear(int from=0);
-    void setFilters(const QStringList&);
-    QStringList filters() const;
+    void setFilters(const QVariantList&);
+    QVariantList filters() const;
     void removeItem(QStandardItem*);
     PropertiesWidget* copy();
     QStandardItem* groupAt(int) const;

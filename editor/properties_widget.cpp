@@ -390,7 +390,7 @@ void PropertiesWidget::append(PropertiesWidget* propertiesWidget, int startAt, c
     mLastItem = lastItemBackup;
 }
 
-void PropertiesWidget::setFilters(const QStringList& filters)
+void PropertiesWidget::setFilters(const QVariantList& filters)
 {
     QStandardItemModel *model = mModel;
     QModelIndexList _indexes;
@@ -400,7 +400,7 @@ void PropertiesWidget::setFilters(const QStringList& filters)
         return;
 
     //reset hidden rows
-    foreach(const QString& filter, mFilters) {
+    foreach(const QVariant& filter, mFilters) {
         _indexes = model->match(model->index(0, 0), Qt::UserRole+1, filter, -1, Qt::MatchFixedString | Qt::MatchRecursive);
         foreach(const QModelIndex& index, _indexes) {
             if (this->isRowHidden(index.row(), index.parent()))
@@ -408,7 +408,7 @@ void PropertiesWidget::setFilters(const QStringList& filters)
         }
     }
 
-    foreach(const QString& filter, filters) {
+    foreach(const QVariant& filter, filters) {
         //can't use findItems because we need to search text in UserRole+1 not in DisplayRole
         _indexes = model->match(model->index(0, 0), Qt::UserRole+1, filter, -1, Qt::MatchFixedString | Qt::MatchRecursive);
         for (int i=0; i < _indexes.size(); i++)
@@ -422,7 +422,7 @@ void PropertiesWidget::setFilters(const QStringList& filters)
     mFilters = filters;
 }
 
-QStringList PropertiesWidget::filters() const
+QVariantList PropertiesWidget::filters() const
 {
     return mFilters;
 }

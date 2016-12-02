@@ -206,12 +206,12 @@ void ObjectEditorWidget::updateData(GameObject* obj)
     connect(currObj, SIGNAL(synced()), this, SLOT(reload()));
 
     if (currObj->resource()) {
-       this->setFilters(QStringList() << "Clones");
+       this->setFilters(QVariantList() << "Clones");
        mResourceLabel->setText(currObj->resource()->name());
        mSyncCheckbox->setChecked(currObj->isSynced());
     }
     else if (currObj->isResource()) {
-        this->setFilters(QStringList() << "Resource");
+        this->setFilters(QVariantList() << "Resource");
         QList<GameObject*> clones = currObj->clones();
         QString name("");
         mClonesComboBox->clear();
@@ -224,7 +224,7 @@ void ObjectEditorWidget::updateData(GameObject* obj)
         }
     }
     else {
-        this->setFilters(QStringList() << "Resource" << "Clones");
+        this->setFilters(QVariantList() << "Resource" << "Clones");
     }
 
     ////mChooseObjectComboBox->clear();
