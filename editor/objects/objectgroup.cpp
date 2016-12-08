@@ -34,7 +34,6 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
     if (!internal)
         Object::loadData(data, internal);
 
-    ResourceManager * resourceManager = ResourceManager::instance();
     Object* obj = 0;
 
     if (data.contains("objects") && data.value("objects").type() == QVariant::List) {
@@ -44,7 +43,7 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
 
         for(int i=0; i < objects.size(); i++) {
             if (objects[i].type() == QVariant::Map) {
-                obj = resourceManager->createObject(objects[i].toMap(), this);
+                obj = createObject(objects[i].toMap());
             }
             else if (objects[i].type() == QMetaType::QObjectStar) {
                 obj = qobject_cast<Object*>(objects[i].value<QObject*>());
@@ -53,6 +52,8 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
             if(obj)
                 _append(obj);
         }
+
+        checkStickyObjects();
     }
 
     //internal data passed between resource and clones
@@ -107,8 +108,6 @@ void ObjectGroup::_append(Object* obj)
     connect(obj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(objectChanged(const QVariantMap&)));
     connect(obj, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)));
     mObjects.append(obj);
-    adaptSize();
-    checkStickyObjects();
 }
 
 void ObjectGroup::append(Object* obj, int spacing)
@@ -126,6 +125,8 @@ void ObjectGroup::append(Object* obj, int spacing)
     obj->setY(starty);
     obj->setX(this->x());
     _append(obj);
+    adaptSize();
+    checkStickyObjects();
     this->notify("objects", variantObjects());
     //connect(this, SIGNAL(resized(int,int)), obj, SLOT(onParentResized(int, int)));
 }
@@ -513,9 +514,17 @@ QVariantMap ObjectGroup::toJsonObject(bool internal) const
 {
     QVariantMap object = Object::toJsonObject(internal);
     QVariantList objects;
+    QVariantMap objData;
+    int x = this->x();
+    int y = this->y();
 
     for(int i=0; i < mObjects.size(); i++) {
-        objects.append(mObjects[i]->toJsonObject(internal));
+        objData = mObjects[i]->toJsonObject(internal);
+        if (internal) {
+            objData.insert("relativeX", mObjects[i]->x() - x);
+            objData.insert("relativeY", mObjects[i]->y() - y);
+        }
+        objects.append(objData);
     }
 
     if (! objects.isEmpty())
@@ -524,3 +533,19 @@ QVariantMap ObjectGroup::toJsonObject(bool internal) const
     return object;
 }
 
+Object* ObjectGroup::createObject(const QVariantMap & data)
+{
+    Object* obj = ResourceManager::instance()->createObject(data, this);
+    int x = this->x();
+    int y = this->y();
+
+    if (obj) {
+        if (data.contains("relativeX") && data.value("relativeX").canConvert(QVariant::Int))
+            obj->setX(x + data.value("relativeX").toInt());
+
+        if (data.contains("relativeY") && data.value("relativeY").canConvert(QVariant::Int))
+            obj->setY(y + data.value("relativeY").toInt());
+    }
+
+    return obj;
+}

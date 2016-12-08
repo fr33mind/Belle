@@ -63,6 +63,7 @@ protected:
     void _append(Object*);
     QVariantMap prepareObjectData(int, const QVariantMap&);
     virtual void loadData(const QVariantMap&, bool internal=false);
+    Object* createObject(const QVariantMap&);
 
 private:
     QList<Object*> mObjects;
