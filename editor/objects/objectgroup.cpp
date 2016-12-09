@@ -101,6 +101,7 @@ void ObjectGroup::init()
     setType(GameObjectMetaType::ObjectGroup);
     mEditingMode = false;
     mSelectedObject = 0;
+    mAligning = false;
 }
 
 void ObjectGroup::_append(Object* obj)
@@ -173,8 +174,10 @@ int ObjectGroup::minHeight() const
 
 void ObjectGroup::alignObjects()
 {
+    mAligning = true;
     alignObjectsHorizontally();
     alignObjectsVertically();
+    mAligning = false;
     notify("alignObjects", true);
 }
 
@@ -504,6 +507,10 @@ void ObjectGroup::objectChanged(const QVariantMap& data)
         object = prepareObjectData(index, data);
         if (!object.isEmpty())
             this->notify("_object", object);
+        if (!mAligning) {
+            adaptSize();
+            checkStickyObjects();
+        }
     }
     else {
         emit dataChanged();

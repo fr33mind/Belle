@@ -69,6 +69,7 @@ private:
     QList<Object*> mObjects;
     QList<Object*> mStickyObjects;
     bool mEditingMode;
+    bool mAligning;
     void init();
     int indexOf(Object*);
     void alignObjects();
