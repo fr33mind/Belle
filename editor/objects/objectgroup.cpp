@@ -289,8 +289,9 @@ void ObjectGroup::adaptSize()
             bottom = rect.bottom();
     }
 
-    w = right - left;
-    h = bottom - top;
+    //Due to Qt's peculiar behaviour we need to add 1 to right/bottom
+    w = (right+1) - left;
+    h = (bottom+1) - top;
 
     Object::setX(left);
     Object::setY(top);
