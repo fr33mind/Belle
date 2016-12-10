@@ -187,9 +187,6 @@ class Object : public GameObject
         void clearEventActions(Interaction::InputEvent, const QList<Action*>&);
         void connectEventActions(Interaction::InputEvent, Object*);
         void copyResourceActions(Interaction::InputEvent);
-        void sync();
-        void unsync();
-
 
     protected:
         QRect mSceneRect;
