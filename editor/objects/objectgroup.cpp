@@ -54,6 +54,7 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
         }
 
         checkStickyObjects();
+        setSpacing(calcSpacing());
     }
 
     //internal data passed between resource and clones
@@ -94,6 +95,13 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
     if (data.contains("alignObjects")) {
         alignObjects();
     }
+
+    if (data.contains("spacing") && data.value("spacing").canConvert(QVariant::Int)) {
+        bool ok = false;
+        int spacing = data.value("spacing").toInt(&ok);
+        if (ok)
+            setSpacing(spacing);
+    }
 }
 
 void ObjectGroup::init()
@@ -102,6 +110,7 @@ void ObjectGroup::init()
     mEditingMode = false;
     mSelectedObject = 0;
     mAligning = false;
+    mSpacing = 0;
 }
 
 void ObjectGroup::_append(Object* obj)
@@ -111,7 +120,7 @@ void ObjectGroup::_append(Object* obj)
     mObjects.append(obj);
 }
 
-void ObjectGroup::append(Object* obj, int spacing)
+void ObjectGroup::append(Object* obj)
 {
     if (! obj)
         return;
@@ -122,7 +131,8 @@ void ObjectGroup::append(Object* obj, int spacing)
             starty = mObjects[i]->y() + mObjects[i]->height();
     }
 
-    starty += spacing;
+    if (mObjects.size())
+        starty += mSpacing;
     obj->setY(starty);
     obj->setX(this->x());
     _append(obj);
@@ -161,6 +171,27 @@ int ObjectGroup::calcSpacing() const
     }
 
     return 0;
+}
+
+void ObjectGroup::setSpacing(int spacing)
+{
+    if (mSpacing == spacing)
+        return;
+
+    int y = this->y();
+
+    for(int i=0; i < mObjects.size(); i++) {
+        mObjects[i]->setY(y);
+        y += mObjects[i]->height() + spacing;
+    }
+
+    mSpacing = spacing;
+    notify("spacing", mSpacing);
+}
+
+int ObjectGroup::spacing() const
+{
+    return mSpacing;
 }
 
 int ObjectGroup::minHeight() const
@@ -227,6 +258,9 @@ void ObjectGroup::alignObjectsVertically()
         mObjects[i]->setY(starty);
         starty += mObjects[i]->height() + spacing;
     }
+
+    mSpacing = spacing;
+    notify("spacing", spacing);
 }
 
 void ObjectGroup::adaptSize()

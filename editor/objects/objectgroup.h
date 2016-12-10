@@ -24,11 +24,12 @@ class ObjectGroup : public Object
     Q_OBJECT
 
     Object* mSelectedObject;
+    int mSpacing;
 
 public:
     explicit ObjectGroup(QObject *parent = 0, const QString& name="");
     ObjectGroup(const QVariantMap& data, QObject *parent = 0);
-    void append(Object*, int spacing=0);
+    void append(Object*);
     Object* object(int) const;
     Object* object(const QString&) const;
     Object* object(const QPoint&) const;
@@ -42,8 +43,9 @@ public:
     virtual void resize(int, int);
     void removeObjectAt(int, bool del=false);
     void removeAllObjects(bool del=false);
-    int calcSpacing() const;
     int minHeight() const;
+    void setSpacing(int);
+    int spacing() const;
 
     void setWidth(int, bool percent=false);
     void setHeight(int, bool percent=false);
@@ -78,6 +80,7 @@ private:
     void checkStickyObjects();
     void addStickyObject(Object*);
     QVariantList objectsRelativeRectsData();
+    int calcSpacing() const;
 };
 
 #endif // OBJECTGROUP_H
