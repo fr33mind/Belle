@@ -104,6 +104,12 @@ void ObjectComboBox::addObject(Object* object)
     insertObject(count(), object);
 }
 
+void ObjectComboBox::setCurrentObject(Object * obj)
+{
+    int index = mObjects.indexOf(obj);
+    if (index != -1)
+        setCurrentIndex(index);
+}
 
 Object* ObjectComboBox::currentObject() const
 {

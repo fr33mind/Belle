@@ -26,6 +26,7 @@ public:
     void addObject(Object*);
     void clear();
     QList<Object*> objects() const;
+    void setCurrentObject(Object*);
     Object* currentObject() const;
     Object* objectAt(int) const;
     Object* object(const QString&) const;
