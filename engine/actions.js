@@ -53,6 +53,11 @@ function Action(data, parent)
             this.object = game.createObject(data["object"], this);
           }
         }
+
+        if ("targetParent" in data && data["targetParent"]) {
+          this.object = this.parent;
+          this.objectName = "";
+        }
             
         if ("skippable" in data)
             this.skippable = data["skippable"];
