@@ -65,6 +65,7 @@ void GameObject::filterLoadData(QVariantMap & data)
 {
     data.remove("name");
     data.remove("sync");
+    data.remove("type");
 }
 
 void GameObject::loadData(const QVariantMap & data, bool internal)
