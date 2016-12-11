@@ -99,6 +99,8 @@ GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaTy
         return new ObjectGroupEditorWidget;
     else if (type == GameObjectMetaType::Menu)
         return new ObjectGroupEditorWidget;
+    else if (type == GameObjectMetaType::MenuOption)
+        return new TextPropertiesWidget;
     else if (type == GameObjectMetaType::Sound)
         return new SoundEditorWidget;
     //scene
