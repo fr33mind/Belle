@@ -107,12 +107,26 @@ void ResourceManager::load(const QVariantMap& data)
     if (data.contains("resources") && data.value("resources").type() == QVariant::Map) {
         QVariantMap resourcesMap = data.value("resources").toMap();
         QMapIterator<QString, QVariant> it(resourcesMap);
+        QVariantList menusData;
+        QVariantMap resData;
+        QString resType;
+
         while(it.hasNext()) {
             it.next();
             if (it.value().type() != QVariant::Map)
                 continue;
 
-            add(it.value().toMap());
+            //Temporary fix: add menus last
+            resData = it.value().toMap();
+            resType = resData.value("type").toString();
+            if (resType == "Menu")
+                menusData.append(resData);
+            else
+                add(resData);
+        }
+
+        foreach(const QVariant& data, menusData) {
+            add(data.toMap());
         }
     }
 }
