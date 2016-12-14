@@ -60,6 +60,7 @@
 #include "editorwidgetfactory.h"
 #include "gameobjectfactory.h"
 #include "sound.h"
+#include "menu.h"
 
 static Belle* mInstance = 0;
 
@@ -136,6 +137,7 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Image")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Dialogue Box")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Button")));
+    mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Menu")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Sound")));
 
     mUi.twObjects->topLevelItem(0)->setIcon(0, QIcon(":/media/user.png"));
@@ -143,7 +145,8 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->topLevelItem(2)->setIcon(0, QIcon(":/media/image.png"));
     mUi.twObjects->topLevelItem(3)->setIcon(0, QIcon(":/media/talk-baloon.png"));
     mUi.twObjects->topLevelItem(4)->setIcon(0, QIcon(":/media/button.png"));
-    mUi.twObjects->topLevelItem(5)->setIcon(0, QIcon(":/media/sound.png"));
+    mUi.twObjects->topLevelItem(5)->setIcon(0, QIcon(":/media/menu.png"));
+    mUi.twObjects->topLevelItem(6)->setIcon(0, QIcon(":/media/sound.png"));
 
 
     //scenes' widget
@@ -591,8 +594,13 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         resource = new Button(ResourceManager::instance());
         ResourceManager::instance()->add(resource);
         break;
-    //Sound
+    //Menu
     case 5:
+        resource = new Menu(ResourceManager::instance());
+        ResourceManager::instance()->add(resource);
+        break;
+    //Sound
+    case 6:
         if (QDir(RESOURCES_DEFAULT_PATH).exists())
             startPath = RESOURCES_DEFAULT_PATH;
         path = FileDialogUtils::getOpenSoundFileName(this, startPath);
