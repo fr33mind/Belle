@@ -176,6 +176,8 @@ void Menu::setButtonResource(Button * btn)
     }
 
     mResourceButton = btn;
+    if (mResourceButton)
+        connect(mResourceButton, SIGNAL(destroyed()), this, SLOT(onButtonResourceDestroyed()), Qt::UniqueConnection);
     notify("buttonResource", QVariant::fromValue(qobject_cast<QObject*>(mResourceButton)));
 }
 
@@ -190,4 +192,9 @@ QVariantMap Menu::toJsonObject(bool internal) const
     if (mResourceButton)
         data.insert("buttonResource", mResourceButton->name());
     return data;
+}
+
+void Menu::onButtonResourceDestroyed()
+{
+    mResourceButton = 0;
 }

@@ -48,6 +48,9 @@ signals:
     
 public slots:
 
+private slots:
+    void onButtonResourceDestroyed();
+
 protected:
     virtual void filterLoadData(QVariantMap&);
     virtual void loadData(const QVariantMap&, bool internal=false);
