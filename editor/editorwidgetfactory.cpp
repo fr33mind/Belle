@@ -28,6 +28,7 @@
 #include "objectgroup_editor_widget.h"
 #include "scene_editor_widget.h"
 #include "soundeditorwidget.h"
+#include "menueditorwidget.h"
 
 static QHash<GameObjectMetaType::Type, GameObjectEditorWidget*> mEditorWidgets;
 
@@ -98,7 +99,7 @@ GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaTy
     else if (type == GameObjectMetaType::DialogueBox)
         return new ObjectGroupEditorWidget;
     else if (type == GameObjectMetaType::Menu)
-        return new ObjectGroupEditorWidget;
+        return new MenuEditorWidget;
     else if (type == GameObjectMetaType::MenuOption)
         return new TextPropertiesWidget;
     else if (type == GameObjectMetaType::Sound)
