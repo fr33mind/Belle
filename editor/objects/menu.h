@@ -17,6 +17,8 @@
 #ifndef MENU_H
 #define MENU_H
 
+#define MENU_MAX_OPTIONS 8
+
 #include "objectgroup.h"
 #include "menuoption.h"
 
@@ -27,7 +29,7 @@ class Menu : public ObjectGroup
     Q_OBJECT
 
     int size;
-    Object* mResourceButton;
+    Button* mResourceButton;
 
 public:
     explicit Menu(QObject *parent = 0);
@@ -38,10 +40,17 @@ public:
     void removeOptionAt(int);
     void setNumberOfOptions(int);
     void addOption(const QString&, const QList<Action*>& actions=QList<Action*>(), const QString& condition="");
+    void setButtonResource(Button*);
+    Button* buttonResource() const;
+    virtual QVariantMap toJsonObject(bool internal=true) const;
     
 signals:
     
 public slots:
+
+protected:
+    virtual void filterLoadData(QVariantMap&);
+    virtual void loadData(const QVariantMap&, bool internal=false);
 
 private:
     void init();

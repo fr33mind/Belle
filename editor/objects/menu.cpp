@@ -23,10 +23,20 @@ Menu::Menu(QObject *parent) :
     ObjectGroup(parent)
 {
     init();
+    setSpacing(10);
     setWidth(300);
-    mResourceButton = new Button(this);
-    mResourceButton->setObjectName("menuButton");
-    ResourceManager::instance()->add(mResourceButton);
+
+    QList<GameObject*> objects = ResourceManager::instance()->objects(GameObjectMetaType::Button);
+    if (objects.isEmpty()) {
+        Button* btn = new Button(this);
+        btn->setName("menuButton");
+        ResourceManager::instance()->add(btn);
+        setButtonResource(btn);
+    }
+    else {
+        GameObject* obj = objects.at(0);
+        setButtonResource(qobject_cast<Button*>(obj));
+    }
 
     addOption("Button 1");
     addOption("Button 2");
@@ -36,11 +46,8 @@ Menu::Menu(const QVariantMap& data, QObject *parent) :
     ObjectGroup(data, parent)
 {
     init();
-    _fixButtons();
-
-    Object* obj = this->object(0);
-    if (obj)
-        mResourceButton = qobject_cast<Object*>(obj->resource());
+    loadInternal(data);
+    //_fixButtons();
 }
 
 
@@ -48,6 +55,22 @@ void Menu::init()
 {
     setType(GameObjectMetaType::Menu);
     mResourceButton = 0;
+}
+
+void Menu::loadData(const QVariantMap& data, bool internal)
+{
+    if (!internal)
+        ObjectGroup::loadData(data, internal);
+
+    if (data.contains("buttonResource")) {
+        if (data.value("buttonResource").type() == QMetaType::QObjectStar)
+            setButtonResource(data.value("buttonResource").value<Button*>());
+
+        if (data.value("buttonResource").type() == QVariant::String) {
+            GameObject* obj = ResourceManager::instance()->object(data.value("buttonResource").toString());
+            setButtonResource(qobject_cast<Button*>(obj));
+        }
+    }
 }
 
 //fix buttons for old versions
@@ -75,6 +98,17 @@ void Menu::_fixButtons()
     for(int i=0; i < new_objects.size(); i++) {
         _append(new_objects.at(i));
     }
+}
+
+void Menu::filterLoadData(QVariantMap & data)
+{
+    ObjectGroup::filterLoadData(data);
+    data.remove("width");
+    data.remove("height");
+    data.remove("alignObjects");
+    data.remove("_object");
+    data.remove("objects");
+    data.remove("editingModeData");
 }
 
 QList<MenuOption*> Menu::options() const
@@ -108,10 +142,11 @@ void Menu::removeOptionAt(int index)
 void Menu::addOption(const QString& text, const QList<Action*>& actions, const QString& condition)
 {
     MenuOption* option = new MenuOption(text, actions, condition, this);
-    int spacing = objects().size() > 0 ? 10 : 0;
     option->setWidth(this->width());
+    if (mResourceButton)
+        option->load(mResourceButton->toJsonObject());
     option->setResource(mResourceButton);
-    append(option, spacing);
+    append(option);
 }
 
 void Menu::setNumberOfOptions(int number)
@@ -124,4 +159,35 @@ void Menu::setNumberOfOptions(int number)
 
     for(int i=options().size()-1; i >= number; i--)
         removeOptionAt(i);
+}
+
+void Menu::setButtonResource(Button * btn)
+{
+    if (mResourceButton == btn)
+        return;
+
+    QList<Object*> objects = this->objects();
+    for(int i=0; i < objects.size(); i++) {
+        if (objects[i] && objects[i]->resource() != btn) {
+            if (btn)
+                objects[i]->load(btn->toJsonObject());
+            objects[i]->setResource(btn);
+        }
+    }
+
+    mResourceButton = btn;
+    notify("buttonResource", QVariant::fromValue(qobject_cast<QObject*>(mResourceButton)));
+}
+
+Button* Menu::buttonResource() const
+{
+    return mResourceButton;
+}
+
+QVariantMap Menu::toJsonObject(bool internal) const
+{
+    QVariantMap data = ObjectGroup::toJsonObject(internal);
+    if (mResourceButton)
+        data.insert("buttonResource", mResourceButton->name());
+    return data;
 }
