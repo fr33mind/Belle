@@ -192,3 +192,8 @@ void ObjectComboBox::onEditTextChanged(const QString & text)
     else
         emit objectChanged(text);
 }
+
+void ObjectComboBox::wheelEvent(QWheelEvent * event)
+{
+    event->ignore();
+}

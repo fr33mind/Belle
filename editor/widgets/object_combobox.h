@@ -38,6 +38,7 @@ public:
 
 protected:
     void setupConnections();
+    virtual void wheelEvent(QWheelEvent *);
 
 signals:
     void objectChanged(Object*);
