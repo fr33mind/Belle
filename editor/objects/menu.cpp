@@ -166,11 +166,15 @@ void Menu::setButtonResource(Button * btn)
     if (mResourceButton == btn)
         return;
 
+    QVariantMap data;
     QList<Object*> objects = this->objects();
     for(int i=0; i < objects.size(); i++) {
         if (objects[i] && objects[i]->resource() != btn) {
-            if (btn)
-                objects[i]->load(btn->toJsonObject());
+            if (btn) {
+                data = btn->toJsonObject();
+                data.remove("text");
+                objects[i]->load(data);
+            }
             objects[i]->setResource(btn);
         }
     }
