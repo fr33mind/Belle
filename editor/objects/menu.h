@@ -50,6 +50,7 @@ public slots:
 
 private slots:
     void onButtonResourceDestroyed();
+    void onButtonResourceResized(int, int);
 
 protected:
     virtual void filterLoadData(QVariantMap&);

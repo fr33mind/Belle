@@ -66,6 +66,10 @@ protected:
     QVariantMap prepareObjectData(int, const QVariantMap&);
     virtual void loadData(const QVariantMap&, bool internal=false);
     Object* createObject(const QVariantMap&);
+    void checkStickyObjects();
+    int calcSpacing() const;
+    void updateSpacing();
+    void adaptLayout();
 
 private:
     QList<Object*> mObjects;
@@ -77,10 +81,8 @@ private:
     void alignObjects();
     void alignObjectsHorizontally();
     void alignObjectsVertically();
-    void checkStickyObjects();
     void addStickyObject(Object*);
     QVariantList objectsRelativeRectsData();
-    int calcSpacing() const;
 };
 
 #endif // OBJECTGROUP_H

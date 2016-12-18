@@ -23,8 +23,6 @@ Menu::Menu(QObject *parent) :
     ObjectGroup(parent)
 {
     init();
-    setSpacing(10);
-    setWidth(300);
 
     QList<GameObject*> objects = ResourceManager::instance()->objects(GameObjectMetaType::Button);
     if (objects.isEmpty()) {
@@ -38,6 +36,8 @@ Menu::Menu(QObject *parent) :
         setButtonResource(qobject_cast<Button*>(obj));
     }
 
+    setSpacing(10);
+    setWidth(300);
     addOption("Button 1");
     addOption("Button 2");
 }
@@ -180,8 +180,12 @@ void Menu::setButtonResource(Button * btn)
     }
 
     mResourceButton = btn;
-    if (mResourceButton)
+    if (mResourceButton) {
         connect(mResourceButton, SIGNAL(destroyed()), this, SLOT(onButtonResourceDestroyed()), Qt::UniqueConnection);
+        connect(mResourceButton, SIGNAL(resized(int,int)), this, SLOT(onButtonResourceResized(int,int)), Qt::UniqueConnection);
+    }
+
+    adaptLayout();
     notify("buttonResource", QVariant::fromValue(qobject_cast<QObject*>(mResourceButton)));
 }
 
@@ -201,4 +205,9 @@ QVariantMap Menu::toJsonObject(bool internal) const
 void Menu::onButtonResourceDestroyed()
 {
     mResourceButton = 0;
+}
+
+void Menu::onButtonResourceResized(int w, int h)
+{
+    adaptLayout();
 }

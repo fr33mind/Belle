@@ -591,3 +591,15 @@ Object* ObjectGroup::createObject(const QVariantMap & data)
 
     return obj;
 }
+
+void ObjectGroup::updateSpacing()
+{
+    mSpacing = calcSpacing();
+}
+
+void ObjectGroup::adaptLayout()
+{
+    adaptSize();
+    updateSpacing();
+    checkStickyObjects();
+}
