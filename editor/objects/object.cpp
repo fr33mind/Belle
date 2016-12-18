@@ -202,6 +202,7 @@ void Object::setWidth(int w, bool percent)
     updateResizeRects();
 
     notify("width", mSceneRect.width());
+    emit resized(mSceneRect.width(), mSceneRect.height());
 }
 
 void Object::setHeight(int h, bool percent)
@@ -226,6 +227,7 @@ void Object::setHeight(int h, bool percent)
     updateResizeRects();
 
     notify("height", mSceneRect.height());
+    emit resized(mSceneRect.width(), mSceneRect.height());
 }
 
 void Object::setY(int y)
@@ -709,9 +711,12 @@ void Object::resize(int x, int y)
 
     updateResizeRects();
     QVariantMap data;
-    data.insert("width", width());
-    data.insert("height", height());
+    int w = width();
+    int h = height();
+    data.insert("width", w);
+    data.insert("height", h);
     emit dataChanged(data);
+    emit resized(w, h);
 }
 
 void Object::fixPoint(int pindex, int w, int h)
