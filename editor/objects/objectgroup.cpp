@@ -572,6 +572,9 @@ QVariantMap ObjectGroup::toJsonObject(bool internal) const
     if (! objects.isEmpty())
         object.insert("objects", objects);
 
+    if (internal)
+        object.insert("spacing", mSpacing);
+
     return object;
 }
 
