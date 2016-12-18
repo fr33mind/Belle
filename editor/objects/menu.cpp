@@ -59,9 +59,6 @@ void Menu::init()
 
 void Menu::loadData(const QVariantMap& data, bool internal)
 {
-    if (!internal)
-        ObjectGroup::loadData(data, internal);
-
     if (data.contains("buttonResource")) {
         if (data.value("buttonResource").type() == QMetaType::QObjectStar)
             setButtonResource(data.value("buttonResource").value<Button*>());
@@ -71,6 +68,9 @@ void Menu::loadData(const QVariantMap& data, bool internal)
             setButtonResource(qobject_cast<Button*>(obj));
         }
     }
+
+    if (!internal)
+        ObjectGroup::loadData(data, internal);
 }
 
 //fix buttons for old versions
