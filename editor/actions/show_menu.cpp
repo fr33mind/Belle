@@ -25,6 +25,19 @@ ShowMenu::ShowMenu(QObject *parent) :
 {
      init();
      setSceneObject(new Menu(this));
+
+     Menu* menuResource = 0;
+     QList<GameObject*> menus = ResourceManager::instance()->objects(GameObjectMetaType::Menu);
+
+     if (menus.isEmpty()) {
+        menuResource = new Menu(this);
+        ResourceManager::instance()->add(menuResource);
+     }
+     else {
+         menuResource = qobject_cast<Menu*>(menus.at(0));
+     }
+
+     setMenuResource(menuResource);
 }
 
 ShowMenu::ShowMenu(const QVariantMap& data, QObject *parent) :
@@ -52,6 +65,7 @@ void ShowMenu::init()
 {
     setType(GameObjectMetaType::ShowMenu);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
+    mMenuResource = 0;
 }
 
 void ShowMenu::loadData(const QVariantMap & data, bool internal)
@@ -63,14 +77,15 @@ void ShowMenu::loadData(const QVariantMap & data, bool internal)
         Object* object = ResourceManager::instance()->createObject(data.value("object").toMap(), this);
         setSceneObject(object);
     }
-}
 
-void ShowMenu::setSceneObject(Object * obj)
-{
-    Action::setSceneObject(obj);
-    if (obj) {
-        connect(obj, SIGNAL(dataChanged()), this, SLOT(updateDisplayText()), Qt::UniqueConnection);
-        updateDisplayText();
+    if (data.contains("menuResource")) {
+        if (data.value("menuResource").type() == QMetaType::QObjectStar)
+            setMenuResource(data.value("menuResource").value<Menu*>());
+
+        if (data.value("menuResource").type() == QVariant::String) {
+            GameObject* obj = ResourceManager::instance()->object(data.value("menuResource").toString());
+            setMenuResource(qobject_cast<Menu*>(obj));
+        }
     }
 }
 
@@ -81,20 +96,10 @@ QVariantMap ShowMenu::toJsonObject(bool internal) const
     if (sceneObject())
         object.insert("object", sceneObject()->toJsonObject(internal));
 
+    if (mMenuResource)
+        object.insert("menuResource", mMenuResource->name());
+
     return object;
-}
-
-void ShowMenu::focusIn()
-{
-    if (sceneObject() && this->scene())
-        this->scene()->appendObject(sceneObject(), true, true);
-}
-
-void ShowMenu::focusOut()
-{
-    if (sceneObject() && this->scene()) {
-        this->scene()->removeObject(sceneObject(), false);
-    }
 }
 
 void ShowMenu::updateDisplayText()
@@ -136,3 +141,55 @@ void ShowMenu::updateDisplayText()
     setDisplayText(lines.join("\n"));
 }
 
+void ShowMenu::connectSceneObject()
+{
+    Action::connectSceneObject();
+    Object* obj = sceneObject();
+    if (obj) {
+        connect(obj, SIGNAL(dataChanged()), this, SLOT(updateDisplayText()), Qt::UniqueConnection);
+        updateDisplayText();
+    }
+}
+
+void ShowMenu::disconnectSceneObject()
+{
+    Action::disconnectSceneObject();
+    Object* obj = sceneObject();
+    if (obj && obj->parent() == this)
+        delete obj;
+}
+
+void ShowMenu::loadSceneObject()
+{
+    if (sceneObject() && scene())
+        scene()->appendObject(sceneObject(), true, true);
+}
+
+void ShowMenu::restoreSceneObject()
+{
+    if (sceneObject() && scene())
+        scene()->removeObject(sceneObject(), false);
+}
+
+void ShowMenu::setMenuResource(Menu * menu)
+{
+    if (mMenuResource == menu)
+        return;
+
+    Object* obj = sceneObject();
+    if (obj) {
+        obj->load(menu->toJsonObject());
+        obj->setResource(menu);
+        obj->update();
+    }
+
+    mMenuResource = menu;
+    if(mMenuResource)
+        connect(mMenuResource, SIGNAL(destroyed()), this, SLOT(onMenuResourceDestroyed()), Qt::UniqueConnection);
+    notify("menuResource", QVariant::fromValue(qobject_cast<QObject*>(mMenuResource)));
+}
+
+void ShowMenu::onMenuResourceDestroyed()
+{
+    mMenuResource = 0;
+}

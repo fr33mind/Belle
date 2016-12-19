@@ -25,12 +25,15 @@
 ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
+    mMenuComboBox = new ObjectComboBox(this);
+    connect(mMenuComboBox, SIGNAL(objectChanged(Object*)), this, SLOT(onMenuChanged(Object*)));
 
     mChooseNumberOfOptions = new QComboBox(this);
     for(int i=2; i <= NUMBER_OF_OPTIONS; i++)
         mChooseNumberOfOptions->addItem(QString::number(i));
     connect(mChooseNumberOfOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(onNumberOfOptionsChanged(int)));
     beginGroup(tr("Show Menu"));
+    appendRow(tr("Menu"), mMenuComboBox);
     appendRow(tr("Number of Options"), mChooseNumberOfOptions);
     endGroup();
 
@@ -69,6 +72,19 @@ void ShowMenuEditorWidget::updateData(GameObject * action)
     ShowMenu* showMenu = qobject_cast<ShowMenu*>(action);
     if (! showMenu)
         return;
+
+    QList<GameObject*> resources = ResourceManager::instance()->objects(GameObjectMetaType::Menu);
+    mMenuComboBox->clear();
+    foreach(GameObject* menu, resources) {
+        if (menu)
+            mMenuComboBox->addObject(qobject_cast<Menu*>(menu));
+    }
+
+    mMenuComboBox->setCurrentIndex(-1);
+    Object* obj = showMenu->sceneObject();
+    if (obj) {
+        mMenuComboBox->setCurrentObject(qobject_cast<Menu*>(obj->resource()));
+    }
 
     //clear all data
     foreach(QLineEdit* lineEditor, mTextEdits)
@@ -265,4 +281,14 @@ void ShowMenuEditorWidget::setNumberOfOptions(int number)
     for(int i=mFirstOptionIndex+number; i < model()->rowCount(); i++) {
         this->setRowHidden(i, model()->index(i, 0).parent(), true);
     }
+}
+
+void ShowMenuEditorWidget::onMenuChanged(Object * obj)
+{
+    Menu* menu = qobject_cast<Menu*>(obj);
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (!menu || !showMenu)
+        return;
+
+    showMenu->setMenuResource(menu);
 }

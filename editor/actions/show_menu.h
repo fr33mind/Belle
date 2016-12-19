@@ -18,6 +18,9 @@
 #define SHOW_MENU_H
 
 #include "action.h"
+#include "menu.h"
+
+class Menu;
 
 class ShowMenu : public Action
 {
@@ -27,21 +30,24 @@ public:
     explicit ShowMenu(QObject *parent = 0);
      ShowMenu(const QVariantMap&, QObject *parent = 0);
      virtual QVariantMap toJsonObject(bool internal=true) const;
-     void setSceneObject(Object*);
-
-     void focusIn();
-     void focusOut();
+     void setMenuResource(Menu*);
 
 signals:
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void connectSceneObject();
+    virtual void disconnectSceneObject();
+    virtual void loadSceneObject();
+    virtual void restoreSceneObject();
 
 private slots:
     void updateDisplayText();
+    void onMenuResourceDestroyed();
 
 private:
     void init();
+    Menu* mMenuResource;
 
 };
 

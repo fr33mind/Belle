@@ -23,11 +23,13 @@
 #include "action_editor_widget.h"
 #include "show_menu.h"
 #include "combobox.h"
+#include "object_combobox.h"
 
 #define NUMBER_OF_OPTIONS 8
 
 class ShowMenu;
 class Menu;
+class ObjectComboBox;
 
 class ShowMenuEditorWidget : public ActionEditorWidget
 {
@@ -38,6 +40,7 @@ class ShowMenuEditorWidget : public ActionEditorWidget
     QList<ComboBox*> mEventChoosers;
     QComboBox* mChooseNumberOfOptions;
     int mFirstOptionIndex;
+    ObjectComboBox* mMenuComboBox;
 
 public:
     explicit ShowMenuEditorWidget(QWidget *parent = 0);
@@ -59,6 +62,9 @@ public slots:
     void onItemRemoved(int);
     void onItemActivated(int);
     void onConditionChanged();
+
+private slots:
+    void onMenuChanged(Object*);
 
 };
 
