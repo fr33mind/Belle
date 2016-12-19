@@ -20,6 +20,7 @@ MenuOption::MenuOption(const QVariantMap& data, QObject* parent) :
     Button(data, parent)
 {
     init();
+    loadInternal(data);
 }
 
 void MenuOption::init()
