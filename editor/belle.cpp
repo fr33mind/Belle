@@ -100,16 +100,6 @@ Belle::Belle(QWidget *widget)
     initSceneManager(mDefaultSceneManager);
     initSceneManager(mPauseSceneManager);
 
-    //setup default data
-    QVariantMap data;
-    data.insert("title", tr("Untitled"));
-    data.insert("width", WIDTH);
-    data.insert("height", HEIGHT);
-    data.insert("textSpeed", 50);
-    data.insert("fontSize", 18);
-    data.insert("fontFamily", QFontInfo(QFont()).family());
-    setNovelProperties(data);
-
     mUi.scenesWidget->setIconSize(QSize(64, 48));
     mUi.pauseScenesWidget->setIconSize(QSize(64, 48));
 
@@ -192,8 +182,6 @@ Belle::Belle(QWidget *widget)
     mUi.menuView->addAction(mUi.objectsViewWidget->toggleViewAction());
     mUi.objectsViewWidget->hide();
 
-    addScene();
-
     int width = mUi.actionCatalogDockWidget->width()/2;
     width += mUi.resourcesDockWidget->width() / 2;
     mUi.propertiesDockWidget->setMinimumWidth(width);
@@ -258,7 +246,8 @@ Belle::Belle(QWidget *widget)
 
 void Belle::afterShow()
 {
-    loadDefaultGame();
+    loadEmptyProject();
+
     if (!Engine::isValid()) {
         QMessageBox::warning(this, tr("Invalid engine"),
                              tr("No valid engine was found at \"%1\".\n"
@@ -1435,10 +1424,25 @@ void Belle::newProject()
 
     if (confirmed) {
         clearProject();
-        bool loaded = loadDefaultGame();
-        if (! loaded)
-            addScene();
+        loadEmptyProject();
     }
+}
+
+void Belle::loadEmptyProject()
+{
+    //setup default data
+    QVariantMap data;
+    data.insert("title", tr("Untitled"));
+    data.insert("width", WIDTH);
+    data.insert("height", HEIGHT);
+    data.insert("textSpeed", 50);
+    data.insert("fontSize", 18);
+    data.insert("fontFamily", QFontInfo(QFont()).family());
+    setNovelProperties(data);
+
+    bool loaded = loadDefaultGame();
+    if (! loaded)
+        addScene();
 }
 
 Clipboard* Belle::clipboard() const

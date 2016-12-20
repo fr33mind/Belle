@@ -147,6 +147,7 @@ private:
         void setCurrentSceneIndex(int);
         void setCurrentSceneManager(SceneManager*);
         void showBuiltinBrowserMessage();
+        void loadEmptyProject();
 };
 
 #endif
