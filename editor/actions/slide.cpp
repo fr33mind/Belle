@@ -65,7 +65,13 @@ QString Slide::displayText() const
     if (! this->sceneObject() || mDestX.isEmpty() && mDestY.isEmpty())
         return "";
 
-    return QString("Slide %1 \"%2\" to (%3, %4)").arg(slideTypeAsString())
+    QString slideType = slideTypeAsString();
+    if (mSlideType == Slide::Custom)
+        slideType = "";
+
+    slideType = QString("Slide %1").arg(slideType);
+
+    return QString("%1\"%2\" to (%3, %4)").arg(slideType)
                                                 .arg(this->sceneObject()->objectName())
                                                 .arg(mDestX)
                                                 .arg(mDestY);
