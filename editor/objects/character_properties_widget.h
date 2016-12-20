@@ -44,7 +44,7 @@ protected:
     virtual void updateData(GameObject*);
 
 private:
-    void updateCharacterStates();
+    void updateCharacterStates(Character*);
 
 signals:
 

@@ -66,7 +66,7 @@ void CharacterPropertiesWidget::updateData(GameObject* obj)
     //mNameEdit->setText(mCurrentCharacter->name());
     mNameColorButton->setColor(character->nameColor());
     mTextColorButton->setColor(character->textColor());
-    updateCharacterStates();
+    updateCharacterStates(character);
 }
 
 void CharacterPropertiesWidget::onNameColorChosen(const QColor & color)
@@ -90,9 +90,8 @@ void CharacterPropertiesWidget::onStateChanged(const QString & text)
         character->setCurrentState(text);
 }
 
-void CharacterPropertiesWidget::updateCharacterStates()
+void CharacterPropertiesWidget::updateCharacterStates(Character* character)
 {
-    Character* character = qobject_cast<Character*>(mGameObject);
     if (! character)
         return;
 
@@ -124,5 +123,5 @@ void CharacterPropertiesWidget::editCharacterStates()
     }
 
     dialog->deleteLater();
-    updateCharacterStates();
+    updateCharacterStates(character);
 }
