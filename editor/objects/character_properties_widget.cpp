@@ -33,6 +33,7 @@ CharacterPropertiesWidget::CharacterPropertiesWidget(QWidget *parent) :
     stateEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     layout->addWidget(mStateChooser);
     layout->addWidget(stateEditButton);
+    layout->setContentsMargins(0, 1, 1, 1);
     mNameColorButton = new ColorPushButton(this);
     mTextColorButton = new ColorPushButton(this);
     //mAddCharacterWidget = new AddCharacterWidget(this);
