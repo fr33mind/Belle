@@ -36,6 +36,7 @@ SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
 
     QWidget * positionWidget = new QWidget(this);
     QHBoxLayout* hLayout = new QHBoxLayout(positionWidget);
+    hLayout->setContentsMargins(0, 1, 1, 1);
     mDestXChooser = new QComboBox(positionWidget);
     mDestYChooser = new QComboBox(positionWidget);
 
