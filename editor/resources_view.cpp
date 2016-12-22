@@ -139,7 +139,7 @@ void ResourcesView::removeItem(GameObject* object, bool del)
 
 void ResourcesView::removeObject(GameObject * object, bool del)
 {
-    if (ResourceManager::instance())
+    if (ResourceManager::instance() && object && object->clones().isEmpty())
         ResourceManager::instance()->remove(object, del);
 }
 
