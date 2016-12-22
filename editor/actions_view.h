@@ -52,6 +52,9 @@ protected:
     QList<Action*> selectedActions() const;
     virtual void selectionChanged(const QItemSelection &, const QItemSelection &);
 
+private:
+    void pasteActionsAt(int, const QList<Action*>&, bool, bool select=true);
+
 signals:
     void actionCopied(const QList<Action*>&);
     void actionCut(const QList<Action*>&);

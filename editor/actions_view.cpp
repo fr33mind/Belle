@@ -31,6 +31,7 @@
 #include "actions_model.h"
 #include "action.h"
 #include "belle.h"
+#include "gameobjectfactory.h"
 
 ActionsViewDelegate::ActionsViewDelegate(QObject* parent) :
     QStyledItemDelegate(parent)
@@ -266,21 +267,39 @@ void ActionsView::onPasteAction()
     Clipboard* clipboard = Belle::instance()->clipboard();
     QList<Action*> actions = clipboard->actions();
     Scene* currScene = Belle::instance()->currentScene();
-    if (! currScene)
+    QModelIndexList indexes = selectedIndexes();
+    QModelIndex lastIndex = indexes.isEmpty() ? QModelIndex() : indexes.last();
+    int insertRow = lastIndex.row();
+    if (! currScene || actions.isEmpty())
         return;
 
-    if (clipboard->operation() == Clipboard::Copy) {
-        foreach(Action* action, actions) {
-            currScene->appendAction(action, true);
+    Action* firstAction = actions.first();
+    Scene* scene = firstAction ? firstAction->scene() : 0;
+    int actionsSize = actions.size();
+    int actionIndex = insertRow;
+    if (scene) {
+        actionIndex = scene->indexOf(firstAction);
+        if (insertRow > actionIndex) {
+            insertRow++;
         }
     }
+
+    if (clipboard->operation() == Clipboard::Copy) {
+        pasteActionsAt(insertRow, actions, true);
+    }
     else if (clipboard->operation() == Clipboard::Cut) {
+        if (actionIndex < insertRow) {
+            int dif = insertRow - actionIndex;
+            if (dif > actionsSize)
+                dif = actionsSize;
+            insertRow -= dif;
+        }
+
         foreach(Action* action, actions)
             if(action->scene())
                 action->scene()->removeAction(action);
 
-        foreach(Action* action, actions)
-            currScene->appendAction(action);
+        pasteActionsAt(insertRow, actions, false);
     }
 }
 
@@ -322,6 +341,7 @@ QList<Action*> ActionsView::selectedActions() const
     Scene* scene = Belle::instance()->currentScene();
     if (scene) {
         QModelIndexList indexes = selectedIndexes();
+        qSort(indexes);
         for(int i=0; i < indexes.size(); i++)
             actions.append(scene->actionAt(indexes[i].row()));
     }
@@ -368,4 +388,30 @@ void ActionsView::selectAction(Action * action)
     QModelIndex index = mActionsModel->indexForAction(action);
     selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
     scrollTo(index);
+}
+
+void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, bool copy, bool select)
+{
+    Scene* currScene = Belle::instance()->currentScene();
+    if (!currScene)
+        return;
+
+    Action* firstAction = 0;
+    int i = 0;
+    foreach(Action* action, actions) {
+        if (copy)
+            action = GameObjectFactory::createAction(action->toJsonObject(), this);
+
+        if (!firstAction)
+            firstAction = action;
+
+        if (index >= 0)
+            currScene->insertAction(index+i, action);
+        else
+            currScene->appendAction(action);
+        i++;
+    }
+
+    if (select)
+        selectAction(firstAction);
 }
