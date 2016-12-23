@@ -109,20 +109,14 @@ QString GoToScene::targetSceneName() const
 
 void GoToScene::setTargetScene(const QString & name)
 {
+    if (!mTargetScene || mTargetScene->name() != name) {
+        Scene* scene = findScene(name);
+        setTargetScene(scene);
+    }
+
     if (mTargetSceneName == name)
         return;
 
-    Scene* targetScene = 0;
-    Scene* scene = this->scene();
-
-    if (scene) {
-        SceneManager* sceneManager = scene->sceneManager();
-        if (sceneManager) {
-            targetScene = sceneManager->scene(name);
-        }
-    }
-
-    setTargetScene(targetScene);
     if (!mTargetScene) {
         mTargetSceneName = name;
         setMetaTarget(GoToScene::Name);
@@ -209,4 +203,18 @@ QVariantMap GoToScene::toJsonObject(bool internal) const
         action.insert("target", sceneName);
     action.insert("metaTarget", static_cast<int>(mMetaTarget));
     return action;
+}
+
+Scene* GoToScene::findScene(const QString & name) const
+{
+    Scene* scene = this->scene();
+
+    if (scene) {
+        SceneManager* sceneManager = scene->sceneManager();
+        if (sceneManager) {
+            return sceneManager->scene(name);
+        }
+    }
+
+    return 0;
 }

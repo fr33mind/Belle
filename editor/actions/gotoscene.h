@@ -53,6 +53,8 @@ public:
     static QString metaTargetString(MetaTarget);
     static MetaTarget metaTargetFromString(const QString&);
 
+    Scene* findScene(const QString&) const;
+
 signals:
 
 public slots:
