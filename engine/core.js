@@ -383,8 +383,14 @@
       for (var name in variables) {
         vars_text += 'var ' + name + ' = variables["' + name + '"];';
       }
-      eval(vars_text);
-      result = eval(condition);
+      
+      try {
+        eval(vars_text);
+        result = eval(condition);
+      }
+      catch(ex) {
+        result = false;
+      }
     }());
 
     return result;
