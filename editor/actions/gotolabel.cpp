@@ -17,6 +17,7 @@
 #include "gotolabel.h"
 #include "scene_manager.h"
 #include "scene.h"
+#include "belle.h"
 
 GoToLabel::GoToLabel(const QString& name, QObject *parent) :
     Action(parent)
@@ -30,6 +31,7 @@ GoToLabel::GoToLabel(const QVariantMap& data, QObject *parent) :
 {
     init();
     loadInternal(data);
+    connect(Belle::instance(), SIGNAL(projectLoaded()), this, SLOT(updateTargetLabel()), Qt::UniqueConnection);
 }
 
 void GoToLabel::init()
@@ -52,31 +54,43 @@ void GoToLabel::loadData(const QVariantMap & data, bool internal)
 
 void GoToLabel::setTargetLabel(Label* label)
 {
-    if (label) {
-        mTargetLabel = label;
-        mTargetLabelName = label->objectName();
-        setDisplayText(mTargetLabelName);
+    if (mTargetLabel == label)
+        return;
+
+    removeTargetLabel();
+    mTargetLabel = label;
+    mTargetLabelName = "";
+
+    if (mTargetLabel) {
+        mTargetLabelName = mTargetLabel->name();
+        connect(mTargetLabel, SIGNAL(nameChanged(const QString&)), this, SLOT(onLabelNameChanged(const QString&)));
     }
+
+    setDisplayText(mTargetLabelName);
+    notify("label", mTargetLabelName);
 }
 
 void GoToLabel::setTargetLabel(const QString& name)
 {
+    if (!mTargetLabel || mTargetLabel->name() != name) {
+        Label* label = findLabel(name);
+        setTargetLabel(label);
+    }
+
     if (mTargetLabelName == name)
         return;
 
-    mTargetLabelName = name;
-    setDisplayText(name);
-    notify("label", mTargetLabelName);
+    if (!mTargetLabel) {
+        mTargetLabelName = name;
+        setDisplayText(mTargetLabelName);
+        notify("label", mTargetLabelName);
+    }
 }
 
 bool GoToLabel::isValidLabel(const QString& name)
 {
-    QList<Label*> labels = availableLabels();
-
-    for(int i=0; i < labels.size(); i++)
-        if (labels[i]->name() == name)
-            return true;
-
+    if (findLabel(name))
+        return true;
     return false;
 }
 
@@ -128,4 +142,38 @@ QList<Label*> GoToLabel::availableLabels() const
     }
 
     return labels;
+}
+
+void GoToLabel::removeTargetLabel()
+{
+    if (!mTargetLabel)
+        return;
+
+    mTargetLabel->disconnect(this);
+    mTargetLabel = 0;
+    mTargetLabelName = "";
+    setDisplayText("");
+}
+
+Label* GoToLabel::findLabel(const QString& name) const
+{
+    QList<Label*> labels = availableLabels();
+
+    for(int i=0; i < labels.size(); i++)
+        if (labels[i]->name() == name)
+            return labels[i];
+
+    return 0;
+}
+
+void GoToLabel::onLabelNameChanged(const QString& name)
+{
+    mTargetLabelName = name;
+    setDisplayText(mTargetLabelName);
+}
+
+void GoToLabel::updateTargetLabel()
+{
+    setTargetLabel(mTargetLabelName);
+    Belle::instance()->disconnect(this);
 }

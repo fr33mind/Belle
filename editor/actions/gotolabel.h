@@ -39,10 +39,14 @@ public:
     bool isValidLabel(const QString&);
     bool hasValidLabel();
     QList<Label*> availableLabels() const;
+    Label* findLabel(const QString&) const;
     
 signals:
     
-public slots:
+private slots:
+    void removeTargetLabel();
+    void onLabelNameChanged(const QString&);
+    void updateTargetLabel();
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
