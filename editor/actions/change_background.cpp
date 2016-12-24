@@ -73,9 +73,7 @@ void ChangeBackground::setBackgroundImage(const QString & background)
 
     AssetManager::instance()->releaseAsset(mBackgroundImage);
     mBackgroundImage = image;
-
-    QFileInfo info(background);
-    setDisplayText(info.fileName());
+    updateDisplayText();
 
     QString name = mBackgroundImage ? mBackgroundImage->name() : "";
     notify("backgroundImage", name);
@@ -100,9 +98,11 @@ QString ChangeBackground::backgroundPath()
 
 void ChangeBackground::setBackgroundColor(const QColor& color)
 {
+    if (mBackgroundColor == color)
+        return;
+
     mBackgroundColor = color;
-    if (color.isValid())
-        setDisplayText(color.name());
+    updateDisplayText();
     notify("backgroundColor", Utils::colorToList(color));
 
     Scene* scene = this->scene();
@@ -148,4 +148,14 @@ QVariantMap ChangeBackground::toJsonObject(bool internal) const
         data.insert("backgroundColor", Utils::colorToList(mBackgroundColor));
 
     return data;
+}
+
+void ChangeBackground::updateDisplayText()
+{
+    QStringList textparts;
+    if (mBackgroundImage)
+        textparts.append(QString("\"%1\"").arg(mBackgroundImage->name()));
+    if (mBackgroundColor.isValid())
+        textparts.append(mBackgroundColor.name());
+    setDisplayText(textparts.join(" and "));
 }

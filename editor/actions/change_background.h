@@ -53,6 +53,7 @@ protected:
 
 private:
    void init();
+   void updateDisplayText();
     
 };
 
