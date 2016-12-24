@@ -182,7 +182,9 @@ QString ChangeObjectBackground::displayText() const
         opacity_str = QString("(%1%)").arg(QString::number(op, 'f', 1));
     }
 
-    if (mImage && mImageChangeEnabled)
+    if (mImage && mImageChangeEnabled && mColor.isValid() && mColorChangeEnabled)
+        text = tr("\"%1\" to \"%2\" and %3 %4").arg(name, mImage->name(), mColor.name(QColor::HexRgb), opacity_str);
+    else if (mImage && mImageChangeEnabled)
         text = tr("\"%1\" to \"%2\" %3").arg(name, mImage->name(), opacity_str);
     else if (mColor.isValid() && mColorChangeEnabled)
         text = tr("\"%1\" to %2 %3").arg(name, mColor.name(QColor::HexRgb), opacity_str);
