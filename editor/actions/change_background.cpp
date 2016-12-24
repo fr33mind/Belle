@@ -140,10 +140,10 @@ void ChangeBackground::focusOut()
 QVariantMap ChangeBackground::toJsonObject(bool internal) const
 {
     QVariantMap data = Action::toJsonObject(internal);
-    QString path = mBackgroundImage ? mBackgroundImage->path() : "";
+    QString name = mBackgroundImage ? mBackgroundImage->name() : "";
 
-    if (! path.isEmpty())
-        data.insert("backgroundImage", QFileInfo(path).fileName());
+    if (! name.isEmpty())
+        data.insert("backgroundImage", name);
     if (mBackgroundColor.isValid())
         data.insert("backgroundColor", Utils::colorToList(mBackgroundColor));
 
