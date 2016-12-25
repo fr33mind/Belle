@@ -159,6 +159,9 @@ void Dialogue::onCharacterDestroyed()
 
 void Dialogue::updateTextBox()
 {
+    if (!isActive())
+        return;
+
     Object* object = sceneObject();
     if (! object)
         return;
@@ -190,6 +193,9 @@ void Dialogue::updateTextBox()
 
 void Dialogue::restoreTextBox()
 {
+    if (!isActive())
+        return;
+
     Object* object = sceneObject();
     if (! object)
         return;
@@ -206,21 +212,16 @@ void Dialogue::restoreTextBox()
     }
 }
 
-void Dialogue::focusIn()
+void Dialogue::loadSceneObject()
 {
+    Action::loadSceneObject();
     updateTextBox();
 }
 
-void Dialogue::focusOut()
+void Dialogue::restoreSceneObject()
 {
+    Action::restoreSceneObject();
     restoreTextBox();
-}
-
-void Dialogue::setSceneObject(Object * obj)
-{
-    restoreTextBox(); //restore old textbox
-    Action::setSceneObject(obj);
-    updateTextBox(); //update new one
 }
 
 bool Dialogue::append() const

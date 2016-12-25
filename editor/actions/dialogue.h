@@ -50,14 +50,10 @@ public:
     virtual QString displayText() const;
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
-    virtual void focusIn();
-    virtual void focusOut();
-
     void updateTextBox();
     void restoreTextBox();
     void activateTextBoxDefaultTextColor();
     void activateCharacterColors();
-    void setSceneObject(Object*);
 
     bool append() const;
     void setAppend(bool);
@@ -66,6 +62,8 @@ signals:
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void restoreSceneObject();
+    virtual void loadSceneObject();
 
 private slots:
     void onCharacterDestroyed();

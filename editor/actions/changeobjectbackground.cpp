@@ -128,9 +128,11 @@ void ChangeObjectBackground::setColor(const QColor & color)
     mColor = color;
     mColor.setAlpha(alpha);
 
-    Object* obj = sceneObject();
-    if (obj)
-        obj->setTemporaryBackgroundColor(mColor);
+    if (isActive()) {
+        Object* obj = sceneObject();
+        if (obj)
+            obj->setTemporaryBackgroundColor(mColor);
+    }
 
     notify("color", Utils::colorToList(color));
 }
@@ -157,9 +159,11 @@ void ChangeObjectBackground::setImage(ImageFile* image)
     if (mImage == image)
         return;
 
-    Object* obj = sceneObject();
-    if (obj)
-        obj->setTemporaryBackgroundImage(image);
+    if (isActive()) {
+        Object* obj = sceneObject();
+        if (obj)
+            obj->setTemporaryBackgroundImage(image);
+    }
 
     releaseImage();
     mImage = image;
@@ -212,6 +216,9 @@ void ChangeObjectBackground::restoreSceneObject()
 
 void ChangeObjectBackground::_loadSceneObject()
 {
+    if (!isActive())
+        return;
+
     Object* obj = sceneObject();
     if (obj) {
         if (mImage) {

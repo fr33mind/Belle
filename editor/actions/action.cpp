@@ -168,7 +168,8 @@ void Action::setSceneObject(Object * object)
     mTargetParent = isParentTargeted();
 
     connectSceneObject();
-    loadSceneObject();
+    if (isActive())
+        loadSceneObject();
 
     emit sceneObjectChanged(mObject);
     QVariantMap data;
@@ -288,8 +289,8 @@ void Action::focusIn()
 
 void Action::focusOut()
 {
-    mActive = false;
     restoreSceneObject();
+    mActive = false;
 }
 
 bool Action::isActive()
@@ -372,7 +373,8 @@ bool Action::isParentTargeted() const
 
 void Action::removeSceneObject()
 {
-    restoreSceneObject();
+    if (isActive())
+        restoreSceneObject();
     disconnectSceneObject();
     mObject = 0;
     mObjectName = "";

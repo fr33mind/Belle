@@ -67,10 +67,6 @@ void ChangeBackground::setBackgroundImage(const QString & background)
         return;
     }
 
-    Scene* scene = this->scene();
-    if (scene && scene->temporaryBackgroundImage() == mBackgroundImage)
-        scene->setTemporaryBackgroundImage(0);
-
     AssetManager::instance()->releaseAsset(mBackgroundImage);
     mBackgroundImage = image;
     updateDisplayText();
@@ -78,10 +74,11 @@ void ChangeBackground::setBackgroundImage(const QString & background)
     QString name = mBackgroundImage ? mBackgroundImage->name() : "";
     notify("backgroundImage", name);
 
-    if (scene && scene->temporaryBackgroundImage() != mBackgroundImage)
-        focusIn();
-
-
+    if (isActive()) {
+        Scene* scene = this->scene();
+        if (scene)
+            scene->setTemporaryBackgroundImage(mBackgroundImage);
+    }
 }
 
 ImageFile* ChangeBackground::background() const
@@ -105,9 +102,11 @@ void ChangeBackground::setBackgroundColor(const QColor& color)
     updateDisplayText();
     notify("backgroundColor", Utils::colorToList(color));
 
-    Scene* scene = this->scene();
-    if (scene && scene->temporaryBackgroundColor() != color)
-        focusIn();
+    if (isActive()) {
+        Scene* scene = this->scene();
+        if (scene)
+            scene->setTemporaryBackgroundColor(color);
+    }
 }
 
 QColor ChangeBackground::backgroundColor()
@@ -115,9 +114,9 @@ QColor ChangeBackground::backgroundColor()
     return mBackgroundColor;
 }
 
-void ChangeBackground::focusIn()
+void ChangeBackground::loadSceneObject()
 {
-    Action::focusIn();
+    Action::loadSceneObject();
     Scene *scene = this->scene();
 
     if (scene) {
@@ -126,9 +125,9 @@ void ChangeBackground::focusIn()
     }
 }
 
-void ChangeBackground::focusOut()
+void ChangeBackground::restoreSceneObject()
 {
-    Action::focusOut();
+    Action::restoreSceneObject();
     Scene* scene = this->scene();
 
     if (scene) {

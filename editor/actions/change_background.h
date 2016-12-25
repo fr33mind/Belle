@@ -40,9 +40,6 @@ public:
 
     void setBackgroundColor(const QColor&);
     QColor backgroundColor();
-
-    void focusIn();
-    void focusOut();
     
 signals:
     
@@ -50,6 +47,8 @@ public slots:
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void restoreSceneObject();
+    virtual void loadSceneObject();
 
 private:
    void init();

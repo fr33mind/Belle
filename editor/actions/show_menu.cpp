@@ -161,12 +161,16 @@ void ShowMenu::disconnectSceneObject()
 
 void ShowMenu::loadSceneObject()
 {
+    Action::loadSceneObject();
+
     if (sceneObject() && scene())
         scene()->appendObject(sceneObject(), true, true);
 }
 
 void ShowMenu::restoreSceneObject()
 {
+    Action::restoreSceneObject();
+
     if (sceneObject() && scene())
         scene()->removeObject(sceneObject(), false);
 }
