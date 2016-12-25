@@ -16,6 +16,7 @@
 
 #include "playsound_editorwidget.h"
 #include "soundresourcecombobox.h"
+#include "slider.h"
 
 #include <QtDebug>
 
@@ -24,7 +25,7 @@ PlaySoundEditorWidget::PlaySoundEditorWidget(QWidget *parent) :
 {
     mSoundComboBox = new SoundResourceComboBox(this);
     mSoundComboBox->setIconsEnabled(true);
-    mVolumeSlider = new QSlider(Qt::Horizontal);
+    mVolumeSlider = new Slider(Qt::Horizontal);
     mVolumeSlider->setMinimum(0);
     mVolumeSlider->setMaximum(100);
     mLoopCheckBox = new QCheckBox(this);

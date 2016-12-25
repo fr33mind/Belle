@@ -17,7 +17,6 @@
 #include "object_editor_widget.h"
 
 #include <QPushButton>
-#include <QSlider>
 #include <QColorDialog>
 #include <QDebug>
 #include <QLineEdit>
@@ -30,6 +29,7 @@
 #include "add_action_dialog.h"
 #include "scene.h"
 #include "drawing_surface_widget.h"
+#include "slider.h"
 
 QHash<QObject*, Interaction::InputEvent> mWidgetToEvent = QHash<QObject*, Interaction::InputEvent>();
 
@@ -51,7 +51,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     mHeightEditor->setValidator(validator);
     mHeightEditor->setObjectName("heightEditor");
     mKeepAspectRatioCheckbox = new QCheckBox(this);
-    mOpacitySlider = new QSlider(Qt::Horizontal, this);
+    mOpacitySlider = new Slider(Qt::Horizontal, this);
     mOpacitySlider->setMaximum(255);
 
     connect(mVisibleCheckbox, SIGNAL(toggled(bool)), this, SLOT(onVisibilityChanged(bool)));
@@ -110,7 +110,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
 
     mImageChooser = new ChooseFileButton(ChooseFileButton::ImageFilter, this);
     mColorButton = new ColorPushButton(this);
-    mBackgroundOpacitySlider = new QSlider(Qt::Horizontal, this);
+    mBackgroundOpacitySlider = new Slider(Qt::Horizontal, this);
     mBackgroundOpacitySlider->setMaximum(255);
 
     connect(mImageChooser, SIGNAL(fileSelected(const QString&)), this, SLOT(onImageChosen(const QString&)));

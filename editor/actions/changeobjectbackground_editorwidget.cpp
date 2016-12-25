@@ -17,6 +17,7 @@
 #include "changeobjectbackground_editorwidget.h"
 
 #include "changeobjectbackground.h"
+#include "slider.h"
 
 #include <QHBoxLayout>
 
@@ -49,7 +50,7 @@ ChangeObjectBackgroundEditorWidget::ChangeObjectBackgroundEditorWidget(QWidget *
 
     QWidget* opacityWidget = new QWidget(this);
     mOpacityCheckBox = new QCheckBox(opacityWidget);
-    mOpacitySlider = new QSlider(Qt::Horizontal, opacityWidget);
+    mOpacitySlider = new Slider(Qt::Horizontal, opacityWidget);
     mOpacitySlider->setMinimum(0);
     mOpacitySlider->setMaximum(255);
 
