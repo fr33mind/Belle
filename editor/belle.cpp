@@ -242,6 +242,7 @@ Belle::Belle(QWidget *widget)
     connect(mUi.scenesTabWidget, SIGNAL(currentChanged(int)), this, SLOT(scenesTabWidgetPageChanged(int)));
 
     restoreSettings();
+    Engine::loadDefaultPath();
 }
 
 void Belle::afterShow()

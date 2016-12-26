@@ -22,6 +22,7 @@
 #include <QMessageBox>
 
 static QString mPath = ENGINE_DEFAULT_PATH;
+static QString mDefaultPath = ENGINE_DEFAULT_PATH;
 static QString mBrowserPath = "";
 static bool mUseBuiltinBrowser = false;
 static bool mPathChanged = false;
@@ -76,7 +77,23 @@ bool Engine::isValid()
 
 QString Engine::defaultPath()
 {
-    return ENGINE_DEFAULT_PATH;
+    return mDefaultPath;
+}
+
+void Engine::loadDefaultPath()
+{
+    if (isValidPath(mDefaultPath))
+        return;
+
+    QStringList paths;
+    paths << "engine";
+
+    foreach(const QString& path, paths) {
+        if (isValidPath(path)) {
+            mDefaultPath = path;
+            break;
+        }
+    }
 }
 
 QString Engine::browserPath()
