@@ -7,7 +7,8 @@
 ChangeStateEditorWidget::ChangeStateEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mCharacterBox = new QComboBox(this);
+    mCharacterBox = new ObjectComboBox(this);
+    mCharacterBox->addTypeFilter(GameObjectMetaType::Character);
     mStateBox = new QComboBox(this);
 
     beginGroup(tr("Change State Editor"));
@@ -16,7 +17,7 @@ ChangeStateEditorWidget::ChangeStateEditorWidget(QWidget *parent) :
     endGroup();
     resizeColumnToContents(0);
 
-    connect(mCharacterBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onObjectChosen(const QString&)));
+    connect(mCharacterBox, SIGNAL(objectChanged(Object*)), this, SLOT(onObjectChosen(Object*)));
     connect(mStateBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onStateChosen(const QString&)));
 }
 
@@ -27,22 +28,9 @@ void ChangeStateEditorWidget::updateData(GameObject* action)
     if (! changeStateAction)
         return;
 
-    QList<Object*> objects = changeStateAction->availableObjects();
-    Object* currObject = changeStateAction->sceneObject();
-    int currIndex = -1;
-    mCharacterBox->clear();
-    foreach(Object* object, objects) {
-        if (currObject && currObject == object)
-            currIndex = mCharacterBox->count();
-        mCharacterBox->addItem(object->name());
-    }
-
-    if (currIndex != -1)
-        mCharacterBox->setCurrentIndex(currIndex);
-    else
-        mCharacterBox->setCurrentIndex(-1);
-
+    mCharacterBox->loadFromAction(changeStateAction);
     mStateBox->clear();
+    Object* currObject = changeStateAction->sceneObject();
     if (currObject) {
         Character* character = qobject_cast<Character*>(currObject);
         if (character)
@@ -53,27 +41,14 @@ void ChangeStateEditorWidget::updateData(GameObject* action)
         mStateBox->setCurrentIndex(mStateBox->findText(changeStateAction->state()));
 }
 
-void ChangeStateEditorWidget::setGameObject(GameObject* action)
-{
-    ActionEditorWidget::setGameObject(action);
-
-    ChangeState* changeStateAction = qobject_cast<ChangeState*>(action);
-    if (! changeStateAction)
-        return;
-
-    Object* currObject = changeStateAction->sceneObject();
-    if (! currObject && mCharacterBox->count())
-        mCharacterBox->setCurrentIndex(0);
-}
-
-void ChangeStateEditorWidget::onObjectChosen(const QString& name)
+void ChangeStateEditorWidget::onObjectChosen(Object* obj)
 {
     ChangeState* action = qobject_cast<ChangeState*>(mGameObject);
     if (! action)
         return;
 
     mStateBox->clear();
-    action->setSceneObject(name);
+    action->setSceneObject(obj);
     action->setState("");
     Character* character = qobject_cast<Character*>(action->sceneObject());
     if (character)

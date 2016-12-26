@@ -1,10 +1,9 @@
 #ifndef CHANGESTATE_EDITORWIDGET_H
 #define CHANGESTATE_EDITORWIDGET_H
 
-#include <QComboBox>
-
 #include "action_editor_widget.h"
 #include "changestate.h"
+#include "object_combobox.h"
 
 class ChangeState;
 
@@ -14,10 +13,9 @@ class ChangeStateEditorWidget : public ActionEditorWidget
 
 public:
     explicit ChangeStateEditorWidget(QWidget *parent = 0);
-    virtual void setGameObject(GameObject*);
 
 private:
-    QComboBox* mCharacterBox;
+    ObjectComboBox* mCharacterBox;
     QComboBox* mStateBox;
 
 signals:
@@ -26,7 +24,7 @@ protected:
     virtual void updateData(GameObject*);
 
 private slots:
-    void onObjectChosen(const QString&);
+    void onObjectChosen(Object*);
     void onStateChosen(const QString&);
 
 };
