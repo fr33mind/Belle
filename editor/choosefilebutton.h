@@ -41,6 +41,9 @@ public:
     bool hasValidFile();
     void setFilter(FilterType);
 
+    QString placeholderText() const;
+    void setPlaceholderText(const QString&);
+
 signals:
     void fileSelected(const QString&);
 
@@ -55,6 +58,7 @@ private:
     QStringList mImageExtensions;
     QStringList mSoundExtensions;
     FilterType mActiveFilter;
+    QString mPlaceholderText;
     void init(FilterType);
 
 };

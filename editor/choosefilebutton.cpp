@@ -37,13 +37,14 @@ ChooseFileButton::ChooseFileButton(FilterType filter, QWidget *parent) :
 
 void ChooseFileButton::init(FilterType filter)
 {
-    setText(tr("No file selected"));
     connect(this, SIGNAL(clicked()), this, SLOT(onClick()));
     mFilePath = "";
     mPreviousPath = "";
     mImageExtensions << "png" << "xpm" << "jpg" << "jpeg" << "gif" << "svg" << "svgz";
     mSoundExtensions << "ogg" << "oga" << "mp3" << "aac" << "wav" << "webm";
     setFilter(filter);
+    mPlaceholderText = tr("No File Selected");
+    setText(mPlaceholderText);
 }
 
 void ChooseFileButton::onClick()
@@ -108,7 +109,7 @@ void ChooseFileButton::setFilePath(const QString & path)
     mFilePath = path;
 
     if (mFilePath.isEmpty()) {
-        setText(tr("No File Selected"));
+        setText(mPlaceholderText);
         setIcon(QIcon());
         return;
     }
@@ -163,4 +164,20 @@ void ChooseFileButton::setFilter(FilterType filter)
     filters += "Any(*.*)";
     mFilters = filters;
     mActiveFilter = filter;
+}
+
+QString ChooseFileButton::placeholderText() const
+{
+    return mPlaceholderText;
+}
+
+void ChooseFileButton::setPlaceholderText(const QString & text)
+{
+    if (mPlaceholderText == text)
+        return;
+
+    mPlaceholderText = text;
+
+    if (!hasValidFile())
+        setText(mPlaceholderText);
 }
