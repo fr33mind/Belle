@@ -214,15 +214,14 @@ void DrawingSurfaceWidget::drawSelection(QPainter& painter, Object* object)
     if (! object)
         return;
 
+    painter.save();
+    QPen pen(Qt::black);
+    painter.setPen(pen);
+
     QRectF rectf = object->sceneRect();
     painter.drawRect(rectf);
 
     QBrush brush(QColor(255,0,0));
-    QPen pen;
-    pen.setWidth(1);
-    painter.save();
-    painter.setPen(pen);
-
     QList<QRect> rects = object->resizeRects();
     foreach(const QRect& rect, rects) {
         painter.fillRect(rect, brush);
