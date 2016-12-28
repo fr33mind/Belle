@@ -659,6 +659,8 @@ QVariantMap Object::toJsonObject(bool internal) const
     if (mBorderColor.isValid() || internal)
         object.insert("borderColor", Utils::colorToList(mBorderColor));
 
+    object.insert("keepAspectRatio", mKeepAspectRatio);
+
     //remove attributes that are the same in the resource
     filterResourceData(object);
 
@@ -1092,6 +1094,9 @@ void Object::loadData(const QVariantMap &data, bool internal)
     if (data.contains("borderColor") && data.value("borderColor").type() == QVariant::List)
         setBorderColor(Utils::listToColor(data.value("borderColor").toList()));
 
+    if (data.contains("keepAspectRatio") && data.value("keepAspectRatio").type() == QVariant::Bool)
+        setKeepAspectRatio(data.value("keepAspectRatio").toBool());
+
     mPadding = Padding(data.value("padding").toMap());
 }
 
@@ -1221,7 +1226,7 @@ void Object::setKeepAspectRatio(bool keep)
 
     mKeepAspectRatio = keep;
 
-    if (mKeepAspectRatio && type() != GameObjectMetaType::Image)
+    if (mKeepAspectRatio)
         updateAspectRatio();
 
     if (mKeepAspectRatio && mAspectRatio != 1) {
@@ -1230,11 +1235,18 @@ void Object::setKeepAspectRatio(bool keep)
         mSceneRect.setHeight(h);
         updateResizeRects();
     }
+
+    notify("keepAspectRatio", mKeepAspectRatio);
 }
 
 void Object::updateAspectRatio()
 {
-    mAspectRatio = (float) width() / height();
+    mAspectRatio = calculateAspectRatio();
+}
+
+float Object::calculateAspectRatio()
+{
+    return (float) width() / height();
 }
 
 void Object::connectToResource()

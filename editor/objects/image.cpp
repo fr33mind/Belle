@@ -42,9 +42,8 @@ Image::Image(const QString& path, QObject *parent, const QString& name) :
 Image::Image(const QVariantMap& data, QObject* parent):
     Object(data, parent)
 {
-    init();
+    init(data);
     loadInternal(data);
-
 }
 
 Image::~Image()
@@ -68,11 +67,12 @@ void Image::loadData(const QVariantMap& data, bool internal)
     }
 }
 
-void Image::init()
+void Image::init(const QVariantMap& data)
 {
-    setKeepAspectRatio(true);
     mImage = 0;
     setType(GameObjectMetaType::Image);
+    if (data.isEmpty())
+        setKeepAspectRatio(true);
 }
 
 void Image::_setImage(ImageFile* image, bool load)
@@ -161,4 +161,11 @@ QVariantMap Image::toJsonObject(bool internal) const
 
     filterResourceData(object);
     return object;
+}
+
+float Image::calculateAspectRatio()
+{
+    if (mImage)
+        return (float) mImage->width() / mImage->height();
+    return Object::calculateAspectRatio();
 }

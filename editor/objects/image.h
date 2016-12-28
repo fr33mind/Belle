@@ -48,9 +48,10 @@ signals:
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual float calculateAspectRatio();
 
 private:
-    void init();
+    void init(const QVariantMap& data=QVariantMap());
     void _setImage(ImageFile*, bool load=true);
 
 

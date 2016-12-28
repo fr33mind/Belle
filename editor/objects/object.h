@@ -201,6 +201,7 @@ class Object : public GameObject
         QList<QRect> mPreviousSceneRects;
         QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
         void updateAspectRatio();
+        virtual float calculateAspectRatio();
         virtual void connectToResource();
         virtual void loadData(const QVariantMap&, bool internal=false);
         virtual void filterLoadData(QVariantMap&);
