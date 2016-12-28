@@ -373,15 +373,23 @@
 
   Game.prototype.loadSlot = function(id) {
     var entry = this.getSlot(id);
+    var loaded = false;
 
     if (entry) {
-      var ok = this.loadState(entry);
-      if (ok) {
+      var ok = confirm("Loading a saved game will discard current unsaved progress.\n Are you sure?");
+      if (!ok)
+        return false;
+
+      loaded = this.loadState(entry);
+      if (loaded) {
         this.mainModel.resume();
       }
-    }
-    else
+      else {
         alert('Game slot "'+ id +'" could not be loaded');
+      }
+    }
+
+    return loaded;
   }
 
   Game.prototype.getSavedGames =  function() {
