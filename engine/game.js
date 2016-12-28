@@ -307,6 +307,31 @@
     return true;
   }
 
+  Game.prototype.getSlot = function(id) {
+    var savedGames = this.getSavedGames(),
+        entry = null;
+
+    if (! savedGames) {
+        return entry;
+    }
+
+    if (typeof id == "number") {
+        if (id >= 0 && id < savedGames.length)
+            entry = savedGames[id];
+    }
+    else if (typeof id == "string") {
+        for(var i=0; i < savedGames.length; i++) {
+            var _entry = savedGames[i];
+            if (_entry && _entry.name == id) {
+              entry = _entry;
+              break;
+            }
+        }
+    }
+
+    return entry;
+  }
+
   Game.prototype.saveSlot = function(id) {
     if (! id)
       id = 0;
@@ -347,38 +372,16 @@
   }
 
   Game.prototype.loadSlot = function(id) {
-    var title = this.properties.title,
-      savedGames = this.getSavedGames(),
-      entry = null,
-      ok = false;
-
-    if (! savedGames) {
-        alert("You don't have any saved games.");
-        return;
-    }
-
-    if (typeof id == "number") {
-        if (id >= 0 && id < savedGames.length)
-            entry = savedGames[id];
-    }
-    else if (typeof id == "string") {
-        for(var i=0; i < savedGames.length; i++) {
-            var _entry = savedGames[i];
-            if (_entry && _entry.name == id) {
-              entry = _entry;
-              break;
-            }
-        }
-    }
+    var entry = this.getSlot(id);
 
     if (entry) {
-      ok = this.loadState(entry);
+      var ok = this.loadState(entry);
       if (ok) {
         this.mainModel.resume();
       }
     }
     else
-        alert('Game "'+ id +'" could not be loaded');
+        alert('Game slot "'+ id +'" could not be loaded');
   }
 
   Game.prototype.getSavedGames =  function() {
