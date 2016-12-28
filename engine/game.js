@@ -355,6 +355,12 @@
         id = i;
     }
 
+    if (savedGames[id]) {
+      var ok = confirm("Are you sure you want to overwrite the saved game?");
+      if (!ok)
+        return null;
+    }
+
     var entry = this.getState();
     entry.date = belle.utils.getSaveDate();
     entry.name = name;
