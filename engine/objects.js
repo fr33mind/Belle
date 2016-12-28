@@ -481,7 +481,7 @@ Image.prototype.load = function(data)
 
 Image.prototype.setImage = function(img)
 {
-  if (! img)
+  if (this.image == img)
     return;
 
   var oldImg = this.image,
@@ -491,22 +491,27 @@ Image.prototype.setImage = function(img)
     return;
 
   if (typeof img == "string") {
-    if (! this.image || this.image.img.src != img)
-      this.image = assetManager.loadAsset(img, "Image");
-    this._bindImage(this.image);
+    this.image = assetManager.loadAsset(img, "Image");
   }
   else if (belle.isInstance(img, GraphicImage)) {
     this.image = img;
   }
+  else {
+    this.image = null;
+  }
 
   if (this.image != oldImg) {
+    this._bindImage(this.image);
     this._unbindImage(oldImg);
     this.update();
     if (this.element) {
       $(this.element).find("img").remove();
-      $(this.element).append(this.image.img);
+      if (this.image)
+        $(this.element).append(this.image.img);
     }
   }
+
+  assetManager.releaseAsset(oldImg);
 }
 
 Image.prototype.paint = function(context)
