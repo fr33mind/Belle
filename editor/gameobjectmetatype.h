@@ -25,6 +25,7 @@ public:
         DialogueBox,
         Menu,
         MenuOption,
+        SlotButton,
         //actions
         Action=128,
         Show,
@@ -48,7 +49,7 @@ public:
         ChangeState,
         End,
         firstObjectType = Object,
-        lastObjectType = MenuOption,
+        lastObjectType = SlotButton,
         firstActionType = Action,
         lastActionType = End
     };

@@ -61,6 +61,7 @@
 #include "gameobjectfactory.h"
 #include "sound.h"
 #include "menu.h"
+#include "slotbutton.h"
 
 static Belle* mInstance = 0;
 
@@ -129,6 +130,7 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Button")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Menu")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Sound")));
+    mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Slot Button")));
 
     mUi.twObjects->topLevelItem(0)->setIcon(0, QIcon(":/media/user.png"));
     mUi.twObjects->topLevelItem(1)->setIcon(0, QIcon(":/media/text.png"));
@@ -137,6 +139,7 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->topLevelItem(4)->setIcon(0, QIcon(":/media/button.png"));
     mUi.twObjects->topLevelItem(5)->setIcon(0, QIcon(":/media/menu.png"));
     mUi.twObjects->topLevelItem(6)->setIcon(0, QIcon(":/media/sound.png"));
+    mUi.twObjects->topLevelItem(7)->setIcon(0, QIcon(":/media/button.png"));
 
 
     //scenes' widget
@@ -597,6 +600,11 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         if (path.isEmpty())
             break;
         resource = new Sound(path, ResourceManager::instance());
+        ResourceManager::instance()->add(resource);
+        break;
+     //Slot Button
+    case 7:
+        resource = new SlotButton(ResourceManager::instance());
         ResourceManager::instance()->add(resource);
         break;
     }

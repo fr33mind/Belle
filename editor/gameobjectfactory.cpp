@@ -28,6 +28,7 @@
 #include "runscript.h"
 #include "changestate.h"
 #include "sound.h"
+#include "slotbutton.h"
 
 void GameObjectFactory::init()
 {
@@ -181,6 +182,9 @@ Object* GameObjectFactory::createObject(GameObjectMetaType::Type type, const QVa
             break;
         case GameObjectMetaType::MenuOption:
             obj = validData ? new MenuOption(data, parent) : new MenuOption("", parent);
+            break;
+        case GameObjectMetaType::SlotButton:
+            obj = validData ? new SlotButton(data, parent) : new SlotButton(parent);
             break;
         default: break;
     }

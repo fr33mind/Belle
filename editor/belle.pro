@@ -141,7 +141,8 @@ HEADERS      += belle.h\
     widgets/gameobjectcombobox.h \
     widgets/soundresourcecombobox.h \
     objects/menueditorwidget.h \
-    widgets/slider.h
+    widgets/slider.h \
+    objects/slotbutton.h
                 
 
 SOURCES      += main.cpp\
@@ -265,6 +266,7 @@ SOURCES      += main.cpp\
     widgets/gameobjectcombobox.cpp \
     widgets/soundresourcecombobox.cpp \
     objects/menueditorwidget.cpp \
-    widgets/slider.cpp
+    widgets/slider.cpp \
+    objects/slotbutton.cpp
 
 RESOURCES += media.qrc
