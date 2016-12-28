@@ -133,7 +133,7 @@
       return;
 
     var filepath = "";
-    for(fpath in assets) {
+    for(fpath in this.assets) {
       if (this.assets[fpath] == asset) {
         filepath = fpath;
         break;
