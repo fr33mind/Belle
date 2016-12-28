@@ -15,6 +15,7 @@ void GameObjectEditorWidget::updateData(GameObject* object)
 {
     mNameEdit->setStyleSheet("background: transparent");
     mNameEdit->setText(object->name());
+    mNameEdit->setReadOnly(!object->nameEditable());
 }
 
 void GameObjectEditorWidget::onNameEdited(const QString& name)
