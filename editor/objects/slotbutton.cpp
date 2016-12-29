@@ -146,3 +146,17 @@ QVariantMap SlotButton::toJsonObject(bool internal) const
     data.insert("slotType", mSlotType);
     return data;
 }
+
+void SlotButton::loadObject(Object * obj, const QVariantMap & data)
+{
+    if (!obj)
+        return;
+
+    ObjectGroup::loadObject(obj, data);
+
+    TextBox* textbox = qobject_cast<TextBox*>(obj);
+    if (textbox) {
+        if (data.contains("text") && data.value("text").type() == QVariant::String)
+            textbox->setText(data.value("text").toString());
+    }
+}

@@ -37,6 +37,7 @@ public:
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void loadObject(Object *, const QVariantMap &);
 
 signals:
 

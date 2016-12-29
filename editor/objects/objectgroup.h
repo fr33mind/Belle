@@ -70,6 +70,7 @@ protected:
     int calcSpacing() const;
     void updateSpacing();
     void adaptLayout();
+    virtual void loadObject(Object*, const QVariantMap&);
 
 private:
     QList<Object*> mObjects;

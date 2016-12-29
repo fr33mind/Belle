@@ -64,12 +64,8 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
             int _index = object.value("_index").toInt();
             if (_index >= 0 && _index < mObjects.size()) {
                 obj = mObjects.at(_index);
-                if (obj) {
-                    obj->load(object);
-                    //some properties are ignored by default so we need to apply them here for the child objects
-                    if (object.contains("visible") && object.value("visible").type() == QVariant::Bool)
-                        obj->setVisible(object.value("visible").toBool());
-                }
+                if (obj)
+                    loadObject(obj, object);
             }
         }
     }
@@ -608,4 +604,15 @@ void ObjectGroup::adaptLayout()
     adaptSize();
     updateSpacing();
     checkStickyObjects();
+}
+
+void ObjectGroup::loadObject(Object * obj, const QVariantMap & data)
+{
+    if (!obj)
+        return;
+
+    obj->load(data);
+    //some properties are ignored by default so we need to apply them here for the child objects
+    if (data.contains("visible") && data.value("visible").type() == QVariant::Bool)
+        obj->setVisible(data.value("visible").toBool());
 }
