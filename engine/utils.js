@@ -256,8 +256,6 @@ utils.getNewName = function(name) {
 utils.getSaveDate = function()
 {
     var date = new Date();
-    var months = [ "January", "February", "March", "April", "May", "June", 
-                    "July", "August", "September", "October", "November", "December" ];
     var hour = date.getHours();
     var min = date.getMinutes();
     if (hour < 10)
@@ -265,7 +263,7 @@ utils.getSaveDate = function()
     if (min < 10)
         min = '0' + min;
     
-    date = date.getDate() + " " + months[date.getMonth()] + " " + date.getFullYear() + " " + hour + ":" + min;
+    date = date.toDateString() + ", " + hour + ":" + min;
     return date;
 }
 
