@@ -1236,6 +1236,104 @@ function Sound(data, parent)
 
 belle.extend(Sound, GameObject);
 
+/************** Slot Button ************/
+
+function SlotButton(data, parent, initElement)
+{
+    ObjectGroup.call(this, data, parent, initElement);
+    this.SlotTypes = {
+      Save: 0,
+      Load: 1
+    };
+
+    this.slot = 0;
+    this.thumbnailEnabled = true;
+    this.emptyThumbnail = null;
+    this.slotType = this.SlotTypes.Save;
+    this.empty = true;
+
+    this.bind("mouseUp", function() {
+      if (this.slotType == this.SlotTypes.Save)
+        this.saveGame();
+      else if (this.slotType == this.SlotTypes.Load)
+        this.loadGame();
+    });
+
+    SlotButton.prototype.load.call(this, data);
+}
+
+belle.extend(SlotButton, ObjectGroup);
+
+SlotButton.prototype.load = function(data) {
+    var loaded = ObjectGroup.prototype.load.call(this, data);
+
+    if (! loaded)
+      return false;
+
+    if ("slot" in data)
+      this.setSlot(data["slot"]);
+
+    if ("thumbnailEnabled" in data)
+      this.thumbnailEnabled = data["thumbnailEnabled"];
+
+    if ("emptyThumbnail" in data) {
+      var assetManager = this.getGame().getAssetManager();
+      if (assetManager)
+        this.emptyThumbnail = assetManager.loadAsset(data["emptyThumbnail"], "Image");
+    }
+
+    if ("slotType" in data && belle.isNumber(data["slotType"])) {
+      this.slotType = parseInt(data["slotType"]);
+    }
+}
+
+SlotButton.prototype.setSlot = function(slot) {
+  if (!belle.isNumber(slot))
+    return;
+
+  this.slot = parseInt(slot);
+  var textbox = this.getObject("textbox");
+  if (textbox)
+    textbox.setText(textbox.text.replace("$id", this.slot));
+  this.loadFromSlot();
+}
+
+SlotButton.prototype.loadFromSlot = function() {
+  this.empty = true;
+  var game = this.getGame();
+  if (game) {
+    var data = game.getSlot(this.slot);
+    if (data) {
+      var thumbnail = this.getObject("thumbnail");
+      if (thumbnail) {
+        var img = new belle.graphics.Image(data.thumbnail, function(){
+                                      thumbnail.update();
+                                    });
+        thumbnail.setImage(img);
+      }
+      var textbox = this.getObject("textbox");
+      if (textbox)
+        textbox.setText(this.slot + "." + data.name + "\n" + data.date);
+      this.empty = false;
+    }
+  }
+}
+
+SlotButton.prototype.saveGame = function() {
+  var game = this.getGame();
+  if (game) {
+    game.saveSlot(this.slot, null, this.thumbnailEnabled);
+    this.loadFromSlot();
+  }
+}
+
+SlotButton.prototype.loadGame = function() {
+  var game = this.getGame();
+  if (game) {
+    game.loadSlot(this.slot);
+  }
+}
+
 // Expose the public methods
 
 objects.Object = Object;
@@ -1248,6 +1346,7 @@ objects.Button = Button;
 objects.MenuOption = MenuOption;
 objects.Menu = Menu;
 objects.Sound = Sound;
+objects.SlotButton = SlotButton;
 
 }(belle));
 
