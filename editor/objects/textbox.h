@@ -84,6 +84,7 @@ private:
 
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
+    virtual void filterLoadData(QVariantMap&);
 
 private:
     void init(const QString&, const QVariantMap& data=QVariantMap());

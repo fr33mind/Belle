@@ -90,6 +90,12 @@ void TextBox::loadData(const QVariantMap& data, bool internal)
         setPlaceholderTextColor(Utils::listToColor(data.value("placeholderTextColor").toList()));
 }
 
+void TextBox::filterLoadData(QVariantMap & data)
+{
+    Object::filterLoadData(data);
+    data.remove("text");
+}
+
 void TextBox::init(const QString& text, const QVariantMap &data)
 {
     mText = text;
@@ -141,7 +147,7 @@ void TextBox::setText(const QString & text)
     if (text != mText) {
         mPlaceholderText.clear();
         mText = text;
-        emit dataChanged();
+        notify("text", mText);
     }
 }
 
