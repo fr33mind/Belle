@@ -345,8 +345,11 @@ void ObjectGroup::paint(QPainter & painter)
     if (! painter.opacity())
         return;
 
-    for(int i=0; i < mObjects.size(); i++)
-       mObjects[i]->paint(painter);
+    for(int i=0; i < mObjects.size(); i++) {
+        painter.save();
+        mObjects[i]->paint(painter);
+        painter.restore();
+    }
 }
 
 QList<Object*> ObjectGroup::objects() const
