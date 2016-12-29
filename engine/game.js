@@ -333,28 +333,29 @@
     return entry;
   }
 
-  Game.prototype.saveSlot = function(id) {
-    if (! id)
-      id = 0;
-
-    var scene = this.mainModel.getScene();
-    var name = scene.name;
+  Game.prototype.saveSlot = function(id, name, screenshot) {
     var title = this.properties.title;
     var gameData = $.jStorage.get(title, {});
     var savedGames = gameData["savedGames"] || [];
     var i = 0;
 
-    //if string passed, search for an empty slot for the savegame
-    if (typeof id == "string") {
+    if (typeof name != "string") {
+      var scene = this.mainModel.getScene();
+      name = scene.name;
+    }
+
+    if (!belle.isNumber(id)) {
         for(i=0; i < savedGames.length; i++) {
             if (savedGames[i] === null) {
                 id = i;
                 break;
             }
         }
-        name = id;
         id = i;
     }
+
+    if (id < 0)
+      return null;
 
     if (savedGames[id]) {
       var ok = confirm("Are you sure you want to overwrite the saved game?");
@@ -365,7 +366,7 @@
     var entry = this.getState();
     entry.date = belle.utils.getSaveDate();
     entry.name = name;
-    entry.thumbnail = this.takeScreenshot();
+    entry.thumbnail = screenshot ? this.takeScreenshot() : null;
 
     if (id >= savedGames.length)
         for(var i=savedGames.length; i <= id; i++)
