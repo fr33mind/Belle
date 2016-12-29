@@ -30,6 +30,7 @@
     this.resources = {};
     this.soundManager = new belle.SoundManager();
     this.setAssetManager(new belle.AssetManager(data.assets));
+    this.controller = null;
 
     if (data.data)
       this.load(data.data);
@@ -364,6 +365,7 @@
     var entry = this.getState();
     entry.date = belle.utils.getSaveDate();
     entry.name = name;
+    entry.thumbnail = this.takeScreenshot();
 
     if (id >= savedGames.length)
         for(var i=savedGames.length; i <= id; i++)
@@ -374,7 +376,7 @@
 
     $.jStorage.set(title, gameData, {TTL: 0});
 
-    return {name: entry.name, date: entry.date};
+    return {name: entry.name, date: entry.date, thumbnail: entry.thumbnail};
   }
 
   Game.prototype.loadSlot = function(id) {
@@ -396,6 +398,20 @@
     }
 
     return loaded;
+  }
+
+  Game.prototype.takeScreenshot = function() {
+    if (!this.controller)
+      return "";
+
+    var mainView = this.controller.views.main;
+    var bgCanvas = mainView.bgcanvas;
+    var canvas = mainView.canvas;
+    var mergedCanvas = canvas.clone();
+    var ctx = mergedCanvas[0].getContext('2d');
+    ctx.drawImage(bgCanvas[0], 0, 0);
+    ctx.drawImage(canvas[0], 0, 0);
+    return mergedCanvas[0].toDataURL("image/jpeg");
   }
 
   Game.prototype.getSavedGames =  function() {

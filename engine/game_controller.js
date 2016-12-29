@@ -27,6 +27,7 @@
 
     this.views = {};
     this.game = new Game(data);
+    this.game.controller = this;
     this.view = null;
     this.touchEnabled = false;
     if (! $('body').find("#belle").length) {
