@@ -78,6 +78,9 @@ void GameObject::loadData(const QVariantMap & data, bool internal)
 
     if (data.contains("sync") && data.value("sync").type() == QVariant::Bool)
         setSync(data.value("sync").toBool());
+
+    if (data.contains("nameEditable") && data.value("nameEditable").type() == QVariant::Bool)
+        setNameEditable(data.value("nameEditable").toBool());
 }
 
 void GameObject::beforeLoadData(const QVariantMap & data)
@@ -97,6 +100,7 @@ QVariantMap GameObject::toJsonObject(bool internal) const
     if (metatype)
         data.insert("type", metatype->toString());
     data.insert("sync", mSynced);
+    data.insert("nameEditable", mNameEditable);
     return data;
 }
 
