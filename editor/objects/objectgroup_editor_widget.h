@@ -29,11 +29,16 @@ class ObjectGroupEditorWidget : public ObjectEditorWidget
 public:
     explicit ObjectGroupEditorWidget(QWidget *parent = 0);
 
+protected:
+    virtual void updateData(GameObject*);
+
 signals:
 
-public slots:
+private slots:
+    void onAlignToggled(bool);
 
 private:
+    QCheckBox* mAlignCheckBox;
 
 };
 

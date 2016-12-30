@@ -47,6 +47,9 @@ public:
     void setSpacing(int);
     int spacing() const;
 
+    bool isAlignEnabled() const;
+    void setAlignEnabled(bool);
+
     void setWidth(int, bool percent=false);
     void setHeight(int, bool percent=false);
     void setX(int);
@@ -77,6 +80,7 @@ private:
     QList<Object*> mStickyObjects;
     bool mEditingMode;
     bool mAligning;
+    bool mAlignEnabled;
     void init();
     int indexOf(Object*);
     void alignObjects();

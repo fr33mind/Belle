@@ -50,6 +50,7 @@ void SlotButton::init()
     mThumbnailEnabled = true;
     mEmptyThumbnail = 0;
     mSlotType = SlotButton::Save;
+    setAlignEnabled(false);
 }
 
 void SlotButton::loadData(const QVariantMap& data, bool internal)

@@ -21,4 +21,30 @@
 ObjectGroupEditorWidget::ObjectGroupEditorWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {
+    mAlignCheckBox = new QCheckBox(this);
+
+    beginGroup(tr("Object Group"), "ObjectGroup");
+    appendRow(tr("Align"), mAlignCheckBox);
+    endGroup();
+
+    connect(mAlignCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAlignToggled(bool)));
+}
+
+void ObjectGroupEditorWidget::updateData(GameObject* object)
+{
+    ObjectEditorWidget::updateData(object);
+    ObjectGroup* obj = qobject_cast<ObjectGroup*>(object);
+    if (! obj)
+        return;
+
+    mAlignCheckBox->setChecked(obj->isAlignEnabled());
+}
+
+void ObjectGroupEditorWidget::onAlignToggled(bool checked)
+{
+    ObjectGroup* obj = qobject_cast<ObjectGroup*>(mGameObject);
+    if (! obj)
+        return;
+
+    obj->setAlignEnabled(checked);
 }

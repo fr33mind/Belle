@@ -88,6 +88,10 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
         setEditingMode(false);
     }
 
+    if (data.contains("alignEnabled") && data.value("alignEnabled").type() == QVariant::Bool) {
+        setAlignEnabled(data.value("alignEnabled").toBool());
+    }
+
     if (data.contains("alignObjects")) {
         alignObjects();
     }
@@ -106,6 +110,7 @@ void ObjectGroup::init()
     mEditingMode = false;
     mSelectedObject = 0;
     mAligning = false;
+    mAlignEnabled = true;
     mSpacing = 0;
 }
 
@@ -201,6 +206,9 @@ int ObjectGroup::minHeight() const
 
 void ObjectGroup::alignObjects()
 {
+    if (!mAlignEnabled)
+        return;
+
     mAligning = true;
     alignObjectsHorizontally();
     alignObjectsVertically();
@@ -574,6 +582,8 @@ QVariantMap ObjectGroup::toJsonObject(bool internal) const
     if (internal)
         object.insert("spacing", mSpacing);
 
+    object.insert("alignEnabled", mAlignEnabled);
+
     return object;
 }
 
@@ -615,4 +625,14 @@ void ObjectGroup::loadObject(Object * obj, const QVariantMap & data)
     //some properties are ignored by default so we need to apply them here for the child objects
     if (data.contains("visible") && data.value("visible").type() == QVariant::Bool)
         obj->setVisible(data.value("visible").toBool());
+}
+
+bool ObjectGroup::isAlignEnabled() const
+{
+    return mAlignEnabled;
+}
+
+void ObjectGroup::setAlignEnabled(bool enabled)
+{
+    mAlignEnabled = enabled;
 }
