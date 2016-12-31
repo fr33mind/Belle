@@ -301,6 +301,9 @@ void ActionsView::onPasteAction()
 
         pasteActionsAt(insertRow, actions, false);
     }
+
+    //To mimic the usual cut and paste behaviour
+    clipboard->setOperation(Clipboard::Copy);
 }
 
 void ActionsView::appendAction(Action* action)
