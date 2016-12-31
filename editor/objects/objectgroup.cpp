@@ -126,12 +126,7 @@ void ObjectGroup::append(Object* obj)
     if (! obj)
         return;
 
-    int starty = this->y();
-    for(int i=0; i < mObjects.size(); i++) {
-        if (mObjects[i]->y() + mObjects[i]->height() > starty)
-            starty = mObjects[i]->y() + mObjects[i]->height();
-    }
-
+    int starty = this->y() + this->height();
     if (mObjects.size())
         starty += mSpacing;
     obj->setY(starty);
@@ -143,15 +138,26 @@ void ObjectGroup::append(Object* obj)
     //connect(this, SIGNAL(resized(int,int)), obj, SLOT(onParentResized(int, int)));
 }
 
-void ObjectGroup::resize(int x, int y)
+void ObjectGroup::resizeSceneRect(int x, int y)
 {
-    int prevY = this->y();
-    int minHeight = this->minHeight();
+    int prevX = mSceneRect.x();
+    int prevY = mSceneRect.y();
+    QRect rect = childrenRect();
+    int minHeight = mAlignEnabled ? childrenMinHeight() : rect.height();
+    int minWidth = mAlignEnabled ? 0 : rect.width();
 
-    Object::resize(x, y);
-    if (this->height() < minHeight) {
-        Object::setY(prevY);
-        Object::setHeight(minHeight);
+    Object::resizeSceneRect(x, y);
+
+    if (mSceneRect.width() < minWidth) {
+        if (mSceneRect.x() != prevX)
+            mSceneRect.setX(rect.x());
+        mSceneRect.setWidth(minWidth);
+    }
+
+    if (mSceneRect.height() < minHeight) {
+        if (mSceneRect.y() != prevY)
+            mSceneRect.setY(rect.y());
+        mSceneRect.setHeight(minHeight);
     }
 
     this->alignObjects();
@@ -195,7 +201,7 @@ int ObjectGroup::spacing() const
     return mSpacing;
 }
 
-int ObjectGroup::minHeight() const
+int ObjectGroup::childrenMinHeight() const
 {
     int height = 0;
     for(int i=0; i < mObjects.size(); i++) {
@@ -230,12 +236,14 @@ void ObjectGroup::alignObjectsHorizontally()
             objRect = mObjects[i]->sceneRect();
         }
         else if (rect.left() < objRect.left()) {
-            if (mStickyObjects.contains(mObjects[i]))
+            if (mStickyObjects.contains(mObjects[i])) {
+                mObjects[i]->setX(x);
                 mObjects[i]->setWidth(this->width());
+                objRect = mObjects[i]->sceneRect();
+            }
         }
 
         if (objRect.right() > rect.right()) {
-            objX = mObjects[i]->x();
             leftspace = objRect.x() - rect.x();
             leftspace -= objRect.right() - rect.right();
             objX = x;
@@ -245,7 +253,7 @@ void ObjectGroup::alignObjectsHorizontally()
                 objWidth -= leftspace * -1;
             mObjects[i]->setX(objX);
             mObjects[i]->setWidth(objWidth);
-            addStickyObject(mObjects[i]);
+            checkStickyObject(mObjects[i]);
         }
         else if (objRect.right() < rect.right()) {
             if (mStickyObjects.contains(mObjects[i]))
@@ -269,38 +277,14 @@ void ObjectGroup::alignObjectsVertically()
 
 void ObjectGroup::adaptSize()
 {
-    if (mObjects.isEmpty())
+    if (mAligning || mObjects.isEmpty())
         return;
 
-    int h = 0;
-    int w = width();
-
-    QRect rect = mObjects.first()->sceneRect();
-    int top = rect.top();
-    int left = rect.left();
-    int right = rect.right();
-    int bottom = rect.bottom();
-
-    for(int i=1; i < mObjects.size(); i++) {
-        rect = mObjects[i]->sceneRect();
-        if (rect.top() < top)
-            top = rect.top();
-        if (rect.left() < left)
-            left = rect.left();
-        if (rect.right() > right)
-            right = rect.right();
-        if (rect.bottom() > bottom)
-            bottom = rect.bottom();
-    }
-
-    //Due to Qt's peculiar behaviour we need to add 1 to right/bottom
-    w = (right+1) - left;
-    h = (bottom+1) - top;
-
-    Object::setX(left);
-    Object::setY(top);
-    Object::setWidth(w);
-    Object::setHeight(h);
+    QRect rect = childrenRect();
+    Object::setX(rect.left());
+    Object::setY(rect.top());
+    Object::setWidth(rect.width());
+    Object::setHeight(rect.height());
 }
 
 Object * ObjectGroup::object(int index) const
@@ -407,6 +391,9 @@ void ObjectGroup::setY(int y)
 
 void ObjectGroup::setWidth(int width, bool percent)
 {
+    QRect rect = childrenRect();
+    if (!percent && width < rect.width())
+        width = rect.width();
     Object::setWidth(width, percent);
 
     /*for(int i=mObjects.size()-1; i >=0; --i) {
@@ -416,6 +403,9 @@ void ObjectGroup::setWidth(int width, bool percent)
 
 void ObjectGroup::setHeight(int height, bool percent)
 {
+    QRect rect = childrenRect();
+    if (!percent && height < rect.height())
+        height = rect.height();
     Object::setHeight(height, percent);
 
     /*for(int i=mObjects.size()-1; i >=0; --i) {
@@ -467,7 +457,7 @@ void ObjectGroup::checkStickyObjects()
     }
 }
 
-void ObjectGroup::addStickyObject(Object * obj)
+void ObjectGroup::checkStickyObject(Object * obj)
 {
     if (obj->width() == this->width() && ! mStickyObjects.contains(obj)) {
         mStickyObjects.append(obj);
@@ -611,6 +601,9 @@ void ObjectGroup::updateSpacing()
 
 void ObjectGroup::adaptLayout()
 {
+    if (mAligning)
+        return;
+
     adaptSize();
     updateSpacing();
     checkStickyObjects();
@@ -635,4 +628,37 @@ bool ObjectGroup::isAlignEnabled() const
 void ObjectGroup::setAlignEnabled(bool enabled)
 {
     mAlignEnabled = enabled;
+}
+
+QRect ObjectGroup::childrenRect() const
+{
+    if (mObjects.isEmpty())
+        return QRect();
+
+    int h = 0;
+    int w = width();
+
+    QRect rect = mObjects.first()->sceneRect();
+    int top = rect.top();
+    int left = rect.left();
+    int right = rect.right();
+    int bottom = rect.bottom();
+
+    for(int i=1; i < mObjects.size(); i++) {
+        rect = mObjects[i]->sceneRect();
+        if (rect.top() < top)
+            top = rect.top();
+        if (rect.left() < left)
+            left = rect.left();
+        if (rect.right() > right)
+            right = rect.right();
+        if (rect.bottom() > bottom)
+            bottom = rect.bottom();
+    }
+
+    //Due to Qt's peculiar behaviour we need to add 1 to right/bottom
+    w = (right+1) - left;
+    h = (bottom+1) - top;
+
+    return QRect(left, top, w, h);
 }

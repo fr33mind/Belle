@@ -683,6 +683,21 @@ void Object::filterResourceData(QVariantMap& objectData) const
     }
 }
 
+void Object::resizeSceneRect(int x, int y)
+{
+    if (mOriginalResizePointIndex == -1)
+        return;
+
+    QPoint point (x, y);
+    movePoint(mOriginalResizePointIndex, point);
+
+    if (mKeepAspectRatio) {
+        int w2 = width();
+        int h2 = round(w2/mAspectRatio);
+        fixPoint(mOriginalResizePointIndex, w2, h2);
+    }
+}
+
 void Object::resize(int pointIndex, int x, int y)
 {
     //QPoint point = rect.center();
@@ -702,15 +717,7 @@ void Object::resize(int x, int y)
     if (mOriginalResizePointIndex == -1)
         return;
 
-    QPoint point (x, y);
-    movePoint(mOriginalResizePointIndex, point);
-
-    if (mKeepAspectRatio) {
-        int w2 = width();
-        int h2 = round(w2/mAspectRatio);
-        fixPoint(mOriginalResizePointIndex, w2, h2);
-    }
-
+    resizeSceneRect(x, y);
     updateResizeRects();
     QVariantMap data;
     int w = width();
@@ -769,7 +776,6 @@ void Object::movePoint(int which, QPoint& point)
         if (point.y() > point2.y())
             point.setY(point2.y());
         mSceneRect.setTopLeft(point);
-        updateResizeRect(0, mSceneRect.topLeft());
         break;
     case 1:
          point2 = mSceneRect.bottomLeft();
@@ -783,7 +789,6 @@ void Object::movePoint(int which, QPoint& point)
         if (point.y() > point2.y())
             point.setY(point2.y());
         mSceneRect.setTopRight(point);
-        updateResizeRect(2, mSceneRect.topRight());
         break;
     case 3:
         point2 = mSceneRect.bottomLeft();
@@ -797,7 +802,6 @@ void Object::movePoint(int which, QPoint& point)
         if (point.y() < point2.y())
             point.setY(point2.y());
         mSceneRect.setBottomRight(point);
-        updateResizeRect(4, mSceneRect.bottomRight());
         break;
     case 5:
         point2 = mSceneRect.topRight();
@@ -811,7 +815,6 @@ void Object::movePoint(int which, QPoint& point)
         if (point.y() < point2.y())
             point.setY(point2.y());
         mSceneRect.setBottomLeft(point);
-        updateResizeRect(6, mSceneRect.bottomLeft());
         break;
     case 7:
         point2 = mSceneRect.topRight();

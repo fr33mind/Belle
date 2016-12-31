@@ -40,10 +40,9 @@ public:
     virtual QVariantMap toJsonObject(bool internal=true) const;
     virtual Object* objectAt(qreal, qreal);
     void adaptSize();
-    virtual void resize(int, int);
     void removeObjectAt(int, bool del=false);
     void removeAllObjects(bool del=false);
-    int minHeight() const;
+    int childrenMinHeight() const;
     void setSpacing(int);
     int spacing() const;
 
@@ -57,6 +56,8 @@ public:
 
     bool editingMode() const;
     void setEditingMode(bool);
+
+    QRect childrenRect() const;
 
 signals:
 
@@ -74,6 +75,7 @@ protected:
     void updateSpacing();
     void adaptLayout();
     virtual void loadObject(Object*, const QVariantMap&);
+    virtual void resizeSceneRect(int x, int y);
 
 private:
     QList<Object*> mObjects;
@@ -86,7 +88,7 @@ private:
     void alignObjects();
     void alignObjectsHorizontally();
     void alignObjectsVertically();
-    void addStickyObject(Object*);
+    void checkStickyObject(Object*);
     QVariantList objectsRelativeRectsData();
 };
 

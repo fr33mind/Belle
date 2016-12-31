@@ -205,6 +205,7 @@ class Object : public GameObject
         virtual void connectToResource();
         virtual void loadData(const QVariantMap&, bool internal=false);
         virtual void filterLoadData(QVariantMap&);
+        virtual void resizeSceneRect(int x, int y);
 
     private: //variables
         QList<QRect> mResizeRects;
