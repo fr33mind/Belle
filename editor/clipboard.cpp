@@ -83,6 +83,11 @@ Clipboard::Operation Clipboard::operation()
     return mOperation;
 }
 
+void Clipboard::setOperation(Clipboard::Operation op)
+{
+    mOperation = op;
+}
+
 void Clipboard::add(QObject * obj, Clipboard::Operation op)
 {
     add(QList<QObject*>()<< obj, op);

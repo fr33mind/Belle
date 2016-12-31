@@ -464,8 +464,9 @@ void DrawingSurfaceWidget::onPasteTriggered()
     Scene * destScene = mSceneManager->currentScene();
 
     if (destScene) {
-        QList<Object*> objects = mSceneManager->clipboard()->objects();
-        Clipboard::Operation op = mSceneManager->clipboard()->operation();
+        Clipboard* clipboard = mSceneManager->clipboard();
+        QList<Object*> objects = clipboard->objects();
+        Clipboard::Operation op = clipboard->operation();
         Scene * srcScene = 0;
 
         foreach(Object* obj, objects) {
@@ -481,7 +482,8 @@ void DrawingSurfaceWidget::onPasteTriggered()
             }
         }
 
-        mSceneManager->clipboard()->clear();
+        //To mimic the usual cut and paste behaviour
+        clipboard->setOperation(Clipboard::Copy);
     }
 }
 

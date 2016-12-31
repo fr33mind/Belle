@@ -47,6 +47,7 @@ public:
     QList<Scene*> scenes();
     QList<Action*> actions();
     Clipboard::Operation operation();
+    void setOperation(Clipboard::Operation);
     void add(QObject*, Clipboard::Operation);
     void add(const QList<QObject*>&, Clipboard::Operation);
     void clear();
