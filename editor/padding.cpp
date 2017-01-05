@@ -105,7 +105,7 @@ bool Padding::isEmpty() const
         total += it.value();
     }
 
-    return total ? true : false;
+    return total ? false : true;
 }
 
 QVariantMap Padding::toJsonObject() const
