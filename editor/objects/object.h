@@ -48,6 +48,7 @@ class Object : public GameObject
         virtual ~Object();
         bool contains(qreal, qreal);
         QRect sceneRect() const;
+        QRect contentRect() const;
         virtual void resize(int, int);
         virtual void resize(int, int, int);
         virtual void move(int x, int y);
@@ -102,6 +103,8 @@ class Object : public GameObject
         virtual void setY(int);
         int x() const;
         int y() const;
+        int contentX() const;
+        int contentY() const;
 
         bool isRounded() const;
         int cornerRadius();
@@ -138,6 +141,18 @@ class Object : public GameObject
         int padding(const QString&);
         void setPadding(const Padding&);
         void setPadding(const QString&, int);
+
+        int paddingLeft() const;
+        void setPaddingLeft(int);
+
+        int paddingTop() const;
+        void setPaddingTop(int);
+
+        int paddingRight() const;
+        void setPaddingRight(int);
+
+        int paddingBottom() const;
+        void setPaddingBottom(int);
 
         void filterResourceData(QVariantMap&) const;
 

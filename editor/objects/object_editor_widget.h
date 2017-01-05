@@ -64,6 +64,10 @@ private slots:
     void onObjectDataChanged(const QVariantMap&);
     void onKeepAspectRatioToggled(bool);
     void syncToggled(bool);
+    void onPaddingLeftChanged(int);
+    void onPaddingTopChanged(int);
+    void onPaddingRightChanged(int);
+    void onPaddingBottomChanged(int);
 
 private:
     void updateEventActions(Object*);
@@ -93,6 +97,10 @@ private:
     QLabel* mResourceLabel;
     QCheckBox* mSyncCheckbox;
     bool mShowSyncMsg;
+    QSpinBox* mPaddingLeftSpinBox;
+    QSpinBox* mPaddingTopSpinBox;
+    QSpinBox* mPaddingRightSpinBox;
+    QSpinBox* mPaddingBottomSpinBox;
 };
 
 #endif // SCENE_OBJECT_PROPERTIES_WIDGET_H

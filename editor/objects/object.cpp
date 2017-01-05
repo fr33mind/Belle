@@ -88,6 +88,16 @@ QRect Object::sceneRect() const
     return mSceneRect;
 }
 
+QRect Object::contentRect() const
+{
+    QRect rect;
+    rect.setX(contentX());
+    rect.setY(contentY());
+    rect.setWidth(contentWidth());
+    rect.setHeight(contentHeight());
+    return rect;
+}
+
 void Object::onResizeEvent(QResizeEvent* event)
 {
     return;
@@ -232,10 +242,10 @@ void Object::setHeight(int h, bool percent)
 
 void Object::setY(int y)
 {
-    if (y == mSceneRect.y() - mPadding.top())
+    if (y == mSceneRect.y())
         return;
 
-    mSceneRect.moveTo(mSceneRect.x(), y + mPadding.top());
+    mSceneRect.moveTo(mSceneRect.x(), y);
     updateResizeRects();
     //FIXME: Implement proper relative positions.
     notify("y", this->y());
@@ -243,10 +253,10 @@ void Object::setY(int y)
 
 void Object::setX(int x)
 {
-    if(x == mSceneRect.x() - mPadding.left())
+    if(x == mSceneRect.x())
         return;
 
-    mSceneRect.moveTo(x + padding("left"), mSceneRect.y());
+    mSceneRect.moveTo(x, mSceneRect.y());
     updateResizeRects();
     notify("x", this->x());
 }
@@ -256,9 +266,19 @@ int Object::x() const
     return mSceneRect.x();
 }
 
+int Object::contentX() const
+{
+    return mSceneRect.x() + mPadding.left();
+}
+
 int Object::y() const
 {
     return mSceneRect.y();
+}
+
+int Object::contentY() const
+{
+    return mSceneRect.y() + mPadding.top();
 }
 
 int Object::parentWidth() const
@@ -275,20 +295,19 @@ int Object::parentWidth() const
 
 int Object::width() const
 {
-    int width = contentWidth();
-    width += mPadding.left() + mPadding.right();
-
-    return width;
-}
-
-int Object::contentWidth() const
-{
     int width = 0;
     if (mPercentWidth)
         width = mPercentWidth / 100 * parentWidth();
     else
         width = mSceneRect.width();
 
+    return width;
+}
+
+int Object::contentWidth() const
+{
+    int width = this->width();
+    width -= mPadding.left() + mPadding.right();
     return width;
 }
 
@@ -305,20 +324,19 @@ int Object::parentHeight() const
 
 int Object::contentHeight() const
 {
+    int height = this->height();
+    height -= mPadding.top() + mPadding.bottom();
+    return height;
+}
+
+int Object::height() const
+{
     int height = 0;
 
     if (mPercentHeight)
         height = mPercentHeight / 100 * parentHeight();
     else
         height = mSceneRect.height();
-
-    return height;
-}
-
-int Object::height() const
-{
-    int height = contentHeight();
-    height += mPadding.top() + mPadding.bottom();
 
     return height;
 }
@@ -352,7 +370,7 @@ int Object::cornerRadius()
 
 void Object::paint(QPainter & painter)
 {
-    QRect rect(mSceneRect.x(), mSceneRect.y(), contentWidth(), contentHeight());
+    QRect rect(mSceneRect.x(), mSceneRect.y(), width(), height());
     if (! mVisible || ! mOpacity) {
         QPen pen(Qt::white);
         painter.setOpacity(0.5);
@@ -588,15 +606,15 @@ QVariantMap Object::toJsonObject(bool internal) const
 {
     QVariantMap object = GameObject::toJsonObject(internal);
     if (!internal || !isResource()) {
-        object.insert("x", mSceneRect.x());
-        object.insert("y", mSceneRect.y());
+        object.insert("x", x());
+        object.insert("y", y());
     }
     object.insert("opacity", mOpacity);
 
     if (mPercentWidth) object.insert("width", QString("%1\%").arg(mPercentWidth));
-    else object.insert("width", contentWidth());
+    else object.insert("width", width());
     if (mPercentHeight) object.insert("height", QString("%1\%").arg(mPercentHeight));
-    else object.insert("height", contentHeight());
+    else object.insert("height", height());
     object.insert("backgroundColor", Utils::colorToList(mBackground.color()));
     object.insert("backgroundOpacity", mBackground.opacity());
 
@@ -967,23 +985,52 @@ void Object::setPadding(const QString & side, int value){
 
 void Object::setPadding(const Padding& padding)
 {
-    /*if (mPadding.top() != padding.top() || mPadding.bottom() != padding.bottom())
-        mSceneRect.setHeight(height());
-
-    if (mPadding.left() != padding.left() || mPadding.right() != padding.right())
-        mSceneRect.setWidth(width());*/
-
-    /*if (mPadding.top() != padding.top())
-        mBoundingRect.setTop(sceneRect().top()+padding.top());
-    if (mPadding.left() != padding.left())
-        mBoundingRect.setLeft(sceneRect().left()+padding.left());
-    if (mPadding.bottom() != padding.bottom())
-        mBoundingRect.setBottom(sceneRect().bottom()+padding.bottom());
-    if (mPadding.right() != padding.right())
-        mBoundingRect.setRight(sceneRect().right()+padding.right());*/
-
     mPadding = padding;
-    emit dataChanged();
+    notify("padding", mPadding.toJsonObject());
+}
+
+int Object::paddingLeft() const
+{
+    return mPadding.left();
+}
+
+void Object::setPaddingLeft(int padding)
+{
+    mPadding.setLeft(padding);
+    notify("padding", mPadding.toJsonObject());
+}
+
+int Object::paddingTop() const
+{
+    return mPadding.top();
+}
+
+void Object::setPaddingTop(int padding)
+{
+    mPadding.setTop(padding);
+    notify("padding", mPadding.toJsonObject());
+}
+
+int Object::paddingRight() const
+{
+    return mPadding.right();
+}
+
+void Object::setPaddingRight(int padding)
+{
+    mPadding.setRight(padding);
+    notify("padding", mPadding.toJsonObject());
+}
+
+int Object::paddingBottom() const
+{
+    return mPadding.bottom();
+}
+
+void Object::setPaddingBottom(int padding)
+{
+    mPadding.setBottom(padding);
+    notify("padding", mPadding.toJsonObject());
 }
 
 void Object::moveSharedEventActions(Object* src, Object* dest, Interaction::InputEvent ev)
@@ -1100,7 +1147,8 @@ void Object::loadData(const QVariantMap &data, bool internal)
     if (data.contains("keepAspectRatio") && data.value("keepAspectRatio").type() == QVariant::Bool)
         setKeepAspectRatio(data.value("keepAspectRatio").toBool());
 
-    mPadding = Padding(data.value("padding").toMap());
+    if (data.value("padding").type() == QVariant::Map)
+        setPadding(Padding(data.value("padding").toMap()));
 }
 
 void Object::filterLoadData(QVariantMap &data)

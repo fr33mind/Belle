@@ -22,6 +22,7 @@
 #include <QLineEdit>
 #include <QVariant>
 #include <QFileDialog>
+#include <QHBoxLayout>
 
 #include "gotolabel.h"
 #include "color_pushbutton.h"
@@ -54,6 +55,24 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     mOpacitySlider = new Slider(Qt::Horizontal, this);
     mOpacitySlider->setMaximum(255);
 
+    QWidget* paddingWidget = new QWidget(this);
+    QHBoxLayout* layout = new QHBoxLayout(paddingWidget);
+    mPaddingLeftSpinBox = new QSpinBox(paddingWidget);
+    mPaddingTopSpinBox = new QSpinBox(paddingWidget);
+    mPaddingRightSpinBox = new QSpinBox(paddingWidget);
+    mPaddingBottomSpinBox = new QSpinBox(paddingWidget);
+
+    mPaddingLeftSpinBox->setPrefix(tr("Left: "));
+    mPaddingTopSpinBox->setPrefix(tr("Top: "));
+    mPaddingRightSpinBox->setPrefix(tr("Right: "));
+    mPaddingBottomSpinBox->setPrefix(tr("Bottom: "));
+
+    layout->setContentsMargins(0, 1, 1, 1);
+    layout->addWidget(mPaddingLeftSpinBox);
+    layout->addWidget(mPaddingTopSpinBox);
+    layout->addWidget(mPaddingRightSpinBox);
+    layout->addWidget(mPaddingBottomSpinBox);
+
     connect(mVisibleCheckbox, SIGNAL(toggled(bool)), this, SLOT(onVisibilityChanged(bool)));
     connect(mXSpin, SIGNAL(valueChanged(int)), this, SLOT(onXChanged(int)));
     connect(mYSpin, SIGNAL(valueChanged(int)), this, SLOT(onYChanged(int)));
@@ -61,6 +80,10 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     connect(mHeightEditor, SIGNAL(textEdited(const QString &)), this, SLOT(onSizeEdited(const QString&)));
     connect(mKeepAspectRatioCheckbox, SIGNAL(toggled(bool)), this, SLOT(onKeepAspectRatioToggled(bool)));
     connect(mOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(onOpacityChanged(int)));
+    connect(mPaddingLeftSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPaddingLeftChanged(int)));
+    connect(mPaddingTopSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPaddingTopChanged(int)));
+    connect(mPaddingRightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPaddingRightChanged(int)));
+    connect(mPaddingBottomSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPaddingBottomChanged(int)));
 
 
     this->beginGroup(tr("Object"), "Object");
@@ -72,6 +95,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     this->appendRow(tr("Height"), mHeightEditor);
     this->appendRow(tr("Keep aspect ratio"), mKeepAspectRatioCheckbox);
     this->appendRow(tr("Opacity"), mOpacitySlider);
+    this->appendRow(tr("Padding"), paddingWidget);
     this->endGroup();
 
     mResourceLabel = new QLabel(this);
@@ -262,6 +286,15 @@ void ObjectEditorWidget::updateData(GameObject* obj)
     mCornerRadiusSpinBox->setValue(currObj->cornerRadius());
     mVisibleCheckbox->setChecked(currObj->visible());
     mKeepAspectRatioCheckbox->setChecked(currObj->keepAspectRatio());
+
+    mPaddingLeftSpinBox->setMaximum(currObj->width());
+    mPaddingLeftSpinBox->setValue(currObj->paddingLeft());
+    mPaddingRightSpinBox->setMaximum(currObj->width());
+    mPaddingRightSpinBox->setValue(currObj->paddingRight());
+    mPaddingTopSpinBox->setMaximum(currObj->height());
+    mPaddingTopSpinBox->setValue(currObj->paddingTop());
+    mPaddingBottomSpinBox->setMaximum(currObj->height());
+    mPaddingBottomSpinBox->setValue(currObj->paddingBottom());
 }
 
 void ObjectEditorWidget::updateEventActions(Object* object)
@@ -515,4 +548,32 @@ void ObjectEditorWidget::syncToggled(bool _sync)
     Object* object = qobject_cast<Object*>(mGameObject);
     if (object)
         object->setSync(_sync);
+}
+
+void ObjectEditorWidget::onPaddingLeftChanged(int padding)
+{
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setPaddingLeft(padding);
+}
+
+void ObjectEditorWidget::onPaddingTopChanged(int padding)
+{
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setPaddingTop(padding);
+}
+
+void ObjectEditorWidget::onPaddingRightChanged(int padding)
+{
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setPaddingRight(padding);
+}
+
+void ObjectEditorWidget::onPaddingBottomChanged(int padding)
+{
+    Object* object = qobject_cast<Object*>(mGameObject);
+    if (object)
+        object->setPaddingBottom(padding);
 }

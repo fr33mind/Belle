@@ -250,9 +250,7 @@ void TextBox::paint(QPainter & painter)
     if (! painter.opacity())
         return;
 
-    QRect rect(sceneRect());
-    rect.setWidth(contentWidth());
-    rect.setHeight(contentHeight());
+    QRect rect(contentRect());
     QPen pen(currentColor());
     painter.save();
     painter.setFont(mFont);

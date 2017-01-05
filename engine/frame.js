@@ -20,6 +20,12 @@
     this.y = 0;
     this.width = 0;
     this.height = 0;
+    this.padding = {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0
+    };
 
     Frame.prototype.load.call(this, data);
   }
@@ -61,6 +67,9 @@
     this.setBackgroundImage(backgroundImage);
     this.setBackgroundColor(backgroundColor);
     this.setBackgroundOpacity(backgroundOpacity);
+    
+    if ("padding" in data)
+      this.padding = data.padding;
 
     return true;
   }
@@ -167,6 +176,26 @@
       if (this.parent && belle.isNumber(this.parent.y))
           return this.y + this.parent.y;
       return this.y
+  }
+  
+  Frame.prototype.contentX = function()
+  {
+      return this.x + this.padding.left;
+  }
+  
+  Frame.prototype.contentY = function()
+  {
+      return this.y + this.padding.top;
+  }
+  
+  Frame.prototype.contentWidth = function()
+  {
+      return this.width - (this.padding.left + this.padding.right);
+  }
+  
+  Frame.prototype.contentHeight = function()
+  {
+      return this.height - (this.padding.top + this.padding.bottom);
   }
 
   Frame.prototype.setWidth = function(width)

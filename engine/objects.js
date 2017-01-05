@@ -679,7 +679,7 @@ TextBox.prototype.paint = function(context)
     this.displayedText = text;
 
     for (var i=this.textParts.length-1; i !== -1; --i) {
-        context.fillText(this.textParts[i], x+this.textLeftPadding[i], y+this.textTopPadding[i], this.width);
+        context.fillText(this.textParts[i], x+this.textLeftPadding[i], y+this.textTopPadding[i], this.contentWidth());
     }
 
     context.font = defaultFont;
@@ -712,7 +712,9 @@ TextBox.prototype.alignText = function(text, size)
         }
     }
     else {
-        this.textParts = belle.utils.splitText(text, this.font, this.width);
+        var contentWidth = this.contentWidth();
+        var contentHeight = this.contentHeight();
+        this.textParts = belle.utils.splitText(text, this.font, contentWidth);
         this.textLeftPadding.length = 0;
         this.textTopPadding.length = 0;
         var sumHeight = 0;
@@ -723,17 +725,17 @@ TextBox.prototype.alignText = function(text, size)
             var size = belle.utils.textSize(text, this.font);
             var width = size[0];
             var height = Math.round(size[1] / 1.2);
-            var leftPadding = 0;
+            var leftPadding = this.padding.left;
             sumHeight += height;
             this.textTopPadding.push(sumHeight);
 
             if (this.textAlignment) {
-                if (width < this.width) {
+                if (width < contentWidth) {
                     if (this.textAlignment.contains("HCenter")) {
-                        leftPadding = Math.round((this.width - width) / 2);
+                        leftPadding += Math.round((contentWidth - width) / 2);
                     }
                     else if (this.textAlignment.contains("Right")) {
-                        leftPadding = this.width - width;
+                        leftPadding += contentWidth - width;
                     }
                 }
             }
@@ -741,12 +743,12 @@ TextBox.prototype.alignText = function(text, size)
             this.textLeftPadding.push(leftPadding);
         }
 
-        if (sumHeight < this.height) {
-            var topOffset = 0;
+        if (sumHeight < contentHeight) {
+            var topOffset = this.padding.top;
             if (this.textAlignment.contains("VCenter"))
-                topOffset = (this.height - sumHeight) / 2;
+                topOffset += (contentHeight - sumHeight) / 2;
             else if (this.textAlignment.contains("Bottom"))
-                topOffset = this.height - sumHeight;
+                topOffset += contentHeight - sumHeight;
             topOffset = topOffset > 0 ? topOffset : 0;
 
             topOffset = Math.round(topOffset);
