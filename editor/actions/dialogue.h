@@ -58,6 +58,9 @@ public:
     bool append() const;
     void setAppend(bool);
 
+    virtual QString editText() const;
+    virtual void setEditText(const QString&);
+
 signals:
 
 protected:

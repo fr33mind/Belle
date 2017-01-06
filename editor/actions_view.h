@@ -36,6 +36,10 @@ public:
     explicit ActionsViewDelegate(QObject* parent = 0);
     virtual void paint (QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    virtual QWidget * createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
+    virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+    virtual bool eventFilter(QObject *watched, QEvent *event);
 };
 
 class ActionsView : public QListView
@@ -45,7 +49,6 @@ public:
     explicit ActionsView(QWidget *parent = 0);
     void appendAction(Action*);
     void selectAction(Action*);
-
 
 protected:
     virtual void dropEvent(QDropEvent *);
@@ -69,6 +72,7 @@ private slots:
     void onCopyAction();
     void onCutAction();
     void onPasteAction();
+    void onEditorClosed(QWidget*, QAbstractItemDelegate::EndEditHint);
 
 private:
     QAction* mDeleteAction;

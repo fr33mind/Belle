@@ -54,6 +54,9 @@ private slots:
     void onCurrentActionDestroyed();
     void onCurrentSceneDestroyed();
 
+private:
+    void updateItemAt(int);
+
 };
 
 #endif // ACTIONS_MODEL_H

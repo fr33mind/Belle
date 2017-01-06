@@ -38,6 +38,7 @@ void Dialogue::init()
     mText = "";
     mAppend = false;
     setMouseClickOnFinish(true);
+    setTextEditable(true);
 }
 
 void Dialogue::loadData(const QVariantMap & data, bool internal)
@@ -241,4 +242,14 @@ void Dialogue::removeCharacter()
         mCharacter->disconnect(this);
         mCharacter = 0;
     }
+}
+
+QString Dialogue::editText() const
+{
+    return mText;
+}
+
+void Dialogue::setEditText(const QString& content)
+{
+    setText(content);
 }

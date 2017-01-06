@@ -39,7 +39,7 @@ void ActionsModel::insertAction(int row, Action* action)
 
     connect(action, SIGNAL(dataChanged()), this, SLOT(updateView()), Qt::UniqueConnection);
     QStandardItem *item = new QStandardItem;
-    item->setEditable(false);
+    item->setEditable(action->isTextEditable());
     insertRow(row, item);
     mActions.insert(row, action);
 }
@@ -131,11 +131,14 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
         mActions.removeAt(index);
         int destIndex = destRow > index && middleRow ? destRow - 1 : destRow;
         mActions.insert(destIndex, action);
-        insertRow(destIndex);
     }
 
     if (mCurrentScene)
         mCurrentScene->setActions(mActions);
+
+    for(int i=0; i < rowCount(); i++) {
+        updateItemAt(i);
+    }
 
     return true;
 }
@@ -215,4 +218,15 @@ void ActionsModel::setCurrentScene(Scene * scene)
 void ActionsModel::onCurrentSceneDestroyed()
 {
     setCurrentScene(0);
+}
+
+void ActionsModel::updateItemAt(int index)
+{
+    QStandardItem* item = this->item(index);
+    Action* action = 0;
+    if (index >= 0 && index < mActions.size())
+        action = mActions.at(index);
+    if (item && action) {
+        item->setEditable(action->isTextEditable());
+    }
 }

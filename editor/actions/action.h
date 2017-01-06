@@ -79,6 +79,12 @@ public:
     Object* parentObject() const;
     bool isParentTargeted() const;
 
+    bool isTextEditable() const;
+    void setTextEditable(bool);
+
+    virtual QString editText() const;
+    virtual void setEditText(const QString&);
+
 protected:
     virtual void restoreSceneObject();
     virtual void loadSceneObject();
@@ -107,6 +113,7 @@ private:
     bool mMouseClickOnFinish;
     bool mActive;
     bool mTargetParent;
+    bool mTextEditable;
 
     void init();
     void removeSceneObject();

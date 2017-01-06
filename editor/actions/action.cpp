@@ -56,6 +56,7 @@ void Action::init()
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
     mTargetParent = false;
+    mTextEditable = false;
     setType(GameObjectMetaType::Action);
 }
 
@@ -379,4 +380,23 @@ void Action::removeSceneObject()
     mObject = 0;
     mObjectName = "";
     mTargetParent = false;
+}
+
+bool Action::isTextEditable() const
+{
+    return mTextEditable;
+}
+
+void Action::setTextEditable(bool editable)
+{
+    mTextEditable = editable;
+}
+
+QString Action::editText() const
+{
+    return "";
+}
+
+void Action::setEditText(const QString& text)
+{
 }

@@ -26,6 +26,7 @@
 #include <QPalette>
 #include <QVariant>
 #include <QMenu>
+#include <QTextEdit>
 
 #include "scene_manager.h"
 #include "actions_model.h"
@@ -167,6 +168,53 @@ QSize ActionsViewDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
     return size;
 }
 
+QWidget* ActionsViewDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QTextEdit* widget = new QTextEdit(parent);
+    QRect rect = option.rect;
+    widget->move(rect.x(), rect.y());
+    widget->resize(rect.size());
+    return widget;
+}
+
+void ActionsViewDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+    QTextEdit* lineEdit = qobject_cast<QTextEdit*>(editor);
+    const ActionsModel* actionsModel = qobject_cast<const ActionsModel*>(index.model());
+    if (lineEdit && actionsModel) {
+        Action* action = actionsModel->actionForIndex(index);
+        if (action)
+            lineEdit->setText(action->editText());
+    }
+}
+
+void ActionsViewDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+    QTextEdit* lineEdit = qobject_cast<QTextEdit*>(editor);
+    const ActionsModel* actionsModel = qobject_cast<const ActionsModel*>(index.model());
+    if (lineEdit && actionsModel) {
+        Action* action = actionsModel->actionForIndex(index);
+        if (action)
+            action->setEditText(lineEdit->toPlainText());
+    }
+}
+
+bool ActionsViewDelegate::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        if (keyEvent->key() == Qt::Key_Return  && keyEvent->modifiers() == Qt::ControlModifier) {
+            QTextEdit* textEdit = qobject_cast<QTextEdit*>(watched);
+            if (textEdit) {
+                emit commitData(textEdit);
+                emit closeEditor(textEdit);
+                return true;
+            }
+        }
+    }
+
+    return QStyledItemDelegate::eventFilter(watched, event);
+}
 
 ActionsView::ActionsView(QWidget *parent) :
     QListView(parent)
@@ -176,11 +224,12 @@ ActionsView::ActionsView(QWidget *parent) :
     this->setModel(model);
 
     setDragEnabled(true);
-    setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setDragDropMode(QAbstractItemView::InternalMove);
+    setEditTriggers(QAbstractItemView::DoubleClicked);
+    setDragDropMode(QAbstractItemView::DragDrop);
     setAcceptDrops(true);
     setDropIndicatorShown(true);
-    setItemDelegate(new ActionsViewDelegate(this));
+    QStyledItemDelegate* delegate = new ActionsViewDelegate(this);
+    setItemDelegate(delegate);
     setContextMenuPolicy(Qt::CustomContextMenu);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -212,6 +261,7 @@ ActionsView::ActionsView(QWidget *parent) :
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onContextMenuRequested(const QPoint&)));
 
     connect(this, SIGNAL(clicked(const QModelIndex&)), this, SLOT(onItemClicked(const QModelIndex&)));
+    connect(delegate, SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)), this, SLOT(onEditorClosed(QWidget*, QAbstractItemDelegate::EndEditHint)));
 }
 
 void ActionsView::onContextMenuRequested(const QPoint & point)
@@ -417,4 +467,10 @@ void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, boo
 
     if (select)
         selectAction(firstAction);
+}
+
+void ActionsView::onEditorClosed(QWidget * editor, QAbstractItemDelegate::EndEditHint hint)
+{
+    selectionModel()->clearSelection();
+    selectionModel()->select(currentIndex(), QItemSelectionModel::ClearAndSelect);
 }
