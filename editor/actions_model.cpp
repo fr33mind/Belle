@@ -105,22 +105,23 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
 
     const MimeData *mimeData = dynamic_cast<const MimeData*> (data);
     if (! mimeData)
-        return true;
+        return false;
+
+    beginResetModel();
 
     int destRow = -1;
-    bool middleRow = false;
     if (parent.isValid())
        destRow = parent.row();
 
     if (destRow < 0) {
        destRow = row;
-       middleRow = true;
     }
 
     if (destRow < 0)
         destRow = this->rowCount()-1;
 
     QList<QObject*> objects = mimeData->objects();
+    int i = 0;
 
     foreach(QObject* obj, objects) {
         Action *action = qobject_cast<Action*>(obj);
@@ -129,8 +130,8 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
             continue;
 
         mActions.removeAt(index);
-        int destIndex = destRow > index && middleRow ? destRow - 1 : destRow;
-        mActions.insert(destIndex, action);
+        mActions.insert(destRow+i, action);
+        i++;
     }
 
     if (mCurrentScene)
@@ -140,6 +141,7 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
         updateItemAt(i);
     }
 
+    endResetModel();
     return true;
 }
 
@@ -153,9 +155,11 @@ QStringList ActionsModel::mimeTypes() const
 QMimeData* ActionsModel::mimeData ( const QModelIndexList & indexes ) const
 {
     MimeData * mimeData = new MimeData;
+    QModelIndexList sortedIndexes = indexes;
+    qSort(sortedIndexes);
 
     QList<Action*> actions = mActions;
-    foreach (const QModelIndex &index, indexes) {
+    foreach (const QModelIndex &index, sortedIndexes) {
         if (index.isValid())
             mimeData->appendObject(actions[index.row()]);
     }
