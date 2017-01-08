@@ -478,24 +478,22 @@ void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, boo
     if (!currScene)
         return;
 
-    Action* firstAction = 0;
     int i = 0;
+    QList<Action*> newActions;
     foreach(Action* action, actions) {
         if (copy)
             action = GameObjectFactory::createAction(action->toJsonObject(), this);
-
-        if (!firstAction)
-            firstAction = action;
 
         if (index >= 0)
             currScene->insertAction(index+i, action);
         else
             currScene->appendAction(action);
+        newActions.append(action);
         i++;
     }
 
     if (select)
-        selectAction(firstAction);
+        selectActions(newActions);
 }
 
 void ActionsView::onEditorClosed(QWidget * editor, QAbstractItemDelegate::EndEditHint hint)
