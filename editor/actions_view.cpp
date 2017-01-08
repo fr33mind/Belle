@@ -461,6 +461,15 @@ void ActionsView::selectAction(Action * action)
     scrollTo(index);
 }
 
+void ActionsView::setCurrentAction(Action * action)
+{
+    if (!mActionsModel)
+        return;
+
+    QModelIndex index = mActionsModel->indexForAction(action);
+    setCurrentIndex(index);
+}
+
 void ActionsView::selectActions(const QList<Action*>& actions)
 {
     if (actions.isEmpty())

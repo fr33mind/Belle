@@ -676,12 +676,10 @@ void Belle::onNewAction(Action * action)
             row = indexes.last().row();
         if (row != -1)
             currentScene()->insertAction(row+1, action);
-        else {
+        else
             currentScene()->appendAction(action);
-            mActionsView->scrollToBottom();
-        }
 
-        mActionsView->selectAction(action);
+        mActionsView->setCurrentAction(action);
     }
 
 }

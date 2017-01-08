@@ -49,6 +49,7 @@ public:
     explicit ActionsView(QWidget *parent = 0);
     void appendAction(Action*);
     void selectAction(Action*);
+    void setCurrentAction(Action*);
     void selectActions(const QList<Action*>&);
 
 protected:
