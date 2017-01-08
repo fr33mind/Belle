@@ -33,6 +33,7 @@
 #include "action.h"
 #include "belle.h"
 #include "gameobjectfactory.h"
+#include "mimedata.h"
 
 ActionsViewDelegate::ActionsViewDelegate(QObject* parent) :
     QStyledItemDelegate(parent)
@@ -225,7 +226,8 @@ ActionsView::ActionsView(QWidget *parent) :
 
     setDragEnabled(true);
     setEditTriggers(QAbstractItemView::DoubleClicked);
-    setDragDropMode(QAbstractItemView::DragDrop);
+    setDragDropMode(QAbstractItemView::InternalMove);
+    setDragDropOverwriteMode(true);
     setAcceptDrops(true);
     setDropIndicatorShown(true);
     QStyledItemDelegate* delegate = new ActionsViewDelegate(this);
@@ -372,6 +374,19 @@ void ActionsView::appendAction(Action* action)
 void ActionsView::dropEvent(QDropEvent *event)
 {
     QListView::dropEvent(event);
+    const MimeData *mimeData = dynamic_cast<const MimeData*> (event->mimeData());
+    if (! mimeData)
+        return;
+
+    QList<QObject*> objects = mimeData->objects();
+    QList<Action*> actions;
+    foreach(QObject* obj, objects) {
+        Action* action = qobject_cast<Action*>(obj);
+        if (action)
+            actions.append(action);
+    }
+
+    selectActions(actions);
 }
 
 void ActionsView::onItemClicked(const QModelIndex & index)
@@ -441,6 +456,20 @@ void ActionsView::selectAction(Action * action)
     QModelIndex index = mActionsModel->indexForAction(action);
     selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
     scrollTo(index);
+}
+
+void ActionsView::selectActions(const QList<Action*>& actions)
+{
+    if (actions.isEmpty())
+        return;
+
+    Action* firstAction = actions.first();
+    Action* lastAction = actions.last();
+    QModelIndex topLeft = mActionsModel->indexForAction(firstAction);
+    QModelIndex bottomRight = mActionsModel->indexForAction(lastAction);
+    QItemSelection selection(topLeft, bottomRight);
+    selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
+    selectionModel()->setCurrentIndex(topLeft, QItemSelectionModel::NoUpdate);
 }
 
 void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, bool copy, bool select)

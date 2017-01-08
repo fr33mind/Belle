@@ -25,6 +25,7 @@ ActionsModel::ActionsModel(QObject *parent) :
 {
     mCurrentAction = 0;
     mCurrentScene = 0;
+    connect(this, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(onItemChanged(QStandardItem*)));
 }
 
 void ActionsModel::appendAction(Action* action)
@@ -75,6 +76,14 @@ QModelIndex ActionsModel::indexForAction(Action * action) const
     if (index != -1)
         return this->index(index, 0);
     return QModelIndex();
+}
+
+Action* ActionsModel::actionForItem(QStandardItem * item) const
+{
+    if (item && item->row() >= 0 && item->row() < mActions.size())
+        return mActions.at(item->row());
+
+    return 0;
 }
 
 void ActionsModel::updateView()
@@ -142,6 +151,7 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
     }
 
     endResetModel();
+
     return true;
 }
 
@@ -233,4 +243,27 @@ void ActionsModel::updateItemAt(int index)
     if (item && action) {
         item->setEditable(action->isTextEditable());
     }
+}
+
+//As a precaution, make sure items are not editable by default
+Qt::ItemFlags ActionsModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags flags = QStandardItemModel::flags(index);
+
+    if (index.isValid()) {
+        Action* action = actionForIndex(index);
+        if (action && action->isTextEditable())
+            return flags | Qt::ItemIsEditable;
+    }
+
+    return flags & (~Qt::ItemIsEditable);
+}
+
+//This method was created because somehow internally the item changed
+//to an icorrect state, after a drop event followed by an item selection in the view.
+void ActionsModel::onItemChanged(QStandardItem * item)
+{
+    Action* action = actionForItem(item);
+    if (action && item && item->isEditable() != action->isTextEditable())
+        item->setEditable(action->isTextEditable());
 }

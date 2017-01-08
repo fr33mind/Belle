@@ -32,6 +32,7 @@ public:
     explicit ActionsModel(QObject *parent = 0);
     Action* actionForIndex(const QModelIndex&) const;
     QModelIndex indexForAction(Action*) const;
+    Action* actionForItem(QStandardItem*) const;
     void setActions(const QList<Action*>&);
     virtual bool dropMimeData ( const QMimeData *, Qt::DropAction, int, int, const QModelIndex &);
     virtual QMimeData* mimeData( const QModelIndexList & ) const;
@@ -40,6 +41,7 @@ public:
     void clear();
     void setCurrentAction(Action*);
     Action* currentAction() const;
+    virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
 signals:
 
@@ -53,6 +55,7 @@ private slots:
     void updateView();
     void onCurrentActionDestroyed();
     void onCurrentSceneDestroyed();
+    void onItemChanged(QStandardItem*);
 
 private:
     void updateItemAt(int);
