@@ -269,15 +269,18 @@ ActionsView::ActionsView(QWidget *parent) :
 void ActionsView::onContextMenuRequested(const QPoint & point)
 {
     QMenu menu;
+    bool canPaste = this->canPaste();
 
     if (! selectedIndexes().isEmpty()) {
         menu.addAction(mCopyAction);
         menu.addAction(mCutAction);
+        if (canPaste)
+            menu.addAction(mPasteAction);
         menu.addSeparator();
         menu.addAction(mDeleteAction);
     }
-    else {
-         menu.addAction(mPasteAction);
+    else if (canPaste) {
+        menu.addAction(mPasteAction);
     }
     menu.exec(mapToGlobal(point));
 }
@@ -500,4 +503,15 @@ void ActionsView::onEditorClosed(QWidget * editor, QAbstractItemDelegate::EndEdi
 {
     selectionModel()->clearSelection();
     selectionModel()->select(currentIndex(), QItemSelectionModel::ClearAndSelect);
+}
+
+bool ActionsView::canPaste() const
+{
+    Clipboard* clipboard = Belle::instance()->clipboard();
+    QList<Action*> actions = clipboard->actions();
+    Scene* scene = Belle::instance()->currentScene();
+
+    if (!actions.isEmpty() && scene)
+        return true;
+    return false;
 }

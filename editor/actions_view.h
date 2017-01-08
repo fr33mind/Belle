@@ -55,6 +55,7 @@ protected:
     virtual void dropEvent(QDropEvent *);
     QList<Action*> selectedActions() const;
     virtual void selectionChanged(const QItemSelection &, const QItemSelection &);
+    bool canPaste() const;
 
 private:
     void pasteActionsAt(int, const QList<Action*>&, bool, bool select=true);
