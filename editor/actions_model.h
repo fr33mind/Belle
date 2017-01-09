@@ -37,6 +37,7 @@ public:
     virtual bool dropMimeData ( const QMimeData *, Qt::DropAction, int, int, const QModelIndex &);
     virtual QMimeData* mimeData( const QModelIndexList & ) const;
     virtual QStringList mimeTypes() const;
+    Scene* currentScene() const;
     void setCurrentScene(Scene*);
     void clear();
     void setCurrentAction(Action*);

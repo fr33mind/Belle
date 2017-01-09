@@ -27,6 +27,7 @@
 #include <QVariant>
 #include <QMenu>
 #include <QTextEdit>
+#include <QTextBlock>
 
 #include "scene_manager.h"
 #include "actions_model.h"
@@ -38,6 +39,8 @@
 ActionsViewDelegate::ActionsViewDelegate(QObject* parent) :
     QStyledItemDelegate(parent)
 {
+    mTextEditCursorAtEnd = false;
+    mTextEditCursorBlockPos = -1;
 }
 
 void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
@@ -182,10 +185,37 @@ void ActionsViewDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
 {
     QTextEdit* lineEdit = qobject_cast<QTextEdit*>(editor);
     const ActionsModel* actionsModel = qobject_cast<const ActionsModel*>(index.model());
+
     if (lineEdit && actionsModel) {
         Action* action = actionsModel->actionForIndex(index);
-        if (action)
+        if (action) {
             lineEdit->setText(action->editText());
+            QTextCursor cursor = lineEdit->textCursor();
+            if (mTextEditCursorAtEnd)
+                cursor.movePosition(QTextCursor::End);
+            if (mTextEditCursorBlockPos >= 0) {
+                int maxBlockPos = cursor.block().length() - 1;
+                int cursorBlockPos = mTextEditCursorBlockPos;
+                if (cursorBlockPos > maxBlockPos)
+                    cursorBlockPos = maxBlockPos;
+                cursor.setPosition(cursor.block().position()+cursorBlockPos);
+            }
+
+            lineEdit->setTextCursor(cursor);
+
+            bool editNextItem = true,
+                 editPrevItem = true;
+
+            if (index.row() == 0) {
+                editPrevItem = false;
+            }
+            else if (index.row() == actionsModel->rowCount()-1) {
+                editNextItem = false;
+            }
+
+            lineEdit->setProperty("editNextItem", editNextItem);
+            lineEdit->setProperty("editPrevItem", editPrevItem);
+        }
     }
 }
 
@@ -204,12 +234,51 @@ bool ActionsViewDelegate::eventFilter(QObject *watched, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Return  && keyEvent->modifiers() == Qt::ControlModifier) {
-            QTextEdit* textEdit = qobject_cast<QTextEdit*>(watched);
-            if (textEdit) {
+        QTextEdit* textEdit = qobject_cast<QTextEdit*>(watched);
+
+        if (textEdit) {
+            mTextEditCursorAtEnd = false;
+            mTextEditCursorBlockPos = -1;
+            bool editNextItem = editorFlag(textEdit, "editNextItem"),
+                 editPrevItem = editorFlag(textEdit, "editPrevItem");
+            QTextDocument* doc = textEdit->document();
+
+            if (keyEvent->key() == Qt::Key_Return  && keyEvent->modifiers() == Qt::ControlModifier) {
                 emit commitData(textEdit);
                 emit closeEditor(textEdit);
                 return true;
+            }
+            else if (keyEvent->key() == Qt::Key_Up) {
+                if (doc && editPrevItem && textEdit->textCursor().block() == doc->firstBlock()) {
+                    mTextEditCursorAtEnd = true;
+                    mTextEditCursorBlockPos = textEdit->textCursor().positionInBlock();
+                    emit commitData(textEdit);
+                    emit closeEditor(textEdit, QAbstractItemDelegate::EditPreviousItem);
+                    return true;
+                }
+            }
+            else if (keyEvent->key() == Qt::Key_Down) {
+                if (doc && editNextItem && textEdit->textCursor().block() == doc->lastBlock()) {
+                    mTextEditCursorBlockPos = textEdit->textCursor().positionInBlock();
+                    emit commitData(textEdit);
+                    emit closeEditor(textEdit, QAbstractItemDelegate::EditNextItem);
+                    return true;
+                }
+            }
+            else if (keyEvent->key() == Qt::Key_Left) {
+                if (editPrevItem && textEdit->textCursor().position() == 0) {
+                    mTextEditCursorAtEnd = true;
+                    emit commitData(textEdit);
+                    emit closeEditor(textEdit, QAbstractItemDelegate::EditPreviousItem);
+                    return true;
+                }
+            }
+            else if (keyEvent->key() == Qt::Key_Right) {
+                if (editNextItem && textEdit->textCursor().position()+1 == doc->characterCount()) {
+                    emit commitData(textEdit);
+                    emit closeEditor(textEdit, QAbstractItemDelegate::EditNextItem);
+                    return true;
+                }
             }
         }
     }
@@ -217,15 +286,25 @@ bool ActionsViewDelegate::eventFilter(QObject *watched, QEvent *event)
     return QStyledItemDelegate::eventFilter(watched, event);
 }
 
+bool ActionsViewDelegate::editorFlag(QWidget* editor, const char * property) const
+{
+    QVariant value = editor->property(property);
+    if (value.type() == QVariant::Bool)
+        return value.toBool();
+    return false;
+}
+
 ActionsView::ActionsView(QWidget *parent) :
     QListView(parent)
 {
+    mWriteAction = 0;
+    mEditTextMode = false;
     ActionsModel* model = new ActionsModel(this);
     mActionsModel = model;
     this->setModel(model);
 
     setDragEnabled(true);
-    setEditTriggers(QAbstractItemView::DoubleClicked);
+    setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
     setDragDropMode(QAbstractItemView::InternalMove);
     setDragDropOverwriteMode(true);
     setAcceptDrops(true);
@@ -256,6 +335,16 @@ ActionsView::ActionsView(QWidget *parent) :
     mDeleteAction->setShortcutContext(Qt::WidgetShortcut);
     addAction(mDeleteAction);
 
+    QAction* writeAction = new QAction(this);
+    writeAction->setShortcut(Qt::Key_Return);
+    writeAction->setShortcutContext(Qt::WidgetShortcut);
+    addAction(writeAction);
+
+    QAction* modifyActionText = new QAction(this);
+    modifyActionText->setShortcut(Qt::CTRL + Qt::Key_Return);
+    modifyActionText->setShortcutContext(Qt::WidgetShortcut);
+    addAction(modifyActionText);
+
     connect(mCopyAction, SIGNAL(triggered()), this, SLOT(onCopyAction()));
     connect(mCutAction, SIGNAL(triggered()), this,  SLOT(onCutAction()));
     connect(mPasteAction, SIGNAL(triggered()), this, SLOT(onPasteAction()));
@@ -264,6 +353,10 @@ ActionsView::ActionsView(QWidget *parent) :
 
     connect(this, SIGNAL(clicked(const QModelIndex&)), this, SLOT(onItemClicked(const QModelIndex&)));
     connect(delegate, SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)), this, SLOT(onEditorClosed(QWidget*, QAbstractItemDelegate::EndEditHint)));
+    connect(writeAction, SIGNAL(triggered()), this, SLOT(onWriteAction()));
+    connect(modifyActionText, SIGNAL(triggered()), this, SLOT(onModifyActionText()));
+
+    viewport()->installEventFilter(this);
 }
 
 void ActionsView::onContextMenuRequested(const QPoint & point)
@@ -510,17 +603,102 @@ void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, boo
 
 void ActionsView::onEditorClosed(QWidget * editor, QAbstractItemDelegate::EndEditHint hint)
 {
-    selectionModel()->clearSelection();
-    selectionModel()->select(currentIndex(), QItemSelectionModel::ClearAndSelect);
+    if (mWriteAction && mWriteAction == mActionsModel->currentAction() && mWriteAction->editText().isEmpty()) {
+        Scene* scene = mActionsModel->currentScene();
+        if (scene)
+            scene->removeAction(mWriteAction, true);
+    }
+
+    mWriteAction = 0;
+    if (hint != QAbstractItemDelegate::EditNextItem && hint != QAbstractItemDelegate::EditPreviousItem) {
+        mEditTextMode = false;
+        QModelIndex index = currentIndex();
+        selectionModel()->clear();
+        selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+    }
+    else {
+        mEditTextMode = true;
+    }
 }
 
 bool ActionsView::canPaste() const
 {
     Clipboard* clipboard = Belle::instance()->clipboard();
     QList<Action*> actions = clipboard->actions();
-    Scene* scene = Belle::instance()->currentScene();
+    Scene* scene = mActionsModel->currentScene();
 
     if (!actions.isEmpty() && scene)
         return true;
     return false;
+}
+
+void ActionsView::onWriteAction()
+{
+    Scene* scene = mActionsModel->currentScene();
+    if (!scene)
+        return;
+
+    Action* action = GameObjectFactory::createAction(GameObjectMetaType::Dialogue, scene);
+    mWriteAction = action;
+    addActionItem(action);
+    QModelIndex index = mActionsModel->indexForAction(action);
+    QListView::edit(index);
+}
+
+void ActionsView::addActionItem(Action * action)
+{
+    Scene* scene = mActionsModel->currentScene();
+    if (!scene)
+        return;
+
+    QItemSelectionModel* selectionModel = this->selectionModel();
+    int row = -1;
+
+    if (selectionModel) {
+        QModelIndexList indexes = selectionModel->selectedIndexes();
+        if (indexes.size())
+            row = indexes.last().row();
+    }
+
+    if (row != -1) {
+        scene->insertAction(row+1, action);
+    }
+    else {
+        scene->appendAction(action);
+        scrollToBottom();
+    }
+
+    setCurrentAction(action);
+}
+
+void ActionsView::onModifyActionText()
+{
+    Action* action = mActionsModel->actionForIndex(currentIndex());
+    if (!action)
+        return;
+
+    if (action->isTextEditable())
+        QListView::edit(currentIndex());
+}
+
+bool ActionsView::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == viewport() && event->type() == QEvent::MouseButtonPress) {
+        mEditTextMode = false;
+    }
+
+    return QListView::eventFilter(watched, event);
+}
+
+bool ActionsView::edit(const QModelIndex &index, EditTrigger trigger, QEvent *event)
+{
+    if (state() == QAbstractItemView::EditingState)
+        return true;
+
+    bool edit = QListView::edit(index, trigger, event);
+    if (!edit && mEditTextMode && trigger == QAbstractItemView::CurrentChanged && (index.flags() & Qt::ItemIsEditable) != 0) {
+        edit = QListView::edit(index, QAbstractItemView::AllEditTriggers, event);
+    }
+
+    return edit;
 }

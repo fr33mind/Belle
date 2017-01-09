@@ -214,6 +214,11 @@ void ActionsModel::onCurrentActionDestroyed()
     mCurrentAction = 0;
 }
 
+Scene* ActionsModel::currentScene() const
+{
+    return mCurrentScene;
+}
+
 void ActionsModel::setCurrentScene(Scene * scene)
 {
     clear();

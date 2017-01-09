@@ -40,6 +40,12 @@ public:
     virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
     virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
     virtual bool eventFilter(QObject *watched, QEvent *event);
+
+private:
+    bool mTextEditCursorAtEnd;
+    int mTextEditCursorBlockPos;
+
+    bool editorFlag(QWidget*, const char*) const;
 };
 
 class ActionsView : public QListView
@@ -51,12 +57,15 @@ public:
     void selectAction(Action*);
     void setCurrentAction(Action*);
     void selectActions(const QList<Action*>&);
+    void addActionItem(Action*);
+    bool eventFilter(QObject *watched, QEvent *event);
 
 protected:
     virtual void dropEvent(QDropEvent *);
     QList<Action*> selectedActions() const;
     virtual void selectionChanged(const QItemSelection &, const QItemSelection &);
     bool canPaste() const;
+    virtual bool edit(const QModelIndex &index, EditTrigger trigger, QEvent *event);
 
 private:
     void pasteActionsAt(int, const QList<Action*>&, bool, bool select=true);
@@ -76,6 +85,8 @@ private slots:
     void onCutAction();
     void onPasteAction();
     void onEditorClosed(QWidget*, QAbstractItemDelegate::EndEditHint);
+    void onWriteAction();
+    void onModifyActionText();
 
 private:
     QAction* mDeleteAction;
@@ -83,6 +94,8 @@ private:
     QAction* mCutAction;
     QAction* mPasteAction;
     ActionsModel* mActionsModel;
+    Action* mWriteAction;
+    bool mEditTextMode;
 };
 
 #endif // ACTIONS_VIEW_H

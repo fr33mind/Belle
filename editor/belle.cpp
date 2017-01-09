@@ -669,19 +669,13 @@ void Belle::showActionEditorWidget(Action* action)
 
 void Belle::onNewAction(Action * action)
 {
-    if (currentScene()) {
-        QModelIndexList indexes = mActionsView->selectionModel()->selectedIndexes();
-        int row = -1;
-        if (indexes.size())
-            row = indexes.last().row();
-        if (row != -1)
-            currentScene()->insertAction(row+1, action);
-        else
-            currentScene()->appendAction(action);
-
-        mActionsView->setCurrentAction(action);
+    Scene* scene = currentScene();
+    if (scene) {
+        mActionsView->addActionItem(action);
     }
-
+    else if (action) {
+        delete action;
+    }
 }
 
 void Belle::switchWidgetInPropertiesWidget(QWidget* widget)
