@@ -265,7 +265,7 @@ bool ActionsViewDelegate::eventFilter(QObject *watched, QEvent *event)
                     return true;
                 }
             }
-            else if (keyEvent->key() == Qt::Key_Left) {
+            /*else if (keyEvent->key() == Qt::Key_Left) {
                 if (editPrevItem && textEdit->textCursor().position() == 0) {
                     mTextEditCursorAtEnd = true;
                     emit commitData(textEdit);
@@ -279,7 +279,7 @@ bool ActionsViewDelegate::eventFilter(QObject *watched, QEvent *event)
                     emit closeEditor(textEdit, QAbstractItemDelegate::EditNextItem);
                     return true;
                 }
-            }
+            }*/
         }
     }
 
