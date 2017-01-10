@@ -83,6 +83,7 @@ void Dialogue::setCharacter(Character *character)
 
     if (mCharacter) {
         connect(mCharacter, SIGNAL(destroyed()), this, SLOT(onCharacterDestroyed()));
+        connect(mCharacter, SIGNAL(nameChanged(const QString&)), this, SLOT(onCharacterNameChanged(const QString&)));
         mCharacterName = mCharacter->name();
     }
 
@@ -178,6 +179,11 @@ QVariantMap Dialogue::toJsonObject(bool internal) const
 void Dialogue::onCharacterDestroyed()
 {
     mCharacter = 0;
+}
+
+void Dialogue::onCharacterNameChanged(const QString & name)
+{
+    emit dataChanged();
 }
 
 void Dialogue::updateTextBox()

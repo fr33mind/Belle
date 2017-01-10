@@ -73,6 +73,7 @@ protected:
 
 private slots:
     void onCharacterDestroyed();
+    void onCharacterNameChanged(const QString&);
 
 private:
     void init();
