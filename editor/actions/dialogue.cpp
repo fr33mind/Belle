@@ -17,6 +17,11 @@
 #include "dialogue.h"
 
 #include <QTextCodec>
+#include <QRegularExpression>
+
+static const QRegularExpression mEditTextRegExp("^(?<name>[^:]+):( )*((\"(?<text1>.*)\")|('(?<text2>.*)'))$",
+                                          QRegularExpression::CaseInsensitiveOption |
+                                          QRegularExpression::DotMatchesEverythingOption);
 
 Dialogue::Dialogue(QObject *parent) :
     Action(parent)
@@ -84,6 +89,23 @@ void Dialogue::setCharacter(Character *character)
     //update DialogueBox or TextBox
     updateTextBox();
     notify("character", characterName());
+}
+
+void Dialogue::setCharacter(const QString& name)
+{
+    if (!mCharacter || mCharacter->name() != name) {
+        Character* character = findCharacter(name);
+        setCharacter(character);
+    }
+
+    if (mCharacterName == name)
+        return;
+
+    if (!mCharacter) {
+        mCharacterName = name;
+        updateTextBox();
+        notify("character", characterName());
+    }
 }
 
 Character* Dialogue::character()
@@ -246,10 +268,42 @@ void Dialogue::removeCharacter()
 
 QString Dialogue::editText() const
 {
+    QString name = characterName();
+    if (!name.isEmpty())
+        return QString("%1: \"%2\"").arg(name).arg(mText);
     return mText;
 }
 
 void Dialogue::setEditText(const QString& content)
 {
-    setText(content);
+    QString text = content.trimmed();
+    QRegularExpression regexp = mEditTextRegExp;
+    QRegularExpressionMatch match = regexp.match(text);
+
+    if (match.hasMatch()) {
+        text = match.captured("text1");
+        if (text.isEmpty())
+            text = match.captured("text2");
+        setCharacter(match.captured("name"));
+        setText(text);
+    }
+    else {
+        setCharacterName("");
+        setText(text);
+    }
+}
+
+Character* Dialogue::findCharacter(const QString & name)
+{
+    Scene* scene = this->scene();
+    if (!scene)
+        return 0;
+
+    QList<Object*> objects = scene->objects(GameObjectMetaType::Character);
+    foreach (Object* obj, objects) {
+        if (obj && obj->name() == name)
+            return qobject_cast<Character*>(obj);
+    }
+
+    return 0;
 }

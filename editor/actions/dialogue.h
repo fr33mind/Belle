@@ -42,6 +42,7 @@ public:
     void setText(const QString&);
 
     void setCharacter(Character*);
+    void setCharacter(const QString&);
     Character* character();
 
     void setCharacterName(const QString&);
@@ -60,6 +61,8 @@ public:
 
     virtual QString editText() const;
     virtual void setEditText(const QString&);
+
+    Character* findCharacter(const QString&);
 
 signals:
 
