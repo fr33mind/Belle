@@ -132,8 +132,17 @@ void FontEditorWidget::setupFontStyles(QComboBox * comboBox)
 void FontEditorWidget::onFallbackChanged(const QString & text)
 {
     FontAsset* fontAsset = currentFontAsset();
-    if (fontAsset)
+    if (fontAsset) {
         fontAsset->setFallback(text);
+
+        FontLibrary::removeFontSubstitutions(fontAsset->fontFamily());
+        QStringList fallbacks;
+        QStringList parts = text.split(",", QString::SkipEmptyParts);
+        foreach(const QString& part, parts) {
+            fallbacks.append(part.trimmed());
+        }
+        FontLibrary::insertFontSubstitutions(fontAsset->fontFamily(), fallbacks);
+    }
 }
 
 void FontEditorWidget::setupGenericFontFamilies(QComboBox * comboBox)

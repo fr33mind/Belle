@@ -63,6 +63,7 @@
 #include "menu.h"
 #include "slotbutton.h"
 #include "font.h"
+#include "fontlibrary.h"
 
 static Belle* mInstance = 0;
 
@@ -105,9 +106,9 @@ Belle::Belle(QWidget *widget)
     mUi.scenesWidget->setIconSize(QSize(64, 48));
     mUi.pauseScenesWidget->setIconSize(QSize(64, 48));
 
-    //create editors
     GameObjectFactory::init();
     EditorWidgetFactory::init();
+    FontLibrary::init();
 
     mActionsView = new ActionsView(this);
     ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
