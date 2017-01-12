@@ -4,8 +4,8 @@ TEMPLATE = app
 isEmpty(PREFIX) {
  PREFIX = /usr
 }
-INCLUDEPATH += actions objects widgets conditions
-DEPENDPATH += actions objects widgets conditions
+INCLUDEPATH += actions objects widgets conditions assets
+DEPENDPATH += actions objects widgets conditions assets
 
 TARGET = belle
 TARGET.path = $$PREFIX/
@@ -143,7 +143,8 @@ HEADERS      += belle.h\
     objects/menueditorwidget.h \
     widgets/slider.h \
     objects/slotbutton.h \
-    objects/slotbuttoneditorwidget.h
+    objects/slotbuttoneditorwidget.h \
+    assets/fontasset.h
                 
 
 SOURCES      += main.cpp\
@@ -269,6 +270,7 @@ SOURCES      += main.cpp\
     objects/menueditorwidget.cpp \
     widgets/slider.cpp \
     objects/slotbutton.cpp \
-    objects/slotbuttoneditorwidget.cpp
+    objects/slotbuttoneditorwidget.cpp \
+    assets/fontasset.cpp
 
 RESOURCES += media.qrc
