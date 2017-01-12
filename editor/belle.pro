@@ -144,7 +144,8 @@ HEADERS      += belle.h\
     widgets/slider.h \
     objects/slotbutton.h \
     objects/slotbuttoneditorwidget.h \
-    assets/fontasset.h
+    assets/fontasset.h \
+    objects/font.h
                 
 
 SOURCES      += main.cpp\
@@ -271,6 +272,7 @@ SOURCES      += main.cpp\
     widgets/slider.cpp \
     objects/slotbutton.cpp \
     objects/slotbuttoneditorwidget.cpp \
-    assets/fontasset.cpp
+    assets/fontasset.cpp \
+    objects/font.cpp
 
 RESOURCES += media.qrc
