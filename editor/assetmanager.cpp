@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "fontfile.h"
 #include "soundasset.h"
+#include "fontasset.h"
 
 static AssetManager* mInstance = new AssetManager();
 static QScopedPointer<AssetManager> mInstanceScopedPointer(mInstance);
@@ -118,6 +119,10 @@ Asset* AssetManager::_loadAsset(const QVariantMap& data, Asset::Type type)
         asset = new SoundAsset(data);
         addAsset(asset, type);
     }
+    else if (type == Asset::Font) {
+        asset = new FontAsset(data);
+        addAsset(asset, type);
+    }
     else {
         asset = _loadAsset(data.value("name").toString(), type);
     }
@@ -136,9 +141,11 @@ Asset* AssetManager::_loadAsset(const QString& name, Asset::Type type)
     if (type == Asset::Image)
         asset = ImageFile::create(path);
     else if (type == Asset::Font)
-        asset = new FontFile(path);
+        asset = new FontAsset(path);
     else if (type == Asset::Audio)
         asset = new SoundAsset(path);
+    else if (type == Asset::FontSource)
+        asset = new FontFile(path);
     else
         asset = new Asset(path, type);
 
@@ -292,7 +299,13 @@ void AssetManager::load(const QDir & dir, bool fromProject)
     QVariantList fontsData = data.value("fonts").toList();
     for(int i=0; i < fontsData.size(); i++) {
         item = fontsData[i].toMap();
-        asset = _loadAsset(item.value("name", "").toString(), Asset::Font);
+        if (item.contains("sources")) {
+            asset = _loadAsset(item, Asset::Font);
+        }
+        else {
+            //for backwards compatibility
+            asset = _loadAsset(item.value("name", "").toString(), Asset::Font);
+        }
         if (asset && fromProject)
             asset->setRemovable(true);
     }
@@ -367,19 +380,15 @@ void AssetManager::saveFontFaces(const QList<Asset*>& fonts, const QDir& dir)
     if (! file.open(QFile::WriteOnly | QFile::Text))
         return;
 
-    FontFile* font = 0;
+    FontAsset* font = 0;
+    QString fontface;
 
     for(int i=0; i < fonts.size(); i++) {
-        font = dynamic_cast<FontFile*>(fonts[i]);
+        font = dynamic_cast<FontAsset*>(fonts[i]);
         if (! font) continue;
-        QString basename = QFileInfo(font->path()).baseName();
-
-        //determine font's family name.
-        QStringList families = QFontDatabase::applicationFontFamilies(font->id());
-        for(int j=0; j < families.size(); j++) {
-            //write css for font
-            file.write(Utils::fontFace(basename, families[j]).toLatin1() + "\n");
-        }
+        //TODO: Add support for relative paths in font-face declaration
+        fontface = font->toFontFace();
+        file.write(fontface.toUtf8() + "\n");
     }
 
     file.close();
@@ -390,8 +399,8 @@ QList<int> AssetManager::fontsIds()
     QList<int> ids;
     QList<Asset*> fontfiles = this->assets(Asset::Font);
     for(int i=0; i < fontfiles.size(); i++) {
-        FontFile* font = dynamic_cast<FontFile*>(fontfiles[i]);
-        ids.append(font->id());
+        FontAsset* font = static_cast<FontAsset*>(fontfiles[i]);
+        ids.append(font->fontId());
     }
 
     return ids;
