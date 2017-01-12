@@ -29,6 +29,7 @@
 #include "changestate.h"
 #include "sound.h"
 #include "slotbutton.h"
+#include "font.h"
 
 void GameObjectFactory::init()
 {
@@ -50,6 +51,8 @@ GameObject* GameObjectFactory::createGameObject(GameObjectMetaType::Type type, c
         obj = createObject(type, data, parent);
     else if (type == GameObjectMetaType::Sound)
         obj = data.isEmpty() ? new Sound("", parent) : new Sound(data, parent);
+    else if (type == GameObjectMetaType::Font)
+        obj = data.isEmpty() ? new Font(parent) : new Font(data, parent);
     else if (type == GameObjectMetaType::Scene)
         obj = createScene(data, parent);
 

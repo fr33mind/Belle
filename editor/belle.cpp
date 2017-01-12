@@ -62,6 +62,7 @@
 #include "sound.h"
 #include "menu.h"
 #include "slotbutton.h"
+#include "font.h"
 
 static Belle* mInstance = 0;
 
@@ -131,6 +132,7 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Menu")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Sound")));
     mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Slot Button")));
+    mUi.twObjects->addTopLevelItem(new QTreeWidgetItem(mUi.twObjects, QStringList()<< tr("Font")));
 
     mUi.twObjects->topLevelItem(0)->setIcon(0, QIcon(":/media/user.png"));
     mUi.twObjects->topLevelItem(1)->setIcon(0, QIcon(":/media/text.png"));
@@ -140,6 +142,7 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->topLevelItem(5)->setIcon(0, QIcon(":/media/menu.png"));
     mUi.twObjects->topLevelItem(6)->setIcon(0, QIcon(":/media/sound.png"));
     mUi.twObjects->topLevelItem(7)->setIcon(0, QIcon(":/media/button.png"));
+    mUi.twObjects->topLevelItem(8)->setIcon(0, QIcon(":/media/font.png"));
 
 
     //scenes' widget
@@ -607,6 +610,16 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         resource = new SlotButton(ResourceManager::instance());
         ResourceManager::instance()->add(resource);
         break;
+    //Font
+    case 8:
+        if (QDir(RESOURCES_DEFAULT_PATH).exists())
+            startPath = RESOURCES_DEFAULT_PATH;
+        path = FileDialogUtils::getOpenFontFileName(this, startPath);
+        if (path.isEmpty())
+            break;
+       resource = new Font(path, ResourceManager::instance());
+       ResourceManager::instance()->add(resource);
+       break;
     }
 
     if (mResourcesView && resource) {

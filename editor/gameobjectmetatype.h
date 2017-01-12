@@ -15,6 +15,7 @@ public:
         GameObject,
         Scene,
         Sound,
+        Font,
         //objects
         Object=32,
         TextBox,

@@ -53,6 +53,7 @@ void GameObjectMetaType::init()
     mGameObjectMetaTypes.insert(MenuOption, new GameObjectMetaType(MenuOption, "MenuOption", tr("Menu Option")));
     mGameObjectMetaTypes.insert(Sound, new GameObjectMetaType(Sound, "Sound", tr("Sound"), QIcon(":/media/sound.png")));
     mGameObjectMetaTypes.insert(SlotButton, new GameObjectMetaType(SlotButton, "SlotButton", tr("Slot Button"), QIcon(":/media/button.png")));
+    mGameObjectMetaTypes.insert(Font, new GameObjectMetaType(Font, "Font", tr("Font"), QIcon(":/media/font.png")));
 
     //scene
     mGameObjectMetaTypes.insert(Scene, new GameObjectMetaType(Scene, "Scene", tr("Scene")));

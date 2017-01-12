@@ -264,9 +264,11 @@ inline QString fontFace(const QString& filename, const QString& family)
 namespace FileDialogUtils {
     extern const QString SoundFilter;
     extern const QString ImageFilter;
+    extern const QString FontFilter;
 
     QString getOpenImageFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString());
     QString getOpenSoundFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString());
+    QString getOpenFontFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString());
     QString toFilter(const QString& name, const QStringList& ext);
 }
 
