@@ -55,7 +55,7 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
     connect(mHorizontalAlignmentComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onAlignmentChanged(int)));
     connect(mVerticalAlignmentComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onAlignmentChanged(int)));
     connect(mFontSizeSpin, SIGNAL(valueChanged(int)), this, SLOT(onFontSizeChanged(int)));
-    connect(mChooseFontWidget, SIGNAL(fontChosen(const QString&)), this, SLOT(onFontChosen(const QString&)));
+    connect(mChooseFontWidget, SIGNAL(currentTextChanged(const QString&)), this, SLOT(onFontChosen(const QString&)));
 
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
 }
@@ -107,7 +107,7 @@ void TextPropertiesWidget::updateData(GameObject* obj)
 
     mTextEdit->setText(textbox->text());
     mColorButton->setColor(textbox->textColor());
-    mChooseFontWidget->setCurrentFontFamily(textbox->fontFamily());
+    mChooseFontWidget->setCurrentText(textbox->fontFamily());
     mFontSizeSpin->setValue(textbox->fontSize());
 }
 
