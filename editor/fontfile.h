@@ -9,6 +9,8 @@ public:
     FontFile(const QString&);
     int id() const;
     virtual bool isNull() const;
+    QStringList fontFamilies() const;
+    QString fontFamily() const;
 
 private:
     int mId;
