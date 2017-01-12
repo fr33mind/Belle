@@ -19,6 +19,7 @@
 #include <QTextCodec>
 
 #include "utils.h"
+#include "fontlibrary.h"
 
 TextBox::TextBox(QObject *parent, const QString& name) :
     Object(parent, name)
@@ -349,6 +350,8 @@ QString TextBox::fontFamily()
 void TextBox::setFontFamily(const QString& family)
 {
     mFont.setFamily(family);
+    QFont::StyleHint hint = FontLibrary::fontStyleHint(family);
+    mFont.setStyleHint(hint);
     this->notify("font", Utils::font(mFont.pixelSize(), mFont.family()));
 }
 
