@@ -78,10 +78,19 @@ void TextBox::loadData(const QVariantMap& data, bool internal)
         setTextAlignment(alignment);
     }
 
+    //Font string is deprecated. Remove at some point.
     if (data.contains("font") && data.value("font").type() == QVariant::String) {
         QString font = data.value("font").toString();
         setFontFamily(Utils::fontFamily(font));
         setFontSize(Utils::fontSize(font));
+    }
+
+    if (data.contains("font") && data.value("font").type() == QVariant::Map) {
+        QVariantMap font = data.value("font").toMap();
+        if (font.contains("family"))
+            setFontFamily(font.value("family").toString());
+        if (font.contains("size"))
+            setFontSize(Utils::fontSize(font.value("size").toString()));
     }
 
     if (data.contains("placeholderText") && data.value("placeholderText").type() == QVariant::String)
@@ -267,8 +276,12 @@ QVariantMap TextBox::toJsonObject(bool internal) const
     object.insert("textColor", Utils::colorToList(textColor()));
     object.insert("text", mText);
     object.insert("textAlignment", textAlignmentAsString());
-    if (mFont != Object::defaultFont())
-        object.insert("font", Utils::font(mFont.pixelSize(), mFont.family()));
+    if (mFont != Object::defaultFont()) {
+        QVariantMap font;
+        font.insert("size", QString("%1px").arg(mFont.pixelSize()));
+        font.insert("family", mFont.family());
+        object.insert("font", font);
+    }
 
     if (internal) {
         if (! placeholderText().isEmpty())
@@ -339,7 +352,7 @@ int TextBox::fontSize()
 void TextBox::setFontSize(int size)
 {
     mFont.setPixelSize(size);
-    this->notify("font", Utils::font(mFont.pixelSize(), mFont.family()));
+    notifyFont("size", mFont.pixelSize());
 }
 
 QString TextBox::fontFamily()
@@ -352,8 +365,14 @@ void TextBox::setFontFamily(const QString& family)
     mFont.setFamily(family);
     QFont::StyleHint hint = FontLibrary::fontStyleHint(family);
     mFont.setStyleHint(hint);
-    this->notify("font", Utils::font(mFont.pixelSize(), mFont.family()));
+    notifyFont("family", mFont.family());
 }
 
+void TextBox::notifyFont(const QString & property, const QVariant & value)
+{
+    QVariantMap font;
+    font.insert(property, value);
+    notify("font", font);
+}
 
 

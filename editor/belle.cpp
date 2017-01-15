@@ -1019,7 +1019,6 @@ void Belle::importScenes(const QVariantList& scenes, SceneManager* sceneManager)
 QVariantMap Belle::createGameFile() const
 {
     QVariantMap jsonFile;
-    QString font = Utils::font(mNovelData.value("fontSize").toInt(), mNovelData.value("fontFamily").toString());
     QMapIterator<QString, QVariant> it(mNovelData);
 
     while(it.hasNext()){
@@ -1027,7 +1026,9 @@ QVariantMap Belle::createGameFile() const
         jsonFile.insert(it.key(), it.value());
     }
 
-    //remove "fontSize" and "fontFamily" attributes, they are going to be replaced by the "font" attribute
+    QVariantMap font;
+    font.insert("size", QString("%1px").arg(mNovelData.value("fontSize").toInt()));
+    font.insert("family", mNovelData.value("fontFamily"));
     jsonFile.insert("font", font);
     jsonFile.remove("fontSize");
     jsonFile.remove("fontFamily");
@@ -1322,6 +1323,7 @@ void Belle::setNovelProperties(const QVariantMap& _data)
         mNovelData.insert("textSpeed", data.value("textSpeed").toInt());
     }
 
+    //Font string is deprecated. Remove at some point.
     if (data.contains("font") && data.value("font").type() == QVariant::String) {
         int fontSize = Utils::fontSize(data.value("font").toString());
         QString fontFamily = Utils::fontFamily(data.value("font").toString());
@@ -1329,6 +1331,21 @@ void Belle::setNovelProperties(const QVariantMap& _data)
         Object::setDefaultFontFamily(fontFamily);
         mNovelData.insert("fontSize", fontSize);
         mNovelData.insert("fontFamily", fontFamily);
+    }
+
+    if (data.contains("font") && data.value("font").type() == QVariant::Map) {
+        QVariantMap font = data.value("font").toMap();
+        if (font.contains("size")) {
+            int fontSize = Utils::fontSize(font.value("size").toString());
+            Object::setDefaultFontSize(fontSize);
+            mNovelData.insert("fontSize", fontSize);
+        }
+
+        if (font.contains("family")) {
+            QString fontFamily = Utils::fontFamily(font.value("family").toString());
+            Object::setDefaultFontFamily(fontFamily);
+            mNovelData.insert("fontFamily", fontFamily);
+        }
     }
 
     if (data.contains("fontSize") && data.value("fontSize").canConvert(QVariant::Int)) {

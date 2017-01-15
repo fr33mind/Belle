@@ -50,6 +50,9 @@
         this.properties[member] = data[member];
     }
 
+    if (this.properties["font"])
+      this.properties["font"] = new belle.graphics.Font(this.properties["font"]);
+
     if (this.properties["textSpeed"] < 0)
         this.properties["textSpeed"] = 0;
     else if (this.properties["textSpeed"] > 100)

@@ -612,6 +612,7 @@ function TextBox(info, parent, initElement)
     this.textTopPadding = [];
     this.textAlignment = [];
     this.textParts = [];
+    this.font = null;
     this.textElement = document.createElement("div");
     this.element.appendChild(this.textElement);
     this.displayedText = "";
@@ -620,11 +621,6 @@ function TextBox(info, parent, initElement)
     game.bind("variableChanged", this, function() {
       this.update();
     });
-
-    if ("font" in info)
-      this.setFont(info["font"]);
-    else
-      this.setFont(game.properties.font);
 
     TextBox.prototype.load.call(this, info);
 
@@ -637,6 +633,7 @@ belle.extend(TextBox, Object);
 TextBox.prototype.load = function(data)
 {
     var loaded = Object.prototype.load.call(this, data);
+    var game = this.getGame();
 
     if (! loaded)
       return false;
@@ -652,6 +649,13 @@ TextBox.prototype.load = function(data)
     if ("textColor" in data) {
         this.setTextColor(data["textColor"]);
         this.defaultTextColor = this.textColor;
+    }
+
+    if ("font" in data) {
+      this.setFont(data["font"]);
+    }
+    else if (game.properties.font) {
+      this.setFont(game.properties.font);
     }
 
     return true;
@@ -784,13 +788,16 @@ TextBox.prototype.appendText = function(text)
 
 TextBox.prototype.setFont = function(font)
 {
-    if (font && this.font != font) {
-        this.font = font;
-        if (this.textElement)
-          this.textElement.style.font = font;
-        this.alignText();
-        this.update();
-    }
+  if (!font)
+    return;
+
+  if (belle.isInstance(font, belle.graphics.Font))
+    this.font = font;
+  else
+    this.font = new belle.graphics.Font(font);
+
+  this.alignText();
+  this.update();
 }
 
 TextBox.prototype.setText = function(text)
@@ -832,7 +839,7 @@ TextBox.prototype.scale = function(widthFactor, heightFactor)
   if (this.textElement) {
     this.textElement.style.width = this.width + "px";
     this.textElement.style.height = this.height + "px";
-    var font = parseInt(this.font);
+    var font = parseInt(this.font ? this.font.toString() : null);
     if (font !== NaN) {
         font *= widthFactor;
         $(this.textElement).css("font-size", font+"px");

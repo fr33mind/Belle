@@ -420,8 +420,11 @@ GameView.prototype._render = function () {
     var objects = scene.getObjects();
     var obj = null;
     var i, j, redraw=false;
+    var font = this.model.properties.font;
 
-    this.context.font = this.model.properties.font;
+    if (font)
+      this.context.font = font;
+    
     if (this._cleared) {
       scene.paint(this.bgcontext);
 

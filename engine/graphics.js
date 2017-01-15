@@ -219,9 +219,35 @@
     return this.opacity / 255;
   }
 
+  /*** Font ***/
+
+  function Font(data)
+  {
+    this.family = "";
+    this.size = "";
+
+    if (typeof data == "object") {
+      this.family = data.family;
+      this.size = data.size;
+    }
+  }
+
+  Font.prototype.toString = function() {
+    return this.size + " " + this.family;
+  }
+
+  Font.prototype.setFamily = function(family) {
+    this.family = family;
+  }
+
+  Font.prototype.setSize = function(size) {
+    this.size = size;
+  }
+
   belle.graphics.AnimatedImage = AnimatedImage;
   belle.graphics.Image = Image;
   belle.graphics.Color = Color;
   belle.graphics.Background = Background;
+  belle.graphics.Font = Font;
 
 }(belle));

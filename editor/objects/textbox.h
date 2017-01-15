@@ -89,6 +89,7 @@ protected:
 private:
     void init(const QString&, const QVariantMap& data=QVariantMap());
     void initRect(const QVariantMap& data=QVariantMap());
+    void notifyFont(const QString&, const QVariant&);
 
 };
 
