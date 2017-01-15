@@ -54,6 +54,7 @@
 
     var images = data["images"] || [];
     var sounds = data["sounds"] || [];
+    var fonts = data["fonts"] || [];
 
     for(var i=0; i < images.length; i++) {
       this._loadAsset(images[i], "Image");
@@ -61,6 +62,10 @@
 
     for(var i=0; i < sounds.length; i++) {
       this._loadAsset(sounds[i], "Audio");
+    }
+
+    for(var i=0; i < fonts.length; i++) {
+      this._loadAsset(fonts[i], "Font");
     }
   }
 
@@ -117,6 +122,10 @@
       
       if (! buzz.isSupported())
         this.assetLoaded(asset);
+    }
+    else if (type == "font") {
+      asset = data;
+      this.assetLoaded(asset);
     }
 
     if (asset) {
