@@ -41,6 +41,8 @@
       "Video" : "",
       "Font" : ""
     };
+    
+    this.data = data;
 
     if (! data) {
       this.trigger("loaded");

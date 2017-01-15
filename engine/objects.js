@@ -791,8 +791,12 @@ TextBox.prototype.setFont = function(font)
   if (!font)
     return;
 
+  var fontLibrary = this.getGame().getFontLibrary();
+
   if (belle.isInstance(font, belle.graphics.Font))
     this.font = font;
+  else if (fontLibrary)
+    this.font = fontLibrary.createFont(font);
   else
     this.font = new belle.graphics.Font(font);
 

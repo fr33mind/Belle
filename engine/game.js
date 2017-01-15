@@ -29,6 +29,7 @@
     this.properties = {};
     this.resources = {};
     this.soundManager = new belle.SoundManager();
+    this.fontLibrary = new belle.graphics.FontLibrary();
     this.setAssetManager(new belle.AssetManager(data.assets));
     this.controller = null;
 
@@ -51,7 +52,7 @@
     }
 
     if (this.properties["font"])
-      this.properties["font"] = new belle.graphics.Font(this.properties["font"]);
+      this.properties["font"] = this.fontLibrary.createFont(this.properties["font"]);
 
     if (this.properties["textSpeed"] < 0)
         this.properties["textSpeed"] = 0;
@@ -115,6 +116,9 @@
     this.assetManager.bind("loaded", this, function() {
       this.resume();
     }, true);
+    
+    if (this.fontLibrary)
+      this.fontLibrary.assetManager = assetManager;
   }
 
   Game.prototype.isReady = function() {
@@ -431,6 +435,10 @@
 
   Game.prototype.stopSound = function(sound, fade) {
       this.soundManager.stop(sound, "sound", fade);
+  }
+
+  Game.prototype.getFontLibrary = function() {
+    return this.fontLibrary;
   }
 
   belle.Game = Game;

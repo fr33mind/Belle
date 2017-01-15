@@ -221,14 +221,15 @@
 
   /*** Font ***/
 
-  function Font(data)
+  function Font(data, library)
   {
     this.family = "";
     this.size = "";
+    this.library = library ? library : null;
 
     if (typeof data == "object") {
-      this.family = data.family;
-      this.size = data.size;
+      this.setFamily(data.family);
+      this.setSize(data.size);
     }
   }
 
@@ -237,6 +238,8 @@
   }
 
   Font.prototype.setFamily = function(family) {
+    if (this.library)
+      family = this.library.completeFontFamily(family);
     this.family = family;
   }
 
@@ -244,10 +247,113 @@
     this.size = size;
   }
 
+  /** FontLibrary - Function object for retrieving font information **/
+
+  function FontLibrary(assetManager) {
+    this.assetManager = assetManager ? assetManager : null;
+    this.webSafeFonts = {};
+    var webSafeFonts = [
+      "Georgia,serif",
+      "Palatino Linotype,Book Antiqua,Palatino,serif",
+      "Times New Roman,Times,serif",
+      "Arial,Helvetica,sans-serif",
+      "Arial Black,Gadget,sans-serif",
+      "Comic Sans MS,cursive,sans-serif",
+      "Impact,Charcoal,sans-serif",
+      "Lucida Sans Unicode,Lucida Grande,sans-serif",
+      "Tahoma,Geneva,sans-serif",
+      "Trebuchet MS,Helvetica,sans-serif",
+      "Verdana,Geneva,sans-serif",
+      "Courier New,Courier,monospace",
+      "Lucida Console,Monaco,monospace"
+    ];
+
+    for(var i=0; i < webSafeFonts.length; i++) {
+      var fonts = webSafeFonts[i].split(",");
+      this.webSafeFonts[fonts[0]] = fonts.slice(1);
+    }
+  }
+
+  FontLibrary.prototype.quote = function (name)
+  {
+    if (name.indexOf(" ") != -1 && name.indexOf('"') == -1 && name.indexOf("'") == -1) {
+      return '"' + name + '"';
+    }
+
+    return name;
+  }
+
+  FontLibrary.prototype.normalizeFamilyName = function(familyName, quote) {
+    familyName = $.trim(familyName);
+    if (quote || quote === undefined)
+      familyName = this.quote(familyName);
+    return familyName;
+  }
+
+  FontLibrary.prototype.normalizeFamilyNames = function(familyNames, quote) {
+    var names = [];
+    var name = "";
+
+    for (var i=0; i < familyNames.length; i++) {
+      name = this.normalizeFamilyName(familyNames[i], quote);
+      if (names.indexOf(name) == -1)
+        names.push(name);
+    }
+
+    return names;
+  }
+
+  FontLibrary.prototype.fallbacks = function (family)
+  {
+    var fallbacks = [],
+        found = false;
+
+    if (this.assetManager && this.assetManager.data) {
+      var fonts = this.assetManager.data.fonts;
+      for(var i=0; i < fonts.length; i++) {
+        if (fonts[i].fontFamily == family) {
+          if (fonts[i].fallback) {
+            fallbacks = fonts[i].fallback.split(",");
+          }
+
+          if (fonts[i].genericFontFamily)
+            fallbacks.push(fonts[i].genericFontFamily);
+
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found) {
+      for(var sfamily in this.webSafeFonts) {
+        if (family.toLowerCase() == sfamily.toLowerCase()) {
+          fallbacks = this.webSafeFonts[sfamily];
+          break;
+        }
+      }
+    }
+
+    return this.normalizeFamilyNames(fallbacks, false);
+  }
+
+  FontLibrary.prototype.completeFontFamily = function (family)
+  {
+    var fallbacks = this.fallbacks(family);
+    fallbacks.unshift(family);
+    fallbacks = this.normalizeFamilyNames(fallbacks);
+    return fallbacks.join(', ');
+  }
+
+  FontLibrary.prototype.createFont = function(data) {
+    return new Font(data, this);
+  }
+
   belle.graphics.AnimatedImage = AnimatedImage;
   belle.graphics.Image = Image;
   belle.graphics.Color = Color;
   belle.graphics.Background = Background;
   belle.graphics.Font = Font;
+  belle.graphics.FontLibrary = FontLibrary;
 
 }(belle));
