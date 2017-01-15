@@ -1343,6 +1343,22 @@ SlotButton.prototype.loadGame = function() {
   }
 }
 
+/************** Font ************/
+
+function Font(data, parent)
+{
+  GameObject.call(this, data, parent);
+  this.asset = data.asset || null;
+
+  if (data.asset) {
+    var assetManager = this.getGame().getAssetManager();
+    if (assetManager)
+      this.asset = assetManager.loadAsset(data.asset, "Font");
+  }
+}
+
+belle.extend(Font, GameObject);
+
 // Expose the public methods
 
 objects.Object = Object;
@@ -1356,6 +1372,7 @@ objects.MenuOption = MenuOption;
 objects.Menu = Menu;
 objects.Sound = Sound;
 objects.SlotButton = SlotButton;
+objects.Font = Font;
 
 }(belle));
 
