@@ -185,7 +185,7 @@ class Object : public GameObject
         void eventActionRemoved(Interaction::InputEvent, Action*, bool);
         void positionChanged(int, int);
         void resized(int, int);
-        void destroyed(Object* object=0);
+        void destroyed(Object* object);
         void synced();
         void eventActionInserted(Interaction::InputEvent, int, Action*);
 
