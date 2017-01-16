@@ -217,6 +217,11 @@ inline bool removeDir(const QString &dirName)
 
 inline int fontSize(const QString& font)
 {
+    bool ok = false;
+    int size = font.toInt(&ok);
+    if (ok)
+        return size;
+
     if (! font.contains("px"))
         return 0;
 

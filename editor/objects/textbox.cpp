@@ -89,7 +89,10 @@ void TextBox::loadData(const QVariantMap& data, bool internal)
         QVariantMap font = data.value("font").toMap();
         if (font.contains("family"))
             setFontFamily(font.value("family").toString());
-        if (font.contains("size"))
+
+        if (font.contains("size") && font.value("size").type() == QVariant::Int)
+            setFontSize(font.value("size").toInt());
+        else if (font.contains("size"))
             setFontSize(Utils::fontSize(font.value("size").toString()));
     }
 
