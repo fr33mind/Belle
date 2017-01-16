@@ -677,6 +677,8 @@ TextBox.prototype.paint = function(context)
     if (this.font)
        context.font = this.font;
 
+    context.textBaseline = "top";
+
     var text = game ? game.replaceVariables(this.text) : this.text;
     if (text != this.displayedText)
         this.alignText();
@@ -722,16 +724,19 @@ TextBox.prototype.alignText = function(text, size)
         this.textLeftPadding.length = 0;
         this.textTopPadding.length = 0;
         var sumHeight = 0;
+        var fontLeading = this.font ? this.font.leading : 0;
 
         for (var i=0; i < this.textParts.length; i++) {
             //empty text means it's just a new line, so we use <br/> to get the height
             var text = this.textParts[i].length ? this.textParts[i] : "<br/>";
             var size = belle.utils.textSize(text, this.font);
             var width = size[0];
-            var height = Math.round(size[1] / 1.2);
+            var height = size[1];
             var leftPadding = this.padding.left;
+            //height should already contain the font leading.
+            //the leading is to center text vertically in the line.
+            this.textTopPadding.push(sumHeight+fontLeading);
             sumHeight += height;
-            this.textTopPadding.push(sumHeight);
 
             if (this.textAlignment) {
                 if (width < contentWidth) {

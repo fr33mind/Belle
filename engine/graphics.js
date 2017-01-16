@@ -225,16 +225,23 @@
   {
     this.family = "";
     this.size = "";
+    this.height = null;
+    this.lineHeight = 1;
+    this.naturalLeading = 0;
+    this.leading = 0;
     this.library = library ? library : null;
 
     if (typeof data == "object") {
       this.setFamily(data.family);
       this.setSize(data.size);
+      if (data.leading)
+        this.naturalLeading = data.leading;
+      this.setHeight(data.height);
     }
   }
 
   Font.prototype.toString = function() {
-    return this.size + " " + this.family;
+    return this.size + "/" + this.lineHeight + " " + this.family;
   }
 
   Font.prototype.setFamily = function(family) {
@@ -245,6 +252,23 @@
 
   Font.prototype.setSize = function(size) {
     this.size = size;
+    this.calcLeading();
+  }
+
+  Font.prototype.setHeight = function(height) {
+    if (belle.isNumber(height)) {
+      this.height = height;
+      this.lineHeight = parseInt(this.height) + parseInt(this.naturalLeading) + "px";
+      this.calcLeading();
+    }
+  }
+
+  Font.prototype.calcLeading = function() {
+    if (belle.isNumber(this.size) && belle.isNumber(this.height)) {
+      var fontSize = parseInt(this.size);
+      var fontHeight = parseInt(this.height);
+      this.leading = Math.round((fontHeight-fontSize) / 2) + this.naturalLeading;
+    }
   }
 
   /** FontLibrary - Function object for retrieving font information **/

@@ -1027,8 +1027,14 @@ QVariantMap Belle::createGameFile() const
     }
 
     QVariantMap font;
-    font.insert("size", QString("%1px").arg(mNovelData.value("fontSize").toInt()));
-    font.insert("family", mNovelData.value("fontFamily"));
+    QFont qfont(mNovelData.value("fontFamily").toString());
+    qfont.setPixelSize(mNovelData.value("fontSize").toInt());
+    QFontMetrics metrics(qfont);
+    font.insert("size", QString("%1px").arg(qfont.pixelSize()));
+    font.insert("family", qfont.family());
+    if (metrics.leading())
+        font.insert("leading", metrics.leading());
+    font.insert("height", metrics.height());
     jsonFile.insert("font", font);
     jsonFile.remove("fontSize");
     jsonFile.remove("fontFamily");

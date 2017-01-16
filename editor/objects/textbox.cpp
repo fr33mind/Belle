@@ -278,8 +278,12 @@ QVariantMap TextBox::toJsonObject(bool internal) const
     object.insert("textAlignment", textAlignmentAsString());
     if (mFont != Object::defaultFont()) {
         QVariantMap font;
+        QFontMetrics metrics(mFont);
         font.insert("size", QString("%1px").arg(mFont.pixelSize()));
         font.insert("family", mFont.family());
+        if (metrics.leading())
+            font.insert("leading", metrics.leading());
+        font.insert("height", metrics.height());
         object.insert("font", font);
     }
 
