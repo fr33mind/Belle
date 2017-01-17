@@ -864,6 +864,8 @@ TextBox.prototype.serialize = function()
     if (this.textColor)
       data["textColor"] = this.textColor.serialize();
     data["textAlignment"] = this.textAlignment.join("|");
+    if (this.font)
+      data["font"] = this.font.serialize();
 
     return data;
 }

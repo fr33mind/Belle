@@ -250,6 +250,10 @@
     this.family = family;
   }
 
+  Font.prototype.getFamilies = function() {
+    return this.family.split(',');
+  }
+
   Font.prototype.setSize = function(size) {
     this.size = size;
     this.calcLeading();
@@ -269,6 +273,16 @@
       var fontHeight = parseInt(this.height);
       this.leading = Math.round((fontHeight-fontSize) / 2) + this.naturalLeading;
     }
+  }
+
+  Font.prototype.serialize = function() {
+    var data = {};
+    var families = this.getFamilies();
+    data.family = families[0];
+    data.size = this.size;
+    data.leading = this.naturalLeading;
+    data.height = this.height;
+    return data;
   }
 
   /** FontLibrary - Function object for retrieving font information **/
