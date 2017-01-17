@@ -40,6 +40,7 @@ class TextPropertiesWidget : public ObjectEditorWidget
     QSpinBox* mFontSizeSpin;
     ChooseFontWidget* mChooseFontWidget;
     QComboBox* mFontWeightsComboBox;
+    QComboBox* mFontStylesComboBox;
 
 
 public:
@@ -59,11 +60,13 @@ private slots:
     void onFontSizeChanged(int);
     void onFontChosen(const QString&);
     void onFontWeightChanged(int);
+    void onFontStyleChanged(int);
 
 private:
     Qt::Alignment horizontalAlignment();
     Qt::Alignment verticalAlignment();
     void setupFontWeights(QComboBox*);
+    void setupFontStyles(QComboBox*);
 
 };
 

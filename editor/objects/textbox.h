@@ -62,6 +62,9 @@ public:
     int fontWeight() const;
     void setFontWeight(int);
 
+    QFont::Style fontStyle() const;
+    void setFontStyle(QFont::Style);
+
     QString placeholderText() const;
     void setPlaceholderText(const QString&);
 

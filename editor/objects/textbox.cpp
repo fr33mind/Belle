@@ -99,6 +99,11 @@ void TextBox::loadData(const QVariantMap& data, bool internal)
             setFontWeight(font.value("weight").toInt());
         else if (font.contains("weight"))
             setFontWeight(FontLibrary::fontWeightFromCss(font.value("weight").toString()));
+
+        if (font.contains("style") && font.value("style").type() == QVariant::Int)
+            setFontStyle(static_cast<QFont::Style>(font.value("style").toInt()));
+        else if (font.contains("style"))
+            setFontStyle(FontLibrary::fontStyleFromCss(font.value("style").toString()));
     }
 
     if (data.contains("placeholderText") && data.value("placeholderText").type() == QVariant::String)
@@ -293,6 +298,7 @@ QVariantMap TextBox::toJsonObject(bool internal) const
             font.insert("leading", metrics.leading());
         font.insert("height", metrics.height());
         font.insert("weight", FontLibrary::cssFontWeight(mFont.weight()));
+        font.insert("style", FontLibrary::cssFontStyle(mFont.style()));
         object.insert("font", font);
     }
 
@@ -397,4 +403,15 @@ void TextBox::setFontWeight(int w)
 {
     mFont.setWeight(w);
     notifyFont("weight", mFont.weight());
+}
+
+QFont::Style TextBox::fontStyle() const
+{
+    return mFont.style();
+}
+
+void TextBox::setFontStyle(QFont::Style s)
+{
+    mFont.setStyle(s);
+    notifyFont("style", mFont.style());
 }
