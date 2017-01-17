@@ -21,6 +21,8 @@
 #include <QSpinBox>
 #include <QDebug>
 
+#include "fontlibrary.h"
+
 TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {
@@ -40,12 +42,15 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
     mVerticalAlignmentComboBox->addItem(tr("Center"), "vcenter");
     mVerticalAlignmentComboBox->addItem(tr("Bottom"), "bottom");
     mVerticalAlignmentComboBox->addItem(tr("Top"), "top");
+    mFontWeightsComboBox = new QComboBox(this);
+    setupFontWeights(mFontWeightsComboBox);
 
     beginGroup("Text");
     appendRow(tr("Text"), mTextEdit);
     appendRow(tr("Color"), mColorButton);
     appendRow(tr("Font"), mChooseFontWidget);
     appendRow(tr("Font size"), mFontSizeSpin);
+    appendRow(tr("Font weight"), mFontWeightsComboBox);
     appendRow(tr("Horizontal Alignment"), mHorizontalAlignmentComboBox);
     appendRow(tr("Vertical Alignment"), mVerticalAlignmentComboBox);
     endGroup();
@@ -56,6 +61,7 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
     connect(mVerticalAlignmentComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onAlignmentChanged(int)));
     connect(mFontSizeSpin, SIGNAL(valueChanged(int)), this, SLOT(onFontSizeChanged(int)));
     connect(mChooseFontWidget, SIGNAL(currentTextChanged(const QString&)), this, SLOT(onFontChosen(const QString&)));
+    connect(mFontWeightsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onFontWeightChanged(int)));
 
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
 }
@@ -109,6 +115,8 @@ void TextPropertiesWidget::updateData(GameObject* obj)
     mColorButton->setColor(textbox->textColor());
     mChooseFontWidget->setCurrentText(textbox->fontFamily());
     mFontSizeSpin->setValue(textbox->fontSize());
+    int index = mFontWeightsComboBox->findData(textbox->fontWeight());
+    mFontWeightsComboBox->setCurrentIndex(index);
 }
 
 void TextPropertiesWidget::onAlignmentChanged(int index)
@@ -173,3 +181,21 @@ void TextPropertiesWidget::onFontChosen(const QString & family)
         textbox->setFontFamily(family);
 }
 
+void TextPropertiesWidget::setupFontWeights(QComboBox * comboBox)
+{
+    QList<int> weights = FontLibrary::fontWeights();
+
+    comboBox->clear();
+    foreach(int weight, weights) {
+        comboBox->addItem(FontLibrary::fontWeightName(weight), weight);
+    }
+}
+
+void TextPropertiesWidget::onFontWeightChanged(int index)
+{
+    TextBox* textbox = qobject_cast<TextBox*>(mGameObject);
+    if (textbox) {
+        QVariant data = mFontWeightsComboBox->itemData(index);
+        textbox->setFontWeight(data.toInt());
+    }
+}

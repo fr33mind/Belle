@@ -230,6 +230,7 @@
     this.naturalLeading = 0;
     this.leading = 0;
     this.library = library ? library : null;
+    this.weight = "normal";
 
     if (typeof data == "object") {
       this.setFamily(data.family);
@@ -237,11 +238,13 @@
       if (data.leading)
         this.naturalLeading = data.leading;
       this.setHeight(data.height);
+      if (data.weight)
+        this.setWeight(data.weight);
     }
   }
 
   Font.prototype.toString = function() {
-    return this.size + "/" + this.lineHeight + " " + this.family;
+    return this.weight + " " + this.size + "/" + this.lineHeight + " " + this.family;
   }
 
   Font.prototype.setFamily = function(family) {
@@ -267,6 +270,10 @@
     }
   }
 
+  Font.prototype.setWeight = function(weight) {
+    this.weight = weight;
+  }
+
   Font.prototype.calcLeading = function() {
     if (belle.isNumber(this.size) && belle.isNumber(this.height)) {
       var fontSize = parseInt(this.size);
@@ -282,6 +289,7 @@
     data.size = this.size;
     data.leading = this.naturalLeading;
     data.height = this.height;
+    data.weight = this.weight;
     return data;
   }
 

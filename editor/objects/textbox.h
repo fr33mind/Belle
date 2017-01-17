@@ -59,6 +59,9 @@ public:
     QString fontFamily();
     void setFontFamily(const QString&);
 
+    int fontWeight() const;
+    void setFontWeight(int);
+
     QString placeholderText() const;
     void setPlaceholderText(const QString&);
 
