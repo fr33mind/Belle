@@ -73,7 +73,7 @@ QString RunScript::displayText() const
     if (! mComment.isEmpty())
         return mComment;
     if (mScript.contains("\n")) {
-       QStringList lines = mScript.split("\n").mid(0, 3);
+       QStringList lines = mScript.split("\n");
        return lines.join("\n");
     }
     return mScript.mid(0, 20);

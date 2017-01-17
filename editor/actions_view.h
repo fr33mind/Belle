@@ -25,6 +25,7 @@
 
 #define BORDER 2
 #define ITEM_SELECTED_LINE_WIDTH 4
+#define MAX_ACTION_DISPLAY_LINES 3
 
 class ActionsModel;
 

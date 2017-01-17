@@ -130,6 +130,8 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
         int lineWidth = 0;
         int marginWidth = option.fontMetrics.width("...") + 2;
 
+        lines = lines.mid(0, MAX_ACTION_DISPLAY_LINES);
+
         for(int i=0; i < lines.size(); i++) {
             line = lines.at(i);
             lineWidth = option.fontMetrics.width(line);
@@ -143,6 +145,8 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
 
             lines[i] = line;
         }
+
+        lines.append("...");
 
         painter->drawText(textRect, Qt::TextWordWrap, lines.join("\n"), &textRect);
     }
