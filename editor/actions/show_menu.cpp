@@ -138,6 +138,9 @@ void ShowMenu::updateDisplayText()
         }
     }
 
+    if (options.size() > 3)
+        lines.append("...");
+
     setDisplayText(lines.join("\n"));
 }
 
