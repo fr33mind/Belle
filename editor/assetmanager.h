@@ -40,8 +40,8 @@ public:
     QList<int> fontsIds();
     void clear();
 
-    bool isNameUnique(const QString&, const QString&destPath="") const;
-    QString uniqueName(QString, const QString&destPath="") const;
+    bool isNameUnique(const QString&) const;
+    QString uniqueName(QString) const;
     QString absoluteFilePath(const QString&, Asset::Type=Asset::Unknown);
     void setLoadPath(const QString&);
 

@@ -196,26 +196,26 @@ ImageFile* AssetManager::image(const QString & name)
    return dynamic_cast<ImageFile*>(asset(name));
 }
 
-bool AssetManager::isNameUnique(const QString& name, const QString& destPath) const
+bool AssetManager::isNameUnique(const QString& name) const
 {
     if (name.isEmpty())
         return false;
 
     QList<Asset*> assets = mAssets.keys();
     for(int i=0; i < assets.size(); i++)
-        if (assets[i]->name() == name && mTypeToPath.value(assets[i]->type(), "") == destPath)
+        if (assets[i]->name() == name)
             return false;
 
     return true;
 }
 
 
-QString AssetManager::uniqueName(QString name, const QString& destPath) const
+QString AssetManager::uniqueName(QString name) const
 {
     if (name.isEmpty() || name.isNull())
         name = "asset";
 
-    while(! isNameUnique(name, destPath))
+    while(! isNameUnique(name))
         name = Utils::incrementFileName(name);
 
     return name;
@@ -424,9 +424,8 @@ void AssetManager::clear()
 
 void AssetManager::addAsset(Asset * asset, Asset::Type type)
 {
-    QString destPath = mTypeToPath.value(type, "");
-    if (asset && ! isNameUnique(asset->name(), destPath))
-        asset->setName(uniqueName(asset->name(), destPath));
+    if (asset && ! isNameUnique(asset->name()))
+        asset->setName(uniqueName(asset->name()));
 
     mAssets.insert(asset, 1);
 }
