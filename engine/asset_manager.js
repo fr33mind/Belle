@@ -132,7 +132,7 @@
     }
     else if (type == "font") {
       asset = data;
-      this.assetLoaded(asset);
+      this._loadFont(asset);
     }
 
     if (asset) {
@@ -141,6 +141,25 @@
     }
 
     return asset;
+  }
+
+  AssetManager.prototype._loadFont = function(data)
+  {
+    var _data = {},
+        self = this;
+
+    if (data.fontWeight)
+      _data.weight = data.fontWeight;
+    if (data.fontStyle)
+      _data.style = data.fontStyle;
+
+    var font = new FontFaceObserver(data.fontFamily, _data);
+
+    font.load().then(function () {
+      self.assetLoaded(data);
+    }, function () {
+      self.assetLoaded(data);
+    });
   }
 
   AssetManager.prototype.releaseAsset = function(asset)
