@@ -97,9 +97,14 @@
   {
     var self = this,
         asset = null,
-        path = data.path ? data.path : data.name ? data.name : "";
+        name = data.name,
+        path = data.path;
 
     type = typeof type == "string" ?  type.toLowerCase() : "";
+
+    if (!path) {
+      path = this.getFilePath(name, type);
+    }
 
     if (type == "image") {
       if ("frames" in data) {
