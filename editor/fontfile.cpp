@@ -8,6 +8,11 @@ FontFile::FontFile(const QString& path) :
     mId = QFontDatabase::addApplicationFont(path);
 }
 
+FontFile::~FontFile()
+{
+    QFontDatabase::removeApplicationFont(mId);
+}
+
 int FontFile::id() const
 {
     return mId;

@@ -7,6 +7,7 @@ class FontFile : public Asset
 {
 public:
     FontFile(const QString&);
+    virtual ~FontFile();
     int id() const;
     virtual bool isNull() const;
     QStringList fontFamilies() const;
