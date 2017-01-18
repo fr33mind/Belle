@@ -372,9 +372,6 @@ void AssetManager::save(const QDir & dir, bool toProject)
 
 void AssetManager::saveFontFaces(const QList<Asset*>& fonts, const QDir& dir)
 {
-    if (fonts.isEmpty())
-        return;
-
     QString fontfaces(FONTFACES_FILE);
     QFile file(dir.absoluteFilePath(fontfaces));
     if (! file.open(QFile::WriteOnly | QFile::Text))
