@@ -232,10 +232,13 @@ void ComboBox::onRemoveItem(int index)
     if (index < 0)
         return;
 
-    emit itemRemoved(index);
-    emit itemRemoved(itemText(index));
+    QString text = itemText(index);
 
     removeItem(index);
+
+    emit itemRemoved(index);
+    emit itemRemoved(text);
+
     if (count() == 1)
         clear();
 
