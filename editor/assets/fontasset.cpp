@@ -1,6 +1,7 @@
 #include "fontasset.h"
 
 #include "fontfile.h"
+#include "fontlibrary.h"
 
 FontAsset::FontAsset() :
     MultiSourceAsset(MultiSourceAsset::Font)
@@ -49,6 +50,11 @@ FontAsset::FontAsset(const QVariantMap& data) :
         setFontFamily(fontfile->fontFamily());
         setFontId(fontfile->id());
     }
+}
+
+FontAsset::~FontAsset()
+{
+    FontLibrary::removeFontSubstitutions(fontFamily());
 }
 
 void FontAsset::init()

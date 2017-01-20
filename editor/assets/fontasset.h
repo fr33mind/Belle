@@ -12,6 +12,7 @@ public:
     explicit FontAsset();
     FontAsset(const QString&);
     FontAsset(const QVariantMap&);
+    virtual ~FontAsset();
 
     int fontId() const;
     FontFile* mainFontFile() const;
