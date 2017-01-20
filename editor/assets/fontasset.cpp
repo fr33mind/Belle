@@ -138,6 +138,8 @@ QStringList FontAsset::fallbacks() const
 void FontAsset::setFallback(const QString & fallback)
 {
     mFallback = fallback;
+    FontLibrary::removeFontSubstitutions(mFontFamily);
+    FontLibrary::insertFontSubstitutions(mFontFamily, fallbacks());
 }
 
 QString FontAsset::genericFontFamily() const
