@@ -26,6 +26,7 @@ public:
     void setFontStyle(const QString&);
 
     QString fallback() const;
+    QStringList fallbacks() const;
     void setFallback(const QString&);
 
     QString genericFontFamily() const;

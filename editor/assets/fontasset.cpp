@@ -91,7 +91,12 @@ QString FontAsset::fontFamily() const
 
 void FontAsset::setFontFamily(const QString & family)
 {
+    if (mFontFamily == family)
+        return;
+
+    FontLibrary::removeFontSubstitutions(mFontFamily);
     mFontFamily = family;
+    FontLibrary::insertFontSubstitutions(mFontFamily, fallbacks());
 }
 
 QString FontAsset::fontWeight() const
@@ -117,6 +122,17 @@ void FontAsset::setFontStyle(const QString & style)
 QString FontAsset::fallback() const
 {
     return mFallback;
+}
+
+QStringList FontAsset::fallbacks() const
+{
+    QStringList fallbacks;
+    QStringList parts = mFallback.split(",", QString::SkipEmptyParts);
+    foreach(const QString& part, parts) {
+        if (!part.trimmed().isEmpty())
+            fallbacks.append(part.trimmed());
+    }
+    return fallbacks;
 }
 
 void FontAsset::setFallback(const QString & fallback)
