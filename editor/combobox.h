@@ -25,6 +25,7 @@
 #include <QStandardItemModel>
 
 #define INVALID_DATA "__INVALID__"
+#define ITEM_REMOVABLE_ROLE Qt::UserRole+1
 
 class QStandardItemModel;
 
@@ -79,6 +80,7 @@ public:
     void setDefaultText(const QString&);
     QString defaultText() const;
     virtual void wheelEvent(QWheelEvent *);
+    void setItemRemovable(int, bool);
 
 signals:
     void itemRemoved(int);

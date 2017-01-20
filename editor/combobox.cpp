@@ -47,7 +47,12 @@ void ComboBoxItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
         QStyleOptionViewItemV4 optionIcon(option);
         optionIcon.rect.setX(option.rect.width()-height);
         optionIcon.rect.setWidth(height);
-        mDeleteIcon.paint(painter, optionIcon.rect);
+        bool showDelIcon = true;
+        QVariant removable = index.data(ITEM_REMOVABLE_ROLE);
+        if (removable.type() == QVariant::Bool)
+            showDelIcon = removable.toBool();
+        if (showDelIcon)
+            mDeleteIcon.paint(painter, optionIcon.rect);
     }
 }
 
@@ -149,8 +154,12 @@ bool ComboBoxItemDelegate::mouseReleased(QEvent * event)
     QAbstractItemModel* model = mCombo->model();
     QMouseEvent *ev = static_cast<QMouseEvent*>(event);
     QModelIndex index = mCombo->view()->indexAt(ev->pos());
+    QVariant removable = index.data(ITEM_REMOVABLE_ROLE);
+    bool remove = true;
+    if (removable.type() == QVariant::Bool)
+        remove = removable.toBool();
 
-    if (mLastIndex == index && model && index.data(Qt::UserRole).toString() != INVALID_DATA) {
+    if (remove && mLastIndex == index && model && index.data(Qt::UserRole).toString() != INVALID_DATA) {
         QStyleOptionMenuItem opt = getStyleOption(mLastStyleOption, index);
         int height = opt.rect.height();
         if (ev->x() >= opt.rect.width()-height) {
@@ -269,4 +278,9 @@ void ComboBox::clear()
    QComboBox::addItem(mDefaultText, INVALID_DATA);
    QComboBox::addItem(QIcon(":/media/add.png"), tr("Add More"), INVALID_DATA);
    setCurrentIndex(0);
+}
+
+void ComboBox::setItemRemovable(int index, bool removable)
+{
+    setItemData(index, removable, ITEM_REMOVABLE_ROLE);
 }
