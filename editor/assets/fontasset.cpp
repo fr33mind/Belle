@@ -189,3 +189,20 @@ QStringList FontAsset::supportedFormats()
     formats << "ttf" << "otf" << "woff" << "eot";
     return formats;
 }
+
+void FontAsset::sourceRemoved(Asset * asset)
+{
+    FontFile* fontSource = static_cast<FontFile*>(asset);
+    if (!fontSource)
+        return;
+
+    if (mFontId == fontSource->id()) {
+        setFontId(-1);
+        Asset* source = sourceAt(0);
+        if(source) {
+            fontSource = static_cast<FontFile*>(source);
+            setFontId(fontSource->id());
+            setFontFamily(fontSource->fontFamily());
+        }
+    }
+}

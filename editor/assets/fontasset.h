@@ -35,6 +35,9 @@ public:
 
     static QStringList supportedFormats();
 
+protected:
+    virtual void sourceRemoved(Asset *);
+
 private:
     QString mFontFamily;
     QString mFontWeight;

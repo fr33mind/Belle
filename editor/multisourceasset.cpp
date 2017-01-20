@@ -92,6 +92,7 @@ void MultiSourceAsset::removeSourceAt(int index)
 {
     if (index >= 0 && index < mSources.size()) {
         Asset* asset = mSources.takeAt(index);
+        sourceRemoved(asset);
         AssetManager::instance()->releaseAsset(asset);
     }
 }
@@ -191,4 +192,8 @@ QVariantMap MultiSourceAsset::toJsonObject()
 
     data.insert("sources", sources);
     return data;
+}
+
+void MultiSourceAsset::sourceRemoved(Asset * asset)
+{
 }

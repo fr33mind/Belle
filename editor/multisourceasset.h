@@ -33,6 +33,7 @@ public:
 
 protected:
     virtual bool doSave(const QDir&);
+    virtual void sourceRemoved(Asset*);
 
 private:
     QList<Asset*> mSources;
