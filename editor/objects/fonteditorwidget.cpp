@@ -6,7 +6,7 @@
 FontEditorWidget::FontEditorWidget(QWidget *parent) :
     GameObjectEditorWidget(parent)
 {
-    mFileComboBox = new FileComboBox(FileComboBox::SoundFilter, this);
+    mFileComboBox = new FileComboBox(FileComboBox::FontFilter, this);
     mFontFamilyEdit = new QLineEdit(this);
     mFontFamilyEdit->setReadOnly(true);
     mFontWeightsComboBox = new QComboBox(this);

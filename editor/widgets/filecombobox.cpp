@@ -1,5 +1,6 @@
 #include "filecombobox.h"
 #include "utils.h"
+#include "gameobjectmetatype.h"
 #include <QFileDialog>
 
 FileComboBox::FileComboBox(QWidget *parent) :
@@ -29,13 +30,20 @@ void FileComboBox::init()
 void FileComboBox::openFileChooser()
 {
     QString path;
+    QIcon icon;
 
     switch(mFileFilter) {
     case ImageFilter:
         path = FileDialogUtils::getOpenImageFileName(this);
+        icon = GameObjectMetaType::icon(GameObjectMetaType::Image);
         break;
     case SoundFilter:
         path = FileDialogUtils::getOpenSoundFileName(this);
+        icon = GameObjectMetaType::icon(GameObjectMetaType::Sound);
+        break;
+    case FontFilter:
+        path = FileDialogUtils::getOpenFontFileName(this);
+        icon = GameObjectMetaType::icon(GameObjectMetaType::Font);
         break;
     default:
         path = QFileDialog::getOpenFileName(this);
@@ -46,6 +54,6 @@ void FileComboBox::openFileChooser()
         return;
     }
 
-    addItem(QIcon(":/media/sound.png"), QFileInfo(path).fileName(), path);
+    addItem(icon, QFileInfo(path).fileName(), path);
     emit fileAdded(path);
 }

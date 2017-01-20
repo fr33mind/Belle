@@ -11,7 +11,8 @@ public:
     enum FileFilter {
         NoFilter,
         ImageFilter,
-        SoundFilter
+        SoundFilter,
+        FontFilter
     };
 
     explicit FileComboBox(QWidget *parent = 0);
