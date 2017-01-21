@@ -4,7 +4,6 @@
 #include <QFontDatabase>
 #include <QJsonDocument>
 #include <QJsonParseError>
-#include <QScopedPointer>
 
 #include "utils.h"
 #include "fontfile.h"
@@ -12,7 +11,6 @@
 #include "fontasset.h"
 
 static AssetManager* mInstance = new AssetManager();
-static QScopedPointer<AssetManager> mInstanceScopedPointer(mInstance);
 
 AssetManager::AssetManager()
 {
@@ -35,6 +33,12 @@ AssetManager::~AssetManager()
 AssetManager* AssetManager::instance()
 {
     return mInstance;
+}
+
+void AssetManager::destroy()
+{
+    if (mInstance)
+        delete mInstance;
 }
 
 void AssetManager::setLoadPath(const QString & path)

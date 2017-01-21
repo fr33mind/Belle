@@ -27,6 +27,7 @@ public:
     AssetManager();
     virtual ~AssetManager();
     static AssetManager* instance();
+    static void destroy();
     void load(const QDir&, bool fromProject=false);
     void save(const QDir&, bool toProject=false);
     Asset* asset(const QString&, Asset::Type type=Asset::Unknown) const;

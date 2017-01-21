@@ -308,6 +308,7 @@ Belle::~Belle()
     GameObjectFactory::destroy();
     ResourceManager::destroy();
     EditorWidgetFactory::destroy();
+    AssetManager::destroy();
     if (! mCurrentRunDirectory.isEmpty()) {
         QDir tmpdir(mCurrentRunDirectory);
         if (tmpdir.exists())
