@@ -70,6 +70,7 @@ void StopSound::setSound(Sound* sound)
 
     if (mSound) {
         connect(mSound, SIGNAL(destroyed()), this, SLOT(onSoundDestroyed()));
+        connect(mSound, SIGNAL(nameChanged(const QString&)), this, SLOT(onSoundNameChanged(const QString&)));
         name = mSound->name();
     }
 
@@ -111,4 +112,9 @@ QVariantMap StopSound::toJsonObject(bool internal) const
 void StopSound::onSoundDestroyed()
 {
     setSound(0);
+}
+
+void StopSound::onSoundNameChanged(const QString& name)
+{
+    setDisplayText(name);
 }

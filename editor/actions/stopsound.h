@@ -49,6 +49,7 @@ protected:
 
 private slots:
     void onSoundDestroyed();
+    void onSoundNameChanged(const QString&);
 
 private:
     void init();
