@@ -100,16 +100,19 @@ Asset* AssetManager::loadAsset(QString path, Asset::Type type)
 
     path = absoluteFilePath(path);
     Asset* asset = this->asset(path, type);
+
+    if (!asset) {
+        asset = _loadAsset(path, type);
+
+        if (asset && mFilesToRemove.contains(asset->path())) {
+            mFilesToRemove.remove(asset->path());
+            asset->setRemovable(true);
+        }
+    }
+
     if (asset) {
         int count = mAssets.value(asset, 0);
         mAssets.insert(asset, ++count);
-        return asset;
-    }
-
-    asset = _loadAsset(path, type);
-    if (asset && mFilesToRemove.contains(asset->path())) {
-        mFilesToRemove.remove(asset->path());
-        asset->setRemovable(true);
     }
 
     return asset;
@@ -159,18 +162,16 @@ Asset* AssetManager::_loadAsset(const QString& name, Asset::Type type)
 
 void AssetManager::releaseAsset(Asset* asset)
 {
-    if (! asset)
+    if (! asset || !mAssets.contains(asset))
         return;
 
     int count = mAssets.value(asset, 0);
-    if (count) {
-        --count;
-        if (count <= 0) {
-            removeAsset(asset);
-        }
-        else {
-            mAssets.insert(asset, count);
-        }
+    --count;
+    if (count <= 0) {
+        removeAsset(asset);
+    }
+    else {
+        mAssets.insert(asset, count);
     }
 }
 
@@ -313,11 +314,6 @@ void AssetManager::load(const QDir & dir, bool fromProject)
         if (asset && fromProject)
             asset->setRemovable(true);
     }
-
-    //reset reference counts
-    QList<Asset*> assets = mAssets.keys();
-    for(int i=0; i < assets.size(); i++)
-        mAssets[assets[i]] = 0;
 }
 
 void AssetManager::save(const QDir & dir, bool toProject)
@@ -428,5 +424,5 @@ void AssetManager::addAsset(Asset * asset, Asset::Type type)
     if (asset && ! isNameUnique(asset->name()))
         asset->setName(uniqueName(asset->name()));
 
-    mAssets.insert(asset, 1);
+    mAssets.insert(asset, 0);
 }
