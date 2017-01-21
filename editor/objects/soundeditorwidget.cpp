@@ -25,6 +25,8 @@ void SoundEditorWidget::updateData(GameObject* obj)
     foreach(Asset* asset, sound->assets()) {
         mFileComboBox->addItem(GameObjectMetaType::icon(GameObjectMetaType::Sound), asset->name(), asset->path());
     }
+
+    updateFileComboBoxFirstItem();
 }
 
 void SoundEditorWidget::onFileAdded(const QString & path)
@@ -34,6 +36,7 @@ void SoundEditorWidget::onFileAdded(const QString & path)
         return;
 
     sound->addFile(path);
+    updateFileComboBoxFirstItem();
 }
 
 void SoundEditorWidget::onItemRemoved(int index)
@@ -43,4 +46,13 @@ void SoundEditorWidget::onItemRemoved(int index)
         return;
 
     sound->removeAssetAt(index);
+    updateFileComboBoxFirstItem();
+}
+
+void SoundEditorWidget::updateFileComboBoxFirstItem()
+{
+    if (mFileComboBox->count() == 2)
+        mFileComboBox->setItemRemovable(0, false);
+    else if (mFileComboBox->count() > 2)
+        mFileComboBox->setItemRemovable(0, true);
 }

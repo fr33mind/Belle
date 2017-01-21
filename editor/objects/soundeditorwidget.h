@@ -22,6 +22,8 @@ private slots:
 private:
     FileComboBox* mFileComboBox;
 
+    void updateFileComboBoxFirstItem();
+
 };
 
 #endif // SOUNDEDITORWIDGET_H
