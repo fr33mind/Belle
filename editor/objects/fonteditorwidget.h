@@ -38,6 +38,7 @@ private:
     void setupFontWeights(QComboBox*);
     void setupFontStyles(QComboBox*);
     void setupGenericFontFamilies(QComboBox*);
+    void updateFileComboBoxFirstItem();
 
 };
 

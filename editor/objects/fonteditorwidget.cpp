@@ -56,6 +56,8 @@ void FontEditorWidget::updateData(GameObject* obj)
         }
     }
 
+    updateFileComboBoxFirstItem();
+
     mFontFamilyEdit->setText(fontAsset->fontFamily());
 
     int index = mFontWeightsComboBox->findData(fontAsset->fontWeight());
@@ -153,4 +155,10 @@ void FontEditorWidget::onGenericFontFamilyChanged(int index)
     FontAsset* fontAsset = currentFontAsset();
     if (fontAsset)
         fontAsset->setGenericFontFamily(mGenericFontFamiliesComboBox->itemData(index).toString());
+}
+
+void FontEditorWidget::updateFileComboBoxFirstItem()
+{
+    if (mFileComboBox->count() == 2)
+        mFileComboBox->setItemRemovable(0, false);
 }
