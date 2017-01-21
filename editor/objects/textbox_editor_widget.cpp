@@ -117,9 +117,12 @@ void TextPropertiesWidget::updateData(GameObject* obj)
 
     mTextEdit->setText(textbox->text());
     mColorButton->setColor(textbox->textColor());
-    mChooseFontWidget->setCurrentText(textbox->fontFamily());
+
+    int index = mChooseFontWidget->findText(textbox->fontFamily());
+    mChooseFontWidget->setCurrentIndex(index);
+
     mFontSizeSpin->setValue(textbox->fontSize());
-    int index = mFontWeightsComboBox->findData(textbox->fontWeight());
+    index = mFontWeightsComboBox->findData(textbox->fontWeight());
     mFontWeightsComboBox->setCurrentIndex(index);
 
     index = mFontStylesComboBox->findData(textbox->fontStyle());
