@@ -50,7 +50,7 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
     beginGroup("Text");
     appendRow(tr("Text"), mTextEdit);
     appendRow(tr("Color"), mColorButton);
-    appendRow(tr("Font"), mChooseFontWidget);
+    appendRow(tr("Font family"), mChooseFontWidget);
     appendRow(tr("Font size"), mFontSizeSpin);
     appendRow(tr("Font weight"), mFontWeightsComboBox);
     appendRow(tr("Font style"), mFontStylesComboBox);
