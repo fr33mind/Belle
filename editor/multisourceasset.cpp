@@ -197,3 +197,11 @@ QVariantMap MultiSourceAsset::toJsonObject()
 void MultiSourceAsset::sourceRemoved(Asset * asset)
 {
 }
+
+void MultiSourceAsset::removableChanged(bool removable)
+{
+    foreach(Asset* src, mSources) {
+        if (src)
+            src->setRemovable(removable);
+    }
+}

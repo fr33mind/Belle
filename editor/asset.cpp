@@ -79,6 +79,7 @@ bool Asset::isRemovable() const
 void Asset::setRemovable(bool removable)
 {
     mRemovable = removable;
+    removableChanged(removable);
 }
 
 bool Asset::remove()
@@ -86,4 +87,8 @@ bool Asset::remove()
     if (isRemovable() && QFile::exists(mPath))
         return QFile::remove(mPath);
     return false;
+}
+
+void Asset::removableChanged(bool removable)
+{
 }

@@ -37,6 +37,7 @@ public:
 
 protected:
     virtual bool doSave(const QDir&);
+    virtual void removableChanged(bool);
 
 private:
     void init();

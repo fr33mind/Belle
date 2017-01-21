@@ -34,6 +34,7 @@ public:
 protected:
     virtual bool doSave(const QDir&);
     virtual void sourceRemoved(Asset*);
+    virtual void removableChanged(bool);
 
 private:
     QList<Asset*> mSources;
