@@ -1475,7 +1475,7 @@ void Belle::loadEmptyProject()
     data.insert("height", HEIGHT);
     data.insert("textSpeed", 50);
     data.insert("fontSize", 18);
-    data.insert("fontFamily", QFontInfo(QFont()).family());
+    data.insert("fontFamily", "Arial");
     setNovelProperties(data);
 
     bool loaded = loadDefaultGame();
