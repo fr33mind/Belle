@@ -147,7 +147,8 @@ HEADERS      += belle.h\
     assets/fontasset.h \
     objects/font.h \
     objects/fonteditorwidget.h \
-    fontlibrary.h
+    fontlibrary.h \
+    actions/actionmetatype.h
                 
 
 SOURCES      += main.cpp\
@@ -277,6 +278,7 @@ SOURCES      += main.cpp\
     assets/fontasset.cpp \
     objects/font.cpp \
     objects/fonteditorwidget.cpp \
-    fontlibrary.cpp
+    fontlibrary.cpp \
+    actions/actionmetatype.cpp
 
 RESOURCES += media.qrc

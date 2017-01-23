@@ -2,6 +2,8 @@
 
 #include <QHash>
 
+#include "actionmetatype.h"
+
 static QHash<GameObjectMetaType::Type, GameObjectMetaType*> mGameObjectMetaTypes;
 
 GameObjectMetaType::GameObjectMetaType(GameObjectMetaType::Type type, const QString& typeString,
@@ -81,6 +83,8 @@ void GameObjectMetaType::init()
     mGameObjectMetaTypes.insert(RunScript, new GameObjectMetaType(RunScript, "RunScript", tr("Run Script"), QIcon(":/media/script.png")));
     mGameObjectMetaTypes.insert(ChangeState, new GameObjectMetaType(ChangeState, "ChangeState", tr("Change State"), QIcon(":/media/user-group.png")));
     mGameObjectMetaTypes.insert(End, new GameObjectMetaType(End, "End", tr("End"), QIcon(":/media/end-novel.png")));
+
+    ActionMetaType::init();
 }
 
 void GameObjectMetaType::destroy()
