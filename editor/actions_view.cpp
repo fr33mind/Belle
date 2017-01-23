@@ -109,7 +109,10 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
         int lineWidth = 0;
         int marginWidth = option.fontMetrics.width("...") + 2;
 
-        lines = lines.mid(0, MAX_ACTION_DISPLAY_LINES);
+        if (lines.size() > MAX_ACTION_DISPLAY_LINES) {
+            lines = lines.mid(0, MAX_ACTION_DISPLAY_LINES);
+            lines.append("...");
+        }
 
         for(int i=0; i < lines.size(); i++) {
             line = lines.at(i);
@@ -124,8 +127,6 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
 
             lines[i] = line;
         }
-
-        lines.append("...");
 
         painter->drawText(textRect, Qt::TextWordWrap, lines.join("\n"), &textRect);
     }
@@ -146,9 +147,22 @@ QSize ActionsViewDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
     int height = 1; //start at 1 for the bottom border
 
     height += option.fontMetrics.size(0, action->name()).height() + BORDER*2;
+
     QString displayText = action->displayText();
-    if (! displayText.isEmpty())
-        height += option.fontMetrics.size(0, displayText).height() + BORDER;
+    if (! displayText.isEmpty()) {
+        QStringList lines = displayText.split("\n");
+
+        if (lines.size() > MAX_ACTION_DISPLAY_LINES) {
+            lines = lines.mid(0, MAX_ACTION_DISPLAY_LINES);
+            lines.append("...");
+        }
+
+        foreach(const QString& line, lines) {
+            height += option.fontMetrics.size(Qt::TextSingleLine, line).height();
+        }
+
+        height += BORDER;
+    }
 
     size.setHeight(height);
 
