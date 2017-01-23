@@ -305,6 +305,12 @@ void Belle::restoreSettings()
 
 Belle::~Belle()
 {
+    if (mDefaultSceneManager)
+        delete mDefaultSceneManager;
+
+    if (mPauseSceneManager)
+        delete mPauseSceneManager;
+
     GameObjectFactory::destroy();
     ResourceManager::destroy();
     EditorWidgetFactory::destroy();
