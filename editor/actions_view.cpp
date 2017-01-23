@@ -35,6 +35,7 @@
 #include "belle.h"
 #include "gameobjectfactory.h"
 #include "mimedata.h"
+#include "actionmetatype.h"
 
 ActionsViewDelegate::ActionsViewDelegate(QObject* parent) :
     QStyledItemDelegate(parent)
@@ -60,59 +61,28 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
         return;
 
     QRect rect = option.rect;
-    QRect textRect = option.rect;
-    rect.setWidth(rect.width()-1);
+    QRect textRect = rect;
     textRect.setX(BORDER);
-    QSize size(option.rect.width(), option.rect.height());
+    textRect.setY(textRect.y()+BORDER);
+    QColor textColor(83, 83, 83);
 
-    QPointF startPoint (size.width()/2, 0);
-    QPointF endPoint (size.width()/2, rect.y() + size.height());
-    QLinearGradient linearGradient(startPoint, endPoint);
-    linearGradient.setColorAt(0, QColor(255, 0, 0, 100));
-    linearGradient.setColorAt(1, Qt::white);
-
-    painter->save();
-    painter->setBrush(QBrush(linearGradient));
-    painter->drawRoundedRect(rect, 4, 4);
-    painter->restore();
+    painter->fillRect(rect, ActionMetaType::color(action));
 
     if (option.state.testFlag(QStyle::State_Selected)) {
-        painter->save();
-        painter->setBrush(option.palette.brush(QPalette::Highlight));
-        painter->drawRoundedRect(rect, 4, 4);
-        painter->restore();
+        painter->fillRect(rect, option.palette.brush(QPalette::Highlight));
+        textColor = option.palette.highlightedText().color();
     }
 
     if (option.state.testFlag(QStyle::State_MouseOver)) {
-        painter->save();
-        //QPen pen(option.palette.brush(QPalette::Highlight), ITEM_SELECTED_LINE_WIDTH);
-        //painter->setPen(pen);
-        //painter->setBrush(QBrush());
-        QBrush brush(option.palette.brush(QPalette::Highlight));
-        QColor color = brush.color();
-        int inc = 40;
-        if (color.red()+inc < 255)
-            color.setRed(color.red()+inc);
-        else
-            color.setRed(255);
-
-        if (color.green()+inc < 255)
-            color.setGreen(color.green()+inc);
-        else
-            color.setGreen(255);
-
-        if (color.blue()+inc < 255)
-            color.setBlue(color.blue()+inc);
-        else
-            color.setBlue(255);
-
-        color.setAlpha(100);
-
-        brush.setColor(color);
-        painter->setBrush(brush);
-        painter->drawRoundedRect(rect, 4, 4);
-        painter->restore();
+        //TODO: Show light selection color when dragging.
     }
+
+    painter->save();
+    QPen pen = painter->pen();
+    pen.setBrush(option.palette.base());
+    painter->setPen(pen);
+    painter->drawLine(rect.bottomLeft(), rect.bottomRight());
+    painter->restore();
 
     const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
     const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
@@ -120,8 +90,17 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
     typeIcon.paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
 
     textRect.setX(textHeight+BORDER*2);
+    pen = painter->pen();
+    pen.setColor(textColor);
+    painter->setPen(pen);
+    QFont font = painter->font();
+    font.setBold(true);
+    painter->setFont(font);
     painter->drawText(textRect, action->title());
     QString displayText = action->displayText();
+
+    font.setBold(false);
+    painter->setFont(font);
 
     if (! displayText.isEmpty()) {
         textRect.setY(textRect.y() + textHeight);
@@ -164,9 +143,9 @@ QSize ActionsViewDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
     if (! action)
         return size;
 
-    int height = 0;
+    int height = 1; //start at 1 for the bottom border
 
-    height += option.fontMetrics.size(0, action->name()).height() + BORDER;
+    height += option.fontMetrics.size(0, action->name()).height() + BORDER*2;
     QString displayText = action->displayText();
     if (! displayText.isEmpty())
         height += option.fontMetrics.size(0, displayText).height() + BORDER;
