@@ -1,32 +1,37 @@
  // ----------------------------------------------------------------------------
  // Buzz, a Javascript HTML5 Audio library
- // v1.1.0 - released 2013-08-15 13:18
+ // v1.2.0 - Built 2016-05-22 15:16
  // Licensed under the MIT license.
  // http://buzz.jaysalvat.com/
  // ----------------------------------------------------------------------------
- // Copyright (C) 2010-2013 Jay Salvat
+ // Copyright (C) 2010-2016 Jay Salvat
  // http://jaysalvat.com/
  // ----------------------------------------------------------------------------
 
-(function(name, context, factory) {
+(function(context, factory) {
+    "use strict";
     if (typeof module !== "undefined" && module.exports) {
         module.exports = factory();
-    } else if (typeof context.define === "function" && context.define.amd) {
-        define(name, [], factory);
+    } else if (typeof define === "function" && define.amd) {
+        define([], factory);
     } else {
-        context[name] = factory();
+        context.buzz = factory();
     }
-})("buzz", this, function() {
+})(this, function() {
+    "use strict";
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
     var buzz = {
         defaults: {
             autoplay: false,
+            crossOrigin: null,
             duration: 5e3,
             formats: [],
             loop: false,
             placeholder: "--",
             preload: "metadata",
             volume: 80,
-            document: document
+            webAudioApi: false,
+            document: window.document
         },
         types: {
             mp3: "audio/mpeg",
@@ -37,6 +42,16 @@
         },
         sounds: [],
         el: document.createElement("audio"),
+        getAudioContext: function() {
+            if (this.audioCtx === undefined) {
+                try {
+                    this.audioCtx = AudioContext ? new AudioContext() : null;
+                } catch (e) {
+                    this.audioCtx = null;
+                }
+            }
+            return this.audioCtx;
+        },
         sound: function(src, options) {
             options = options || {};
             var doc = options.document || buzz.defaults.document;
@@ -361,7 +376,7 @@
                     var idx = types[t], type = idx.split(".")[0];
                     for (var i = 0; i < events.length; i++) {
                         var namespace = events[i].idx.split(".");
-                        if (events[i].idx == idx || namespace[1] && namespace[1] == idx.replace(".", "")) {
+                        if (events[i].idx === idx || namespace[1] && namespace[1] === idx.replace(".", "")) {
                             this.sound.removeEventListener(type, events[i].func, true);
                             events.splice(i, 1);
                         }
@@ -384,7 +399,7 @@
                 });
                 return this;
             };
-            this.trigger = function(types) {
+            this.trigger = function(types, detail) {
                 if (!supported) {
                     return this;
                 }
@@ -393,9 +408,10 @@
                     var idx = types[t];
                     for (var i = 0; i < events.length; i++) {
                         var eventType = events[i].idx.split(".");
-                        if (events[i].idx == idx || eventType[0] && eventType[0] == idx.replace(".", "")) {
+                        if (events[i].idx === idx || eventType[0] && eventType[0] === idx.replace(".", "")) {
                             var evt = doc.createEvent("HTMLEvents");
                             evt.initEvent(eventType[0], false, true);
+                            evt.originalEvent = detail;
                             this.sound.dispatchEvent(evt);
                         }
                     }
@@ -412,10 +428,11 @@
                 } else {
                     duration = duration || buzz.defaults.duration;
                 }
-                var from = this.volume, delay = duration / Math.abs(from - to), self = this;
+                var from = this.volume, delay = duration / Math.abs(from - to), self = this, fadeToTimeout;
                 this.play();
                 function doFade() {
-                    setTimeout(function() {
+                    clearTimeout(fadeToTimeout);
+                    fadeToTimeout = setTimeout(function() {
                         if (from < to && self.volume < to) {
                             self.setVolume(self.volume += 1);
                             doFade();
@@ -467,6 +484,18 @@
                     func.call(self);
                 }
             };
+            this.addSource = function(src) {
+                var self = this, source = doc.createElement("source");
+                source.src = src;
+                if (buzz.types[getExt(src)]) {
+                    source.type = buzz.types[getExt(src)];
+                }
+                this.sound.appendChild(source);
+                source.addEventListener("error", function(e) {
+                    self.trigger("sourceerror", e);
+                });
+                return source;
+            };
             function timerangeToArray(timeRange) {
                 var array = [], length = timeRange.length - 1;
                 for (var i = 0; i <= length; i++) {
@@ -480,35 +509,39 @@
             function getExt(filename) {
                 return filename.split(".").pop();
             }
-            function addSource(sound, src) {
-                var source = doc.createElement("source");
-                source.src = src;
-                if (buzz.types[getExt(src)]) {
-                    source.type = buzz.types[getExt(src)];
-                }
-                sound.appendChild(source);
-            }
             if (supported && src) {
                 for (var i in buzz.defaults) {
                     if (buzz.defaults.hasOwnProperty(i)) {
-                        options[i] = options[i] || buzz.defaults[i];
+                        if (options[i] === undefined) {
+                            options[i] = buzz.defaults[i];
+                        }
                     }
                 }
                 this.sound = doc.createElement("audio");
+                if (options.crossOrigin !== null) {
+                    this.sound.crossOrigin = options.crossOrigin;
+                }
+                if (options.webAudioApi) {
+                    var audioCtx = buzz.getAudioContext();
+                    if (audioCtx) {
+                        this.source = audioCtx.createMediaElementSource(this.sound);
+                        this.source.connect(audioCtx.destination);
+                    }
+                }
                 if (src instanceof Array) {
                     for (var j in src) {
                         if (src.hasOwnProperty(j)) {
-                            addSource(this.sound, src[j]);
+                            this.addSource(src[j]);
                         }
                     }
                 } else if (options.formats.length) {
                     for (var k in options.formats) {
                         if (options.formats.hasOwnProperty(k)) {
-                            addSource(this.sound, src + "." + options.formats[k]);
+                            this.addSource(src + "." + options.formats[k]);
                         }
                     }
                 } else {
-                    addSource(this.sound, src);
+                    this.addSource(src);
                 }
                 if (options.loop) {
                     this.loop();
@@ -542,7 +575,7 @@
                 soundArray = argsToArray(soundArray, arguments);
                 for (var a = 0; a < soundArray.length; a++) {
                     for (var i = 0; i < sounds.length; i++) {
-                        if (sounds[i] == soundArray[a]) {
+                        if (sounds[i] === soundArray[a]) {
                             sounds.splice(i, 1);
                             break;
                         }
@@ -599,6 +632,10 @@
             };
             this.unloop = function() {
                 fn("unloop");
+                return this;
+            };
+            this.setSpeed = function(speed) {
+                fn("setSpeed", speed);
                 return this;
             };
             this.setTime = function(time) {
@@ -677,10 +714,10 @@
         },
         fromTimer: function(time) {
             var splits = time.toString().split(":");
-            if (splits && splits.length == 3) {
+            if (splits && splits.length === 3) {
                 time = parseInt(splits[0], 10) * 3600 + parseInt(splits[1], 10) * 60 + parseInt(splits[2], 10);
             }
-            if (splits && splits.length == 2) {
+            if (splits && splits.length === 2) {
                 time = parseInt(splits[0], 10) * 60 + parseInt(splits[1], 10);
             }
             return time;
