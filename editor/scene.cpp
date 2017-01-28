@@ -105,6 +105,9 @@ void Scene::init(const QString& name)
     setType(GameObjectMetaType::Scene);
     //mScenePixmap = new QPixmap(Scene::width(), Scene::height());
     //mScenePixmap->fill(Qt::gray);
+    mActionManager = new GameObjectManager(this);
+    mActionManager->setUniqueNames(false);
+    mActionManager->setAllowEmptyNames(true);
 
     this->setName(name);
 }
@@ -516,8 +519,9 @@ Object* Scene::highlightedObject()
 
 void Scene::removeActionAt(int index , bool del)
 {
-    if (index >= 0 && index < mActions.size()) {
-        Action * action = mActions.takeAt(index);
+    if (index >= 0 && index < mActionManager->size()) {
+        GameObject* obj = mActionManager->takeAt(index);
+        Action* action = qobject_cast<Action*>(obj);
         emit actionRemoved(action);
         emit actionRemoved(index);
 
@@ -530,22 +534,27 @@ void Scene::removeAction(Action* action, bool del)
 {
     if (! action)
         return;
-    removeActionAt(mActions.indexOf(action), del);
+    removeActionAt(mActionManager->indexOf(action), del);
 }
 
 QList<Action*> Scene::actions() const
 {
-    return mActions;
-}
+    QList<GameObject*> objects = mActionManager->objects();
+    QList<Action*> actions;
+    Action* action = 0;
 
-void Scene::setActions(const QList<Action *> & actions)
-{
-    mActions = actions;
+    foreach(GameObject* obj, objects) {
+        action = qobject_cast<Action*>(obj);
+        if (action)
+            actions.append(action);
+    }
+
+    return actions;
 }
 
 void Scene::appendAction(Action * action, bool copy)
 {
-    insertAction(mActions.size(), action, copy);
+    insertAction(mActionManager->size(), action, copy);
 }
 
 void Scene::insertAction(int row, Action* action, bool copy)
@@ -557,15 +566,14 @@ void Scene::insertAction(int row, Action* action, bool copy)
         action = GameObjectFactory::createAction(action->toJsonObject(), this);
     else
         action->setParent(this);
-    mActions.insert(row, action);
+    mActionManager->insert(row, action);
     emit actionInserted(row, action);
 }
 
 Action* Scene::actionAt(int i) const
 {
-    if (i >= 0 && i < mActions.size())
-        return mActions.at(i);
-    return 0;
+    GameObject* obj = mActionManager->objectAt(i);
+    return qobject_cast<Action*>(obj);
 }
 
 QIcon Scene::icon()
@@ -607,8 +615,8 @@ QVariantMap Scene::toJsonObject(bool internal)
     scene.insert("objects", objects);
 
     QVariantList actions;
-    for(int i=0; i < mActions.size(); i++) {
-        actions.append(mActions[i]->toJsonObject(internal));
+    for(int i=0; i < mActionManager->size(); i++) {
+        actions.append(mActionManager->objectAt(i)->toJsonObject(internal));
     }
 
     scene.insert("actions", actions);
@@ -743,8 +751,13 @@ int Scene::indexOf(GameObject* obj)
         return mObjectManager.indexOf(obj);
     }
     else if (qobject_cast<Action*>(obj)) {
-        return mActions.indexOf(qobject_cast<Action*>(obj));
+        return mActionManager->indexOf(qobject_cast<Action*>(obj));
     }
 
     return -1;
+}
+
+GameObjectManager* Scene::actionManager() const
+{
+    return mActionManager;
 }

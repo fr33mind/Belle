@@ -38,7 +38,7 @@ class Scene : public GameObject
     
     GameObjectManager mObjectManager;
     GameObjectManager mTemporaryObjectManager;
-    QList<Action*> mActions;
+    GameObjectManager* mActionManager;
     Object * mSelectedObject;
     Object* mHighlightedObject;
     ImageFile *mBackgroundImage;
@@ -93,12 +93,12 @@ class Scene : public GameObject
         void resize(int, int, bool, bool);
 
         void insertAction(int, Action*, bool copy=false);
-        void setActions(const QList<Action*>&);
         void removeActionAt(int, bool del=false);
         void removeAction(Action*, bool del=false);
         QList<Action*> actions() const;
         void appendAction(Action*, bool copy=false);
         Action* actionAt(int) const;
+        GameObjectManager* actionManager() const;
 
         int indexOf(GameObject*);
 
