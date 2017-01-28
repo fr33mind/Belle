@@ -397,9 +397,7 @@ void Belle::updateActions()
 
     Scene* currScene = currentScene();
     if (currScene) {
-        model->setCurrentScene(currScene);
-        connect(currScene, SIGNAL(actionInserted(int, Action*)), model, SLOT(insertAction(int, Action*)), Qt::UniqueConnection);
-        connect(currScene, SIGNAL(actionRemoved(int)), model, SLOT(removeAction(int)), Qt::UniqueConnection);
+        model->setActionManager(currScene->actionManager());
     }
 }
 
@@ -690,13 +688,7 @@ void Belle::showActionEditorWidget(Action* action)
 
 void Belle::onNewAction(Action * action)
 {
-    Scene* scene = currentScene();
-    if (scene) {
-        mActionsView->addActionItem(action);
-    }
-    else if (action) {
-        delete action;
-    }
+    mActionsView->addActionItem(action);
 }
 
 void Belle::switchWidgetInPropertiesWidget(QWidget* widget)

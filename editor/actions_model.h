@@ -19,14 +19,16 @@
 
 #include <QStandardItemModel>
 #include "action.h"
+#include "gameobjectmanager.h"
+
+class GameObjectManager;
 
 class ActionsModel : public QStandardItemModel
 {
     Q_OBJECT
 
     Action* mCurrentAction;
-    QList<Action*> mActions;
-    Scene* mCurrentScene;
+    GameObjectManager* mActionManager;
 
 public:
     explicit ActionsModel(QObject *parent = 0);
@@ -37,26 +39,35 @@ public:
     virtual bool dropMimeData ( const QMimeData *, Qt::DropAction, int, int, const QModelIndex &);
     virtual QMimeData* mimeData( const QModelIndexList & ) const;
     virtual QStringList mimeTypes() const;
-    Scene* currentScene() const;
-    void setCurrentScene(Scene*);
     void clear();
     void setCurrentAction(Action*);
     Action* currentAction() const;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
+    GameObjectManager* actionManager() const;
+    void setActionManager(GameObjectManager*);
+
+protected:
+    void appendActionRow(Action*);
+    void insertActionRow(int, Action*);
+    void loadActionRows();
+
 signals:
+    void actionRemoved(int);
+    void actionInserted(int, Action*);
 
 public slots:
     void appendAction(Action*);
-    void removeAction(int);
+    void removeAction(int, bool del=false);
+    void removeAction(Action*, bool del=false);
     void insertAction(int, Action*);
     void setCurrentIndex(const QModelIndex&);
 
 private slots:
     void updateView();
     void onCurrentActionDestroyed();
-    void onCurrentSceneDestroyed();
     void onItemChanged(QStandardItem*);
+    void onActionManagerDestroyed();
 
 private:
     void updateItemAt(int);

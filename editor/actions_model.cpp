@@ -24,7 +24,7 @@ ActionsModel::ActionsModel(QObject *parent) :
     QStandardItemModel(parent)
 {
     mCurrentAction = 0;
-    mCurrentScene = 0;
+    mActionManager = 0;
     connect(this, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(onItemChanged(QStandardItem*)));
 }
 
@@ -35,53 +35,85 @@ void ActionsModel::appendAction(Action* action)
 
 void ActionsModel::insertAction(int row, Action* action)
 {   
-    if (! action)
+    if (! action || !mActionManager)
         return;
 
+    insertActionRow(row, action);
+    mActionManager->insert(row, action);
+    emit actionInserted(row, action);
+}
+
+void ActionsModel::appendActionRow(Action * action)
+{
+    insertActionRow(rowCount(), action);
+}
+
+void ActionsModel::insertActionRow(int row, Action * action)
+{
     connect(action, SIGNAL(dataChanged()), this, SLOT(updateView()), Qt::UniqueConnection);
     QStandardItem *item = new QStandardItem;
     item->setEditable(action->isTextEditable());
     insertRow(row, item);
-    mActions.insert(row, action);
 }
 
-void ActionsModel::removeAction(int index)
+void ActionsModel::removeAction(int index, bool del)
 {
+    if (index < 0 || index >= rowCount() || !mActionManager)
+        return;
+
     removeRow(index);
-    mActions.removeAt(index);
+    mActionManager->removeAt(index, del);
+    emit actionRemoved(index);
+}
+
+void ActionsModel::removeAction(Action* action, bool del)
+{
+    if (mActionManager)
+        removeAction(mActionManager->indexOf(action), del);
 }
 
 void ActionsModel::clear()
 {
     QStandardItemModel::clear();
-    foreach(Action* action, mActions) {
-        if (action)
-            action->disconnect(this);
+
+    if (mActionManager) {
+        foreach(GameObject* action, mActionManager->objects()) {
+            if (action)
+                action->disconnect(this);
+        }
+
+        mActionManager->disconnect(this);
     }
-    mActions.clear();
+
+    mActionManager = 0;
     mCurrentAction = 0;
 }
 
 Action* ActionsModel::actionForIndex(const QModelIndex & index) const
 {
-    if (index.row() >= 0 && index.row() < mActions.size())
-        return mActions.at(index.row());
+    if (mActionManager) {
+        GameObject* obj = mActionManager->objectAt(index.row());
+        return qobject_cast<Action*>(obj);
+    }
 
     return 0;
 }
 
 QModelIndex ActionsModel::indexForAction(Action * action) const
 {
-    int index = mActions.indexOf(action);
-    if (index != -1)
-        return this->index(index, 0);
+    if (mActionManager) {
+        int index = mActionManager->indexOf(action);
+        if (index != -1)
+            return this->index(index, 0);
+    }
+
     return QModelIndex();
 }
 
 Action* ActionsModel::actionForItem(QStandardItem * item) const
 {
-    if (item && item->row() >= 0 && item->row() < mActions.size())
-        return mActions.at(item->row());
+    if (item)
+        return actionForIndex(item->index());
 
     return 0;
 }
@@ -116,6 +148,9 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
     if (! mimeData)
         return false;
 
+    if (!mActionManager)
+        return false;
+
     beginResetModel();
 
     int destRow = -1;
@@ -134,17 +169,14 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
 
     foreach(QObject* obj, objects) {
         Action *action = qobject_cast<Action*>(obj);
-        int index = mActions.indexOf(action);
+        int index = mActionManager->indexOf(action);
         if (index == -1)
             continue;
 
-        mActions.removeAt(index);
-        mActions.insert(destRow+i, action);
+        mActionManager->removeAt(index);
+        mActionManager->insert(destRow+i, action);
         i++;
     }
-
-    if (mCurrentScene)
-        mCurrentScene->setActions(mActions);
 
     for(int i=0; i < rowCount(); i++) {
         updateItemAt(i);
@@ -166,12 +198,19 @@ QMimeData* ActionsModel::mimeData ( const QModelIndexList & indexes ) const
 {
     MimeData * mimeData = new MimeData;
     QModelIndexList sortedIndexes = indexes;
+    GameObject* obj = 0;
+
+    if (!mActionManager)
+        return mimeData;
+
     qSort(sortedIndexes);
 
-    QList<Action*> actions = mActions;
     foreach (const QModelIndex &index, sortedIndexes) {
-        if (index.isValid())
-            mimeData->appendObject(actions[index.row()]);
+        if (index.isValid()) {
+            obj = mActionManager->objectAt(index.row());
+            if (obj)
+                mimeData->appendObject(obj);
+        }
     }
 
     mimeData->setData("application/x-objectpointers", QByteArray());
@@ -181,7 +220,7 @@ QMimeData* ActionsModel::mimeData ( const QModelIndexList & indexes ) const
 
 void ActionsModel::setCurrentAction(Action* action)
 {
-    if (action == mCurrentAction || (action && !mActions.contains(action)))
+    if (!mActionManager || action == mCurrentAction || (action && !mActionManager->contains(action)))
         return;
 
     if (mCurrentAction) {
@@ -214,37 +253,16 @@ void ActionsModel::onCurrentActionDestroyed()
     mCurrentAction = 0;
 }
 
-Scene* ActionsModel::currentScene() const
-{
-    return mCurrentScene;
-}
-
-void ActionsModel::setCurrentScene(Scene * scene)
-{
-    clear();
-
-    if (mCurrentScene)
-        mCurrentScene->disconnect(this);
-
-    mCurrentScene = scene;
-
-    if (mCurrentScene) {
-        connect(mCurrentScene, SIGNAL(destroyed()), this, SLOT(onCurrentSceneDestroyed()), Qt::UniqueConnection);
-        setActions(mCurrentScene->actions());
-    }
-}
-
-void ActionsModel::onCurrentSceneDestroyed()
-{
-    setCurrentScene(0);
-}
-
 void ActionsModel::updateItemAt(int index)
 {
     QStandardItem* item = this->item(index);
     Action* action = 0;
-    if (index >= 0 && index < mActions.size())
-        action = mActions.at(index);
+
+    if (mActionManager) {
+        GameObject* obj = mActionManager->objectAt(index);
+        action = qobject_cast<Action*>(obj);
+    }
+
     if (item && action) {
         item->setEditable(action->isTextEditable());
     }
@@ -271,4 +289,45 @@ void ActionsModel::onItemChanged(QStandardItem * item)
     Action* action = actionForItem(item);
     if (action && item && item->isEditable() != action->isTextEditable())
         item->setEditable(action->isTextEditable());
+}
+
+GameObjectManager* ActionsModel::actionManager() const
+{
+    return mActionManager;
+}
+
+void ActionsModel::setActionManager(GameObjectManager * actionManager)
+{
+    if (mActionManager == actionManager)
+        return;
+
+    clear();
+
+    mActionManager = actionManager;
+
+    if (mActionManager)
+        connect(mActionManager, SIGNAL(destroyed()), this, SLOT(onActionManagerDestroyed()));
+
+    loadActionRows();
+}
+
+void ActionsModel::onActionManagerDestroyed()
+{
+    mActionManager = 0;
+}
+
+void ActionsModel::loadActionRows()
+{
+    QStandardItemModel::clear();
+    mCurrentAction = 0;
+
+    if (! mActionManager)
+        return;
+
+    Action* action = 0;
+
+    foreach(GameObject* obj, mActionManager->objects()) {
+        action = qobject_cast<Action*>(obj);
+        appendActionRow(action);
+    }
 }

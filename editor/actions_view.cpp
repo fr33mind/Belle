@@ -377,16 +377,13 @@ void ActionsView::onContextMenuRequested(const QPoint & point)
 
 void ActionsView::onDeleteAction()
 {
-    Scene* scene = Belle::instance()->currentScene();
-    if (scene) {
-        setAutoScroll(false);
-        QModelIndexList indexes = selectedIndexes();
-        qSort(indexes);
-        for(int i=indexes.size()-1; i >= 0; --i) {
-            scene->removeActionAt(indexes[i].row(), true);
-        }
-        setAutoScroll(true);
+    setAutoScroll(false);
+    QModelIndexList indexes = selectedIndexes();
+    qSort(indexes);
+    for(int i=indexes.size()-1; i >= 0; --i) {
+        mActionsModel->removeAction(indexes[i].row(), true);
     }
+    setAutoScroll(true);
 }
 
 void ActionsView::onCopyAction()
@@ -411,19 +408,19 @@ void ActionsView::onPasteAction()
 {
     Clipboard* clipboard = Belle::instance()->clipboard();
     QList<Action*> actions = clipboard->actions();
-    Scene* currScene = Belle::instance()->currentScene();
     QModelIndexList indexes = selectedIndexes();
     QModelIndex lastIndex = indexes.isEmpty() ? QModelIndex() : indexes.last();
     int insertRow = lastIndex.row();
-    if (! currScene || actions.isEmpty())
+    if (actions.isEmpty())
         return;
 
     Action* firstAction = actions.first();
-    Scene* scene = firstAction ? firstAction->scene() : 0;
     int actionsSize = actions.size();
     int actionIndex = insertRow;
-    if (scene) {
-        actionIndex = scene->indexOf(firstAction);
+    QModelIndex firstIndex = mActionsModel->indexForAction(firstAction);
+
+    if (firstIndex.isValid()) {
+        actionIndex = firstIndex.row();
         if (insertRow > actionIndex) {
             insertRow++;
         }
@@ -440,11 +437,14 @@ void ActionsView::onPasteAction()
             insertRow -= dif;
         }
 
-        foreach(Action* action, actions)
-            if(action->scene())
-                action->scene()->removeAction(action);
+        foreach(Action* action, actions) {
+            if (action->manager() == mActionsModel->actionManager())
+                mActionsModel->removeAction(action);
+            else if (action->manager())
+                action->manager()->remove(action);
+        }
 
-        pasteActionsAt(insertRow, actions, false);
+        pasteActionsAt(insertRow, actions, true);
     }
 
     //To mimic the usual cut and paste behaviour
@@ -499,12 +499,13 @@ void ActionsView::onItemClicked(const QModelIndex & index)
 QList<Action*> ActionsView::selectedActions() const
 {
     QList<Action*> actions;
-    Scene* scene = Belle::instance()->currentScene();
-    if (scene) {
-        QModelIndexList indexes = selectedIndexes();
-        qSort(indexes);
-        for(int i=0; i < indexes.size(); i++)
-            actions.append(scene->actionAt(indexes[i].row()));
+    QModelIndexList indexes = selectedIndexes();
+    Action* action = 0;
+    qSort(indexes);
+    for(int i=0; i < indexes.size(); i++) {
+        action = mActionsModel->actionForIndex(indexes[i]);
+        if (action)
+            actions.append(action);
     }
 
     return actions;
@@ -576,10 +577,6 @@ void ActionsView::selectActions(const QList<Action*>& actions)
 
 void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, bool copy, bool select)
 {
-    Scene* currScene = Belle::instance()->currentScene();
-    if (!currScene)
-        return;
-
     int i = 0;
     QList<Action*> newActions;
     foreach(Action* action, actions) {
@@ -587,9 +584,9 @@ void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, boo
             action = GameObjectFactory::createAction(action->toJsonObject(), this);
 
         if (index >= 0)
-            currScene->insertAction(index+i, action);
+            mActionsModel->insertAction(index+i, action);
         else
-            currScene->appendAction(action);
+            mActionsModel->appendAction(action);
         newActions.append(action);
         i++;
     }
@@ -601,9 +598,7 @@ void ActionsView::pasteActionsAt(int index, const QList<Action *> & actions, boo
 void ActionsView::onEditorClosed(QWidget * editor, QAbstractItemDelegate::EndEditHint hint)
 {
     if (mWriteAction && mWriteAction == mActionsModel->currentAction() && mWriteAction->editText().isEmpty()) {
-        Scene* scene = mActionsModel->currentScene();
-        if (scene)
-            scene->removeAction(mWriteAction, true);
+        mActionsModel->removeAction(mWriteAction);
     }
 
     mWriteAction = 0;
@@ -622,20 +617,15 @@ bool ActionsView::canPaste() const
 {
     Clipboard* clipboard = Belle::instance()->clipboard();
     QList<Action*> actions = clipboard->actions();
-    Scene* scene = mActionsModel->currentScene();
 
-    if (!actions.isEmpty() && scene)
+    if (!actions.isEmpty())
         return true;
     return false;
 }
 
 void ActionsView::onWriteAction()
 {
-    Scene* scene = mActionsModel->currentScene();
-    if (!scene)
-        return;
-
-    Action* action = GameObjectFactory::createAction(GameObjectMetaType::Dialogue, scene);
+    Action* action = GameObjectFactory::createAction(GameObjectMetaType::Dialogue, mActionsModel->actionManager());
     mWriteAction = action;
     addActionItem(action);
     QModelIndex index = mActionsModel->indexForAction(action);
@@ -644,10 +634,6 @@ void ActionsView::onWriteAction()
 
 void ActionsView::addActionItem(Action * action)
 {
-    Scene* scene = mActionsModel->currentScene();
-    if (!scene)
-        return;
-
     QItemSelectionModel* selectionModel = this->selectionModel();
     int row = -1;
 
@@ -658,10 +644,10 @@ void ActionsView::addActionItem(Action * action)
     }
 
     if (row != -1) {
-        scene->insertAction(row+1, action);
+        mActionsModel->insertAction(row+1, action);
     }
     else {
-        scene->appendAction(action);
+        mActionsModel->appendAction(action);
         scrollToBottom();
     }
 
