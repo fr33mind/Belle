@@ -120,7 +120,8 @@ class Object : public GameObject
         void setEventActions(Interaction::InputEvent, const QList<Action*> &);
         void removeEventActionAt(Interaction::InputEvent, int, bool del=false);
         void removeEventActions(Interaction::InputEvent, bool del=false);
-        QList<Action*> actionsForEvent(Interaction::InputEvent);
+        QList<Action*> actionsForEvent(Interaction::InputEvent) const;
+        GameObjectManager* actionManagerForEvent(Interaction::InputEvent) const;
         Action* eventAction(Interaction::InputEvent, const QString&);
         bool hasActionForEvent(Action*, Interaction::InputEvent);
         void moveSharedEventActions(Object*, Object*, Interaction::InputEvent);
@@ -201,7 +202,6 @@ class Object : public GameObject
         void addEventActions(Interaction::InputEvent, const QVariantList&);
         void clearEventActions(Interaction::InputEvent, const QList<Action*>&);
         void connectEventActions(Interaction::InputEvent, Object*);
-        void copyResourceActions(Interaction::InputEvent);
 
     protected:
         QRect mSceneRect;
@@ -214,7 +214,7 @@ class Object : public GameObject
         float mYDif;
         Padding mPadding;
         QList<QRect> mPreviousSceneRects;
-        QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
+        QHash<Interaction::InputEvent, GameObjectManager*> mEventToActions;
         void updateAspectRatio();
         virtual float calculateAspectRatio();
         virtual void connectToResource();

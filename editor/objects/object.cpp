@@ -62,9 +62,9 @@ void Object::init()
     mKeepAspectRatio = false;
     mAspectRatio = 1;
     mScaledBackgroundImage = 0;
-    mEventToActions.insert(Interaction::MouseMove, QList<Action*>());
-    mEventToActions.insert(Interaction::MousePress, QList<Action*>());
-    mEventToActions.insert(Interaction::MouseRelease, QList<Action*>());
+    mEventToActions.insert(Interaction::MouseMove, new GameObjectManager(this));
+    mEventToActions.insert(Interaction::MousePress, new GameObjectManager(this));
+    mEventToActions.insert(Interaction::MouseRelease, new GameObjectManager(this));
 }
 
 Object::~Object()
@@ -432,21 +432,33 @@ void Object::addEventActions(Interaction::InputEvent event, const QVariantList &
 
 void Object::clearEventActions(Interaction::InputEvent event, const QList<Action *> & newActions)
 {
-    QList<Action*> currActions = mEventToActions.value(event);
-    for(int i=currActions.size()-1; i >= 0; i--) {
-        if (newActions.contains(currActions.at(i)))
+    GameObjectManager* actionManager = mEventToActions.value(event);
+    Action* action = 0;
+
+    if (!actionManager)
+        return;
+
+    for(int i=actionManager->size()-1; i >= 0; i--) {
+        action = qobject_cast<Action*>(actionManager->objectAt(i));
+        if (newActions.contains(action))
             removeEventActionAt(event, i, false);
         else
             removeEventActionAt(event, i, true);
     }
 
-    mEventToActions.insert(event, QList<Action*>());
+    actionManager->clear();
 }
 
 void Object::replaceEventActions(Interaction::InputEvent event, const QList<Action*>& actions)
 {
     clearEventActions(event, actions);
-    mEventToActions.insert(event, actions);
+    GameObjectManager* actionManager = mEventToActions.value(event);
+    if (actionManager) {
+        actionManager->clear();
+        foreach(Action* action, actions) {
+            actionManager->add(action);
+        }
+    }
 }
 
 void Object::setEventActions(Interaction::InputEvent event, const QList<Action*>& actions)
@@ -456,17 +468,18 @@ void Object::setEventActions(Interaction::InputEvent event, const QList<Action*>
 
 void Object::appendEventAction(Interaction::InputEvent event, Action * action)
 {
-    insertEventAction(event, mEventToActions.value(event).size(), action);
+    GameObjectManager* actionManager = mEventToActions.value(event);
+    if (actionManager) {
+        insertEventAction(event, actionManager->size(), action);
+    }
 }
 
 void Object::insertEventAction(Interaction::InputEvent event, int index, Action * action)
 {
-    if (action) {
-        QList<Action*> actions;
-        Action* newAction = 0;
-        if (mEventToActions.contains(event))
-            actions = mEventToActions.value(event);
+    GameObjectManager* actionManager = mEventToActions.value(event);
 
+    if (action && actionManager) {
+        Action* newAction = 0;
         GameObject* resource = this->resource();
         //copy action if it comes from the resource
         if (resource && action->parent() == resource) {
@@ -480,13 +493,7 @@ void Object::insertEventAction(Interaction::InputEvent event, int index, Action 
             action->setParent(this);
         }
 
-        if (index > actions.size())
-            index = actions.size();
-
-        if (index >= 0 && index <= actions.size()) {
-            actions.insert(index, action);
-            mEventToActions.insert(event, actions);
-        }
+        actionManager->insert(index, action);
 
         if (isSynced() && isResource()) {
             emit eventActionInserted(event, index, action);
@@ -499,11 +506,14 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
    if (loadBlocked())
        return;
 
-   QList<Action*> actions = mEventToActions.value(event);
-   if (index >= 0 && index < actions.size()) {
-       Action* action = actions.takeAt(index);
-       mEventToActions.insert(event, actions);
+   GameObjectManager* actionManager = mEventToActions.value(event);
+   if (!actionManager)
+       return;
 
+   GameObject* obj = actionManager->takeAt(index);
+   Action* action = qobject_cast<Action*>(obj);
+
+   if (action) {
        bool loadBlocked = blockLoad(true);
        emit eventActionRemoved(event, action, del);
        blockLoad(loadBlocked);
@@ -517,22 +527,17 @@ void Object::removeEventAction(Interaction::InputEvent event, Action* action, bo
 {
     if (! action)
         return;
-    QList<Action*> actions = mEventToActions.value(event);
-    this->removeEventActionAt(event, actions.indexOf(action), del);
+
+    GameObjectManager* actionManager = mEventToActions.value(event);
+    if (actionManager)
+        this->removeEventActionAt(event, actionManager->indexOf(action), del);
 }
 
 void Object::removeEventActions(Interaction::InputEvent event, bool del)
 {
-    QList<Action*> actions = mEventToActions.value(event);
-    if (del) {
-        for(int i=0; i < actions.size(); i++) {
-            if (del && actions[i]->parent() == this)
-                actions[i]->deleteLater();
-        }
-    }
-
-    actions.clear();
-    mEventToActions.insert(event, actions);
+    GameObjectManager* actionManager = mEventToActions.value(event);
+    if (actionManager)
+        actionManager->clear(del);
 }
 
 void Object::removeEventActionSync(Interaction::InputEvent event, Action * action, bool del)
@@ -544,7 +549,7 @@ void Object::removeEventActionSync(Interaction::InputEvent event, Action * actio
         removeEventAction(event, qobject_cast<Action*>(action->resource()), del);
     }
     else {
-        QList<Action*> actions = mEventToActions.value(event);
+        QList<Action*> actions = actionsForEvent(event);
         foreach(Action* _action, actions) {
             if (_action && _action->resource() == action)
                 removeEventAction(event, _action, del);
@@ -581,9 +586,27 @@ ImageFile* Object::backgroundImage() const
     return mBackground.image();
 }
 
-QList<Action*> Object::actionsForEvent(Interaction::InputEvent event)
+QList<Action*> Object::actionsForEvent(Interaction::InputEvent event) const
 {
-    return mEventToActions.value(event, QList<Action*>());
+    GameObjectManager* actionManager = mEventToActions.value(event);
+    QList<Action*> actions;
+    Action* action = 0;
+
+    if (!actionManager)
+        return actions;
+
+    foreach(GameObject* obj, actionManager->objects()) {
+        action = qobject_cast<Action*>(obj);
+        if (action)
+            actions.append(action);
+    }
+
+    return actions;
+}
+
+GameObjectManager* Object::actionManagerForEvent(Interaction::InputEvent event) const
+{
+    return mEventToActions.value(event);
 }
 
 Action* Object::eventAction(Interaction::InputEvent event, const QString& name)
@@ -599,7 +622,10 @@ Action* Object::eventAction(Interaction::InputEvent event, const QString& name)
 
 bool Object::hasActionForEvent(Action* action, Interaction::InputEvent event)
 {
-    return mEventToActions.value(event, QList<Action*>()).contains(action);
+    GameObjectManager* actionManager = mEventToActions.value(event);
+    if (actionManager)
+        return actionManager->contains(action);
+    return false;
 }
 
 QVariantMap Object::toJsonObject(bool internal) const
@@ -627,7 +653,7 @@ QVariantMap Object::toJsonObject(bool internal) const
     }
 
     QVariantList jsonActions;
-    QList<Action*> actions = mEventToActions.value(Interaction::MousePress);
+    QList<Action*> actions = actionsForEvent(Interaction::MousePress);
     if (internal) {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(QVariant::fromValue(qobject_cast<QObject*>(actions[i])));
@@ -641,7 +667,7 @@ QVariantMap Object::toJsonObject(bool internal) const
         object.insert("onMousePress", jsonActions);
 
     jsonActions.clear();
-    actions = mEventToActions.value(Interaction::MouseRelease);
+    actions = actionsForEvent(Interaction::MouseRelease);
     if (internal) {
         for(int i=0; i < actions.size(); i++)
             jsonActions.append(QVariant::fromValue(qobject_cast<QObject*>(actions[i])));
@@ -655,7 +681,7 @@ QVariantMap Object::toJsonObject(bool internal) const
         object.insert("onMouseRelease", jsonActions);
 
     jsonActions.clear();
-    actions = mEventToActions.value(Interaction::MouseMove);
+    actions = actionsForEvent(Interaction::MouseMove);
 
     if (internal) {
         for(int i=0; i < actions.size(); i++)
@@ -1157,23 +1183,6 @@ void Object::filterLoadData(QVariantMap &data)
     data.remove("x");
     data.remove("y");
     data.remove("visible");
-}
-
-void Object::copyResourceActions(Interaction::InputEvent event)
-{
-    QList<Action*> actions = mEventToActions.value(event);
-    QList<Action*> copiedActions;
-    Action* action = 0;
-
-    for(int i=0; i < actions.size(); i++) {
-        if (actions[i]->parent() != this)
-            action = GameObjectFactory::createAction(actions[i]->toJsonObject(), this);
-        else
-            action = actions[i];
-        copiedActions.append(action);
-    }
-
-    mEventToActions.insert(event, copiedActions);
 }
 
 void Object::onParentResized(int w, int h)
