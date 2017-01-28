@@ -78,6 +78,11 @@ void GameObjectManager::insert(int index, GameObject* object)
     if (contains(object))
         return;
 
+    if (index < 0)
+        index = 0;
+    else if (index > mGameObjects.size())
+        index = mGameObjects.size();
+
     prepareObject(object);
     mGameObjects.insert(index, object);
     emit objectAdded(object);
@@ -87,7 +92,7 @@ void GameObjectManager::removeAt(int index, bool del)
 {
     if (index >= 0 && index < mGameObjects.size()) {
         GameObject* obj = takeAt(index);
-        if (del)
+        if (del && obj)
             delete obj;
     }
 }
