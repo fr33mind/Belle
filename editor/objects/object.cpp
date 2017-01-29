@@ -62,9 +62,9 @@ void Object::init()
     mKeepAspectRatio = false;
     mAspectRatio = 1;
     mScaledBackgroundImage = 0;
-    mEventToActions.insert(Interaction::MouseMove, new GameObjectManager(this));
-    mEventToActions.insert(Interaction::MousePress, new GameObjectManager(this));
-    mEventToActions.insert(Interaction::MouseRelease, new GameObjectManager(this));
+    initEventActionManager(Interaction::MouseMove);
+    initEventActionManager(Interaction::MousePress);
+    initEventActionManager(Interaction::MouseRelease);
 }
 
 Object::~Object()
@@ -73,6 +73,18 @@ Object::~Object()
 
     if (mBackground.image())
         AssetManager::instance()->releaseAsset(mBackground.image());
+}
+
+void Object::initEventActionManager(Interaction::InputEvent event)
+{
+    if (mEventToActions.contains(event))
+        return;
+
+    GameObjectManager* actionManager = new GameObjectManager(this);
+    actionManager->setUniqueNames(false);
+    actionManager->setAllowEmptyNames(true);
+    actionManager->setObjectsParent(this);
+    mEventToActions.insert(event, actionManager);
 }
 
 bool Object::contains(qreal x, qreal y)

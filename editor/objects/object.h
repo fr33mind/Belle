@@ -202,6 +202,7 @@ class Object : public GameObject
         void addEventActions(Interaction::InputEvent, const QVariantList&);
         void clearEventActions(Interaction::InputEvent, const QList<Action*>&);
         void connectEventActions(Interaction::InputEvent, Object*);
+        void initEventActionManager(Interaction::InputEvent);
 
     protected:
         QRect mSceneRect;
