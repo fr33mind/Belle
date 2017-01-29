@@ -39,6 +39,9 @@ public:
     void setAllowEmptyNames(bool);
     bool allowEmptyNames() const;
 
+    QObject* objectsParent() const;
+    void setObjectsParent(QObject*);
+
 private:
     void prepareObject(GameObject*);
 
@@ -50,6 +53,7 @@ private:
     QList<GameObject*> mGameObjects;
     bool mUniqueNames;
     bool mAllowEmptyNames;
+    QObject* mObjectsParent;
 
 signals:
     void objectAdded(GameObject*);

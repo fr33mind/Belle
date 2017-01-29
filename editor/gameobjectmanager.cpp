@@ -7,6 +7,7 @@ GameObjectManager::GameObjectManager(QObject *parent) :
 {
     setUniqueNames(true);
     setAllowEmptyNames(false);
+    mObjectsParent = this;
 }
 
 GameObjectManager::~GameObjectManager()
@@ -25,6 +26,7 @@ void GameObjectManager::prepareObject(GameObject * object)
         renameObject(object);
 
     object->setManager(this);
+    object->setParent(mObjectsParent);
 }
 
 void GameObjectManager::add(GameObject* object)
@@ -243,4 +245,14 @@ void GameObjectManager::renameObjects()
 void GameObjectManager::onObjectDestroyed(GameObject* obj)
 {
     remove(obj);
+}
+
+QObject* GameObjectManager::objectsParent() const
+{
+    return mObjectsParent;
+}
+
+void GameObjectManager::setObjectsParent(QObject * parent)
+{
+    mObjectsParent = parent;
 }
