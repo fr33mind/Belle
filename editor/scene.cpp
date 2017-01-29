@@ -108,6 +108,7 @@ void Scene::init(const QString& name)
     mActionManager = new GameObjectManager(this);
     mActionManager->setUniqueNames(false);
     mActionManager->setAllowEmptyNames(true);
+    mActionManager->setObjectsParent(this);
 
     this->setName(name);
 }
