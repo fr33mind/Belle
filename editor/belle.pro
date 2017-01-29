@@ -4,8 +4,8 @@ TEMPLATE = app
 isEmpty(PREFIX) {
  PREFIX = /usr
 }
-INCLUDEPATH += actions objects widgets conditions assets
-DEPENDPATH += actions objects widgets conditions assets
+INCLUDEPATH += actions objects widgets conditions assets dialogs
+DEPENDPATH += actions objects widgets conditions assets dialogs
 
 TARGET = belle
 TARGET.path = $$PREFIX/
@@ -148,7 +148,8 @@ HEADERS      += belle.h\
     objects/font.h \
     objects/fonteditorwidget.h \
     fontlibrary.h \
-    actions/actionmetatype.h
+    actions/actionmetatype.h \
+    dialogs/actionmanagerdialog.h
                 
 
 SOURCES      += main.cpp\
@@ -279,6 +280,7 @@ SOURCES      += main.cpp\
     objects/font.cpp \
     objects/fonteditorwidget.cpp \
     fontlibrary.cpp \
-    actions/actionmetatype.cpp
+    actions/actionmetatype.cpp \
+    dialogs/actionmanagerdialog.cpp
 
 RESOURCES += media.qrc
