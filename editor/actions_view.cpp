@@ -86,7 +86,10 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
 
     const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
     const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
-    int textHeight = option.fontMetrics.size(0, action->title()).height();
+    QString title = action->title();
+    QString actionStatusText = this->actionStatusText(action);
+    QSize textSize = option.fontMetrics.size(0, title);
+    int textHeight = textSize.height();
     typeIcon.paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
 
     textRect.setX(textHeight+BORDER*2);
@@ -96,11 +99,17 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
     QFont font = painter->font();
     font.setBold(true);
     painter->setFont(font);
-    painter->drawText(textRect, action->title());
-    QString displayText = action->displayText();
-
+    painter->drawText(textRect, title);
     font.setBold(false);
     painter->setFont(font);
+
+    if (!actionStatusText.isEmpty()) {
+        QRect textRect2 = textRect;
+        textRect2.setX(textRect.x() + textSize.width());
+        painter->drawText(textRect2, actionStatusText);
+    }
+
+    QString displayText = action->displayText();
 
     if (! displayText.isEmpty()) {
         textRect.setY(textRect.y() + textHeight);
@@ -289,6 +298,32 @@ bool ActionsViewDelegate::editorFlag(QWidget* editor, const char * property) con
     if (value.type() == QVariant::Bool)
         return value.toBool();
     return false;
+}
+
+QString ActionsViewDelegate::actionStatusText(const Action * action) const
+{
+    QString text;
+
+    if (!action)
+        return text;
+
+    QString syncedText = tr("Synced");
+    QString notSyncedText = tr("Not Synced");
+    QString syncStatusText = "";
+    GameObject* actionResource = action->resource();
+
+    if (actionResource) {
+        if (action->isSynced())
+            syncStatusText = syncedText;
+        else
+            syncStatusText = notSyncedText;
+
+        syncStatusText = QString(" (%1)").arg(syncStatusText);
+    }
+
+    text = syncStatusText;
+
+    return text;
 }
 
 ActionsView::ActionsView(QWidget *parent) :

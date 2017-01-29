@@ -47,6 +47,7 @@ private:
     int mTextEditCursorBlockPos;
 
     bool editorFlag(QWidget*, const char*) const;
+    QString actionStatusText(const Action*) const;
 };
 
 class ActionsView : public QListView
