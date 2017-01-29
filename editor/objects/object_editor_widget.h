@@ -21,14 +21,16 @@
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QLabel>
+#include <QComboBox>
 
-#include "combobox.h"
 #include "color_pushbutton.h"
 #include "gameobject_editorwidget.h"
 #include "object.h"
 #include "choosefilebutton.h"
+#include "actionmanagerbutton.h"
 
 class Object;
+class ActionManagerButton;
 
 class ObjectEditorWidget : public GameObjectEditorWidget
 {
@@ -48,15 +50,12 @@ public slots:
     void onColorChosen(const QColor&);
     void onSliderValueChanged(int);
     void onOpacityChanged(int);
-    void onAddItemActivated();
-    void onItemActivated(int);
     void onVisibilityChanged(bool);
     void onBorderWidthChanged(int);
     void onBorderColorChanged(const QColor&);
 
 private slots:
     void onSizeEdited(const QString&);
-    void onEventItemRemoved(int);
     void onImageChosen(const QString&);
     void onXChanged(int);
     void onYChanged(int);
@@ -70,19 +69,14 @@ private slots:
     void onPaddingBottomChanged(int);
 
 private:
-    void updateEventActions(Object*);
-    void addEventActionItem(ComboBox*, Action*);
-    QString eventActionItemText(Action*);
-
-private:
     ColorPushButton* mColorButton;
     QSlider* mBackgroundOpacitySlider;
     QSlider* mOpacitySlider;
     Object *mResourceObject;
     QComboBox* mChooseObjectComboBox;
-    ComboBox * mMousePressComboBox;
-    ComboBox * mMouseReleaseComboBox;
-    ComboBox * mMouseMoveComboBox;
+    ActionManagerButton* mMousePressButton;
+    ActionManagerButton* mMouseReleaseButton;
+    ActionManagerButton* mMouseMoveButton;
     ChooseFileButton* mImageChooser;
     QSpinBox* mCornerRadiusSpinBox;
     QCheckBox* mVisibleCheckbox;

@@ -32,8 +32,6 @@
 #include "drawing_surface_widget.h"
 #include "slider.h"
 
-QHash<QObject*, Interaction::InputEvent> mWidgetToEvent = QHash<QObject*, Interaction::InputEvent>();
-
 ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     GameObjectEditorWidget(parent)
 {
@@ -148,30 +146,12 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     this->endGroup();
 
     this->beginGroup(tr("Events"));
-    mMousePressComboBox = new ComboBox(this);
-    mMousePressComboBox->setObjectName("MousePressComboBox");
-    connect (mMousePressComboBox, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
-    connect (mMousePressComboBox, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
-    connect (mMousePressComboBox, SIGNAL(itemRemoved(int)), this, SLOT(onEventItemRemoved(int)));
-    this->appendRow("OnMousePress", mMousePressComboBox);
-    mWidgetToEvent.insert(mMousePressComboBox, Interaction::MousePress);
-
-    mMouseReleaseComboBox = new ComboBox(this);
-    mMouseReleaseComboBox->setObjectName("MouseReleaseComboBox");
-    connect (mMouseReleaseComboBox, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
-    connect (mMouseReleaseComboBox, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
-    connect (mMouseReleaseComboBox, SIGNAL(itemRemoved(int)), this, SLOT(onEventItemRemoved(int)));
-    this->appendRow("OnMouseRelease", mMouseReleaseComboBox);
-    mWidgetToEvent.insert(mMouseReleaseComboBox, Interaction::MouseRelease);
-    this->endGroup();
-
-    mMouseMoveComboBox = new ComboBox(this);
-    mMouseMoveComboBox->setObjectName("MouseMoveComboBox");
-    connect (mMouseMoveComboBox, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
-    connect (mMouseMoveComboBox, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
-    connect (mMouseMoveComboBox, SIGNAL(itemRemoved(int)), this, SLOT(onEventItemRemoved(int)));
-    this->appendRow("OnMouseMove", mMouseMoveComboBox);
-    mWidgetToEvent.insert(mMouseMoveComboBox, Interaction::MouseMove);
+    mMousePressButton = new ActionManagerButton(this);
+    this->appendRow(tr("Mouse Press"), mMousePressButton);
+    mMouseReleaseButton = new ActionManagerButton(this);
+    this->appendRow(tr("Mouse Release"), mMouseReleaseButton);
+    mMouseMoveButton = new ActionManagerButton(this);
+    this->appendRow(tr("Mouse Move"), mMouseMoveButton);
     this->endGroup();
 
     resizeColumnToContents(0);
@@ -281,7 +261,9 @@ void ObjectEditorWidget::updateData(GameObject* obj)
     else
         mHeightEditor->setText(QString::number(currObj->height()));
 
-    updateEventActions(currObj);
+    mMousePressButton->setActionManager(currObj->actionManagerForEvent(Interaction::MousePress));
+    mMouseReleaseButton->setActionManager(currObj->actionManagerForEvent(Interaction::MouseRelease));
+    mMouseMoveButton->setActionManager(currObj->actionManagerForEvent(Interaction::MouseMove));
 
     mCornerRadiusSpinBox->setValue(currObj->cornerRadius());
     mVisibleCheckbox->setChecked(currObj->visible());
@@ -295,109 +277,6 @@ void ObjectEditorWidget::updateData(GameObject* obj)
     mPaddingTopSpinBox->setValue(currObj->paddingTop());
     mPaddingBottomSpinBox->setMaximum(currObj->height());
     mPaddingBottomSpinBox->setValue(currObj->paddingBottom());
-}
-
-void ObjectEditorWidget::updateEventActions(Object* object)
-{
-    mMousePressComboBox->clear();
-    mMouseReleaseComboBox->clear();
-    mMouseMoveComboBox->clear();
-
-    if (! object)
-        return;
-
-    QList<Action*> actions;
-
-    actions = object->actionsForEvent(Interaction::MousePress);
-    for(int i=0; i < actions.size(); i++) {
-        addEventActionItem(mMousePressComboBox, actions[i]);
-    }
-
-    actions = object->actionsForEvent(Interaction::MouseRelease);
-    for(int i=0; i < actions.size(); i++) {
-        addEventActionItem(mMouseReleaseComboBox, actions[i]);
-    }
-
-    actions = object->actionsForEvent(Interaction::MouseMove);
-    for(int i=0; i < actions.size(); i++) {
-        addEventActionItem(mMouseMoveComboBox, actions[i]);
-    }
-}
-
-QString ObjectEditorWidget::eventActionItemText(Action * action)
-{
-    QString text;
-
-    if (!action)
-        return text;
-
-    QString syncedText = tr("Synced");
-    QString notSyncedText = tr("Not Synced");
-    QString syncStatusText = "";
-    GameObject* actionResource = action->resource();
-
-    if (actionResource || (mGameObject && mGameObject->resource())) {
-        if (actionResource && action->isSynced())
-            syncStatusText = syncedText;
-        else
-            syncStatusText = notSyncedText;
-
-        syncStatusText = QString(" (%1)").arg(syncStatusText);
-    }
-    text = action->toString() + syncStatusText;
-
-    return text;
-}
-
-void ObjectEditorWidget::addEventActionItem(ComboBox * comboBox, Action * action)
-{
-    if (!comboBox || !action)
-        return;
-
-    const QIcon typeIcon = GameObjectMetaType::icon(action->type());
-    QString text = eventActionItemText(action);
-    comboBox->addItem(typeIcon, text, QVariant::fromValue(qobject_cast<QObject*>(action)));
-}
-
-void ObjectEditorWidget::onAddItemActivated()
-{
-    Object* object = qobject_cast<Object*>(mGameObject);
-    if (! object)
-        return;
-
-    Interaction::InputEvent event = mWidgetToEvent.value(sender());
-    AddActionDialog dialog(object);
-    dialog.exec();
-
-    if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
-        Action* action = dialog.selectedAction();
-        object->appendEventAction(event, action);
-        ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
-        if(comboBox) {
-            addEventActionItem(comboBox, action);
-        }
-    }
-}
-
-void ObjectEditorWidget::onItemActivated(int index)
-{
-    Object* object = qobject_cast<Object*>(mGameObject);
-    if (! object)
-        return;
-
-    Interaction::InputEvent event = mWidgetToEvent.value(sender());
-    QList<Action*> actions = object->actionsForEvent(event);
-    if (index >= actions.size())
-        return;
-
-    Action * action = actions[index];
-    AddActionDialog dialog(action);
-    dialog.exec();
-
-    ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
-    if(comboBox) {
-        comboBox->setItemText(index, eventActionItemText(action));
-    }
 }
 
 void ObjectEditorWidget::onSizeEdited(const QString & text)
@@ -452,25 +331,6 @@ void ObjectEditorWidget::onVisibilityChanged(bool visible)
     Object* object = qobject_cast<Object*>(mGameObject);
     if (object)
         object->setVisible(visible);
-}
-
-void ObjectEditorWidget::onEventItemRemoved(int index)
-{
-    Object* object = qobject_cast<Object*>(mGameObject);
-    if (! object || index < 0)
-        return;
-
-    QString name = sender()->objectName();
-
-    if (name == "MousePressComboBox") {
-        object->removeEventActionAt(Interaction::MousePress, index, true);
-    }
-    else if (name == "MouseReleaseComboBox") {
-        object->removeEventActionAt(Interaction::MouseRelease, index, true);
-    }
-    else if (name == "MouseMoveComboBox") {
-        object->removeEventActionAt(Interaction::MouseMove, index, true);
-    }
 }
 
 void ObjectEditorWidget::onBorderWidthChanged(int w)
