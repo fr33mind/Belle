@@ -42,6 +42,18 @@ void Branch::init()
 {
     setType(GameObjectMetaType::Branch);
     mCondition = new ComplexCondition();
+    mTrueActions = createActionManager();
+    mFalseActions = createActionManager();
+}
+
+GameObjectManager* Branch::createActionManager()
+{
+    GameObjectManager* actionManager = new GameObjectManager(this);
+    actionManager->setUniqueNames(false);
+    actionManager->setAllowEmptyNames(true);
+    actionManager->setObjectsParent(this);
+    connect(actionManager, SIGNAL(destroyed(QObject*)), this, SLOT(onActionManagerDestroyed(QObject*)));
+    return actionManager;
 }
 
 void Branch::loadData(const QVariantMap & data, bool internal)
@@ -124,15 +136,15 @@ QVariantMap Branch::toJsonObject(bool internal) const
     data.insert("condition", mCondition->toMap());
 
     QVariantList actions;
-    if (! mTrueActions.isEmpty()){
-        foreach(Action* action, mTrueActions)
+    if (mTrueActions->size()){
+        foreach(GameObject* action, mTrueActions->objects())
             actions.append(action->toJsonObject(internal));
     }
     data.insert("trueActions", actions);
     actions.clear();
 
-    if (! mFalseActions.isEmpty()){
-        foreach(Action* action, mFalseActions)
+    if (mFalseActions->size()){
+        foreach(GameObject* action, mFalseActions->objects())
             actions.append(action->toJsonObject(internal));
     }
     data.insert("falseActions", actions);
@@ -199,6 +211,21 @@ void Branch::setCondition(const QString& condition)
 
 QList<Action*> Branch::actions(bool cond) const
 {
+    GameObjectManager* actionManager = cond ? mTrueActions : mFalseActions;
+    QList<Action*> actions;
+    Action* action = 0;
+
+    foreach(GameObject* obj, actionManager->objects()) {
+        action = qobject_cast<Action*>(obj);
+        if (action)
+            actions.append(action);
+    }
+
+    return actions;
+}
+
+GameObjectManager* Branch::actionManager(bool cond) const
+{
     if (cond)
         return mTrueActions;
     return mFalseActions;
@@ -210,9 +237,9 @@ void Branch::appendAction(Action* action, bool cond)
         return;
 
     if (cond)
-        mTrueActions.append(action);
+        mTrueActions->add(action);
     else
-        mFalseActions.append(action);
+        mFalseActions->add(action);
 
     connect(this, SIGNAL(syncChanged(bool)), action, SLOT(setSync(bool)));
     updateDisplayText();
@@ -226,12 +253,17 @@ void Branch::appendAction(Action* action, bool cond)
 
 Action* Branch::action(int index, bool cond) const
 {
+    GameObject* obj = 0;
+
     if (cond) {
-        if (index < mTrueActions.size())
-            return mTrueActions[index];
+        if (index < mTrueActions->size())
+            obj = mTrueActions->objectAt(index);
     }
-    else if (index < mFalseActions.size())
-        return mFalseActions[index];
+    else if (index < mFalseActions->size())
+        obj = mFalseActions->objectAt(index);
+
+    if (obj)
+        return qobject_cast<Action*>(obj);
 
     return 0;
 }
@@ -240,14 +272,14 @@ void Branch::removeAction(int index, bool cond, bool del){
     if (loadBlocked())
         return;
 
-    Action* action = 0;
+    GameObject* action = 0;
 
     if (cond) {
-        if (index < mTrueActions.size())
-            action = mTrueActions.takeAt(index);
+        if (index < mTrueActions->size())
+            action = mTrueActions->takeAt(index);
     }
-    else if (index < mFalseActions.size())
-        action = mFalseActions.takeAt(index);
+    else if (index < mFalseActions->size())
+        action = mFalseActions->takeAt(index);
 
     if (action) {
         action->disconnect(this);
@@ -269,9 +301,9 @@ void Branch::removeAction(Action* action, bool cond, bool del)
     int index = -1;
 
     if (cond)
-        index = mTrueActions.indexOf(action);
+        index = mTrueActions->indexOf(action);
     else
-        index = mFalseActions.indexOf(action);
+        index = mFalseActions->indexOf(action);
 
     removeAction(index, cond, del);
 }
@@ -288,8 +320,8 @@ void Branch::updateDisplayText()
     if (mCondition)
         condition = mCondition->toString();
 
-    for(int i=0; i < mTrueActions.size(); i++) {
-        metatype = GameObjectMetaType::metaType(mTrueActions.at(i)->type());
+    for(int i=0; i < mTrueActions->size(); i++) {
+        metatype = GameObjectMetaType::metaType(mTrueActions->objectAt(i)->type());
         if (metatype)
             trueActions.append(metatype->name());
     }
@@ -297,8 +329,8 @@ void Branch::updateDisplayText()
     if (!trueActions.isEmpty())
         trueAction = trueActions.join(", ");
 
-    for(int i=0; i < mFalseActions.size(); i++) {
-        metatype = GameObjectMetaType::metaType(mFalseActions.at(i)->type());
+    for(int i=0; i < mFalseActions->size(); i++) {
+        metatype = GameObjectMetaType::metaType(mFalseActions->objectAt(i)->type());
         if (metatype)
             falseActions.append(metatype->name());
     }
@@ -316,4 +348,12 @@ void Branch::onConditionChanged()
 
     if (mCondition)
         notify("condition", mCondition->toMap());
+}
+
+void Branch::onActionManagerDestroyed(QObject* object)
+{
+    if (mTrueActions == object)
+        mTrueActions = 0;
+    else if (mFalseActions == object)
+        mFalseActions = 0;
 }

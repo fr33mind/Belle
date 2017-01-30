@@ -19,9 +19,11 @@
 
 #include "action.h"
 #include "complexcondition.h"
+#include "gameobjectmanager.h"
 
 class Action;
 class BranchEditorWidget;
+class GameObjectManager;
 
 class Branch : public Action
 {
@@ -34,6 +36,7 @@ public:
     AbstractCondition* condition() const;
     virtual QVariantMap toJsonObject(bool internal=true) const;
     QList<Action*> actions(bool) const;
+    GameObjectManager* actionManager(bool) const;
     Action* action(int, bool) const;
 
 signals:
@@ -47,16 +50,20 @@ public slots:
     void removeAction(Action*, bool, bool del=false);
     void onConditionChanged();
 
+private slots:
+    void onActionManagerDestroyed(QObject*);
+
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
     virtual void connectToResource();
 
 private:
     AbstractCondition* mCondition;
-    QList<Action*> mTrueActions;
-    QList<Action*> mFalseActions;
+    GameObjectManager* mTrueActions;
+    GameObjectManager* mFalseActions;
     void init();
     void connectActions(Branch*, bool);
+    GameObjectManager* createActionManager();
 };
 
 #endif // BRANCH_H
