@@ -1,5 +1,4 @@
 #include "menueditorwidget.h"
-#include "add_action_dialog.h"
 
 MenuEditorWidget::MenuEditorWidget(QWidget *parent) :
     ObjectGroupEditorWidget(parent)

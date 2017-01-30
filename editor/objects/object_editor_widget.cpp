@@ -27,7 +27,6 @@
 #include "gotolabel.h"
 #include "color_pushbutton.h"
 #include "combobox.h"
-#include "add_action_dialog.h"
 #include "scene.h"
 #include "drawing_surface_widget.h"
 #include "slider.h"

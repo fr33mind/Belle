@@ -19,7 +19,6 @@
 #include "condition_text_edit.h"
 #include "scene_manager.h"
 #include "menu.h"
-#include "add_action_dialog.h"
 #include "interaction.h"
 
 ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :

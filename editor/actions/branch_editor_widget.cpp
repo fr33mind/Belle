@@ -20,7 +20,6 @@
 #include <QDebug>
 
 #include "combobox.h"
-#include "add_action_dialog.h"
 #include "condition_dialog.h"
 
 BranchEditorWidget::BranchEditorWidget(QWidget *parent) :

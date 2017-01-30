@@ -54,7 +54,6 @@ HEADERS      += belle.h\
     actions/gotolabel_editor_widget.h \
     objects/button.h \
     combobox.h \
-    add_action_dialog.h \
     objects/image.h \
     utils.h \
     resources_view.h \
@@ -187,7 +186,6 @@ SOURCES      += main.cpp\
     actions/gotolabel_editor_widget.cpp \
     objects/button.cpp \
     combobox.cpp \
-    add_action_dialog.cpp \
     objects/image.cpp \
     objects/character.cpp \
     objects/object.cpp \
