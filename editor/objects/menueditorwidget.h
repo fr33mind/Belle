@@ -7,10 +7,12 @@
 #include "object_combobox.h"
 #include "menu.h"
 #include "combobox.h"
+#include "actionmanagerbutton.h"
 
 class ObjectComboBox;
 class Menu;
 class ComboBox;
+class ActionManagerButton;
 
 class MenuEditorWidget : public ObjectGroupEditorWidget
 {
@@ -26,23 +28,19 @@ signals:
 
 private slots:
     void onTextEdited(const QString&);
-    void onAddItemActivated();
     void onNumberOfOptionsChanged(int);
-    void onItemRemoved(int);
-    void onItemActivated(int);
     void onButtonChanged(Object*);
 
 private:
     void setNumberOfOptions(int);
     void _updateTexts(Menu*);
-    int widgetIndex(QObject*);
 
 private:
     ObjectComboBox* mButtonComboBox;
     QComboBox* mChooseNumberOfOptions;
     int mFirstOptionIndex;
     QList<QLineEdit*> mTextEdits;
-    QList<ComboBox*> mEventChoosers;
+    QList<ActionManagerButton*> mActionButtons;
     QList<QTextEdit*> mConditionEdits;
 };
 

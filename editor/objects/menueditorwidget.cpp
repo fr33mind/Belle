@@ -25,11 +25,11 @@ MenuEditorWidget::MenuEditorWidget(QWidget *parent) :
 //        conditionEdit->installEventFilter(this);
 //        conditionEdit->setMaximumHeight(50);
 //        mConditionEdits.append(conditionEdit);
-        mEventChoosers.append(new ComboBox(this));
+        mActionButtons.append(new ActionManagerButton(this));
 
         beginGroup(QString("%1 %2").arg(tr("Option")).arg(QString::number(i+1)));
         appendRow(tr("Text"), mTextEdits.last());
-        appendRow(tr("Action"), mEventChoosers.last());
+        appendRow(tr("Action"), mActionButtons.last());
         //appendRow(tr("Condition"), mConditionEdits.last());
         endGroup();
 
@@ -38,9 +38,6 @@ MenuEditorWidget::MenuEditorWidget(QWidget *parent) :
 
         //connect(mConditionEdits.last(), SIGNAL(textChanged()), this, SLOT(onConditionChanged()));
         connect(mTextEdits.last(), SIGNAL(textEdited(const QString&)), this, SLOT(onTextEdited(const QString&)));
-        connect(mEventChoosers.last(), SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
-        connect(mEventChoosers.last(), SIGNAL(itemRemoved(int)), this, SLOT(onItemRemoved(int)));
-        connect(mEventChoosers.last(), SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
     }
 
     resizeColumnToContents(0);
@@ -60,8 +57,8 @@ void MenuEditorWidget::updateData(GameObject * object)
         lineEditor->clear();
     foreach(QTextEdit* conditionEditor, mConditionEdits)
         conditionEditor->clear();
-    foreach(ComboBox* eventChooser, mEventChoosers)
-        eventChooser->clear();
+    foreach(ActionManagerButton* button, mActionButtons)
+        button->clear();
 
     MenuOption* option = 0;
     QList<Object*> objects = menu->objects();
@@ -91,14 +88,8 @@ void MenuEditorWidget::updateData(GameObject * object)
         if (i < mConditionEdits.size())
             mConditionEdits[i]->setPlainText(option->condition());
 
-        actions = option->actions();
-        if (i < mEventChoosers.size()) {
-            for(int j=0; j < actions.size(); j++) {
-                const GameObjectMetaType* metatype = GameObjectMetaType::metaType(actions[j]->type());
-                const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
-                mEventChoosers[i]->addItem(typeIcon, actions[j]->toString());
-            }
-        }
+        if (i < mActionButtons.size())
+            mActionButtons[i]->setActionManager(option->actionManager());
     }
 }
 
@@ -157,72 +148,6 @@ void MenuEditorWidget::onTextEdited(const QString & text)
     MenuOption* option = menu->optionAt(index);
     if (option)
         option->setText(text);
-}
-
-void MenuEditorWidget::onAddItemActivated()
-{
-    Menu* menu = qobject_cast<Menu*>(mGameObject);
-    if (!menu)
-        return;
-
-    AddActionDialog dialog(qobject_cast<QObject*>(mGameObject), this);
-    dialog.exec();
-
-    if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
-        Action* action = dialog.selectedAction();
-
-        ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
-        if(comboBox && action) {
-            const QIcon typeIcon = GameObjectMetaType::icon(action->type());
-            comboBox->addItem(typeIcon, action->toString());
-            int index = mEventChoosers.indexOf(comboBox);
-            MenuOption* option = menu->optionAt(index);
-            if (option)
-                option->addAction(action);
-        }
-    }
-}
-
-void MenuEditorWidget::onItemRemoved(int actionIndex)
-{
-    Menu* menu = qobject_cast<Menu*>(mGameObject);
-    ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
-    if (! menu || ! comboBox)
-        return;
-
-    int optIndex = mEventChoosers.indexOf(comboBox);
-    MenuOption* option = menu->optionAt(optIndex);
-    if (option)
-        option->removeActionAt(actionIndex);
-}
-
-void MenuEditorWidget::onItemActivated(int actionIndex)
-{
-    Menu* menu = qobject_cast<Menu*>(mGameObject);
-    if (!menu)
-        return;
-
-    int optIndex = widgetIndex(sender());
-    MenuOption* option = menu->optionAt(optIndex);
-    if (! option)
-        return;
-
-    QList<Action*> actions = option->actions();
-    if (actionIndex < 0 || actionIndex >= actions.size())
-        return;
-
-    AddActionDialog dialog(actions[actionIndex]);
-    dialog.exec();
-
-    mEventChoosers[optIndex]->setItemText(actionIndex, actions[actionIndex]->toString());
-}
-
-int MenuEditorWidget::widgetIndex(QObject* objectComboBox)
-{
-    ComboBox *comboBox = qobject_cast<ComboBox*>(objectComboBox);
-    if (comboBox)
-      return mEventChoosers.indexOf(comboBox);
-    return -1;
 }
 
 void MenuEditorWidget::onButtonChanged(Object * obj)
