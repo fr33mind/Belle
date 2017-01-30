@@ -26,6 +26,17 @@ MenuOption::MenuOption(const QVariantMap& data, QObject* parent) :
 void MenuOption::init()
 {
     setType(GameObjectMetaType::MenuOption);
+    mActionManager = createActionManager();
+}
+
+GameObjectManager* MenuOption::createActionManager()
+{
+    GameObjectManager* actionManager = new GameObjectManager(this);
+    actionManager->setUniqueNames(false);
+    actionManager->setAllowEmptyNames(true);
+    actionManager->setObjectsParent(this);
+    connect(actionManager, SIGNAL(destroyed()), this, SLOT(onActionManagerDestroyed()));
+    return actionManager;
 }
 
 void MenuOption::loadData(const QVariantMap & data, bool internal)
@@ -46,28 +57,63 @@ void MenuOption::loadData(const QVariantMap & data, bool internal)
 
 QList<Action *> MenuOption::actions() const
 {
-    return mActions;
+    QList<Action*> actions;
+    Action* action = 0;
+
+    if (!mActionManager)
+        return actions;
+
+    foreach(GameObject* obj, mActionManager->objects()) {
+        action = qobject_cast<Action*>(obj);
+        if (action)
+            actions.append(action);
+    }
+
+    return actions;
 }
 
 void MenuOption::setActions(const QList<Action *> & actions)
 {
-    mActions = actions;
+    if (!mActionManager)
+        return;
+
+    QList<GameObject*> prevObjects = mActionManager->objects();
+    mActionManager->clear();
+
+    foreach(Action* action, actions) {
+        mActionManager->add(action);
+        if (prevObjects.contains(action)) {
+            prevObjects.removeAll(action);
+        }
+    }
+
+    foreach(GameObject* obj, prevObjects) {
+        if (obj)
+            delete obj;
+    }
+}
+
+GameObjectManager* MenuOption::actionManager() const
+{
+    return mActionManager;
 }
 
 void MenuOption::addAction(Action* action)
 {
-    mActions.append(action);
+    if (!mActionManager)
+        return;
+
+    mActionManager->add(action);
     emit dataChanged();
 }
 
 void MenuOption::removeActionAt(int index)
 {
-    if (index >= 0 && index < mActions.size()) {
-        Action* action = mActions.takeAt(index);
-        if (action)
-            action->deleteLater();
-        emit dataChanged();
-    }
+    if (!mActionManager)
+        return;
+
+    mActionManager->removeAt(index, true);
+    emit dataChanged();
 }
 
 QString MenuOption::condition() const
@@ -88,12 +134,19 @@ QVariantMap MenuOption::toJsonObject(bool internal) const
     QVariantMap option = Button::toJsonObject(internal);
     QVariantList actions;
 
-    for(int i=0; i < mActions.size(); i++) {
-        actions.append(mActions[i]->toJsonObject(internal));
+    if (mActionManager) {
+        for(int i=0; i < mActionManager->size(); i++) {
+            actions.append(mActionManager->objectAt(i)->toJsonObject(internal));
+        }
     }
 
     option.insert("actions", actions);
     if (! mCondition.isEmpty())
         option.insert("condition", mCondition);
     return option;
+}
+
+void MenuOption::onActionManagerDestroyed()
+{
+    mActionManager = 0;
 }

@@ -2,15 +2,17 @@
 #define MENUOPTION_H
 
 #include "button.h"
+#include "gameobjectmanager.h"
 
 class Action;
+class GameObjectManager;
 
 class MenuOption : public Button
 {
     Q_OBJECT
 
     QString mText;
-    QList<Action*> mActions;
+    GameObjectManager* mActionManager;
     QString mCondition;
 
 public:
@@ -20,6 +22,7 @@ public:
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
     QList<Action*> actions() const;
+    GameObjectManager* actionManager() const;
     void setActions(const QList<Action*>&);
     void addAction(Action*);
     void removeActionAt(int);
@@ -30,8 +33,12 @@ public:
 protected:
     virtual void loadData(const QVariantMap&, bool internal=false);
 
+private slots:
+    void onActionManagerDestroyed();
+
 private:
     void init();
+    GameObjectManager* createActionManager();
 };
 
 #endif // MENUOPTION_H
