@@ -36,21 +36,13 @@ BranchEditorWidget::BranchEditorWidget(QWidget *parent) :
     endGroup();
 
     beginGroup(tr("If True"));
-    mTrueActionsChooser = new ComboBox(this);
-    mTrueActionsChooser->setObjectName("true");
-    appendRow(tr("Action"), mTrueActionsChooser);
-    connect(mTrueActionsChooser, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
-    connect(mTrueActionsChooser, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
-    connect(mTrueActionsChooser, SIGNAL(itemRemoved(int)), this, SLOT(onItemRemoved(int)));
+    mTrueActionsButton = new ActionManagerButton(this);
+    appendRow(tr("Actions"), mTrueActionsButton);
     endGroup();
 
     beginGroup(tr("If False"));
-    mFalseActionsChooser = new ComboBox(this);
-    mFalseActionsChooser->setObjectName("false");
-    appendRow(tr("Action"), mFalseActionsChooser);
-    connect(mFalseActionsChooser, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
-    connect(mFalseActionsChooser, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
-    connect(mFalseActionsChooser, SIGNAL(itemRemoved(int)), this, SLOT(onItemRemoved(int)));
+    mFalseActionsButton = new ActionManagerButton(this);
+    appendRow(tr("Actions"), mFalseActionsButton);
     endGroup();
 
     resizeColumnToContents(0);
@@ -66,26 +58,14 @@ void BranchEditorWidget::updateData(GameObject* action)
     connect(mConditionEdit, SIGNAL(conditionChanged()), branch, SLOT(onConditionChanged()), Qt::UniqueConnection);
     connect(mConditionEdit, SIGNAL(conditionChanged(AbstractCondition*)), branch, SLOT(setCondition(AbstractCondition*)), Qt::UniqueConnection);
 
-    mTrueActionsChooser->clear();
-    mFalseActionsChooser->clear();
-
     mConditionEdit->clear();
     mConditionEdit->setCondition(branch->condition());
 
-    const GameObjectMetaType* metatype = 0;
-    QList<Action*> actions = branch->actions(true);
-    foreach(Action* action,  actions) {
-        metatype = GameObjectMetaType::metaType(action->type());
-        const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
-        mTrueActionsChooser->addItem(typeIcon, action->toString());
-    }
+    connect(mTrueActionsButton, SIGNAL(managingFinished()), branch, SLOT(updateDisplayText()), Qt::UniqueConnection);
+    connect(mFalseActionsButton, SIGNAL(managingFinished()), branch, SLOT(updateDisplayText()), Qt::UniqueConnection);
 
-    actions = branch->actions(false);
-    foreach(Action* action,  actions) {
-        metatype = GameObjectMetaType::metaType(action->type());
-        const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
-        mFalseActionsChooser->addItem(typeIcon, action->toString());
-    }
+    mTrueActionsButton->setActionManager(branch->actionManager(true));
+    mFalseActionsButton->setActionManager(branch->actionManager(false));
 }
 
 void BranchEditorWidget::onConditionsClicked()
@@ -100,73 +80,13 @@ bool BranchEditorWidget::eventFilter(QObject * obj, QEvent * event)
     return ActionEditorWidget::eventFilter(obj, event);
 }
 
-void BranchEditorWidget::onAddItemActivated()
-{
-    Branch *branch = qobject_cast<Branch*>(mGameObject);
-    if (! branch)
-        return;
-
-    AddActionDialog dialog(qobject_cast<QObject*>(mGameObject));
-    dialog.exec();
-
-    if (dialog.result() == QDialog::Accepted && dialog.selectedAction()) {
-
-        Action* action = dialog.selectedAction();
-        ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
-        if(comboBox && action) {
-            const GameObjectMetaType* metatype = GameObjectMetaType::metaType(action->type());
-            const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
-
-            comboBox->addItem(typeIcon, action->toString());
-            if (sender()->objectName() == "true")
-                branch->appendAction(action, true);
-            else
-                branch->appendAction(action, false);
-        }
-    }
-}
-
-void BranchEditorWidget::onItemActivated(int index)
-{
-    Action* action = 0;
-    Branch *branch = qobject_cast<Branch*>(mGameObject);
-
-    if (! branch)
-        return;
-
-    if (sender()->objectName() == "true")
-        action = branch->action(index, true);
-    else
-        action = branch->action(index, false);
-
-    if (! action)
-        return;
-
-    AddActionDialog dialog(action);
-    dialog.exec();
-
-    //update action's text
-    if (sender()->objectName() == "true")
-        mTrueActionsChooser->setItemText(index, action->toString());
-    else
-        mFalseActionsChooser->setItemText(index, action->toString());
-}
-
-void BranchEditorWidget::onItemRemoved(int index)
-{
-    Branch *branch = qobject_cast<Branch*>(mGameObject);
-    if (branch) {
-        if (sender()->objectName() == "true")
-            branch->removeAction(index, true, true);
-        else
-            branch->removeAction(index, false, true);
-    }
-}
-
 void BranchEditorWidget::disconnectGameObject()
 {
     ActionEditorWidget::disconnectGameObject();
 
-    if (mGameObject)
+    if (mGameObject) {
         mConditionEdit->disconnect(mGameObject);
+        mTrueActionsButton->disconnect(mGameObject);
+        mFalseActionsButton->disconnect(mGameObject);
+    }
 }

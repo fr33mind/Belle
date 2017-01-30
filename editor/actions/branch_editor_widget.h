@@ -21,8 +21,8 @@
 
 #include "action_editor_widget.h"
 #include "branch.h"
-#include "combobox.h"
 #include "condition_text_edit.h"
+#include "actionmanagerbutton.h"
 
 class Branch;
 class ConditionTextEdit;
@@ -42,14 +42,11 @@ signals:
     
 private slots:
     void onConditionsClicked();
-    void onAddItemActivated();
-    void onItemActivated(int);
-    void onItemRemoved(int);
 
 private:
     ConditionTextEdit* mConditionEdit;
-    ComboBox* mTrueActionsChooser;
-    ComboBox* mFalseActionsChooser;
+    ActionManagerButton* mTrueActionsButton;
+    ActionManagerButton* mFalseActionsButton;
     
 };
 
