@@ -32,6 +32,9 @@ public:
      virtual QVariantMap toJsonObject(bool internal=true) const;
      void setMenuResource(Menu*);
 
+public slots:
+     void updateDisplayText();
+
 signals:
 
 protected:
@@ -42,7 +45,6 @@ protected:
     virtual void restoreSceneObject();
 
 private slots:
-    void updateDisplayText();
     void onMenuResourceDestroyed();
 
 private:

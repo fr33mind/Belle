@@ -24,12 +24,14 @@
 #include "show_menu.h"
 #include "combobox.h"
 #include "object_combobox.h"
+#include "actionmanagerbutton.h"
 
 #define NUMBER_OF_OPTIONS 8
 
 class ShowMenu;
 class Menu;
 class ObjectComboBox;
+class ActionManagerButton;
 
 class ShowMenuEditorWidget : public ActionEditorWidget
 {
@@ -37,7 +39,7 @@ class ShowMenuEditorWidget : public ActionEditorWidget
 
     QList<QLineEdit*> mTextEdits;
     QList<QTextEdit*> mConditionEdits;
-    QList<ComboBox*> mEventChoosers;
+    QList<ActionManagerButton*> mActionButtons;
     QComboBox* mChooseNumberOfOptions;
     int mFirstOptionIndex;
     ObjectComboBox* mMenuComboBox;
@@ -49,7 +51,6 @@ protected:
     virtual void updateData(GameObject*);
 
 private:
-    int widgetIndex(QObject*);
     void setNumberOfOptions(int);
     void _updateTexts(Menu*);
 
@@ -57,14 +58,12 @@ signals:
 
 public slots:
     void onTextEdited(const QString&);
-    void onAddItemActivated();
     void onNumberOfOptionsChanged(int);
-    void onItemRemoved(int);
-    void onItemActivated(int);
     void onConditionChanged();
 
 private slots:
     void onMenuChanged(Object*);
+    void updateShowMenuText();
 
 };
 
