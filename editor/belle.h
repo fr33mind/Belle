@@ -104,7 +104,7 @@ class Belle : public QMainWindow
         void onSceneRemoved(int);
         void onSceneNameChanged(int, const QString&);
         QString exportProject(const QString& path="", bool toRun=false);
-        void saveProject();
+        bool saveProject();
         void newProject();
         void scenesTabWidgetPageChanged(int);
 

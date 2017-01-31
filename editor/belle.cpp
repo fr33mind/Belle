@@ -845,7 +845,7 @@ QString Belle::exportProject(const QString& _path, bool toRun)
     //Utils::safeCopy(QDir::current().absoluteFilePath(fileName), projectDir.absoluteFilePath(fileName));
 }
 
-void Belle::saveProject()
+bool Belle::saveProject()
 {
     if (mSavePath.isEmpty() || ! QFile::exists(mSavePath)) {
         SaveProjectDialog saveProjectDialog(mNovelData.value("title").toString(), this);
@@ -857,7 +857,7 @@ void Belle::saveProject()
             changeProjectTitle(saveProjectDialog.projectName());
         }
         else
-            return;
+            return false;
     }
 
     if (QFile::exists(mSavePath)) {
@@ -869,7 +869,11 @@ void Belle::saveProject()
 
         if(statusBar())
             statusBar()->showMessage(tr("Project saved..."), 3000);
+
+        return true;
     }
+
+    return false;
 }
 
 QVariantMap Belle::readGameFile(const QString& filepath) const
@@ -1423,8 +1427,11 @@ bool Belle::confirmQuit(const QString& title, const QString& text)
         reply = QMessageBox::question(this, title, text,
                                       QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel, QMessageBox::Cancel);
 
-        if (reply == QMessageBox::Yes)
-            saveProject();
+        if (reply == QMessageBox::Yes) {
+            bool saved = saveProject();
+            if (!saved)
+                return false;
+        }
 
         if (reply == QMessageBox::Yes || reply == QMessageBox::No)
             return true;
