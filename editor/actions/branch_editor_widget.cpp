@@ -36,11 +36,13 @@ BranchEditorWidget::BranchEditorWidget(QWidget *parent) :
 
     beginGroup(tr("If True"));
     mTrueActionsButton = new ActionManagerButton(this);
+    mTrueActionsButton->hideAction(GameObjectMetaType::Label);
     appendRow(tr("Actions"), mTrueActionsButton);
     endGroup();
 
     beginGroup(tr("If False"));
     mFalseActionsButton = new ActionManagerButton(this);
+    mFalseActionsButton->hideAction(GameObjectMetaType::Label);
     appendRow(tr("Actions"), mFalseActionsButton);
     endGroup();
 

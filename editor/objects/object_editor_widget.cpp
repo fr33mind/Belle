@@ -145,11 +145,16 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     this->endGroup();
 
     this->beginGroup(tr("Events"));
+    QList<GameObjectMetaType::Type> hiddenTypes;
+    hiddenTypes << GameObjectMetaType::Label << GameObjectMetaType::ShowMenu;
     mMousePressButton = new ActionManagerButton(this);
+    mMousePressButton->hideActions(hiddenTypes);
     this->appendRow(tr("Mouse Press"), mMousePressButton);
     mMouseReleaseButton = new ActionManagerButton(this);
+    mMouseReleaseButton->hideActions(hiddenTypes);
     this->appendRow(tr("Mouse Release"), mMouseReleaseButton);
     mMouseMoveButton = new ActionManagerButton(this);
+    mMouseMoveButton->hideActions(hiddenTypes);
     this->appendRow(tr("Mouse Move"), mMouseMoveButton);
     this->endGroup();
 

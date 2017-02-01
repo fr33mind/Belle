@@ -37,6 +37,7 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
     endGroup();
 
     mFirstOptionIndex = model()->rowCount();
+    ActionManagerButton* actionManagerButton = 0;
 
     for (int i=0; i < NUMBER_OF_OPTIONS; i++) {
         mTextEdits.append(new QLineEdit(this));
@@ -44,7 +45,9 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
 //        conditionEdit->installEventFilter(this);
 //        conditionEdit->setMaximumHeight(50);
 //        mConditionEdits.append(conditionEdit);
-        mActionButtons.append(new ActionManagerButton(this));
+        actionManagerButton = new ActionManagerButton(this);
+        actionManagerButton->hideAction(GameObjectMetaType::Label);
+        mActionButtons.append(actionManagerButton);
 
         beginGroup(QString("%1 %2").arg(tr("Option")).arg(QString::number(i+1)));
         appendRow(tr("Text"), mTextEdits.last());
