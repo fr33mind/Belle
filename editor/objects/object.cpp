@@ -1415,3 +1415,27 @@ int Object::temporaryBackgroundOpacity() const
 
     //mEditorWidget->setFilters();
 }*/
+
+void Object::alignHorizontally(const QString & alignment)
+{
+    QString align = alignment.toLower();
+
+    if (align == "left")
+        setX(0);
+    else if (align == "center")
+        setX(Scene::width()/2 - width()/2);
+    else if (align == "right")
+        setX(Scene::width() - width());
+}
+
+void Object::alignVertically(const QString & alignment)
+{
+    QString align = alignment.toLower();
+
+    if (align == "top")
+        setY(0);
+    else if (align == "center")
+        setY(Scene::height()/2 - height()/2);
+    else if (align == "bottom")
+        setY(Scene::height() - height());
+}

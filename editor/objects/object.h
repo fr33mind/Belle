@@ -161,6 +161,9 @@ class Object : public GameObject
         bool keepAspectRatio();
         void setKeepAspectRatio(bool);
 
+        void alignHorizontally(const QString&);
+        void alignVertically(const QString&);
+
         static QString defaultFontFamily();
         static void setDefaultFontFamily(const QString&);
         static int defaultFontSize();
