@@ -87,14 +87,25 @@ void ShowMenu::loadData(const QVariantMap & data, bool internal)
             setMenuResource(qobject_cast<Menu*>(obj));
         }
     }
+
+    if (data.value("menuHA").type() == QVariant::String) {
+        setMenuHAlignment(data.value("menuHA").toString());
+    }
+
+    if (data.value("menuVA").type() == QVariant::String) {
+        setMenuVAlignment(data.value("menuVA").toString());
+    }
 }
 
 QVariantMap ShowMenu::toJsonObject(bool internal) const
 {
     QVariantMap object = Action::toJsonObject(internal);
 
-    if (sceneObject())
+    if (sceneObject()) {
         object.insert("object", sceneObject()->toJsonObject(internal));
+        object.insert("menuHA", mMenuHAlignment);
+        object.insert("menuVA", mMenuVAlignment);
+    }
 
     if (mMenuResource)
         object.insert("menuResource", mMenuResource->name());
@@ -199,4 +210,38 @@ void ShowMenu::setMenuResource(Menu * menu)
 void ShowMenu::onMenuResourceDestroyed()
 {
     mMenuResource = 0;
+}
+
+QString ShowMenu::menuHAlignment() const
+{
+    return mMenuHAlignment;
+}
+
+void ShowMenu::setMenuHAlignment(const QString& alignment)
+{
+    mMenuHAlignment = alignment.toLower();
+
+    Object* obj = sceneObject();
+    if (obj) {
+        obj->alignHorizontally(mMenuHAlignment);
+    }
+
+    notify("menuHA", mMenuHAlignment);
+}
+
+QString ShowMenu::menuVAlignment() const
+{
+    return mMenuVAlignment;
+}
+
+void ShowMenu::setMenuVAlignment(const QString& alignment)
+{
+    mMenuVAlignment = alignment.toLower();
+
+    Object* obj = sceneObject();
+    if (obj) {
+        obj->alignVertically(mMenuVAlignment);
+    }
+
+    notify("menuVA", mMenuVAlignment);
 }

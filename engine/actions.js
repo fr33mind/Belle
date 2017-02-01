@@ -1046,10 +1046,20 @@ function ShowMenu(data, parent)
     Action.call(this, data, parent);
     this.options = 0;
     this.selectedOption = null;
+    this.menuHAlignment = "";
+    this.menuVAlignment = "";
     var object = this.getObject();
 
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
+
+    if ("menuHA" in data) {
+      this.menuHAlignment = data["menuHA"];
+    }
+
+    if ("menuVA" in data) {
+      this.menuVAlignment = data["menuVA"];
+    }
     
     if (object) {
       object.bind("optionSelected", this, function(option) {
@@ -1064,8 +1074,14 @@ ShowMenu.prototype.onExecute = function()
 {
     var scene = this.getScene();
     var object = this.getObject();
+    var x, y;
+
     if (object && scene) {
       object.setVisible(true);
+      x = object.mapXFromName(this.menuHAlignment);
+      y = object.mapYFromName(this.menuVAlignment);
+      object.setX(x);
+      object.setY(y);
       scene.addObject(object, true);
     }
 }

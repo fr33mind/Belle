@@ -43,6 +43,8 @@ class ShowMenuEditorWidget : public ActionEditorWidget
     QComboBox* mChooseNumberOfOptions;
     int mFirstOptionIndex;
     ObjectComboBox* mMenuComboBox;
+    QComboBox* mMenuHAlignmentComboBox;
+    QComboBox* mMenuVAlignmentComboBox;
 
 public:
     explicit ShowMenuEditorWidget(QWidget *parent = 0);
@@ -64,6 +66,8 @@ public slots:
 private slots:
     void onMenuChanged(Object*);
     void updateShowMenuText();
+    void onMenuHAlignmentChanged(int);
+    void onMenuVAlignmentChanged(int);
 
 };
 

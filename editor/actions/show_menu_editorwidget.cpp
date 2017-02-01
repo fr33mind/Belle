@@ -16,6 +16,8 @@
 
 #include "show_menu_editorwidget.h"
 
+#include <QHBoxLayout>
+
 #include "condition_text_edit.h"
 #include "scene_manager.h"
 #include "menu.h"
@@ -27,12 +29,33 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
     mMenuComboBox = new ObjectComboBox(this);
     connect(mMenuComboBox, SIGNAL(objectChanged(Object*)), this, SLOT(onMenuChanged(Object*)));
 
+    QWidget* alignmentWidget = new QWidget(this);
+    mMenuHAlignmentComboBox = new QComboBox(alignmentWidget);
+    mMenuHAlignmentComboBox->addItem("");
+    mMenuHAlignmentComboBox->addItem(tr("Left"), "left");
+    mMenuHAlignmentComboBox->addItem(tr("Center"), "center");
+    mMenuHAlignmentComboBox->addItem(tr("Right"), "right");
+    connect(mMenuHAlignmentComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onMenuHAlignmentChanged(int)));
+
+    mMenuVAlignmentComboBox = new QComboBox(alignmentWidget);
+    mMenuVAlignmentComboBox->addItem("");
+    mMenuVAlignmentComboBox->addItem(tr("Top"), "top");
+    mMenuVAlignmentComboBox->addItem(tr("Center"), "center");
+    mMenuVAlignmentComboBox->addItem(tr("Bottom"), "bottom");
+    connect(mMenuVAlignmentComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onMenuVAlignmentChanged(int)));
+
+    QHBoxLayout* layout = new QHBoxLayout(alignmentWidget);
+    layout->setContentsMargins(0, 1, 0, 1);
+    layout->addWidget(mMenuHAlignmentComboBox);
+    layout->addWidget(mMenuVAlignmentComboBox);
+
     mChooseNumberOfOptions = new QComboBox(this);
     for(int i=2; i <= NUMBER_OF_OPTIONS; i++)
         mChooseNumberOfOptions->addItem(QString::number(i));
     connect(mChooseNumberOfOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(onNumberOfOptionsChanged(int)));
     beginGroup(tr("Show Menu"));
     appendRow(tr("Menu"), mMenuComboBox);
+    appendRow(tr("Menu alignment"), alignmentWidget);
     appendRow(tr("Number of Options"), mChooseNumberOfOptions);
     endGroup();
 
@@ -86,6 +109,11 @@ void ShowMenuEditorWidget::updateData(GameObject * action)
         mMenuComboBox->setCurrentObject(qobject_cast<Menu*>(obj->resource()));
     }
 
+    int index = mMenuHAlignmentComboBox->findData(showMenu->menuHAlignment());
+    mMenuHAlignmentComboBox->setCurrentIndex(index);
+    index = mMenuVAlignmentComboBox->findData(showMenu->menuVAlignment());
+    mMenuVAlignmentComboBox->setCurrentIndex(index);
+
     //clear all data
     foreach(QLineEdit* lineEditor, mTextEdits)
         lineEditor->clear();
@@ -101,7 +129,11 @@ void ShowMenuEditorWidget::updateData(GameObject * action)
     MenuOption* option = 0;
     QList<Object*> objects = menu->objects();
 
-    int index = menu->objects().size() >= 2 ? menu->objects().size()-2 : 0;
+    //realign menu in case it was moved by the user
+    menu->alignHorizontally(showMenu->menuHAlignment());
+    menu->alignVertically(showMenu->menuVAlignment());
+
+    index = menu->objects().size() >= 2 ? menu->objects().size()-2 : 0;
     mChooseNumberOfOptions->setCurrentIndex(index);
     setNumberOfOptions(menu->options().size());
 
@@ -215,4 +247,24 @@ void ShowMenuEditorWidget::updateShowMenuText()
         return;
 
     showMenu->updateDisplayText();
+}
+
+void ShowMenuEditorWidget::onMenuHAlignmentChanged(int index)
+{
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (!showMenu)
+        return;
+
+    QString alignment = mMenuHAlignmentComboBox->itemData(index).toString();
+    showMenu->setMenuHAlignment(alignment);
+}
+
+void ShowMenuEditorWidget::onMenuVAlignmentChanged(int index)
+{
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(mGameObject);
+    if (!showMenu)
+        return;
+
+    QString alignment = mMenuVAlignmentComboBox->itemData(index).toString();
+    showMenu->setMenuVAlignment(alignment);
 }

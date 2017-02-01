@@ -32,6 +32,12 @@ public:
      virtual QVariantMap toJsonObject(bool internal=true) const;
      void setMenuResource(Menu*);
 
+     QString menuHAlignment() const;
+     void setMenuHAlignment(const QString&);
+
+     QString menuVAlignment() const;
+     void setMenuVAlignment(const QString&);
+
 public slots:
      void updateDisplayText();
 
@@ -50,6 +56,8 @@ private slots:
 private:
     void init();
     Menu* mMenuResource;
+    QString mMenuHAlignment;
+    QString mMenuVAlignment;
 
 };
 
