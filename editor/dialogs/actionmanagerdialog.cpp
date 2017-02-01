@@ -110,3 +110,8 @@ void ActionManagerDialog::keyPressEvent(QKeyEvent *event)
 
     QDialog::keyPressEvent(event);
 }
+
+ActionCatalogWidget* ActionManagerDialog::actionCatalogWidget() const
+{
+    return mActionCatalogWidget;
+}

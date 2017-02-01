@@ -110,3 +110,35 @@ void ActionCatalogWidget::_appendRow(const GameObjectMetaType * metaType)
         appendRow(metaType->icon(), metaType->name(), metaType->type());
     }
 }
+
+void ActionCatalogWidget::hideAction(GameObjectMetaType::Type type)
+{
+    QVariantList filters = this->filters();
+    if (!filters.contains(type)) {
+        filters << type;
+        setFilters(filters);
+    }
+}
+
+void ActionCatalogWidget::hideActions(const QList<GameObjectMetaType::Type>& types)
+{
+    foreach(GameObjectMetaType::Type type, types) {
+        hideAction(type);
+    }
+}
+
+void ActionCatalogWidget::showAction(GameObjectMetaType::Type type)
+{
+    QVariantList filters = this->filters();
+    if (filters.contains(type)) {
+        filters.removeAll(type);
+        setFilters(filters);
+    }
+}
+
+void ActionCatalogWidget::showActions(const QList<GameObjectMetaType::Type>& types)
+{
+    foreach(GameObjectMetaType::Type type, types) {
+        showAction(type);
+    }
+}

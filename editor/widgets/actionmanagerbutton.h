@@ -16,6 +16,12 @@ public:
     GameObjectManager* actionManager() const;
     void setActionManager(GameObjectManager*);
 
+    void hideAction(GameObjectMetaType::Type);
+    void hideActions(const QList<GameObjectMetaType::Type>&);
+
+    void showAction(GameObjectMetaType::Type);
+    void showActions(const QList<GameObjectMetaType::Type>&);
+
 public slots:
     void clear();
 
@@ -29,6 +35,7 @@ private slots:
 private:
     GameObjectManager* mActionManager;
     QString mDefaultText;
+    QList<GameObjectMetaType::Type> mActionFilter;
 
     void updateText();
 

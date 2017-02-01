@@ -16,6 +16,7 @@ class ActionManagerDialog : public QDialog
 public:
     explicit ActionManagerDialog(GameObjectManager*, QWidget *parent = 0);
     virtual ~ActionManagerDialog();
+    ActionCatalogWidget* actionCatalogWidget() const;
 
 protected:
     void switchPropertiesEditorWidget(QWidget*);

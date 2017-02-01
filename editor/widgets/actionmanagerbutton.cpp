@@ -39,6 +39,9 @@ void ActionManagerButton::onClicked()
         return;
 
     ActionManagerDialog dialog(mActionManager);
+    ActionCatalogWidget* widget = dialog.actionCatalogWidget();
+    if (widget)
+        widget->hideActions(mActionFilter);
     dialog.exec();
     updateText();
     emit managingFinished();
@@ -73,4 +76,32 @@ void ActionManagerButton::onActionManagerDestroyed()
 void ActionManagerButton::clear()
 {
     setActionManager(0);
+}
+
+void ActionManagerButton::hideAction(GameObjectMetaType::Type type)
+{
+    if (!mActionFilter.contains(type)) {
+        mActionFilter.append(type);
+    }
+}
+
+void ActionManagerButton::hideActions(const QList<GameObjectMetaType::Type>& types)
+{
+    foreach(GameObjectMetaType::Type type, types) {
+        hideAction(type);
+    }
+}
+
+void ActionManagerButton::showAction(GameObjectMetaType::Type type)
+{
+    if (mActionFilter.contains(type)) {
+        mActionFilter.removeAll(type);
+    }
+}
+
+void ActionManagerButton::showActions(const QList<GameObjectMetaType::Type>& types)
+{
+    foreach(GameObjectMetaType::Type type, types) {
+        showAction(type);
+    }
 }

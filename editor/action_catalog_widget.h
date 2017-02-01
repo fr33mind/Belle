@@ -28,6 +28,12 @@ class ActionCatalogWidget : public PropertiesWidget
 public:
     explicit ActionCatalogWidget(QWidget *parent = 0);
 
+    void hideAction(GameObjectMetaType::Type);
+    void hideActions(const QList<GameObjectMetaType::Type>&);
+
+    void showAction(GameObjectMetaType::Type);
+    void showActions(const QList<GameObjectMetaType::Type>&);
+
 signals:
     void newAction(Action*);
 
