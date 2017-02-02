@@ -749,7 +749,9 @@ void Belle::showBuiltinBrowserMessage()
                      "Since it's more integrated with Belle it's easier and quicker "
                      "to use than an external browser.\n"
                      "Nevertheless it's also recommended that, "
-                     "from time to time, you test your game in other browsers.\n\n"
+                     "from time to time, you test your game in other browsers.\n"
+                     "You can change the browser used to run your game at any time by "
+                     "going to the top menu bar and selecting Project > Properties > Project.\n\n"
                      "Do you want to switch to the built-in browser now?");
 
     QMessageBox msgBox(QMessageBox::Question, title, msg, QMessageBox::No | QMessageBox::Yes, this);
