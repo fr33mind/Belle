@@ -762,7 +762,8 @@ void Belle::showBuiltinBrowserMessage()
 
     bool use = result == QMessageBox::Yes ? true : false;
     Engine::setUseBuiltinBrowser(use);
-    mShowBuiltinBrowserMessage = !checkBox.isChecked();
+    if (use || checkBox.isChecked())
+        mShowBuiltinBrowserMessage = false;
 }
 
 void Belle::onRunTriggered()
