@@ -268,6 +268,7 @@ void Belle::saveSettings()
 {
     //save settings
     mSettings->setValue("showBuiltinBrowserMessage", mShowBuiltinBrowserMessage);
+    mSettings->setValue("showWebSafeFontsMessage", ChooseFontWidget::showWebSafeFontsMessage());
     mSettings->beginGroup("Window");
     mSettings->setValue("Geometry", this->saveGeometry());
     mSettings->setValue("State", this->saveState());
@@ -301,6 +302,8 @@ void Belle::restoreSettings()
     mShowBuiltinBrowserMessage = true;
     if (mSettings->contains("showBuiltinBrowserMessage"))
         mShowBuiltinBrowserMessage = mSettings->value("showBuiltinBrowserMessage").toBool();
+    if (mSettings->contains("showWebSafeFontsMessage"))
+        ChooseFontWidget::setShowWebSafeFontsMessage(mSettings->value("showWebSafeFontsMessage").toBool());
 }
 
 Belle::~Belle()

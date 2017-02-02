@@ -11,6 +11,9 @@ public:
     explicit ChooseFontWidget(QWidget *parent = 0);
     void loadFonts();
 
+    static bool showWebSafeFontsMessage();
+    static void setShowWebSafeFontsMessage(bool);
+
 protected:
     void loadWebSafeFonts();
     void loadApplicationFonts();
@@ -18,6 +21,7 @@ protected:
 signals:
     
 private slots:
+    void onActivated(int);
     
 };
 
