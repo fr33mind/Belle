@@ -128,7 +128,7 @@ void Object::move(int x, int y)
     QVariantMap data;
     data.insert("x", x);
     data.insert("y", y);
-    emit dataChanged(data);
+    notify(data);
     //emit positionChanged(mSceneRect.x(), mSceneRect.y());
 }
 
@@ -780,7 +780,7 @@ void Object::resize(int x, int y)
     int h = height();
     data.insert("width", w);
     data.insert("height", h);
-    emit dataChanged(data);
+    notify(data);
     emit resized(w, h);
 }
 
