@@ -196,13 +196,13 @@ QList<GameObject*> GameObject::clones() const
     return mClones;
 }
 
-void GameObject::blockNotifications(bool block)
+bool GameObject::blockNotifications(bool block)
 {
     // don't block signals for resources
     if (block && mClones.size())
-        return;
+        return signalsBlocked();
 
-    this->blockSignals(block);
+    return this->blockSignals(block);
 }
 
 void GameObject::setSync(bool sync)

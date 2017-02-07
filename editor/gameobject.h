@@ -37,6 +37,7 @@ public:
 
     bool blockLoad(bool);
     bool loadBlocked() const;
+    bool blockNotifications(bool);
 
     void sync();
     bool isSynced() const;
@@ -64,7 +65,6 @@ protected:
     virtual void afterLoadData(const QVariantMap&);
     void notify(const QString&, const QVariant&);
     void notify(const QVariantMap&);
-    void blockNotifications(bool);
     void setType(GameObjectMetaType::Type);
     void loadInternal(const QVariantMap&);
 
