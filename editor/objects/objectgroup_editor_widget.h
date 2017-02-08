@@ -36,9 +36,11 @@ signals:
 
 private slots:
     void onAlignToggled(bool);
+    void onObjectsSyncedToggled(bool);
 
 private:
     QCheckBox* mAlignCheckBox;
+    QCheckBox* mObjectsSyncedCheckBox;
 
 };
 

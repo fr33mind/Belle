@@ -22,12 +22,15 @@ ObjectGroupEditorWidget::ObjectGroupEditorWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {
     mAlignCheckBox = new QCheckBox(this);
+    mObjectsSyncedCheckBox = new QCheckBox(this);
 
     beginGroup(tr("Object Group"), "ObjectGroup");
     appendRow(tr("Align"), mAlignCheckBox);
+    appendRow(tr("Sync Objects"), mObjectsSyncedCheckBox);
     endGroup();
 
     connect(mAlignCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAlignToggled(bool)));
+    connect(mObjectsSyncedCheckBox, SIGNAL(toggled(bool)), this, SLOT(onObjectsSyncedToggled(bool)));
 }
 
 void ObjectGroupEditorWidget::updateData(GameObject* object)
@@ -38,6 +41,7 @@ void ObjectGroupEditorWidget::updateData(GameObject* object)
         return;
 
     mAlignCheckBox->setChecked(obj->isAlignEnabled());
+    mObjectsSyncedCheckBox->setChecked(obj->objectsSynced());
 }
 
 void ObjectGroupEditorWidget::onAlignToggled(bool checked)
@@ -47,4 +51,13 @@ void ObjectGroupEditorWidget::onAlignToggled(bool checked)
         return;
 
     obj->setAlignEnabled(checked);
+}
+
+void ObjectGroupEditorWidget::onObjectsSyncedToggled(bool checked)
+{
+    ObjectGroup* obj = qobject_cast<ObjectGroup*>(mGameObject);
+    if (! obj)
+        return;
+
+    obj->setObjectsSynced(checked);
 }
