@@ -29,11 +29,13 @@ class ObjectGroup : public Object
 public:
     explicit ObjectGroup(QObject *parent = 0, const QString& name="");
     ObjectGroup(const QVariantMap& data, QObject *parent = 0);
-    void append(Object*);
+    void append(Object*, int x=0);
+    void add(Object*, int x=0, int y=0);
     Object* object(int) const;
     Object* object(const QString&) const;
     Object* object(const QPoint&) const;
     QList<Object*> objects() const;
+    int count() const;
     QVariantList variantObjects() const;
     virtual void paint(QPainter&);
     virtual void move(int x, int y);
@@ -59,6 +61,9 @@ public:
 
     QRect childrenRect() const;
 
+    bool objectsSynced() const;
+    void setObjectsSynced(bool);
+
 signals:
 
 private slots:
@@ -67,7 +72,7 @@ private slots:
 
 protected:
     void _append(Object*);
-    QVariantMap prepareObjectData(int, const QVariantMap&);
+    void prepareObjectData(QVariantMap&);
     virtual void loadData(const QVariantMap&, bool internal=false);
     Object* createObject(const QVariantMap&);
     void checkStickyObjects();
@@ -83,13 +88,17 @@ private:
     bool mEditingMode;
     bool mAligning;
     bool mAlignEnabled;
+    bool mObjectsSynced;
     void init();
     int indexOf(Object*);
     void alignObjects();
     void alignObjectsHorizontally();
     void alignObjectsVertically();
+    void _alignObjectsVertically();
     void checkStickyObject(Object*);
     QVariantList objectsRelativeRectsData();
+    QList<QRect> objectsRelativeRects() const;
+    void loadOtherObjects(Object*, const QVariantMap&);
 };
 
 #endif // OBJECTGROUP_H

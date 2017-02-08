@@ -54,12 +54,17 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
         }
 
         checkStickyObjects();
-        setSpacing(calcSpacing());
+        updateSpacing();
+    }
+
+    if (data.value("objectsSynced").type() == QVariant::Bool) {
+        setObjectsSynced(data.value("objectsSynced").toBool());
     }
 
     //internal data passed between resource and clones
     if (data.contains("_object") && data.value("_object").type() == QVariant::Map) {
         QVariantMap object = data.value("_object").toMap();
+        obj = 0;
         if (object.contains("_index") && object.value("_index").canConvert(QVariant::Int)) {
             int _index = object.value("_index").toInt();
             if (_index >= 0 && _index < mObjects.size()) {
@@ -68,32 +73,58 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
                     loadObject(obj, object);
             }
         }
+
+        if (mObjectsSynced)
+            loadOtherObjects(obj, object);
+
+        notify("_object", object);
     }
 
     if (data.contains("editingModeData") && data.value("editingModeData").type() == QVariant::Map) {
         QVariantMap editingModeData = data.value("editingModeData").toMap();
         QVariantList rects = editingModeData.value("rects").toList();
         QRect rect;
+        int origX = x();
+        int origY = y();
+        Object* lastObj = 0;
         setEditingMode(true);
         for(int i=0; i < mObjects.size() && i < rects.size(); i++) {
             obj = mObjects.at(i);
             rect = rects.at(i).toRect();
             if (obj) {
+                bool blocked = obj->blockSignals(true);
                 obj->setX(this->x() + rect.x());
                 obj->setY(this->y() + rect.y());
                 obj->setWidth(rect.width());
                 obj->setHeight(rect.height());
+                obj->blockSignals(blocked);
+                lastObj = obj;
             }
         }
+
+        //Make sure all objects are updated.
+        if (mObjectsSynced && lastObj) {
+            int width = lastObj->width();
+            int height = lastObj->height();
+
+            for(int i=rects.size(); i < mObjects.size(); i++) {
+                obj = mObjects.at(i);
+                if (obj) {
+                    bool blocked = obj->blockSignals(true);
+                    obj->setWidth(width);
+                    obj->setHeight(height);
+                    obj->blockSignals(blocked);
+                }
+            }
+        }
+
         setEditingMode(false);
+        setX(origX);
+        setY(origY);
     }
 
     if (data.contains("alignEnabled") && data.value("alignEnabled").type() == QVariant::Bool) {
         setAlignEnabled(data.value("alignEnabled").toBool());
-    }
-
-    if (data.contains("alignObjects")) {
-        alignObjects();
     }
 
     if (data.contains("spacing") && data.value("spacing").canConvert(QVariant::Int)) {
@@ -112,6 +143,7 @@ void ObjectGroup::init()
     mAligning = false;
     mAlignEnabled = true;
     mSpacing = 0;
+    mObjectsSynced = false;
 }
 
 void ObjectGroup::_append(Object* obj)
@@ -121,21 +153,27 @@ void ObjectGroup::_append(Object* obj)
     mObjects.append(obj);
 }
 
-void ObjectGroup::append(Object* obj)
+void ObjectGroup::append(Object* obj, int x)
 {
     if (! obj)
         return;
 
-    int starty = this->y() + this->height();
+    int starty =  this->height();
     if (mObjects.size())
         starty += mSpacing;
-    obj->setY(starty);
-    obj->setX(this->x());
+    add(obj, x, starty);
+}
+
+void ObjectGroup::add(Object* obj, int x, int y)
+{
+    if (! obj)
+        return;
+
+    obj->setX(this->x() + x);
+    obj->setY(this->y() + y);
     _append(obj);
     adaptSize();
-    checkStickyObjects();
     this->notify("objects", variantObjects());
-    //connect(this, SIGNAL(resized(int,int)), obj, SLOT(onParentResized(int, int)));
 }
 
 void ObjectGroup::resizeSceneRect(int x, int y)
@@ -143,21 +181,41 @@ void ObjectGroup::resizeSceneRect(int x, int y)
     int prevX = mSceneRect.x();
     int prevY = mSceneRect.y();
     QRect rect = childrenRect();
-    int minHeight = mAlignEnabled ? childrenMinHeight() : rect.height();
-    int minWidth = mAlignEnabled ? 0 : rect.width();
 
     Object::resizeSceneRect(x, y);
 
-    if (mSceneRect.width() < minWidth) {
-        if (mSceneRect.x() != prevX)
-            mSceneRect.setX(rect.x());
-        mSceneRect.setWidth(minWidth);
-    }
+    if (mAlignEnabled) {
+        int minHeight = childrenMinHeight();
+        int minWidth = 0;
 
-    if (mSceneRect.height() < minHeight) {
-        if (mSceneRect.y() != prevY)
-            mSceneRect.setY(rect.y());
-        mSceneRect.setHeight(minHeight);
+        if (mSceneRect.width() < minWidth) {
+            if (mSceneRect.x() != prevX)
+                mSceneRect.setX(rect.x());
+            mSceneRect.setWidth(minWidth);
+        }
+
+        if (mSceneRect.height() < minHeight) {
+            if (mSceneRect.y() != prevY)
+                mSceneRect.setY(rect.y());
+            mSceneRect.setHeight(minHeight);
+        }
+    }
+    else {
+        if (mSceneRect.right() < rect.right()) {
+            mSceneRect.setRight(rect.right());
+        }
+
+        if (mSceneRect.left() > rect.left()) {
+            mSceneRect.setLeft(rect.left());
+        }
+
+        if (mSceneRect.top() > rect.top()) {
+            mSceneRect.setTop(rect.top());
+        }
+
+        if (mSceneRect.bottom() < rect.bottom()) {
+            mSceneRect.setBottom(rect.bottom());
+        }
     }
 
     this->alignObjects();
@@ -185,14 +243,13 @@ void ObjectGroup::setSpacing(int spacing)
     if (mSpacing == spacing)
         return;
 
-    int y = this->y();
-
-    for(int i=0; i < mObjects.size(); i++) {
-        mObjects[i]->setY(y);
-        y += mObjects[i]->height() + spacing;
-    }
-
     mSpacing = spacing;
+
+    //avoid sending superfluous signals. Just send "spacing" signal at the end
+    bool blocked = blockSignals(true);
+    _alignObjectsVertically();
+    adaptSize();
+    blockSignals(blocked);
     notify("spacing", mSpacing);
 }
 
@@ -218,8 +275,10 @@ void ObjectGroup::alignObjects()
     mAligning = true;
     alignObjectsHorizontally();
     alignObjectsVertically();
+    QVariantMap data;
+    data.insert("rects", objectsRelativeRectsData());
+    notify("editingModeData", data);
     mAligning = false;
-    notify("alignObjects", true);
 }
 
 void ObjectGroup::alignObjectsHorizontally()
@@ -264,15 +323,17 @@ void ObjectGroup::alignObjectsHorizontally()
 
 void ObjectGroup::alignObjectsVertically()
 {
-    int spacing = this->calcSpacing();
+    updateSpacing();
+    _alignObjectsVertically();
+}
+
+void ObjectGroup::_alignObjectsVertically()
+{
     int starty = this->y();
     for(int i=0; i < mObjects.size(); i++) {
         mObjects[i]->setY(starty);
-        starty += mObjects[i]->height() + spacing;
+        starty += mObjects[i]->height() + mSpacing;
     }
-
-    mSpacing = spacing;
-    notify("spacing", spacing);
 }
 
 void ObjectGroup::adaptSize()
@@ -285,6 +346,8 @@ void ObjectGroup::adaptSize()
     Object::setY(rect.top());
     Object::setWidth(rect.width());
     Object::setHeight(rect.height());
+
+    checkStickyObjects();
 }
 
 Object * ObjectGroup::object(int index) const
@@ -315,6 +378,9 @@ Object * ObjectGroup::object(const QPoint& point) const
 
 void ObjectGroup::move(int x, int y)
 {
+    if (mEditingMode)
+        return;
+
     QRect prevSceneRect = sceneRect();
     int difX, difY;
     Object::move(x, y);
@@ -391,26 +457,33 @@ void ObjectGroup::setY(int y)
 
 void ObjectGroup::setWidth(int width, bool percent)
 {
-    QRect rect = childrenRect();
-    if (!percent && width < rect.width())
-        width = rect.width();
+    if (!percent && !mAlignEnabled) {
+        QRect rect = childrenRect();
+        if (width < rect.width())
+            width = rect.width();
+    }
+
     Object::setWidth(width, percent);
 
-    /*for(int i=mObjects.size()-1; i >=0; --i) {
-        mObjects[i]->setWidth(width, mObjects[i]->percentWidth());
-    }*/
+    this->alignObjects();
 }
 
 void ObjectGroup::setHeight(int height, bool percent)
 {
-    QRect rect = childrenRect();
-    if (!percent && height < rect.height())
-        height = rect.height();
+    if (!percent) {
+        int minHeight = 0;
+        if (mAlignEnabled)
+            minHeight = childrenMinHeight();
+        else
+            minHeight = childrenRect().height();
+
+        if (height < minHeight)
+            height = minHeight;
+    }
+
     Object::setHeight(height, percent);
 
-    /*for(int i=mObjects.size()-1; i >=0; --i) {
-        mObjects[i]->setHeight(height, mObjects[i]->percentHeight());
-    }*/
+    this->alignObjects();
 }
 
 bool ObjectGroup::editingMode() const
@@ -424,13 +497,15 @@ void ObjectGroup::setEditingMode(bool mode)
         return;
 
     mEditingMode = mode;
-    if (! mEditingMode) {
+    if (!mEditingMode) {
+        bool blocked = blockSignals(true);
         adaptSize();
-        checkStickyObjects();
+        blockSignals(blocked);
         QVariantMap data;
         data.insert("rects", objectsRelativeRectsData());
         notify("editingModeData", data);
     }
+    notify("editingMode", mEditingMode);
 }
 
 QVariantList ObjectGroup::objectsRelativeRectsData()
@@ -446,6 +521,21 @@ QVariantList ObjectGroup::objectsRelativeRectsData()
     }
 
     return data;
+}
+
+QList<QRect> ObjectGroup::objectsRelativeRects() const
+{
+    QList<QRect> rects;
+    QRect rect;
+
+    foreach(Object* obj, mObjects) {
+        rect = obj->sceneRect();
+        rect.moveLeft(rect.x() - this->x());
+        rect.moveTop(rect.y() - this->y());
+        rects.append(rect);
+    }
+
+    return rects;
 }
 
 void ObjectGroup::checkStickyObjects()
@@ -468,7 +558,6 @@ void ObjectGroup::removeObjectAt(int index, bool del)
 {
     if (index >= 0 && index < mObjects.size()) {
         Object* obj = mObjects.takeAt(index);
-        mStickyObjects.removeAt(index);
         this->notify("objects", variantObjects());
         obj->disconnect(this);
         if (del)
@@ -508,44 +597,43 @@ void ObjectGroup::objectDestroyed(Object * object)
         this->removeObjectAt(index);
 }
 
-QVariantMap ObjectGroup::prepareObjectData(int index, const QVariantMap & data)
+void ObjectGroup::prepareObjectData(QVariantMap & data)
 {
-    QVariantMap object = data;
+    //size and position properties will be set later using editingModeData signal
+    if (data.contains("width"))
+        data.remove("width");
 
-    object.insert("_index", index);
+    if (data.contains("height"))
+        data.remove("height");
 
-    if (object.contains("width"))
-        object.remove("width");
+    if (data.contains("x"))
+        data.remove("x");
 
-    if (object.contains("height"))
-        object.remove("height");
-
-    if (object.contains("x"))
-        object.remove("x");
-
-    if (object.contains("y"))
-        object.remove("y");
-
-    return object;
+    if (data.contains("y"))
+        data.remove("y");
 }
 
 void ObjectGroup::objectChanged(const QVariantMap& data)
 {
     Object * sender = qobject_cast<Object*>(this->sender());
-    QVariantMap object;
     int index = this->indexOf(sender);
 
     if (index != -1) {
-        object = prepareObjectData(index, data);
-        if (!object.isEmpty())
+        QVariantMap object = data;
+        prepareObjectData(object);
+        if (!object.isEmpty()) {
+            object.insert("_index", index);
             this->notify("_object", object);
-        if (!mAligning) {
-            adaptSize();
-            checkStickyObjects();
         }
-    }
-    else {
-        emit dataChanged();
+
+        if (mObjectsSynced)
+            loadOtherObjects(sender, data);
+
+        if (mEditingMode && (data.contains("x") || data.contains("y") || data.contains("width") || data.contains("height"))) {
+            bool blocked = blockSignals(true);
+            adaptSize();
+            blockSignals(blocked);
+        }
     }
 }
 
@@ -573,6 +661,7 @@ QVariantMap ObjectGroup::toJsonObject(bool internal) const
         object.insert("spacing", mSpacing);
 
     object.insert("alignEnabled", mAlignEnabled);
+    object.insert("objectsSynced", mObjectsSynced);
 
     return object;
 }
@@ -597,6 +686,7 @@ Object* ObjectGroup::createObject(const QVariantMap & data)
 void ObjectGroup::updateSpacing()
 {
     mSpacing = calcSpacing();
+    notify("spacing", mSpacing);
 }
 
 void ObjectGroup::adaptLayout()
@@ -606,7 +696,6 @@ void ObjectGroup::adaptLayout()
 
     adaptSize();
     updateSpacing();
-    checkStickyObjects();
 }
 
 void ObjectGroup::loadObject(Object * obj, const QVariantMap & data)
@@ -615,9 +704,26 @@ void ObjectGroup::loadObject(Object * obj, const QVariantMap & data)
         return;
 
     obj->load(data);
+    bool blocked = obj->blockNotifications(true);
     //some properties are ignored by default so we need to apply them here for the child objects
     if (data.contains("visible") && data.value("visible").type() == QVariant::Bool)
         obj->setVisible(data.value("visible").toBool());
+    obj->blockNotifications(blocked);
+}
+
+void ObjectGroup::loadOtherObjects(Object * object, const QVariantMap & data)
+{
+    if (data.isEmpty())
+        return;
+
+    QVariantMap _data = data;
+    _data.remove("relativeX");
+    _data.remove("relativeY");
+
+    foreach(Object* obj, mObjects) {
+        if (obj != object)
+            loadObject(obj, _data);
+    }
 }
 
 bool ObjectGroup::isAlignEnabled() const
@@ -627,7 +733,11 @@ bool ObjectGroup::isAlignEnabled() const
 
 void ObjectGroup::setAlignEnabled(bool enabled)
 {
+    if (mAlignEnabled == enabled)
+        return;
+
     mAlignEnabled = enabled;
+    notify("alignEnabled", mAlignEnabled);
 }
 
 QRect ObjectGroup::childrenRect() const
@@ -661,4 +771,23 @@ QRect ObjectGroup::childrenRect() const
     h = (bottom+1) - top;
 
     return QRect(left, top, w, h);
+}
+
+int ObjectGroup::count() const
+{
+    return mObjects.size();
+}
+
+bool ObjectGroup::objectsSynced() const
+{
+    return mObjectsSynced;
+}
+
+void ObjectGroup::setObjectsSynced(bool sync)
+{
+    if (mObjectsSynced == sync)
+        return;
+
+    mObjectsSynced = sync;
+    notify("objectsSynced", mObjectsSynced);
 }
