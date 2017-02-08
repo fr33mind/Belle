@@ -29,7 +29,6 @@ class Menu : public ObjectGroup
     Q_OBJECT
 
     int size;
-    Button* mResourceButton;
 
 public:
     explicit Menu(QObject *parent = 0);
@@ -40,8 +39,6 @@ public:
     void removeOptionAt(int);
     void setNumberOfOptions(int);
     void addOption(const QString&, const QList<Action*>& actions=QList<Action*>(), const QString& condition="");
-    void setButtonResource(Button*);
-    Button* buttonResource() const;
     virtual QVariantMap toJsonObject(bool internal=true) const;
     
 signals:
@@ -49,8 +46,6 @@ signals:
 public slots:
 
 private slots:
-    void onButtonResourceDestroyed();
-    void onButtonResourceResized(int, int);
 
 protected:
     virtual void filterLoadData(QVariantMap&);

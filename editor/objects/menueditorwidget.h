@@ -4,12 +4,10 @@
 #include <QTextEdit>
 
 #include "objectgroup_editor_widget.h"
-#include "object_combobox.h"
 #include "menu.h"
 #include "combobox.h"
 #include "actionmanagerbutton.h"
 
-class ObjectComboBox;
 class Menu;
 class ComboBox;
 class ActionManagerButton;
@@ -29,14 +27,12 @@ signals:
 private slots:
     void onTextEdited(const QString&);
     void onNumberOfOptionsChanged(int);
-    void onButtonChanged(Object*);
 
 private:
     void setNumberOfOptions(int);
     void _updateTexts(Menu*);
 
 private:
-    ObjectComboBox* mButtonComboBox;
     QComboBox* mChooseNumberOfOptions;
     int mFirstOptionIndex;
     QList<QLineEdit*> mTextEdits;

@@ -3,16 +3,12 @@
 MenuEditorWidget::MenuEditorWidget(QWidget *parent) :
     ObjectGroupEditorWidget(parent)
 {
-    mButtonComboBox = new ObjectComboBox(this);
-    connect(mButtonComboBox, SIGNAL(objectChanged(Object*)), this, SLOT(onButtonChanged(Object*)));
-
     mChooseNumberOfOptions = new QComboBox(this);
     for(int i=2; i <= MENU_MAX_OPTIONS; i++)
         mChooseNumberOfOptions->addItem(QString::number(i));
     connect(mChooseNumberOfOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(onNumberOfOptionsChanged(int)));
 
     beginGroup(tr("Menu"), "Menu");
-    appendRow(tr("Button"), mButtonComboBox);
     appendRow(tr("Number of Options"), mChooseNumberOfOptions);
     endGroup();
 
@@ -65,15 +61,6 @@ void MenuEditorWidget::updateData(GameObject * object)
     MenuOption* option = 0;
     QList<Object*> objects = menu->objects();
     QList<Action*> actions;
-
-    QList<GameObject*> btnResources = ResourceManager::instance()->objects(GameObjectMetaType::Button);
-    mButtonComboBox->clear();
-    foreach(GameObject* btn, btnResources) {
-        if (btn)
-            mButtonComboBox->addObject(qobject_cast<Button*>(btn));
-    }
-
-    mButtonComboBox->setCurrentObject(menu->buttonResource());
 
     int index = menu->objects().size() >= 2 ? menu->objects().size()-2 : 0;
     mChooseNumberOfOptions->setCurrentIndex(index);
@@ -150,16 +137,6 @@ void MenuEditorWidget::onTextEdited(const QString & text)
     MenuOption* option = menu->optionAt(index);
     if (option)
         option->setText(text);
-}
-
-void MenuEditorWidget::onButtonChanged(Object * obj)
-{
-    Button* btn = qobject_cast<Button*>(obj);
-    Menu* menu = qobject_cast<Menu*>(mGameObject);
-    if (!menu || !btn)
-        return;
-
-    menu->setButtonResource(btn);
 }
 
 bool MenuEditorWidget::eventFilter(QObject * obj, QEvent * ev)

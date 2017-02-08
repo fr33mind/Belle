@@ -23,21 +23,9 @@ Menu::Menu(QObject *parent) :
     ObjectGroup(parent)
 {
     init();
-
-    QList<GameObject*> objects = ResourceManager::instance()->objects(GameObjectMetaType::Button);
-    if (objects.isEmpty()) {
-        Button* btn = new Button(this);
-        btn->setName("menuButton");
-        ResourceManager::instance()->add(btn);
-        setButtonResource(btn);
-    }
-    else {
-        GameObject* obj = objects.at(0);
-        setButtonResource(qobject_cast<Button*>(obj));
-    }
-
-    setSpacing(10);
+    setObjectsSynced(true);
     setWidth(300);
+    setSpacing(10);
     addOption("Button 1");
     addOption("Button 2");
 }
@@ -54,21 +42,10 @@ Menu::Menu(const QVariantMap& data, QObject *parent) :
 void Menu::init()
 {
     setType(GameObjectMetaType::Menu);
-    mResourceButton = 0;
 }
 
 void Menu::loadData(const QVariantMap& data, bool internal)
 {
-    if (data.contains("buttonResource")) {
-        if (data.value("buttonResource").type() == QMetaType::QObjectStar)
-            setButtonResource(data.value("buttonResource").value<Button*>());
-
-        if (data.value("buttonResource").type() == QVariant::String) {
-            GameObject* obj = ResourceManager::instance()->object(data.value("buttonResource").toString());
-            setButtonResource(qobject_cast<Button*>(obj));
-        }
-    }
-
     if (!internal)
         ObjectGroup::loadData(data, internal);
 }
@@ -103,12 +80,9 @@ void Menu::_fixButtons()
 void Menu::filterLoadData(QVariantMap & data)
 {
     ObjectGroup::filterLoadData(data);
-    data.remove("width");
-    data.remove("height");
-    data.remove("alignObjects");
-    data.remove("_object");
     data.remove("objects");
-    data.remove("editingModeData");
+    data.remove("height");
+    data.remove("width");
 }
 
 QList<MenuOption*> Menu::options() const
@@ -141,12 +115,34 @@ void Menu::removeOptionAt(int index)
 
 void Menu::addOption(const QString& text, const QList<Action*>& actions, const QString& condition)
 {
+    bool loaded = false;
+    int x=0, y=0;
     MenuOption* option = new MenuOption(text, actions, condition, this);
+    Menu* menuResource = qobject_cast<Menu*>(resource());
     option->setWidth(this->width());
-    if (mResourceButton)
-        option->load(mResourceButton->toJsonObject());
-    option->setResource(mResourceButton);
-    append(option);
+
+    if (menuResource) {
+        Object* obj = menuResource->object(count());
+        if (obj) {
+            option->load(obj->toJsonObject());
+            x = obj->x() - menuResource->x();
+            y = obj->y() - menuResource->y();
+            loaded = true;
+        }
+    }
+
+    if (!loaded) {
+        QList<MenuOption*> options = this->options();
+        if (!options.isEmpty()) {
+            MenuOption* lastOption = options.last();
+            option->load(lastOption->toJsonObject());
+        }
+    }
+
+    if (loaded)
+        add(option, x, y);
+    else
+        append(option, x);
 }
 
 void Menu::setNumberOfOptions(int number)
@@ -161,53 +157,8 @@ void Menu::setNumberOfOptions(int number)
         removeOptionAt(i);
 }
 
-void Menu::setButtonResource(Button * btn)
-{
-    if (mResourceButton == btn)
-        return;
-
-    QVariantMap data;
-    QList<Object*> objects = this->objects();
-    for(int i=0; i < objects.size(); i++) {
-        if (objects[i] && objects[i]->resource() != btn) {
-            if (btn) {
-                data = btn->toJsonObject();
-                data.remove("text");
-                objects[i]->load(data);
-            }
-            objects[i]->setResource(btn);
-        }
-    }
-
-    mResourceButton = btn;
-    if (mResourceButton) {
-        connect(mResourceButton, SIGNAL(destroyed()), this, SLOT(onButtonResourceDestroyed()), Qt::UniqueConnection);
-        connect(mResourceButton, SIGNAL(resized(int,int)), this, SLOT(onButtonResourceResized(int,int)), Qt::UniqueConnection);
-    }
-
-    adaptLayout();
-    notify("buttonResource", QVariant::fromValue(qobject_cast<QObject*>(mResourceButton)));
-}
-
-Button* Menu::buttonResource() const
-{
-    return mResourceButton;
-}
-
 QVariantMap Menu::toJsonObject(bool internal) const
 {
     QVariantMap data = ObjectGroup::toJsonObject(internal);
-    if (mResourceButton)
-        data.insert("buttonResource", mResourceButton->name());
     return data;
-}
-
-void Menu::onButtonResourceDestroyed()
-{
-    mResourceButton = 0;
-}
-
-void Menu::onButtonResourceResized(int w, int h)
-{
-    adaptLayout();
 }
