@@ -13,9 +13,7 @@ SlotButton::SlotButton(QObject *parent) :
     img->setKeepAspectRatio(false);
     img->setWidth(50);
     img->setHeight(50);
-    append(img);
-    img->setX(0);
-    img->setY(0);
+    add(img, 0, 0);
 
     TextBox* textbox = new TextBox("$id. Empty Slot", this);
     textbox->setName("textbox");
@@ -23,9 +21,7 @@ SlotButton::SlotButton(QObject *parent) :
     textbox->setWidth(200);
     textbox->setHeight(img->height());
     textbox->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    append(textbox);
-    textbox->setX(img->width()+10);
-    textbox->setY(0);
+    add(textbox, img->width()+10, 0);
 }
 
 SlotButton::SlotButton(const QVariantMap& data, QObject *parent) :
