@@ -289,18 +289,16 @@ QVariantMap TextBox::toJsonObject(bool internal) const
     object.insert("textColor", Utils::colorToList(textColor()));
     object.insert("text", mText);
     object.insert("textAlignment", textAlignmentAsString());
-    if (mFont != Object::defaultFont()) {
-        QVariantMap font;
-        QFontMetrics metrics(mFont);
-        font.insert("size", QString("%1px").arg(mFont.pixelSize()));
-        font.insert("family", mFont.family());
-        if (metrics.leading())
-            font.insert("leading", metrics.leading());
-        font.insert("height", metrics.height());
-        font.insert("weight", FontLibrary::cssFontWeight(mFont.weight()));
-        font.insert("style", FontLibrary::cssFontStyle(mFont.style()));
-        object.insert("font", font);
-    }
+    QVariantMap font;
+    QFontMetrics metrics(mFont);
+    font.insert("size", QString("%1px").arg(mFont.pixelSize()));
+    font.insert("family", mFont.family());
+    if (metrics.leading())
+        font.insert("leading", metrics.leading());
+    font.insert("height", metrics.height());
+    font.insert("weight", FontLibrary::cssFontWeight(mFont.weight()));
+    font.insert("style", FontLibrary::cssFontStyle(mFont.style()));
+    object.insert("font", font);
 
     if (internal) {
         if (! placeholderText().isEmpty())
