@@ -166,16 +166,13 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
 
     QList<QObject*> objects = mimeData->objects();
     int i = 0;
+    bool moved;
 
     foreach(QObject* obj, objects) {
         Action *action = qobject_cast<Action*>(obj);
-        int index = mActionManager->indexOf(action);
-        if (index == -1)
-            continue;
-
-        mActionManager->removeAt(index);
-        mActionManager->insert(destRow+i, action);
-        i++;
+        moved = mActionManager->move(action, destRow+i);
+        if (moved)
+            i++;
     }
 
     for(int i=0; i < rowCount(); i++) {

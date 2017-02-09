@@ -23,6 +23,7 @@ public:
     void insert(int, GameObject*);
     bool remove(GameObject*, bool del=false);
     void removeAt(int, bool del=false);
+    bool move(GameObject*, int);
     bool contains(GameObject*) const;
     bool contains(const QString&) const;
     void clear(bool del=false);
@@ -57,8 +58,11 @@ private:
 
 signals:
     void objectAdded(GameObject*);
-    void objectRemoved(GameObject*);
+    void objectInserted(int, GameObject*);
+    void objectTaken(GameObject*);
+    void objectRemoved(GameObject*, bool del=false);
     void objectChanged();
+    void objectMoved(GameObject*, int);
 
 private slots:
     void onObjectDestroyed(GameObject*);

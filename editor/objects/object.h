@@ -180,6 +180,10 @@ class Object : public GameObject
 
     private slots:
         void removeEventActionSync(Interaction::InputEvent, Action *, bool del=false);
+        void onEventActionInserted(int, GameObject*);
+        void onEventActionRemoved(GameObject*, bool);
+        void onEventActionMoved(GameObject*, int);
+        void moveEventActionSync(Interaction::InputEvent, Action *, int);
 
 //    private slots:
 //        void eventActionChanged();
@@ -192,6 +196,7 @@ class Object : public GameObject
         void destroyed(Object* object);
         void synced();
         void eventActionInserted(Interaction::InputEvent, int, Action*);
+        void eventActionMoved(Interaction::InputEvent, Action*, int);
 
     private:
         //void init(const QString &, int, int, QObject*);
@@ -206,6 +211,7 @@ class Object : public GameObject
         void clearEventActions(Interaction::InputEvent, const QList<Action*>&);
         void connectEventActions(Interaction::InputEvent, Object*);
         void initEventActionManager(Interaction::InputEvent);
+        Interaction::InputEvent eventFromSender(QObject*);
 
     protected:
         QRect mSceneRect;

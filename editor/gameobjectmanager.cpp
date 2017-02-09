@@ -32,6 +32,7 @@ void GameObjectManager::prepareObject(GameObject * object)
 void GameObjectManager::add(GameObject* object)
 {
     insert(size(), object);
+    emit objectAdded(object);
 }
 
 int GameObjectManager::indexOf(GameObject* obj) const
@@ -71,7 +72,7 @@ GameObject* GameObjectManager::takeAt(int index)
     GameObject* obj = mGameObjects.takeAt(index);
     if (obj)
         obj->disconnect(this);
-    emit objectRemoved(obj);
+    emit objectTaken(obj);
     return obj;
 }
 
@@ -87,13 +88,14 @@ void GameObjectManager::insert(int index, GameObject* object)
 
     prepareObject(object);
     mGameObjects.insert(index, object);
-    emit objectAdded(object);
+    emit objectInserted(index, object);
 }
 
 void GameObjectManager::removeAt(int index, bool del)
 {
     if (index >= 0 && index < mGameObjects.size()) {
         GameObject* obj = takeAt(index);
+        emit objectRemoved(obj, del);
         if (del && obj)
             delete obj;
     }
@@ -111,6 +113,20 @@ bool GameObjectManager::remove(GameObject* obj, bool del)
     }
 
     return false;
+}
+
+bool GameObjectManager::move(GameObject* obj, int to)
+{
+    int from = indexOf(obj);
+    if (from == -1 || from == to)
+        return false;
+
+    bool blocked = blockSignals(true);
+    removeAt(from);
+    insert(to, obj);
+    blockSignals(blocked);
+    emit objectMoved(obj, to);
+    return true;
 }
 
 bool GameObjectManager::contains(GameObject* obj) const

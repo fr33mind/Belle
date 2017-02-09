@@ -84,6 +84,10 @@ void Object::initEventActionManager(Interaction::InputEvent event)
     actionManager->setUniqueNames(false);
     actionManager->setAllowEmptyNames(true);
     actionManager->setObjectsParent(this);
+    actionManager->setProperty("event", event);
+    connect(actionManager, SIGNAL(objectInserted(int,GameObject*)), this, SLOT(onEventActionInserted(int, GameObject*)));
+    connect(actionManager, SIGNAL(objectRemoved(GameObject*, bool)), this, SLOT(onEventActionRemoved(GameObject*, bool)));
+    connect(actionManager, SIGNAL(objectMoved(GameObject*, int)), this, SLOT(onEventActionMoved(GameObject*, int)));
     mEventToActions.insert(event, actionManager);
 }
 
@@ -554,7 +558,7 @@ void Object::removeEventActions(Interaction::InputEvent event, bool del)
 
 void Object::removeEventActionSync(Interaction::InputEvent event, Action * action, bool del)
 {
-    if (!action)
+    if (!action || loadBlocked())
         return;
 
     if (isResource()) {
@@ -565,6 +569,31 @@ void Object::removeEventActionSync(Interaction::InputEvent event, Action * actio
         foreach(Action* _action, actions) {
             if (_action && _action->resource() == action)
                 removeEventAction(event, _action, del);
+        }
+    }
+}
+
+void Object::moveEventActionSync(Interaction::InputEvent event, Action* action, int to)
+{
+    if (!action || loadBlocked())
+        return;
+
+    GameObjectManager* actionManager = actionManagerForEvent(event);
+    if (!actionManager)
+        return;
+
+    if (isResource()) {
+        actionManager->move(action->resource(), to);
+    }
+    else {
+        QList<GameObject*> actions = actionManager->objects();
+        bool moved;
+        foreach(GameObject* _action, actions) {
+            if (_action && _action->resource() == action) {
+                moved = actionManager->move(_action, to);
+                if (moved)
+                    break;
+            }
         }
     }
 }
@@ -1329,6 +1358,8 @@ void Object::connectToResource()
         connect(resource, SIGNAL(eventActionInserted(Interaction::InputEvent,int,Action*)), this, SLOT(insertEventAction(Interaction::InputEvent,int,Action*)), Qt::UniqueConnection);
         connect(this, SIGNAL(eventActionRemoved(Interaction::InputEvent,Action*,bool)), resource, SLOT(removeEventActionSync(Interaction::InputEvent,Action*,bool)), Qt::UniqueConnection);
         connect(resource, SIGNAL(eventActionRemoved(Interaction::InputEvent,Action*,bool)), this, SLOT(removeEventActionSync(Interaction::InputEvent,Action*,bool)), Qt::UniqueConnection);
+        connect(this, SIGNAL(eventActionMoved(Interaction::InputEvent,Action*,int)), resource, SLOT(moveEventActionSync(Interaction::InputEvent,Action*,int)), Qt::UniqueConnection);
+        connect(resource, SIGNAL(eventActionMoved(Interaction::InputEvent,Action*,int)), this, SLOT(moveEventActionSync(Interaction::InputEvent,Action*,int)), Qt::UniqueConnection);
         connectEventActions(Interaction::MouseMove, resource);
         connectEventActions(Interaction::MousePress, resource);
         connectEventActions(Interaction::MouseRelease, resource);
@@ -1438,4 +1469,47 @@ void Object::alignVertically(const QString & alignment)
         setY(Scene::height()/2 - height()/2);
     else if (align == "bottom")
         setY(Scene::height() - height());
+}
+
+Interaction::InputEvent Object::eventFromSender(QObject* sender)
+{
+    GameObjectManager* actionManager = qobject_cast<GameObjectManager*>(sender);
+    if (!actionManager)
+        return Interaction::None;
+
+    QVariant prop = actionManager->property("event");
+    if (prop.type() != QVariant::Int)
+        return Interaction::None;
+
+    return static_cast<Interaction::InputEvent>(prop.toInt());
+}
+
+void Object::onEventActionInserted(int index, GameObject * action)
+{
+    Interaction::InputEvent event = eventFromSender(sender());
+    Action* _action = qobject_cast<Action*>(action);
+
+    if (isSynced() && isResource() && _action) {
+        emit eventActionInserted(event, index, _action);
+    }
+}
+
+void Object::onEventActionRemoved(GameObject * action, bool del)
+{
+    Interaction::InputEvent event = eventFromSender(sender());
+    Action* _action = qobject_cast<Action*>(action);
+
+    bool loadBlocked = blockLoad(true);
+    emit eventActionRemoved(event, _action, del);
+    blockLoad(loadBlocked);
+}
+
+void Object::onEventActionMoved(GameObject* action, int to)
+{
+    Interaction::InputEvent event = eventFromSender(sender());
+    Action* _action = qobject_cast<Action*>(action);
+
+    bool loadBlocked = blockLoad(true);
+    emit eventActionMoved(event, _action, to);
+    blockLoad(loadBlocked);
 }
