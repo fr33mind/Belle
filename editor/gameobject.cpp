@@ -152,8 +152,7 @@ void GameObject::setResource(GameObject * resource)
 
     if (mResource) {
         mResource->addClone(this);
-        connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()), Qt::UniqueConnection);
-        connect(this, SIGNAL(destroyed(GameObject*)), mResource, SLOT(removeClone(GameObject*)), Qt::UniqueConnection);
+        setupBasicConnectionToResource();
         if (mSynced)
             connectToResource();
     }
@@ -214,8 +213,11 @@ void GameObject::setSync(bool sync)
 
     if (sync)
         connectToResource();
-    else
+    else {
         disconnectFromResource();
+        //reconnect destroy signals
+        setupBasicConnectionToResource();
+    }
 
     emit syncChanged(sync);
 }
@@ -311,4 +313,13 @@ bool GameObject::blockLoad(bool block)
 bool GameObject::loadBlocked() const
 {
     return mLoadBlocked;
+}
+
+void GameObject::setupBasicConnectionToResource()
+{
+    if (!mResource)
+        return;
+
+    connect(mResource, SIGNAL(destroyed()), this, SLOT(resourceDestroyed()), Qt::UniqueConnection);
+    connect(this, SIGNAL(destroyed(GameObject*)), mResource, SLOT(removeClone(GameObject*)), Qt::UniqueConnection);
 }

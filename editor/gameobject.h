@@ -70,6 +70,7 @@ protected:
 
 private:
     void init();
+    void setupBasicConnectionToResource();
 
 private:
     GameObject* mResource;
