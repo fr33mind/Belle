@@ -96,8 +96,10 @@ void Scene::init(const QString& name)
     if ( parent() )
         connect(parent(), SIGNAL(resized(const QResizeEvent&)), this, SLOT(onResizeEvent(const QResizeEvent&)));
 
+    mObjectManager.setObjectsParent(this);
     mTemporaryObjectManager.setUniqueNames(false);
     mTemporaryObjectManager.setAllowEmptyNames(true);
+    mTemporaryObjectManager.setTakeObjectsOwnership(false);
     mSelectedObject = 0;
     mHighlightedObject = 0;
     mBackgroundImage = 0;
