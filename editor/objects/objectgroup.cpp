@@ -37,6 +37,10 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
 
     Object* obj = 0;
 
+    if (data.value("objectsSynced").type() == QVariant::Bool) {
+        setObjectsSynced(data.value("objectsSynced").toBool());
+    }
+
     if (data.contains("objects") && data.value("objects").type() == QVariant::List) {
         this->removeAllObjects(true);
         QVariantList objects = data.value("objects").toList();
@@ -56,10 +60,6 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
 
         checkStickyObjects();
         updateSpacing();
-    }
-
-    if (data.value("objectsSynced").type() == QVariant::Bool) {
-        setObjectsSynced(data.value("objectsSynced").toBool());
     }
 
     //internal data passed between resource and clones
@@ -841,8 +841,19 @@ void ObjectGroup::connectToResource()
                 centralAction->setResource(action);
         }
 
-        for (int i=0; i < count() && i < resource->count(); i++) {
+        int count = this->count();
+        int resourceCount = resource->count();
+
+        for (int i=0; i < count && i < resourceCount; i++) {
             connectObjectEventsActions(resource->object(i), mObjects.at(i));
+        }
+
+        if (count > resourceCount) {
+            for (int i=resourceCount; i < count; i++) {
+                if (i > 0) {
+                    connectObjectEventsActions(mObjects.at(i-1), mObjects.at(i));
+                }
+            }
         }
 
         cleanupObjectsEventActions();
