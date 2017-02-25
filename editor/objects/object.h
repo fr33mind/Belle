@@ -120,6 +120,7 @@ class Object : public GameObject
         void setEventActions(Interaction::InputEvent, const QList<Action*> &);
         void removeEventActionAt(Interaction::InputEvent, int, bool del=false);
         void removeEventActions(Interaction::InputEvent, bool del=false);
+        bool removeEventActionFromResource(Interaction::InputEvent, Action*, bool del=false);
         QList<Action*> actionsForEvent(Interaction::InputEvent) const;
         GameObjectManager* actionManagerForEvent(Interaction::InputEvent) const;
         Action* eventAction(Interaction::InputEvent, const QString&);
@@ -176,14 +177,15 @@ class Object : public GameObject
         void onParentResized(int, int);
         void appendEventAction(Interaction::InputEvent, Action*);
         void insertEventAction(Interaction::InputEvent, int, Action*);
-        void removeEventAction(Interaction::InputEvent, Action *, bool del=false);
+        bool removeEventAction(Interaction::InputEvent, Action *, bool del=false);
+        bool removeEventActionSync(Interaction::InputEvent, Action *, bool del=false);
+        bool moveEventAction(Interaction::InputEvent, Action *, int);
+        void moveEventActionSync(Interaction::InputEvent, Action *, int);
 
     private slots:
-        void removeEventActionSync(Interaction::InputEvent, Action *, bool del=false);
         void onEventActionInserted(int, GameObject*);
         void onEventActionRemoved(GameObject*, bool);
         void onEventActionMoved(GameObject*, int);
-        void moveEventActionSync(Interaction::InputEvent, Action *, int);
 
 //    private slots:
 //        void eventActionChanged();

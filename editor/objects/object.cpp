@@ -539,14 +539,21 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
    }
 }
 
-void Object::removeEventAction(Interaction::InputEvent event, Action* action, bool del)
+bool Object::removeEventAction(Interaction::InputEvent event, Action* action, bool del)
 {
     if (! action)
-        return;
+        return false;
 
     GameObjectManager* actionManager = mEventToActions.value(event);
-    if (actionManager)
-        this->removeEventActionAt(event, actionManager->indexOf(action), del);
+    if (actionManager) {
+        int index = actionManager->indexOf(action);
+        if (index != -1) {
+            this->removeEventActionAt(event, index, del);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Object::removeEventActions(Interaction::InputEvent event, bool del)
@@ -556,21 +563,49 @@ void Object::removeEventActions(Interaction::InputEvent event, bool del)
         actionManager->clear(del);
 }
 
-void Object::removeEventActionSync(Interaction::InputEvent event, Action * action, bool del)
+bool Object::removeEventActionSync(Interaction::InputEvent event, Action * action, bool del)
 {
     if (!action || loadBlocked())
-        return;
+        return false;
 
     if (isResource()) {
-        removeEventAction(event, qobject_cast<Action*>(action->resource()), del);
+        return removeEventAction(event, qobject_cast<Action*>(action->resource()), del);
     }
     else {
-        QList<Action*> actions = actionsForEvent(event);
-        foreach(Action* _action, actions) {
-            if (_action && _action->resource() == action)
-                removeEventAction(event, _action, del);
+        return removeEventActionFromResource(event, action, del);
+    }
+
+    return false;
+}
+
+bool Object::removeEventActionFromResource(Interaction::InputEvent event, Action * action, bool del)
+{
+    if (!action)
+        return false;
+
+    bool removed = false;
+    QList<Action*> actions = actionsForEvent(event);
+
+    foreach(Action* _action, actions) {
+        if (_action && _action->resource() == action) {
+            removed = removeEventAction(event, _action, del);
+            break;
         }
     }
+
+    return removed;
+}
+
+bool Object::moveEventAction(Interaction::InputEvent event, Action* action, int to)
+{
+    if (!action)
+        return false;
+
+    GameObjectManager* actionManager = actionManagerForEvent(event);
+    if (!actionManager)
+        return false;
+
+    return actionManager->move(action, to);
 }
 
 void Object::moveEventActionSync(Interaction::InputEvent event, Action* action, int to)
@@ -1489,7 +1524,7 @@ void Object::onEventActionInserted(int index, GameObject * action)
     Interaction::InputEvent event = eventFromSender(sender());
     Action* _action = qobject_cast<Action*>(action);
 
-    if (isSynced() && isResource() && _action) {
+    if (_action) {
         emit eventActionInserted(event, index, _action);
     }
 }
