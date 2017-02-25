@@ -37,7 +37,7 @@ void ObjectComboBox::loadFromAction(Action * action)
     int currIndex = -1, pindex = -1;
 
     //only load from scene if action is not synced to any resource
-    if (!action->isSynced() || !action->resource())
+    if (!action->resource())
         this->loadFromScene(action->scene());
 
     Object* parent = action->parentObject();
