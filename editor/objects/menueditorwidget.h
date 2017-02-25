@@ -30,6 +30,7 @@ private slots:
 
 private:
     void setNumberOfOptions(int);
+    void setMenuOptions(const QList<MenuOption*>&);
     void _updateTexts(Menu*);
 
 private:

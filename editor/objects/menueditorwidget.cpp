@@ -58,28 +58,11 @@ void MenuEditorWidget::updateData(GameObject * object)
     foreach(ActionManagerButton* button, mActionButtons)
         button->clear();
 
-    MenuOption* option = 0;
-    QList<Object*> objects = menu->objects();
-    QList<Action*> actions;
-
-    int index = menu->objects().size() >= 2 ? menu->objects().size()-2 : 0;
+    QList<MenuOption*> options = menu->options();
+    int optionsSize = options.size();
+    int index = optionsSize >= 2 ? optionsSize-2 : 0;
     mChooseNumberOfOptions->setCurrentIndex(index);
-    setNumberOfOptions(menu->options().size());
-
-    for(int i=0; i < objects.size(); i++) {
-        option = menu->optionAt(i);
-        if (! option)
-            continue;
-
-        if (i < mTextEdits.size())
-            mTextEdits[i]->setText(option->text());
-
-        if (i < mConditionEdits.size())
-            mConditionEdits[i]->setPlainText(option->condition());
-
-        if (i < mActionButtons.size())
-            mActionButtons[i]->setActionManager(option->actionManager());
-    }
+    setMenuOptions(menu->options());
 }
 
 void MenuEditorWidget::onNumberOfOptionsChanged(int index)
@@ -96,8 +79,8 @@ void MenuEditorWidget::onNumberOfOptionsChanged(int index)
     if (! ok)
         return;
 
-    setNumberOfOptions(number);
     menu->setNumberOfOptions(number);
+    setMenuOptions(menu->options());
     _updateTexts(menu);
 }
 
@@ -146,4 +129,26 @@ bool MenuEditorWidget::eventFilter(QObject * obj, QEvent * ev)
     }
 
     return ObjectGroupEditorWidget::eventFilter(obj, ev);
+}
+
+void MenuEditorWidget::setMenuOptions(const QList<MenuOption *> & options)
+{
+    MenuOption* option = 0;
+
+    setNumberOfOptions(options.size());
+
+    for(int i=0; i < options.size(); i++) {
+        option = options.at(i);
+        if (! option)
+            continue;
+
+        if (i < mTextEdits.size())
+            mTextEdits[i]->setText(option->text());
+
+        if (i < mConditionEdits.size())
+            mConditionEdits[i]->setPlainText(option->condition());
+
+        if (i < mActionButtons.size())
+            mActionButtons[i]->setActionManager(option->actionManager());
+    }
 }

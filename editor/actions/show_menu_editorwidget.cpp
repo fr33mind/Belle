@@ -126,31 +126,16 @@ void ShowMenuEditorWidget::updateData(GameObject * action)
         return;
 
     Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
-    MenuOption* option = 0;
-    QList<Object*> objects = menu->objects();
+    QList<MenuOption*> options = menu->options();
+    int optionsSize = options.size();
 
     //realign menu in case it was moved by the user
     menu->alignHorizontally(showMenu->menuHAlignment());
     menu->alignVertically(showMenu->menuVAlignment());
 
-    index = menu->objects().size() >= 2 ? menu->objects().size()-2 : 0;
+    index = optionsSize >= 2 ? optionsSize-2 : 0;
     mChooseNumberOfOptions->setCurrentIndex(index);
-    setNumberOfOptions(menu->options().size());
-
-    for(int i=0; i < objects.size(); i++) {
-        option = menu->optionAt(i);
-        if (! option)
-            continue;
-
-        if (i < mTextEdits.size())
-            mTextEdits[i]->setText(option->text());
-
-        if (i < mConditionEdits.size())
-            mConditionEdits[i]->setPlainText(option->condition());
-
-        if (i < mActionButtons.size())
-            mActionButtons[i]->setActionManager(option->actionManager());
-    }
+    setMenuOptions(options);
 }
 
 void ShowMenuEditorWidget::onTextEdited(const QString & text)
@@ -187,8 +172,8 @@ void ShowMenuEditorWidget::onNumberOfOptionsChanged(int index)
     if (! ok)
         return;
 
-    this->setNumberOfOptions(number);
     menu->setNumberOfOptions(number);
+    setMenuOptions(menu->options());
     _updateTexts(menu);
 }
 
@@ -267,4 +252,26 @@ void ShowMenuEditorWidget::onMenuVAlignmentChanged(int index)
 
     QString alignment = mMenuVAlignmentComboBox->itemData(index).toString();
     showMenu->setMenuVAlignment(alignment);
+}
+
+void ShowMenuEditorWidget::setMenuOptions(const QList<MenuOption *> & options)
+{
+    MenuOption* option = 0;
+
+    setNumberOfOptions(options.size());
+
+    for(int i=0; i < options.size(); i++) {
+        option = options.at(i);
+        if (! option)
+            continue;
+
+        if (i < mTextEdits.size())
+            mTextEdits[i]->setText(option->text());
+
+        if (i < mConditionEdits.size())
+            mConditionEdits[i]->setPlainText(option->condition());
+
+        if (i < mActionButtons.size())
+            mActionButtons[i]->setActionManager(option->actionManager());
+    }
 }
