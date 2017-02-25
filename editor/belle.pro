@@ -149,7 +149,8 @@ HEADERS      += belle.h\
     fontlibrary.h \
     actions/actionmetatype.h \
     dialogs/actionmanagerdialog.h \
-    widgets/actionmanagerbutton.h
+    widgets/actionmanagerbutton.h \
+    actionpool.h
                 
 
 SOURCES      += main.cpp\
@@ -281,6 +282,7 @@ SOURCES      += main.cpp\
     fontlibrary.cpp \
     actions/actionmetatype.cpp \
     dialogs/actionmanagerdialog.cpp \
-    widgets/actionmanagerbutton.cpp
+    widgets/actionmanagerbutton.cpp \
+    actionpool.cpp
 
 RESOURCES += media.qrc
