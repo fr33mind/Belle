@@ -194,16 +194,49 @@ void ShowMenu::setMenuResource(Menu * menu)
     if (mMenuResource == menu)
         return;
 
-    Object* obj = sceneObject();
-    if (obj) {
-        obj->load(menu->toJsonObject());
-        obj->setResource(menu);
-        obj->update();
+    if (mMenuResource) {
+        mMenuResource->disconnect(this);
     }
 
     mMenuResource = menu;
-    if(mMenuResource)
+
+    if(mMenuResource) {
         connect(mMenuResource, SIGNAL(destroyed()), this, SLOT(onMenuResourceDestroyed()), Qt::UniqueConnection);
+
+        menu = qobject_cast<Menu*>(sceneObject());
+        if (menu && menu->resource() != mMenuResource) {
+            QList<MenuOption*> options = menu->options();
+            menu->load(mMenuResource->toJsonObject());
+            QVariantMap data;
+            MenuOption* opt=0;
+            MenuOption* option=0;
+
+            for(int i=0; i < options.size(); i++) {
+                option = options.at(i);
+                if (!option)
+                    continue;
+
+                opt = mMenuResource->optionAt(i);
+                if (opt)
+                    data = opt->toJsonObject();
+
+                if (!data.isEmpty()) {
+                    data.remove("text");
+                    data.remove("actions");
+                    option->load(data);
+                    if (opt) {
+                        option->setX(menu->x() + (opt->x() - mMenuResource->x()));
+                        option->setY(menu->y() + (opt->y() - mMenuResource->y()));
+                    }
+                }
+            }
+
+            menu->setResource(mMenuResource);
+            menu->update();
+            menu->adaptSize();
+        }
+    }
+
     notify("menuResource", QVariant::fromValue(qobject_cast<QObject*>(mMenuResource)));
 }
 
