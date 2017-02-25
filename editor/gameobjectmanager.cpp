@@ -8,6 +8,7 @@ GameObjectManager::GameObjectManager(QObject *parent) :
     setUniqueNames(true);
     setAllowEmptyNames(false);
     mObjectsParent = this;
+    mTakeObjectsOwnership = true;
 }
 
 GameObjectManager::~GameObjectManager()
@@ -26,7 +27,8 @@ void GameObjectManager::prepareObject(GameObject * object)
         renameObject(object);
 
     object->setManager(this);
-    object->setParent(mObjectsParent);
+    if (mTakeObjectsOwnership)
+        object->setParent(mObjectsParent);
 }
 
 void GameObjectManager::add(GameObject* object)
@@ -271,4 +273,14 @@ QObject* GameObjectManager::objectsParent() const
 void GameObjectManager::setObjectsParent(QObject * parent)
 {
     mObjectsParent = parent;
+}
+
+bool GameObjectManager::takeObjectsOwnership() const
+{
+    return mTakeObjectsOwnership;
+}
+
+void GameObjectManager::setTakeObjectsOwnership(bool take)
+{
+    mTakeObjectsOwnership = take;
 }

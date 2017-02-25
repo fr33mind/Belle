@@ -43,6 +43,9 @@ public:
     QObject* objectsParent() const;
     void setObjectsParent(QObject*);
 
+    bool takeObjectsOwnership() const;
+    void setTakeObjectsOwnership(bool);
+
 private:
     void prepareObject(GameObject*);
 
@@ -55,6 +58,7 @@ private:
     bool mUniqueNames;
     bool mAllowEmptyNames;
     QObject* mObjectsParent;
+    bool mTakeObjectsOwnership;
 
 signals:
     void objectAdded(GameObject*);
