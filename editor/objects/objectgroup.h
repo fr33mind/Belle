@@ -18,6 +18,9 @@
 #define OBJECTGROUP_H
 
 #include "object.h"
+#include "actionpool.h"
+
+class ActionPool;
 
 class ObjectGroup : public Object
 {
@@ -65,10 +68,21 @@ public:
     void setObjectsSynced(bool);
 
 signals:
+    void objectEventActionInserted(int, Interaction::InputEvent, int, Action*, ActionPool* actionPool=0);
+    void objectEventActionRemoved(int, Interaction::InputEvent,Action*,bool);
+    void objectEventActionMoved(int, Interaction::InputEvent,Action*,int);
+    void objectsSyncChanged(bool);
 
 private slots:
     void objectDestroyed(Object*);
     void objectChanged(const QVariantMap&);
+    void onObjectEventActionInserted(Interaction::InputEvent, int, Action*);
+    void onObjectEventActionInsertedSync(int, Interaction::InputEvent, int, Action*, ActionPool* actionPool=0);
+    void onObjectEventActionRemoved(Interaction::InputEvent,Action*,bool);
+    void onObjectEventActionRemovedSync(int,Interaction::InputEvent,Action*,bool);
+    void onObjectEventActionMoved(Interaction::InputEvent,Action*,int);
+    void onObjectEventActionMovedSync(int,Interaction::InputEvent,Action*,int);
+    void onActionPoolDestroyed(ActionPool*);
 
 protected:
     void _append(Object*);
@@ -81,6 +95,9 @@ protected:
     void adaptLayout();
     virtual void loadObject(Object*, const QVariantMap&);
     virtual void resizeSceneRect(int x, int y);
+    virtual void connectToResource();
+    void connectObjectEventActions(Interaction::InputEvent, Object*, Object*);
+    void connectObjectEventsActions(Object*, Object*);
 
 private:
     QList<Object*> mObjects;
@@ -89,6 +106,8 @@ private:
     bool mAligning;
     bool mAlignEnabled;
     bool mObjectsSynced;
+    QList<Action*> mObjectsEventActions;
+    QList<ActionPool*> mObjectsActionPools;
     void init();
     int indexOf(Object*);
     void alignObjects();
@@ -99,6 +118,17 @@ private:
     QVariantList objectsRelativeRectsData();
     QList<QRect> objectsRelativeRects() const;
     void loadOtherObjects(Object*, const QVariantMap&);
+    void insertEventActionInObjects(const QList<Object*>&, Interaction::InputEvent, int, Action *, ActionPool*);
+    Action* createObjectsEventAction(Action*, ActionPool* pool=0);
+    ActionPool* createActionPool();
+    void addActionPool(ActionPool*);
+    void addActionPools(const QList<ActionPool*>&);
+    void cleanupObjectsEventActions();
+    ActionPool* actionPoolFromAction(Action*);
+    void removeObjectsEventActionsFromPool(Interaction::InputEvent, ActionPool*, bool del=false);
+    void moveObjectsEventActionsFromPool(Interaction::InputEvent, ActionPool*, int);
+    void initObjectEventActions(Interaction::InputEvent, Object*);
+    void initObjectEventsActions(Object*);
 };
 
 #endif // OBJECTGROUP_H

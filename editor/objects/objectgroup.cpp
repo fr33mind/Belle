@@ -15,6 +15,7 @@
  */
 
 #include "objectgroup.h"
+#include "gameobjectfactory.h"
 
 ObjectGroup::ObjectGroup(QObject *parent,  const QString& name) :
     Object(parent, name)
@@ -150,6 +151,28 @@ void ObjectGroup::_append(Object* obj)
 {
     connect(obj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(objectChanged(const QVariantMap&)));
     connect(obj, SIGNAL(destroyed(Object*)), this, SLOT(objectDestroyed(Object*)));
+    connect(obj, SIGNAL(eventActionInserted(Interaction::InputEvent,int,Action*)), this, SLOT(onObjectEventActionInserted(Interaction::InputEvent,int,Action*)));
+    connect(obj, SIGNAL(eventActionRemoved(Interaction::InputEvent,Action*,bool)), this, SLOT(onObjectEventActionRemoved(Interaction::InputEvent,Action*,bool)));
+    connect(obj, SIGNAL(eventActionMoved(Interaction::InputEvent,Action*,int)), this, SLOT(onObjectEventActionMoved(Interaction::InputEvent,Action*,int)));
+
+    if (mObjects.isEmpty()) {
+        initObjectEventsActions(obj);
+    }
+    else {
+        Object* lastObj = mObjects.last();
+        if (lastObj) {
+            connectObjectEventsActions(lastObj, obj);
+        }
+    }
+
+    ObjectGroup* resource = qobject_cast<ObjectGroup*>(this->resource());
+    if (resource) {
+        Object* resourceObject = resource->object(count());
+        if (resourceObject) {
+            connectObjectEventsActions(resourceObject, obj);
+        }
+    }
+
     mObjects.append(obj);
 }
 
@@ -790,4 +813,439 @@ void ObjectGroup::setObjectsSynced(bool sync)
 
     mObjectsSynced = sync;
     notify("objectsSynced", mObjectsSynced);
+    emit objectsSyncChanged(mObjectsSynced);
+}
+
+void ObjectGroup::connectToResource()
+{
+    ObjectGroup * resource = qobject_cast<ObjectGroup*>(this->resource());
+    if (resource) {
+        setObjectsSynced(resource->objectsSynced());
+        connect(resource, SIGNAL(objectEventActionInserted(int,Interaction::InputEvent,int,Action*, ActionPool*)),
+                this, SLOT(onObjectEventActionInsertedSync(int,Interaction::InputEvent,int,Action*, ActionPool*)));
+        connect(this, SIGNAL(objectEventActionRemoved(int,Interaction::InputEvent,Action*,bool)),
+                resource, SLOT(onObjectEventActionRemovedSync(int,Interaction::InputEvent,Action*,bool)), Qt::UniqueConnection);
+        connect(resource, SIGNAL(objectEventActionRemoved(int,Interaction::InputEvent,Action*,bool)),
+                this, SLOT(onObjectEventActionRemovedSync(int,Interaction::InputEvent,Action*,bool)), Qt::UniqueConnection);
+        connect(this, SIGNAL(objectEventActionMoved(int,Interaction::InputEvent,Action*,int)),
+                resource, SLOT(onObjectEventActionMovedSync(int,Interaction::InputEvent,Action*,int)), Qt::UniqueConnection);
+        connect(resource, SIGNAL(objectEventActionMoved(int,Interaction::InputEvent,Action*,int)),
+                this, SLOT(onObjectEventActionMovedSync(int,Interaction::InputEvent,Action*,int)), Qt::UniqueConnection);
+
+        addActionPools(resource->mObjectsActionPools);
+
+        Action* centralAction;
+        foreach(Action* action, resource->mObjectsEventActions) {
+            centralAction = createObjectsEventAction(action, actionPoolFromAction(action));
+            if (centralAction)
+                centralAction->setResource(action);
+        }
+
+        for (int i=0; i < count() && i < resource->count(); i++) {
+            connectObjectEventsActions(resource->object(i), mObjects.at(i));
+        }
+
+        cleanupObjectsEventActions();
+    }
+
+    Object::connectToResource();
+}
+
+void ObjectGroup::onObjectEventActionInserted(Interaction::InputEvent event, int index, Action * action)
+{
+    if (loadBlocked() || !action)
+        return;
+
+    Object* sender = qobject_cast<Object*>(this->sender());
+    if (!sender)
+        return;
+
+    int objectIndex = mObjects.indexOf(sender);
+    if (objectIndex == -1)
+        return;
+
+    ActionPool* actionPool = 0;
+
+    if (mObjectsSynced) {
+        actionPool = createActionPool();
+        actionPool->addAction(action);
+
+        Action* centralAction = createObjectsEventAction(action, actionPool);
+        action->setResource(centralAction);
+        connect(this, SIGNAL(objectsSyncChanged(bool)), action, SLOT(setSync(bool)), Qt::UniqueConnection);
+
+        QList<Object*> objects = mObjects;
+        objects.removeAll(sender);
+        insertEventActionInObjects(objects, event, index, centralAction, actionPool);
+    }
+
+    bool blocked = blockLoad(true);
+    emit objectEventActionInserted(objectIndex, event, index, action, actionPool);
+    blockLoad(blocked);
+}
+
+//This method will be called only in clones
+void ObjectGroup::onObjectEventActionInsertedSync(int objectIndex, Interaction::InputEvent event, int index, Action * action, ActionPool* actionPool)
+{
+    if (!action)
+        return;
+
+    if (mObjectsSynced) {
+        Action* centralAction = createObjectsEventAction(action, actionPool);
+        GameObject* resource = action->resource();
+        if (!resource)
+            resource = action;
+        centralAction->setResource(resource);
+        connect(this, SIGNAL(syncChanged(bool)), centralAction, SLOT(setSync(bool)), Qt::UniqueConnection);
+        insertEventActionInObjects(mObjects, event, index, centralAction, actionPool);
+    }
+    else {
+        Object* obj = this->object(objectIndex);
+        if (obj) {
+            Action* newAction = GameObjectFactory::createAction(action->toJsonObject(), obj);
+            newAction->setResource(action);
+            connect(this, SIGNAL(syncChanged(bool)), newAction, SLOT(setSync(bool)), Qt::UniqueConnection);
+            if (actionPool)
+                actionPool->addAction(newAction);
+            obj->insertEventAction(event, index, newAction);
+        }
+    }
+
+    addActionPool(actionPool);
+}
+
+void ObjectGroup::insertEventActionInObjects(const QList<Object *> & objects, Interaction::InputEvent event, int index, Action* action, ActionPool* actionPool)
+{
+    bool blocked;
+    Action* newAction = 0;
+
+    if (!action || objects.isEmpty())
+        return;
+
+    foreach(Object* obj, objects) {
+        blocked = obj->blockSignals(true);
+        newAction = GameObjectFactory::createAction(action->toJsonObject(), obj);
+        newAction->setResource(action);
+        connect(this, SIGNAL(objectsSyncChanged(bool)), newAction, SLOT(setSync(bool)), Qt::UniqueConnection);
+        if (actionPool)
+            actionPool->addAction(newAction);
+        obj->insertEventAction(event, index, newAction);
+        obj->blockSignals(blocked);
+    }
+}
+
+Action* ObjectGroup::createObjectsEventAction(Action * action, ActionPool* pool)
+{
+    if (!action)
+        return 0;
+
+    Action* centralAction = GameObjectFactory::createAction(action->toJsonObject(), this);
+    mObjectsEventActions.append(centralAction);
+    if (pool)
+        pool->addAction(centralAction);
+    return centralAction;
+}
+
+ActionPool* ObjectGroup::createActionPool()
+{
+    ActionPool* pool = new ActionPool(this);
+    addActionPool(pool);
+    return pool;
+}
+
+void ObjectGroup::addActionPool(ActionPool* pool)
+{
+    if (!pool)
+        return;
+
+    mObjectsActionPools.append(pool);
+    connect(pool, SIGNAL(destroyed(ActionPool*)), this, SLOT(onActionPoolDestroyed(ActionPool*)));
+}
+
+void ObjectGroup::addActionPools(const QList<ActionPool *> & pools)
+{
+    foreach(ActionPool* pool, pools) {
+        addActionPool(pool);
+    }
+}
+
+ActionPool* ObjectGroup::actionPoolFromAction(Action * action)
+{
+    if (!action)
+        return 0;
+
+    foreach(ActionPool* pool, mObjectsActionPools) {
+        if (pool->contains(action))
+            return pool;
+    }
+
+    return 0;
+}
+
+void ObjectGroup::onObjectEventActionRemoved(Interaction::InputEvent event, Action * action, bool del)
+{
+    if (loadBlocked() || !action)
+        return;
+
+    Object* sender = qobject_cast<Object*>(this->sender());
+    if (!sender)
+        return;
+
+    int objectIndex = mObjects.indexOf(sender);
+    if (objectIndex == -1)
+        return;
+
+    if (mObjectsSynced) {
+        ActionPool* pool = actionPoolFromAction(action);
+        if (pool) {
+            removeObjectsEventActionsFromPool(event, pool, del);
+
+            Action* resourceAction = qobject_cast<Action*>(action->resource());
+            if (resourceAction && mObjectsEventActions.contains(resourceAction)) {
+                mObjectsEventActions.removeAll(resourceAction);
+                delete resourceAction;
+            }
+        }
+    }
+
+    bool loadBlocked = blockLoad(true);
+    emit objectEventActionRemoved(objectIndex, event, action, del);
+    blockLoad(loadBlocked);
+}
+
+void ObjectGroup::onObjectEventActionRemovedSync(int objectIndex, Interaction::InputEvent event, Action * action, bool del)
+{
+    if (loadBlocked() || !action)
+        return;
+
+    Object* object = this->object(objectIndex);
+    ActionPool* pool = actionPoolFromAction(action);
+    Action* objectAction = 0;
+
+    if (pool) {
+        if (object) {
+            objectAction = pool->actionFromParent(object);
+            object->removeEventAction(event, objectAction, del);
+        }
+        else if (mObjectsSynced) {
+            removeObjectsEventActionsFromPool(event, pool, del);
+        }
+    }
+    else if (object) {
+        object->removeEventActionSync(event, action, del);
+    }
+}
+
+void ObjectGroup::onActionPoolDestroyed(ActionPool * pool)
+{
+    if (mObjectsActionPools.contains(pool)) {
+        mObjectsActionPools.removeAll(pool);
+    }
+}
+
+void ObjectGroup::removeObjectsEventActionsFromPool(Interaction::InputEvent event, ActionPool* pool, bool del)
+{
+    if (!pool)
+        return;
+
+    bool blocked;
+    Action* objectAction;
+
+    foreach(Object* obj, mObjects) {
+        objectAction = pool->actionFromParent(obj);
+        if (objectAction) {
+            blocked = obj->blockSignals(true);
+            obj->removeEventAction(event, objectAction, del);
+            obj->blockSignals(blocked);
+        }
+    }
+}
+
+void ObjectGroup::connectObjectEventActions(Interaction::InputEvent event, Object * source, Object * target)
+{
+    if (!target || !source)
+        return;
+
+    QList<Action*> sourceActions, targetActions;
+    sourceActions = source->actionsForEvent(event);
+    targetActions = target->actionsForEvent(event);
+    Action* sourceAction;
+    Action* targetAction;
+    GameObject* resourceAction = 0;
+    ActionPool* pool = 0;
+    ActionPool* oldPool = 0;
+    bool resourceConnect = false;
+    bool directResourceConnect = false;
+
+    if (source->isResource() && !target->isResource())
+        resourceConnect = true;
+
+    for(int i=0; i < sourceActions.size() && i < targetActions.size(); i++) {
+        sourceAction = sourceActions.at(i);
+        targetAction = targetActions.at(i);
+        if (!sourceAction || !targetAction)
+            break;
+
+        if (sourceAction->type() != targetAction->type())
+            break;
+
+        directResourceConnect = false;
+        resourceAction = 0;
+        pool = actionPoolFromAction(sourceAction);
+        oldPool = actionPoolFromAction(targetAction);
+        if (pool) {
+            resourceAction = pool->actionFromParent(this);
+            if (oldPool != pool) {
+                if (oldPool)
+                    oldPool->removeAction(targetAction);
+                pool->addAction(targetAction);
+            }
+        }
+
+        if (resourceConnect && !resourceAction) {
+            directResourceConnect = true;
+            if (sourceAction->resource()) {
+                resourceAction = sourceAction->resource();
+            }
+            else {
+                resourceAction = sourceAction;
+            }
+        }
+
+        if (resourceAction) {
+            targetAction->setResource(resourceAction);
+            targetAction->setSync(sourceAction->isSynced());
+
+            if (directResourceConnect)
+                connect(this, SIGNAL(syncChanged(bool)), targetAction, SLOT(setSync(bool)), Qt::UniqueConnection);
+            else
+                connect(this, SIGNAL(objectsSyncChanged(bool)), targetAction, SLOT(setSync(bool)), Qt::UniqueConnection);
+        }
+    }
+}
+
+void ObjectGroup::connectObjectEventsActions(Object * source, Object * target)
+{
+    connectObjectEventActions(Interaction::MouseMove, source, target);
+    connectObjectEventActions(Interaction::MousePress, source, target);
+    connectObjectEventActions(Interaction::MouseRelease, source, target);
+}
+
+void ObjectGroup::initObjectEventActions(Interaction::InputEvent event, Object * object)
+{
+    if (!object || !mObjectsSynced)
+        return;
+
+    QList<Action*> actions = object->actionsForEvent(event);
+    if (actions.isEmpty())
+        return;
+
+    ActionPool* pool;
+    Action* resourceAction;
+
+    foreach(Action* action, actions) {
+        pool = createActionPool();
+        resourceAction = createObjectsEventAction(action, pool);
+        pool->addAction(action);
+
+        if (resourceAction) {
+            action->setResource(resourceAction);
+            connect(this, SIGNAL(objectsSyncChanged(bool)), action, SLOT(setSync(bool)), Qt::UniqueConnection);
+        }
+    }
+}
+
+void ObjectGroup::initObjectEventsActions(Object * object)
+{
+    initObjectEventActions(Interaction::MouseMove, object);
+    initObjectEventActions(Interaction::MousePress, object);
+    initObjectEventActions(Interaction::MouseRelease, object);
+}
+
+void ObjectGroup::cleanupObjectsEventActions()
+{
+    Action* action;
+
+    for(int i=mObjectsEventActions.size()-1; i >= 0; i--) {
+        action = mObjectsEventActions.at(i);
+        if (action && action->parent() == this && action->clones().isEmpty()) {
+            mObjectsEventActions.removeAt(i);
+            delete action;
+        }
+    }
+}
+
+void ObjectGroup::onObjectEventActionMoved(Interaction::InputEvent event, Action * action, int index)
+{
+    if (loadBlocked() || !action)
+        return;
+
+    Object* sender = qobject_cast<Object*>(this->sender());
+    if (!sender)
+        return;
+
+    int objectIndex = mObjects.indexOf(sender);
+    if (objectIndex == -1)
+        return;
+
+    if (mObjectsSynced) {
+        ActionPool* pool = actionPoolFromAction(action);
+        if (pool) {
+            Action* objectAction;
+            bool blocked;
+            foreach(Object* obj, mObjects) {
+                objectAction = pool->actionFromParent(obj);
+                if (objectAction) {
+                    blocked = obj->blockSignals(true);
+                    obj->moveEventAction(event, objectAction, index);
+                    obj->blockSignals(blocked);
+                }
+            }
+        }
+    }
+
+    bool loadBlocked = blockLoad(true);
+    emit objectEventActionMoved(objectIndex, event, action, index);
+    blockLoad(loadBlocked);
+}
+
+void ObjectGroup::onObjectEventActionMovedSync(int objectIndex, Interaction::InputEvent event, Action *action, int index)
+{
+    if (loadBlocked() || !action)
+        return;
+
+    Object* object = this->object(objectIndex);
+    ActionPool* pool = actionPoolFromAction(action);
+    Action* objectAction = 0;
+
+    if (pool) {
+        if (object) {
+            objectAction = pool->actionFromParent(object);
+            object->moveEventAction(event, objectAction, index);
+        }
+        else if (mObjectsSynced) {
+            moveObjectsEventActionsFromPool(event, pool, index);
+        }
+    }
+    else if (object) {
+        object->moveEventActionSync(event, action, index);
+    }
+}
+
+void ObjectGroup::moveObjectsEventActionsFromPool(Interaction::InputEvent event, ActionPool * pool, int index)
+{
+    if (!pool)
+        return;
+
+    bool blocked;
+    Action* objectAction;
+
+    foreach(Object* obj, mObjects) {
+        objectAction = pool->actionFromParent(obj);
+        if (objectAction) {
+            blocked = obj->blockSignals(true);
+            obj->moveEventAction(event, objectAction, index);
+            obj->blockSignals(blocked);
+        }
+    }
 }
