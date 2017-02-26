@@ -119,6 +119,7 @@ class Scene : public GameObject
         void onResizeEvent(const QResizeEvent&);
         void clearRemovedObject(Object*);
         void onSelectedObjectDestroyed();
+        void onHighlightedObjectDestroyed();
 
     public slots:
         void moveSelectedObjectUp();

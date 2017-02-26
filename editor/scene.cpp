@@ -516,8 +516,17 @@ void Scene::selectObject(Object* obj)
 
 void Scene::highlightObject(Object* obj)
 {
+    if (mHighlightedObject == obj)
+        return;
+
     if (mObjectManager.contains(obj) || ! obj) {
+        if (mHighlightedObject)
+            mHighlightedObject->disconnect(SIGNAL(destroyed()), this, SLOT(onHighlightedObjectDestroyed()));
+
         mHighlightedObject = obj;
+        if (mHighlightedObject)
+            connect(mHighlightedObject, SIGNAL(destroyed()), this, SLOT(onHighlightedObjectDestroyed()), Qt::UniqueConnection);
+
         emit dataChanged();
     }
 }
@@ -775,4 +784,9 @@ GameObjectManager* Scene::actionManager() const
 void Scene::onSelectedObjectDestroyed()
 {
     mSelectedObject = 0;
+}
+
+void Scene::onHighlightedObjectDestroyed()
+{
+    mHighlightedObject = 0;
 }
