@@ -38,6 +38,8 @@ ShowMenu::ShowMenu(QObject *parent) :
      }
 
      setMenuResource(menuResource);
+     setMenuHAlignment("center");
+     setMenuVAlignment("center");
 }
 
 ShowMenu::ShowMenu(const QVariantMap& data, QObject *parent) :
