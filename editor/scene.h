@@ -85,7 +85,7 @@ class Scene : public GameObject
         QString backgroundPath();
         ImageFile* background() const;
         void removeSelectedObject(bool del=false);
-        void removeObject(Object*, bool del=false);
+        bool removeObject(Object*, bool del=false);
         void selectObject(Object*);
         void highlightObject(Object*);
         Object * highlightedObject();
@@ -118,6 +118,7 @@ class Scene : public GameObject
     private slots:
         void onResizeEvent(const QResizeEvent&);
         void clearRemovedObject(Object*);
+        void onSelectedObjectDestroyed();
 
     public slots:
         void moveSelectedObjectUp();

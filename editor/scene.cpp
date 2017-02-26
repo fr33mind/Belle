@@ -280,15 +280,13 @@ void Scene::onResizeEvent(const QResizeEvent& event)
 
 void Scene::selectObjectAt(int x, int y) 
 {
-    Object *prevSelectedObject = mSelectedObject;
-    mSelectedObject = objectAt(x, y);
+    Object* object = objectAt(x, y);
 
     //usually returns the self object, but if it is an ObjectGroup it can return other objects inside it
-    if (mSelectedObject)
-        mSelectedObject = mSelectedObject->objectAt(x, y);
+    if (object)
+        object = object->objectAt(x, y);
 
-    //if (mSelectedObject != prevSelectedObject)
-    selectObject(mSelectedObject);
+    selectObject(object);
 }
 
 void Scene::moveSelectedObject(int x, int y)
@@ -462,10 +460,10 @@ void Scene::setPoint(const QPoint & point)
     mPoint = point;
 }
 
-void Scene::removeObject(Object* object, bool del)
+bool Scene::removeObject(Object* object, bool del)
 {
     if (! object)
-        return;
+        return false;
 
     bool removed = false;
 
@@ -480,6 +478,8 @@ void Scene::removeObject(Object* object, bool del)
             object->deleteLater();
         }
     }
+
+    return removed;
 }
 
 void Scene::clearRemovedObject(Object *object)
@@ -493,15 +493,22 @@ void Scene::clearRemovedObject(Object *object)
 
 void Scene::removeSelectedObject(bool del)
 {
-    removeObject(mSelectedObject, del);
-    mSelectedObject = 0;
+    bool removed = removeObject(mSelectedObject, del);
+    if (!removed)
+        selectObject(0);
 }
 
 void Scene::selectObject(Object* obj)
 {
+    if (mSelectedObject == obj)
+        return;
 
-    mHighlightedObject = 0;
+    if (mSelectedObject)
+        mSelectedObject->disconnect(SIGNAL(destroyed()), this, SLOT(onSelectedObjectDestroyed()));
+
     mSelectedObject = obj;
+    if (mSelectedObject)
+        connect(mSelectedObject, SIGNAL(destroyed()), this, SLOT(onSelectedObjectDestroyed()), Qt::UniqueConnection);
 
    emit dataChanged();
    emit selectionChanged(mSelectedObject);
@@ -763,4 +770,9 @@ int Scene::indexOf(GameObject* obj)
 GameObjectManager* Scene::actionManager() const
 {
     return mActionManager;
+}
+
+void Scene::onSelectedObjectDestroyed()
+{
+    mSelectedObject = 0;
 }
