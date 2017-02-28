@@ -74,8 +74,6 @@ SoundManager.prototype.play = function(sound, channel, options) {
   sound = _addSound(sound, channel, options);
   
   if (sound) {
-    if (sound.isPaused() === false)
-        sound.stop();
     sound.play();
   }
 }
