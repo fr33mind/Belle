@@ -287,7 +287,7 @@
     for(var i=0; i < sounds.length; i++) {
       var snd = sounds[i];
       var sound = {
-        "src": snd.src,
+        "name": snd.name,
         "volume": snd.volume,
         "loop": snd.sound.loop
       }
@@ -307,8 +307,12 @@
     this.soundManager.stopAll();
     if (state.sounds) {
       var sounds = state.sounds;
-      for(var i=0; i < sounds.length; i++)
-        this.soundManager.play(sounds[i].src, "sound", sounds[i]);
+      for(var i=0; i < sounds.length; i++) {
+        var sound = this.assetManager.loadAsset(sounds[i].name, "Audio");
+        if (sound) {
+          this.soundManager.play(sound, "sound", sounds[i]);
+        }
+      }
     }
     this.mainModel.loadState(state);
 

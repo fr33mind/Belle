@@ -123,6 +123,7 @@
       asset = new buzz.sound(src, {
                       preload: true
                   });
+      asset.name = name;
       asset.bind('canplay error', function() {
         self.assetLoaded(this);
       });
