@@ -67,18 +67,18 @@ void ChangeBackground::setBackgroundImage(const QString & background)
         return;
     }
 
+    if (isActive()) {
+        Scene* scene = this->scene();
+        if (scene)
+            scene->setTemporaryBackgroundImage(image);
+    }
+
     AssetManager::instance()->releaseAsset(mBackgroundImage);
     mBackgroundImage = image;
     updateDisplayText();
 
     QString name = mBackgroundImage ? mBackgroundImage->name() : "";
     notify("backgroundImage", name);
-
-    if (isActive()) {
-        Scene* scene = this->scene();
-        if (scene)
-            scene->setTemporaryBackgroundImage(mBackgroundImage);
-    }
 }
 
 ImageFile* ChangeBackground::background() const
