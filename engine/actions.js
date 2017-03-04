@@ -55,7 +55,7 @@ function Action(data, parent)
         }
 
         if ("targetParent" in data && data["targetParent"]) {
-          this.object = this.parent;
+          this.object = this.getParentObject();
           this.objectName = "";
         }
             
@@ -186,6 +186,20 @@ Action.prototype.getObject = function()
       return scene.getObject(this.objectName);
   }
   return null;
+}
+
+Action.prototype.getParentObject = function()
+{
+  var parent = this.parent,
+      Object = belle.objects.Object;
+
+  while(parent) {
+    if (belle.isInstance(parent, Object))
+      break;
+    parent = parent.parent;
+  }
+
+  return parent;
 }
 
 Action.prototype.setWait = function(wait)
