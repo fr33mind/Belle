@@ -691,13 +691,10 @@ TextBox.prototype.paint = function(context)
     context.font = defaultFont;
 }
 
-TextBox.prototype.alignText = function(text, size)
+TextBox.prototype.alignText = function()
 {
-    if (! text && ! this.text)
-        return;
     var game = this.getGame();
-    if (! text)
-        text = game ? game.replaceVariables(this.text) : this.text;
+    var text = game ? game.replaceVariables(this.text) : this.text;
 
     if (belle.display.DOM && this.textElement) {
         text = text.replace("\n", "<br/>");
