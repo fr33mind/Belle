@@ -572,6 +572,7 @@ function Character(data, parent, initElement)
     this.states = {};
     this.nameColor = null;
     this.textColor = null;
+    this.currentState = currState;
 
     if ("states" in data) {
         for(state in data["states"]) {
@@ -599,6 +600,7 @@ belle.extend(Character, Image);
 Character.prototype.setState = function(state)
 {
     if (state in this.states) {
+      this.currentState = state;
       this.setImage(this.states[state]);
     }
 }
