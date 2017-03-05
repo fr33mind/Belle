@@ -430,9 +430,12 @@
                 }
                 var from = this.volume, delay = duration / Math.abs(from - to), self = this, fadeToTimeout;
                 this.play();
+                this.fadingOut = true;
                 function doFade() {
                     clearTimeout(fadeToTimeout);
                     fadeToTimeout = setTimeout(function() {
+                        if (!self.fadingOut)
+                          return;
                         if (from < to && self.volume < to) {
                             self.setVolume(self.volume += 1);
                             doFade();

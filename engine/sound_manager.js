@@ -55,6 +55,8 @@ function _addSound(sound, channel, options) {
   }
   
   if (sound instanceof buzz.sound) {
+    sound.fadingOut = false;
+
     if (options.loop)
       sound.loop();
     else
