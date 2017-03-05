@@ -1036,14 +1036,14 @@ function StopSound(data, parent)
 {
     Action.call(this, data, parent);
     
-    this.fade = 0;
+    this.fadeTime = 0;
     this.sound = null;
     
     if ( "sound" in data) 
         this.sound = this.getGame().getResource(data["sound"]);
     
-    if ("fade" in data && typeof data["fade"] === "number") 
-        this.fade = data["fade"] * 1000;
+    if ("fadeTime" in data && belle.isNumber(data["fadeTime"]))
+        this.fadeTime = data["fadeTime"] * 1000;
         
 }
 
@@ -1053,7 +1053,7 @@ StopSound.prototype.onExecute = function()
 {
     var game = this.getGame();
     if (this.sound)
-        game.stopSound(this.sound.asset, this.fade);
+        game.stopSound(this.sound.asset, this.fadeTime);
     
     this.setFinished(true);
 }

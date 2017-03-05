@@ -83,8 +83,16 @@ SoundManager.prototype.play = function(sound, channel, options) {
 SoundManager.prototype.stop = function(sound, channel, fade) {
   sound = _getSound(sound, channel);
   
-  if (sound)
-    sound.stop();
+  if (sound) {
+    if (fade) {
+      sound.fadeOut(fade, function() {
+          sound.stop();
+      });
+    }
+    else {
+      sound.stop();
+    }
+  }
 }
 
 SoundManager.prototype.stopAll = function(channel, fade) {
