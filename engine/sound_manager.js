@@ -57,6 +57,8 @@ function _addSound(sound, channel, options) {
   if (sound instanceof buzz.sound) {
     if (options.loop)
       sound.loop();
+    else
+      sound.unloop();
     if (belle.utils.isNumber(options.volume) && options.volume != sound.getVolume())
       sound.setVolume(options.volume);
     
