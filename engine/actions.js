@@ -712,10 +712,8 @@ ChangeBackground.prototype.onExecute = function ()
 {
     var scene = this.getScene();
     if (scene) {
-        if (this.backgroundImage)
-            scene.setBackgroundImage(this.backgroundImage);
-        if (this.backgroundColor)
-            scene.setBackgroundColor(this.backgroundColor);
+      scene.setBackgroundImage(this.backgroundImage);
+      scene.setBackgroundColor(this.backgroundColor);
     }
     
     this.setFinished(true);
