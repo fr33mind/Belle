@@ -653,6 +653,13 @@ ChangeVisibility.prototype.onSkip = function () {
   this.check();
 }
 
+ChangeVisibility.prototype.onStop = function()
+{
+    for (var i=0; i < this.transitions.length; i++) {
+        this.transitions[i].stop();
+    }
+}
+
 /*********** Show Action ***********/
 
 function Show(data, parent)
