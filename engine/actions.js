@@ -124,6 +124,7 @@ Action.prototype.stop = function()
 
   this.running = false;
   this.onStop();
+  this.trigger("stopped");
 }
 
 Action.prototype.onStop = function()
@@ -202,6 +203,21 @@ Action.prototype.getParentObject = function()
   return parent;
 }
 
+Action.prototype.getTopParentAction = function()
+{
+  var parent = this.parent,
+      parentAction = null,
+      Action = belle.actions.Action;
+
+  while(parent) {
+    if (belle.isInstance(parent, Action))
+      parentAction = parent;
+    parent = parent.parent;
+  }
+
+  return parentAction;
+}
+
 Action.prototype.setWait = function(wait)
 {
   this.wait = wait;
@@ -270,6 +286,14 @@ Fade.prototype.onExecute = function () {
     if (! object) {
       this.setFinished(true);
       return;
+    }
+
+    var game = this.getGame();
+    if (game && game.shouldUndoAction(this)) {
+      var opacity = object.opacity;
+      game.saveUndoAction(this, function() {
+        object.setOpacity(opacity);
+      });
     }
 
     this.startTimer(this.fade.bind(this), this.intervalDuration, true);
@@ -352,6 +376,16 @@ Slide.prototype.onExecute = function ()
     if (! object) {
       this.setFinished(true);
       return;
+    }
+
+    var game = this.getGame();
+    if (game && game.shouldUndoAction(this)) {
+      var x = object.globalX(),
+          y = object.globalY();
+
+      game.saveUndoAction(this, function() {
+        object.moveTo(x, y);
+      });
     }
 
     this.startX = object.x;
@@ -471,6 +505,14 @@ Dialogue.prototype.onExecute = function () {
         this.setFinished(true);
         return;
     }
+
+    var game = this.getGame();
+    if (game && game.shouldUndoAction(this)) {
+      var text = object.text;
+      game.saveUndoAction(this, function() {
+        object.setText(text);
+      });
+    }
     
     object.activateDefaultTextColor();
 
@@ -577,6 +619,20 @@ ChangeVisibility.prototype.onExecute = function ()
     if (! object) {
       this.setFinished(true);
       return;
+    }
+
+    var game = this.getGame();
+    if (game && game.shouldUndoAction(this)) {
+      var characterState = null;
+      if (object instanceof belle.objects.Character && this.characterState)
+        characterState = object.currentState;
+      var objectVisible = object.visible;
+
+      game.saveUndoAction(this, function() {
+        if (characterState)
+          object.setState(characterState);
+        object.setVisible(objectVisible);
+      });
     }
     
     if (object instanceof belle.objects.Character && this.characterState)
@@ -712,6 +768,19 @@ ChangeBackground.prototype.onExecute = function ()
 {
     var scene = this.getScene();
     if (scene) {
+      var game = this.getGame();
+      if (game && game.shouldUndoAction(this)) {
+        var sceneBgImage = scene.background.image,
+            sceneBgColor = scene.background.color,
+            bgImage = sceneBgImage,
+            bgColor = sceneBgColor ? belle.serialize(sceneBgColor) : null;
+
+        game.saveUndoAction(this, function() {
+          scene.setBackgroundImage(bgImage);
+          scene.setBackgroundColor(bgColor);
+        });
+      }
+
       scene.setBackgroundImage(this.backgroundImage);
       scene.setBackgroundColor(this.backgroundColor);
     }
@@ -732,8 +801,17 @@ belle.extend(ChangeState, Action);
 ChangeState.prototype.onExecute = function ()
 {
     var object = this.getObject();
-    if (object && typeof object.setState == "function")
+
+    if (object && typeof object.setState == "function") {
+      var game = this.getGame();
+      if (game && game.shouldUndoAction(this)) {
+        var currentState = object.currentState;
+        game.saveUndoAction(this, function() {
+          object.setState(currentState);
+        });
+      }
       object.setState(this.state);
+    }
     
     this.setFinished(true);
 }
@@ -970,6 +1048,25 @@ ChangeObjectBackground.prototype.onExecute = function()
         this.setFinished(true);
         return;
     }
+
+    var game = this.getGame();
+    if (game && game.shouldUndoAction(this)) {
+      var colorChangeEnabled = this.colorChangeEnabled,
+          imageChangeEnabled = this.imageChangeEnabled,
+          opacityChangeEnabled = this.opacityChangeEnabled,
+          objectData = object.serialize();
+
+      game.saveUndoAction(this, function() {
+        if (colorChangeEnabled)
+          object.setBackgroundColor(objectData.backgroundColor);
+
+        if (imageChangeEnabled)
+          object.setBackgroundImage(objectData.backgroundImage);
+
+        if (opacityChangeEnabled)
+          object.setBackgroundOpacity(objectData.opacity);
+      });
+    }
     
     if (this.colorChangeEnabled)
       object.setBackgroundColor(this.color);
@@ -1024,9 +1121,28 @@ PlaySound.prototype.onExecute = function()
         "loop" : this.loop,
         "volume" : this.volume
     }
-    
-    this.getGame().playSound(this.sound.asset, options);
 
+    var game = this.getGame(),
+        sound = this.sound.asset;
+
+    if (game && game.shouldUndoAction(this)) {
+      var paused = sound.isPaused(),
+          volume = sound.getVolume(),
+          loop = sound.sound.loop;
+
+      game.saveUndoAction(this, function() {
+        sound.setVolume(volume);
+        if (loop)
+          sound.loop();
+        else
+          sound.unloop();
+
+        if (paused)
+          game.stopSound(sound);
+      });
+    }
+    
+    game.playSound(sound, options);
     this.setFinished(true);
 }
 
@@ -1044,17 +1160,37 @@ function StopSound(data, parent)
     
     if ("fadeTime" in data && belle.isNumber(data["fadeTime"]))
         this.fadeTime = data["fadeTime"] * 1000;
-        
+
 }
 
 belle.extend(StopSound, Action);
 
 StopSound.prototype.onExecute = function()
 {
-    var game = this.getGame();
-    if (this.sound)
-        game.stopSound(this.sound.asset, this.fadeTime);
-    
+    if (! this.sound) {
+      this.setFinished(true);
+      return;
+    }
+
+    var game = this.getGame(),
+        sound = this.sound.asset;
+
+    if (game && game.shouldUndoAction(this)) {
+      var paused = sound.isPaused(),
+          volume = sound.getVolume(),
+          loop = sound.sound.loop ? true : false;
+
+      game.saveUndoAction(this, function() {
+        if (paused === false) {
+          game.playSound(sound, {
+            volume: volume,
+            loop: loop
+          });
+        }
+      });
+    }
+
+    game.stopSound(sound, this.fadeTime);
     this.setFinished(true);
 }
 
@@ -1223,8 +1359,22 @@ SetGameVariable.prototype.onExecute = function()
 {   
     var currValue = "";
     var newValue = this.value;
-    if (this._game.hasVariable(this.variable))
+    var game = this.getGame(),
+        hasVariable = game.hasVariable(this.variable);
+
+    if (hasVariable)
         currValue = this._game.getVariableValue(this.variable);
+
+    if (game && game.shouldUndoAction(this)) {
+      var variable = this.variable,
+          value = currValue;
+      game.saveUndoAction(this, function() {
+        if (hasVariable)
+          game.addVariable(variable, value);
+        else
+          game.removeVariable(variable);
+      });
+    }
     
     //if arithmetic operation
     if (this.validOperators.slice(1,5).contains(this.operator)) {

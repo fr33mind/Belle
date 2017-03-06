@@ -32,6 +32,8 @@
     this.fontLibrary = new belle.graphics.FontLibrary();
     this.setAssetManager(new belle.AssetManager(data.assets));
     this.controller = null;
+    this.actionsDataStack = [];
+    this.watchedObjects = [];
 
     if (data.data)
       this.load(data.data);
@@ -229,6 +231,14 @@
       this.variables[variable] = value;
       this.trigger("variableChanged");
     }
+  }
+
+  Game.prototype.removeVariable = function (variable) {
+    if (!this.variables.hasOwnProperty(variable))
+      return;
+
+    delete this.variables[variable];
+    this.trigger("variableChanged");
   }
 
   Game.prototype.replaceVariables = function(text) {
@@ -443,6 +453,95 @@
 
   Game.prototype.getFontLibrary = function() {
     return this.fontLibrary;
+  }
+
+  Game.prototype.addWatchedObject = function(object) {
+    if (!object || this.watchedObjects.indexOf(object) != -1)
+      return;
+
+    this.watchedObjects.push(object);
+  }
+
+  Game.prototype.removeWatchedObject = function(object, restore) {
+    var index = this.watchedObjects.indexOf(object);
+    if (index == -1)
+      return;
+
+    if (restore === undefined)
+      restore = true;
+
+    if (restore)
+      this.restoreWatchedObject(object);
+
+    this.watchedObjects.splice(index, 1);
+  }
+
+  Game.prototype.getWatchedObjectFromAction = function(action) {
+    if (!action)
+      return null;
+
+    var object, actionGroup;
+    for(var i=0; i < this.watchedObjects.length; i++) {
+      object = this.watchedObjects[i];
+      actionGroup = object.mouseMoveActionGroup;
+      if (actionGroup) {
+        if (actionGroup.actions.indexOf(action) != -1)
+          return object;
+        
+        var parentAction = action.getTopParentAction();
+        if (parentAction && actionGroup.actions.indexOf(parentAction) != -1)
+          return object;
+      }
+    }
+
+    return null;
+  }
+
+  Game.prototype.shouldUndoAction = function(action) {
+    var object = this.getWatchedObjectFromAction(action);
+    if (object)
+      return true;
+    return false;
+  }
+
+  Game.prototype.saveUndoAction = function(action, undo) {
+    var object = this.getWatchedObjectFromAction(action);
+    if (!object)
+      return;
+
+    var data = {
+      'watchedObject': object,
+      'action': action,
+      'undo': undo
+    };
+
+    this.actionsDataStack.push(data);
+  }
+
+  Game.prototype.restoreWatchedObject = function(object) {
+    if (!object)
+      return;
+
+    for(var i=this.actionsDataStack.length-1; i >= 0; i--) {
+      var data = this.actionsDataStack[i];
+      if (data.watchedObject != object)
+        continue;
+
+      if (typeof data.undo == "function") {
+        if (!data.action.isRunning())
+          data.undo();
+        else {
+          (function(game, action, undo) {
+            var handler = function() {
+              undo();
+              action.unbind("stopped", game, handler);
+            };
+            action.bind("stopped", game, handler, true);
+          })(this, data.action, data.undo);
+        }
+      }
+      this.actionsDataStack.splice(i, 1);
+    }
   }
 
   belle.Game = Game;

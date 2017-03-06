@@ -346,13 +346,20 @@ GameView.prototype.mouseMove = function(ev) {
 
   var prevHoveredObject = this.hoveredObject;
   this.hoveredObject = this._detectHoveredObject(ev);
+  var game = this.model ? this.model.getGame() : null;
 
   if (prevHoveredObject != this.hoveredObject) {
-    if (prevHoveredObject)
+    if (prevHoveredObject) {
       prevHoveredObject.mouseLeaveEvent(ev);
+      if (game)
+        game.removeWatchedObject(prevHoveredObject);
+    }
 
-    if (this.hoveredObject)
+    if (this.hoveredObject) {
+      if (game)
+        game.addWatchedObject(this.hoveredObject);
       this.hoveredObject.mouseEnterEvent(ev);
+    }
   }
   else if (this.hoveredObject)
     this.hoveredObject.mouseMove(ev);

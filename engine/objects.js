@@ -38,7 +38,6 @@ function Object(info, parent, initElement)
     this.mouseReleaseActionGroup = null;
     this.mouseMoveActionGroup = null;
     this.mouseLeaveActionGroup = null;
-    this.defaultState = null;
     this.redrawing = false;
     this.hovering = false;
     this.loaded = true;
@@ -308,10 +307,6 @@ Object.prototype.mouseLeaveEvent = function(ev)
     if (this.mouseMoveActionGroup)
       this._gameModel.stopAction(this.mouseMoveActionGroup);
 
-    if (this.defaultState) {
-      this.load(this.defaultState);
-    }
-
     this.hovering = false;
 }
 
@@ -319,9 +314,6 @@ Object.prototype.mouseEnterEvent = function(ev)
 {
     if (! this.visible || this.hovering)
       return;
-
-    if (this.mouseMoveActionGroup || this.eventListeners["mousemove"].length)
-      this.defaultState = this.serialize();
 
     this.hovering = true;
     this.processEvent(ev, "mouseMove");
@@ -997,6 +989,9 @@ ObjectGroup.prototype.mouseLeaveEvent = function(event)
 {
   if (this.hoveredObject) {
     this.hoveredObject.mouseLeaveEvent(event);
+    var game = this.getGame();
+    if (game)
+      game.removeWatchedObject(this.hoveredObject);
     this.hoveredObject = null;
   }
 
@@ -1006,13 +1001,20 @@ ObjectGroup.prototype.mouseLeaveEvent = function(event)
 ObjectGroup.prototype.mouseMove = function(event)
 {
   var object = this.getObjectAt(event.canvasX, event.canvasY);
+  var game = this.getGame();
 
   if (this.hoveredObject != object) {
-    if (this.hoveredObject)
+    if (this.hoveredObject) {
         this.hoveredObject.mouseLeaveEvent(event);
+        if (game)
+          game.removeWatchedObject(this.hoveredObject);
+    }
 
-    if (object)
+    if (object) {
+      if (game)
+        game.addWatchedObject(object);
       object.mouseEnterEvent(event);
+    }
   }
   else if (object) {
     object.mouseMove(event);
@@ -1025,8 +1027,12 @@ ObjectGroup.prototype.mouseMove = function(event)
 ObjectGroup.prototype.mouseEnterEvent = function(event)
 {
   this.hoveredObject = this.getObjectAt(event.canvasX, event.canvasY);
-  if (this.hoveredObject)
+  if (this.hoveredObject) {
+    var game = this.getGame();
+    if (game)
+      game.addWatchedObject(this.hoveredObject);
     this.hoveredObject.mouseEnterEvent(event);
+  }
 
   Object.prototype.mouseEnterEvent.call(this, event);
 }
