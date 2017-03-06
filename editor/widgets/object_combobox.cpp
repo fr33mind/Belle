@@ -44,8 +44,9 @@ void ObjectComboBox::loadFromAction(Action * action)
     if (parent) {
         pindex = mObjects.indexOf(parent);
         if (pindex == -1) {
+            //might fail due to filters
             insertObject(0, parent);
-            pindex = 0;
+            pindex = mObjects.indexOf(parent);
         }
 
         if (pindex != -1) {
@@ -65,7 +66,7 @@ void ObjectComboBox::loadFromAction(Action * action)
     this->blockSignals(false);
 
     if (! action->sceneObject()) {
-        if (parent) {
+        if (pindex != -1) {
             action->setSceneObject(parent);
             currIndex = pindex;
         }
