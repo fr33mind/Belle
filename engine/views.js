@@ -341,12 +341,14 @@ GameView.prototype._detectHoveredObject = function(ev)
 }
 
 GameView.prototype.mouseMove = function(ev) {
-  if (! this.mapToScene(ev))
-      return;
-
-  var prevHoveredObject = this.hoveredObject;
-  this.hoveredObject = this._detectHoveredObject(ev);
   var game = this.model ? this.model.getGame() : null;
+  var prevHoveredObject = this.hoveredObject;
+  var mapped = this.mapToScene(ev);
+
+  if (mapped)
+    this.hoveredObject = this._detectHoveredObject(ev);
+  else
+    this.hoveredObject = null;
 
   if (prevHoveredObject != this.hoveredObject) {
     if (prevHoveredObject) {
