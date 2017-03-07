@@ -641,21 +641,26 @@ ChangeVisibility.prototype.onExecute = function ()
     this.initObjectForTransitions();
     if (this.show)
       object.show();
-    
-    var that = this;
-    for (var i=0; i < this.transitions.length; i++) {
-        this.transitions[i].execute();
-    }
-    
+
     if (this.transitions.length === 0) {
         object.setVisible(this.show);
         this.setFinished(true);
     }
-    else
-        this.startTimer(this.check.bind(this), this.duration);
+    else {
+      var gameModel = this.getGameModel();
+      if (gameModel) {
+        for (var i=0; i < this.transitions.length; i++) {
+          this.transitions[i].bind("finished", this, function(){
+            this.checkFinished();
+          }, true);
+          
+          gameModel.executeAction(this.transitions[i]);
+        }
+      }
+    }
 }
 
-ChangeVisibility.prototype.check = function () 
+ChangeVisibility.prototype.checkFinished = function ()
 {
     var finish = true;
     var object = this.getObject();
@@ -670,10 +675,6 @@ ChangeVisibility.prototype.check = function ()
     if (finish) {
       object.setVisible(this.show);
       this.setFinished(true);
-    }
-    else {
-      var that = this;
-      this.startTimer(this.check.bind(this), 10);
     }
 }
 
