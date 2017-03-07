@@ -192,6 +192,10 @@ void ChangeVisibility::setFadeActionEnabled(bool enable)
             Action* fadeAction = GameObjectFactory::createAction(GameObjectMetaType::Fade, this);
             mFadeAction = static_cast<Fade*>(fadeAction);
             mFadeAction->setDuration(0);
+            if (sceneObject())
+                mFadeAction->setSceneObject(sceneObject());
+            else
+                mFadeAction->setSceneObjectName(sceneObjectName());
             connect(mFadeAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()), Qt::UniqueConnection);
             if (mToShow) {
                 mFadeAction->setFadeType(Fade::In);
@@ -232,6 +236,10 @@ void ChangeVisibility::setSlideActionEnabled(bool enable)
             Action* slideAction = GameObjectFactory::createAction(GameObjectMetaType::Slide, this);
             mSlideAction = static_cast<Slide*>(slideAction);
             mSlideAction->setDuration(0);
+            if (sceneObject())
+                mSlideAction->setSceneObject(sceneObject());
+            else
+                mSlideAction->setSceneObjectName(sceneObjectName());
             connect(mSlideAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()), Qt::UniqueConnection);
             notify("_enableSlideAction", QVariant::fromValue(qobject_cast<QObject*>(mSlideAction)));
         }
