@@ -25,13 +25,9 @@ var Color = belle.graphics.Color,
 
 /*********** OBJECT ***********/
 
-function Object(info, parent, initElement)
+function Object(info, parent)
 {
     Frame.call(this, info, parent);
-
-    this.element = document.createElement("div");
-    this.backgroundElement = document.createElement("div");
-    this.element.appendChild(this.backgroundElement);
 
     this.roundedRect = false;
     this.mousePressActionGroup = null;
@@ -70,9 +66,6 @@ function Object(info, parent, initElement)
     }
 
     Object.prototype.load.call(this, info);
-
-    if(initElement || initElement === undefined)
-      this.initElement();
 }
 
 belle.extend(Object, Frame);
@@ -129,8 +122,6 @@ Object.prototype.addEventAction = function(event, action)
 
 Object.prototype.setCornerRadius = function(radius) {
     this.cornerRadius = radius;
-    belle.utils.setBorderRadius(this.element, radius);
-    belle.utils.setBorderRadius(this.backgroundElement, radius);
     if (this.cornerRadius > 0)
       this.roundedRect = true;
 }
@@ -190,14 +181,11 @@ Object.prototype.overlaped = function(object)
 Object.prototype.setBorderColor = function(borderColor)
 {
   this.borderColor = borderColor;
-  $(this.element).css("border-color", borderColor.toHex());
 }
 
 Object.prototype.setBorderWidth = function(borderWidth)
 {
   this.borderWidth = borderWidth;
-  $(this.element).css("border-width", borderWidth+"px");
-  $(this.element).css("border-style", "solid");
 }
 
 Object.prototype.getOpacity = function (alpha)
@@ -220,10 +208,6 @@ Object.prototype.setOpacity = function (alpha)
     if (this.opacity != alpha) {
       this.opacity = alpha;
       this.redraw = true;
-    }
-
-    if (this.element) {
-        $(this.element).css("opacity", this.getOpacityF());
     }
 }
 
@@ -412,25 +396,6 @@ Object.prototype.initActionGroup = function(actions)
     return actionGroup;
 }
 
-Object.prototype.initElement = function()
-{
-  if (! this.element)
-    return;
-
-  $(this.element).css("position", "absolute");
-  $(this.element).width(this.width);
-  $(this.element).height(this.height);
-  $(this.backgroundElement).addClass("background");
-
-  var $children = $(this.element).children();
-  $children.css("position", "absolute");
-  $children.css("width", $(this.element).width()+"px");
-  $children.css("height", $(this.element).height()+"px");
-  $children.css("display", "block");
-  $children.css("filter", "inherit");
-  $(this.backgroundElement).css({"width": "100%", "height": "100%"});
-}
-
 Object.prototype.serialize = function()
 {
   var data = Frame.prototype.serialize.call(this);
@@ -446,15 +411,12 @@ Object.prototype.serialize = function()
 }
 
 /*********** IMAGE OBJECT ***********/
-function Image (data, parent, initElement)
+function Image (data, parent)
 {
-    Object.call(this, data, parent, false);
+    Object.call(this, data, parent);
     this.interval = null;
     this.currentFrame = 0;
     this.image = null;
-
-    if(initElement || initElement === undefined)
-      this.initElement();
 
     this.load(data);
 }
@@ -496,11 +458,6 @@ Image.prototype.setImage = function(img)
     this._bindImage(this.image);
     this._unbindImage(oldImg);
     this.update();
-    if (this.element) {
-      $(this.element).find("img").remove();
-      if (this.image)
-        $(this.element).append(this.image.img);
-    }
   }
 
   assetManager.releaseAsset(oldImg);
@@ -552,9 +509,9 @@ Image.prototype.serialize = function()
 
 /*********** CHARACTER ***********/
 
-function Character(data, parent, initElement)
+function Character(data, parent)
 {
-    Image.call(this, data, parent, false);
+    Image.call(this, data, parent);
 
     var path = "";
     var image;
@@ -582,9 +539,6 @@ function Character(data, parent, initElement)
       this.nameColor = new Color(data["nameColor"]);
     if ("textColor" in data)
       this.textColor = new Color(data["textColor"]);
-
-    if(initElement || initElement === undefined)
-      this.initElement();
 }
 
 belle.extend(Character, Image);
@@ -599,16 +553,14 @@ Character.prototype.setState = function(state)
 
 /*********** TEXT BOX ***********/
 
-function TextBox(info, parent, initElement)
+function TextBox(info, parent)
 {
-    Object.call(this, info, parent, false);
+    Object.call(this, info, parent);
     this.textLeftPadding = [];
     this.textTopPadding = [];
     this.textAlignment = [];
     this.textParts = [];
     this.font = null;
-    this.textElement = document.createElement("div");
-    this.element.appendChild(this.textElement);
     this.displayedText = "";
     var game = this.getGame();
 
@@ -617,9 +569,6 @@ function TextBox(info, parent, initElement)
     });
 
     TextBox.prototype.load.call(this, info);
-
-    if(initElement || initElement === undefined)
-      this.initElement();
 }
 
 belle.extend(TextBox, Object);
@@ -690,25 +639,6 @@ TextBox.prototype.alignText = function()
     var game = this.getGame();
     var text = game ? game.replaceVariables(this.text) : this.text;
 
-    if (belle.display.DOM && this.textElement) {
-        text = text.replace("\n", "<br/>");
-        if (this.textAlignment.contains("HCenter"))
-            this.textElement.style.textAlign = "center";
-        else if (this.textAlignment.contains("Right"))
-            this.textElement.style.textAlign = "right";
-        else
-            this.textElement.style.textAlign = "left";
-
-        if (this.textAlignment.contains("VCenter")) {
-            this.textElement.style.top = "0";
-            this.textElement.style.verticalAlign = "middle";
-        }
-        else if (this.textAlignment.contains("Bottom")) {
-          this.textElement.style.top = "auto";
-          this.textElement.style.bottom = "0";
-        }
-    }
-    else {
         var contentWidth = this.contentWidth();
         var contentHeight = this.contentHeight();
         this.textParts = belle.utils.splitText(text, this.font, contentWidth);
@@ -755,7 +685,6 @@ TextBox.prototype.alignText = function()
             for(var i=0; i < this.textTopPadding.length; i++)
                 this.textTopPadding[i] += topOffset;
         }
-    }
 }
 
 TextBox.prototype.needsRedraw = function()
@@ -804,8 +733,6 @@ TextBox.prototype.setText = function(text)
 {
     if (this.text != text) {
         this.text = text;
-        var game = this.getGame();
-        this.textElement.innerHTML = game ? game.replaceVariables(text.replace("\n", "<br/>")) : text;
         this.alignText();
         this.update();
     }
@@ -819,11 +746,6 @@ TextBox.prototype.setTextColor = function(color)
     if (color instanceof Array)
         color = new Color(color);
     this.textColor = color;
-
-    if (this.textElement) {
-        this.textElement.style.color = color.toHex();
-    }
-
     this.update();
 }
 
@@ -836,15 +758,6 @@ TextBox.prototype.scale = function(widthFactor, heightFactor)
 {
   Object.prototype.scale.call(this, widthFactor, heightFactor);
 
-  if (this.textElement) {
-    this.textElement.style.width = this.width + "px";
-    this.textElement.style.height = this.height + "px";
-    var font = parseInt(this.font ? this.font.toString() : null);
-    if (font !== NaN) {
-        font *= widthFactor;
-        $(this.textElement).css("font-size", font+"px");
-    }
-  }
   this.alignText();
 }
 
@@ -861,35 +774,15 @@ TextBox.prototype.serialize = function()
     return data;
 }
 
-TextBox.prototype.update = function()
-{
-    Object.prototype.update.call(this);
-    var game = this.getGame();
-    if (this.textElement && game)
-      this.textElement.innerHTML = game.replaceVariables(this.text);
-}
-
-TextBox.prototype.initElement = function()
-{
-  Object.prototype.initElement.call(this);
-
-  this.textElement.style.display = "table-cell";
-  this.textElement.style.position = "relative";
-}
-
 /*********** Object Group ***********/
 
-function ObjectGroup(data, parent, initElement)
+function ObjectGroup(data, parent)
 {
-    Object.call(this, data, parent, false);
+    Object.call(this, data, parent);
     this.objects = [];
     this.hoveredObject = null;
 
     ObjectGroup.prototype.load.call(this, data);
-
-    if(initElement || initElement === undefined)
-      this.initElement();
-
 }
 
 belle.extend(ObjectGroup, Object);
@@ -924,24 +817,6 @@ ObjectGroup.prototype.load = function(data) {
                 belle.log(objects[i].type + ": is not a valid object type");
                 continue;
             }
-            var left = parseInt(this.element.style.left);
-            var elemLeft = parseInt(obj.element.style.left);
-            //TODO: position should be relative to parent or global?
-            //obj.setX(obj.x - this.x);
-
-
-
-            var top = parseInt(this.element.style.top);
-            var elemTop = parseInt(obj.element.style.top);
-            //obj.setY(obj.y - this.y);
-
-            //if (belle.display.DOM) {
-                obj.element.style.display = "block";
-                obj.element.style.left = obj.x + "px";
-                //temporary hack in DOM mode to fix top/y value
-                obj.element.style.top = obj.y + "px";
-                this.element.appendChild(obj.element);
-            //}
 
             this.objects.push(obj);
         }
@@ -1116,9 +991,9 @@ ObjectGroup.prototype.getObject = function(name)
 
 /*********** DIALOGUE BOX ***********/
 
-function DialogueBox(data, parent, initElement)
+function DialogueBox(data, parent)
 {
-    ObjectGroup.call(this, data, parent, initElement);
+    ObjectGroup.call(this, data, parent);
 
     this.text = "";
     this.speakerName = "";
@@ -1181,13 +1056,10 @@ DialogueBox.prototype.activateDefaultTextColor = function()
 
 /************** BUTTON ************/
 
-function Button(data, parent, initElement)
+function Button(data, parent)
 {
-    TextBox.call(this, data, parent, initElement);
+    TextBox.call(this, data, parent);
     this.visible = true;
-    if (this.element)
-      this.element.style.cursor = "pointer";
-
 }
 
 belle.extend(Button, TextBox);
@@ -1221,9 +1093,9 @@ belle.extend(MenuOption, Button);
 
 /************** MENU ************/
 
-function Menu(data, parent, initElement)
+function Menu(data, parent)
 {
-    ObjectGroup.call(this, data, parent, initElement);
+    ObjectGroup.call(this, data, parent);
 
     if (this.objects) {
       var self = this;
@@ -1263,9 +1135,9 @@ belle.extend(Sound, GameObject);
 
 /************** Slot Button ************/
 
-function SlotButton(data, parent, initElement)
+function SlotButton(data, parent)
 {
-    ObjectGroup.call(this, data, parent, initElement);
+    ObjectGroup.call(this, data, parent);
     this.SlotTypes = {
       Save: 0,
       Load: 1

@@ -31,18 +31,6 @@ function Scene(data, parent)
     this.finished = false;
     this.tries = 0;
     this.setVisible(false);
-    
-    this.element = document.createElement("div");
-    this.backgroundElement = document.createElement("div");
-    $(this.element).attr("id", data["name"]);
-    $(this.element).addClass("scene");
-    $(this.element).width(this.width);
-    $(this.element).height(this.height);
-    
-    belle.utils.initElement(this.element, data);
-    belle.utils.initElement(this.backgroundElement, data);
-    this.backgroundElement.style.display = "block";
-
     this.load(data);
 }
 
