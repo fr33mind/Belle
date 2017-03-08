@@ -316,7 +316,10 @@
         _action = this.runningActions[i];
           _object = _action.getObject();
         if (_action.type == action.type && object == _object) {
-          this.stopAction(_action);
+          if (this.isActionFromScene(action) || !this.isActionFromScene(_action))
+            this.stopAction(_action);
+          else
+            return;
         }
       }
     }
@@ -371,6 +374,22 @@
     this.runningActions.length = 0;
     this.queuedActions.length = 0;
     this.action = this._nextAction = null;
+  }
+
+  GameModel.prototype.isActionFromScene = function(action) {
+    var scene = this.getScene();
+    if (!scene || !action)
+      return false;
+
+    var actions = scene.getActions();
+    if (actions.indexOf(action) != -1)
+      return true;
+
+    var topAction = action.getTopParentAction();
+    if (actions.indexOf(topAction) != -1)
+      return true;
+
+    return false;
   }
 
   GameModel.prototype.isPaused = function() {
