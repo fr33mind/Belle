@@ -712,8 +712,12 @@ ChangeVisibility.prototype.onSkip = function () {
 
 ChangeVisibility.prototype.onStop = function()
 {
+    var gameModel = this.getGameModel();
+    if (!gameModel)
+      return;
+
     for (var i=0; i < this.transitions.length; i++) {
-        this.transitions[i].stop();
+        gameModel.stopAction(this.transitions[i]);
     }
 }
 
