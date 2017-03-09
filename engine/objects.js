@@ -638,53 +638,52 @@ TextBox.prototype.alignText = function()
 {
     var game = this.getGame();
     var text = game ? game.replaceVariables(this.text) : this.text;
+    var contentWidth = this.contentWidth();
+    var contentHeight = this.contentHeight();
+    this.textParts = belle.utils.splitText(text, this.font, contentWidth);
+    this.textLeftPadding.length = 0;
+    this.textTopPadding.length = 0;
+    var sumHeight = 0;
+    var fontLeading = this.font ? this.font.leading : 0;
 
-        var contentWidth = this.contentWidth();
-        var contentHeight = this.contentHeight();
-        this.textParts = belle.utils.splitText(text, this.font, contentWidth);
-        this.textLeftPadding.length = 0;
-        this.textTopPadding.length = 0;
-        var sumHeight = 0;
-        var fontLeading = this.font ? this.font.leading : 0;
+    for (var i=0; i < this.textParts.length; i++) {
+        //empty text means it's just a new line, so we use <br/> to get the height
+        var text = this.textParts[i].length ? this.textParts[i] : "<br/>";
+        var size = belle.utils.textSize(text, this.font);
+        var width = size[0];
+        var height = size[1];
+        var leftPadding = this.padding.left;
+        //height should already contain the font leading.
+        //the leading is to center text vertically in the line.
+        this.textTopPadding.push(sumHeight+fontLeading);
+        sumHeight += height;
 
-        for (var i=0; i < this.textParts.length; i++) {
-            //empty text means it's just a new line, so we use <br/> to get the height
-            var text = this.textParts[i].length ? this.textParts[i] : "<br/>";
-            var size = belle.utils.textSize(text, this.font);
-            var width = size[0];
-            var height = size[1];
-            var leftPadding = this.padding.left;
-            //height should already contain the font leading.
-            //the leading is to center text vertically in the line.
-            this.textTopPadding.push(sumHeight+fontLeading);
-            sumHeight += height;
-
-            if (this.textAlignment) {
-                if (width < contentWidth) {
-                    if (this.textAlignment.contains("HCenter")) {
-                        leftPadding += Math.round((contentWidth - width) / 2);
-                    }
-                    else if (this.textAlignment.contains("Right")) {
-                        leftPadding += contentWidth - width;
-                    }
+        if (this.textAlignment) {
+            if (width < contentWidth) {
+                if (this.textAlignment.contains("HCenter")) {
+                    leftPadding += Math.round((contentWidth - width) / 2);
+                }
+                else if (this.textAlignment.contains("Right")) {
+                    leftPadding += contentWidth - width;
                 }
             }
-
-            this.textLeftPadding.push(leftPadding);
         }
 
-        if (sumHeight < contentHeight) {
-            var topOffset = this.padding.top;
-            if (this.textAlignment.contains("VCenter"))
-                topOffset += (contentHeight - sumHeight) / 2;
-            else if (this.textAlignment.contains("Bottom"))
-                topOffset += contentHeight - sumHeight;
-            topOffset = topOffset > 0 ? topOffset : 0;
+        this.textLeftPadding.push(leftPadding);
+    }
 
-            topOffset = Math.round(topOffset);
-            for(var i=0; i < this.textTopPadding.length; i++)
-                this.textTopPadding[i] += topOffset;
-        }
+    if (sumHeight < contentHeight) {
+        var topOffset = this.padding.top;
+        if (this.textAlignment.contains("VCenter"))
+            topOffset += (contentHeight - sumHeight) / 2;
+        else if (this.textAlignment.contains("Bottom"))
+            topOffset += contentHeight - sumHeight;
+        topOffset = topOffset > 0 ? topOffset : 0;
+
+        topOffset = Math.round(topOffset);
+        for(var i=0; i < this.textTopPadding.length; i++)
+            this.textTopPadding[i] += topOffset;
+    }
 }
 
 TextBox.prototype.needsRedraw = function()
