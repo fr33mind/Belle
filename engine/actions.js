@@ -966,7 +966,11 @@ belle.extend(Branch, Action);
 
 Branch.prototype.onExecute = function()
 {
-  var game = this.getGame();
+  var game = this.getGame(),
+      gameModel = this.getGameModel();
+
+  if (!game || !gameModel)
+    return;
 
   this.result = null;
 
@@ -975,21 +979,23 @@ Branch.prototype.onExecute = function()
 
   var actions = (this.result === true) ? this.trueActions : this.falseActions;
 
-  if (this._actionGroup)
-    this._actionGroup.setFinished(true);
+  if (this._actionGroup && this._actionGroup.isRunning())
+    gameModel.stopAction(this._actionGroup);
   this._actionGroup = new ActionGroup({}, this);
   this._actionGroup.addActions(actions);
   this._actionGroup.bind("finished", this, function() {
     this.setFinished(true);
   });
-  this._actionGroup.execute();
+  gameModel.executeAction(this._actionGroup);
 }
 
 Branch.prototype.stop = function()
 {
   Action.prototype.stop.call(this);
-  if (this._actionGroup)
-    this._actionGroup.stop();
+
+  var gameModel = this.getGameModel();
+  if (gameModel && this._actionGroup)
+    gameModel.stopAction(this._actionGroup);
 }
 
 Branch.prototype.setFinished = function(finished)
