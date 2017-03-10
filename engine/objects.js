@@ -1058,7 +1058,6 @@ DialogueBox.prototype.activateDefaultTextColor = function()
 function Button(data, parent)
 {
     TextBox.call(this, data, parent);
-    this.visible = true;
 }
 
 belle.extend(Button, TextBox);
