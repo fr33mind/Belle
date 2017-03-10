@@ -453,21 +453,25 @@ GameView.prototype._render = function () {
         scene.redraw = false;
       }
 
+      var redraws = [];
+
+      for(i=0; i < objects.length; i++) {
+        redraws[i] = objects[i].redraw;
+      }
+
       for(i=objects.length-1; i !== -1; --i) {
-          obj = objects[i];
-          if (obj.redraw) {
+          if (redraws[i]) {
+            obj = objects[i];
             redraw = true;
             for(j=objects.length-1; j !== -1; --j) {
-                if (objects[j].redraw || i == j)
+                if (redraws[j] || i == j)
                     continue;
 
-                if (obj.isPainted()) {
-                  if (obj.overlaped(objects[j]))
-                    objects[j].redraw = true;
+                if (obj.isPainted() && obj.overlaped(objects[j])) {
+                  redraws[j] = true;
                 }
-                else {
-                  if (obj.overlaps(objects[j]))
-                    objects[j].redraw = true;
+                else if (obj.overlaps(objects[j])) {
+                  redraws[j] = true;
                 }
             }
           }
@@ -475,14 +479,12 @@ GameView.prototype._render = function () {
 
       if (redraw) {
         for(j=0; j !== objects.length; j++)
-            if (objects[j].redraw)
+            if (redraws[j])
               objects[j].clear(this.context);
 
         for(j=0; j !== objects.length; j++) {
-            obj = objects[j];
-
-            if (obj.redraw) {
-              //console.log("redraw", obj);
+            if (redraws[j]) {
+              obj = objects[j];
               this.context.save();
               obj.paint(this.context);
               obj.redraw = false;
