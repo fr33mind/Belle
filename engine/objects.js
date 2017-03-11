@@ -1201,9 +1201,12 @@ SlotButton.prototype.loadFromSlot = function() {
     if (data) {
       var thumbnail = this.getObject("thumbnail");
       if (thumbnail) {
-        var img = new belle.graphics.Image(data.thumbnail, function(){
-                                      thumbnail.update();
-                                    });
+        var img = null;
+        if (data.thumbnail) {
+          img = new belle.graphics.Image(data.thumbnail, function(){
+                                        thumbnail.update();
+                                      });
+        }
         thumbnail.setImage(img);
       }
       var textbox = this.getObject("textbox");
