@@ -170,7 +170,9 @@ void DrawingSurfaceWidget::paintObject(QPaintDevice * paintDevice)
 
     QPainter painter(paintDevice);
     painter.fillRect(0, 0, width(), height(), Qt::gray);
+    painter.save();
     mObject->paint(painter);
+    painter.restore();
     drawSelection(painter, mObject->selectedObject());
 }
 
@@ -205,7 +207,9 @@ void DrawingSurfaceWidget::paintSceneTo(QPaintDevice * paintDevice)
 
     QPainter painter(paintDevice);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    painter.save();
     scene->paint(painter);
+    painter.restore();
     drawSelection(painter, scene->selectedObject());
 }
 
