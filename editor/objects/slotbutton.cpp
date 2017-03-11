@@ -119,8 +119,10 @@ void SlotButton::setEmptyThumbnail(const QString & thumb)
     if (thumbImage)
         thumbImage->setImage(mEmptyThumbnail);
 
+    QString name;
     if (mEmptyThumbnail)
-        notify("emptyThumbnail", mEmptyThumbnail->name());
+        name = mEmptyThumbnail->name();
+    notify("emptyThumbnail", name);
 }
 
 SlotButton::SlotType SlotButton::slotType() const
