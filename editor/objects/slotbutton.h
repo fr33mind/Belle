@@ -33,6 +33,7 @@ public:
     SlotType slotType() const;
     void setSlotType(SlotType);
 
+    virtual void paint(QPainter&);
     virtual QVariantMap toJsonObject(bool internal=true) const;
 
 protected:

@@ -157,3 +157,22 @@ void SlotButton::loadObject(Object * obj, const QVariantMap & data)
             textbox->setText(data.value("text").toString());
     }
 }
+
+void SlotButton::paint(QPainter & painter)
+{
+    ObjectGroup::paint(painter);
+
+    if (thumbnailEnabled()) {
+        Image* thumb = thumbnail();
+        if (thumb && !thumb->image() && (!thumb->borderWidth() || !thumb->borderColor().isValid())) {
+            QRect rect = thumb->sceneRect();
+            QPen pen(Qt::white);
+            painter.save();
+            painter.setOpacity(0.5);
+            pen.setWidth(1);
+            painter.setPen(pen);
+            painter.drawRect(rect);
+            painter.restore();
+        }
+    }
+}
