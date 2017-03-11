@@ -29,6 +29,7 @@ SceneManager::SceneManager(QObject * parent, const QString& name) :
     mCurrentSceneIndex = -1;
     connect(this, SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
     setObjectName(name);
+    mGameObjectManager.setObjectsParent(this);
 }
 
 SceneManager::~SceneManager()
