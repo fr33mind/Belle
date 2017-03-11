@@ -26,10 +26,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
     mUi.setupUi(this);
 
     QString desc = tr("Belle is a cross-platform and easy-to-use visual novel maker,<br/>"
-                      "that deploys games for the web.<br/>"
-                      "It uses Qt4 for the editor and HTML5 for the engine.");
-    QString copyright = "Copyright &copy; 2012-2015 Carlos Pais";
-    QString version = "Belle 0.6.1 alpha";
+                      "that lets you create visual novels and other 2D games for the web.<br/>"
+                      "It uses Qt framework for the editor and HTML5 for the engine.");
+    QString copyright = "Copyright &copy; 2012-2017 Carlos Pais";
+    QString version = "Belle 0.7 beta";
 
     QString fullDesc = QString("<p><b>%1</b></p><p>%2</p><p>%3</p>").arg(version).arg(desc).arg(copyright);
 
@@ -62,11 +62,11 @@ AboutDialog::AboutDialog(QWidget *parent) :
                 << "<a  href='mailto:freemind@live.com.pt'>Carlos Pais</a>"
                 << ""
                 << "Thanks to:"
-                << "<a href='http://qt-project.org'>Qt4</a>"
+                << "<a href='http://qt-project.org'>Qt</a>"
                 << "<a href='http://jquery.com'>jQuery</a>"
                 << "<a href='http://buzz.jaysalvat.com/'>Buzz</a>"
                 << "<a href='http://www.jstorage.info/'>jStorage</a>"
-                << "<a href='https://github.com/ereilin/qt-json'>Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt</a>";
+                << "<a href='https://fontfaceobserver.com/'>Font Face Observer</a>";
 
     mUi.creditsBrowser->setOpenExternalLinks(true);
     mUi.creditsBrowser->setHtml(style + thanksTo.join("<br/>"));
