@@ -41,6 +41,10 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
         setObjectsSynced(data.value("objectsSynced").toBool());
     }
 
+    if (data.contains("alignEnabled") && data.value("alignEnabled").type() == QVariant::Bool) {
+        setAlignEnabled(data.value("alignEnabled").toBool());
+    }
+
     if (data.value("resizeToContentsEnabled").type() == QVariant::Bool) {
         setResizeToContentsEnabled(data.value("resizeToContentsEnabled").toBool());
     }
@@ -126,10 +130,6 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
         setEditingMode(false);
         setX(origX);
         setY(origY);
-    }
-
-    if (data.contains("alignEnabled") && data.value("alignEnabled").type() == QVariant::Bool) {
-        setAlignEnabled(data.value("alignEnabled").toBool());
     }
 
     if (data.contains("spacing") && data.value("spacing").canConvert(QVariant::Int)) {
@@ -275,7 +275,7 @@ int ObjectGroup::calcSpacing() const
 
 void ObjectGroup::setSpacing(int spacing)
 {
-    if (mSpacing == spacing)
+    if (!mAlignEnabled || mSpacing == spacing)
         return;
 
     mSpacing = spacing;
@@ -708,7 +708,7 @@ QVariantMap ObjectGroup::toJsonObject(bool internal) const
     if (! objects.isEmpty())
         object.insert("objects", objects);
 
-    if (internal)
+    if (internal && mAlignEnabled)
         object.insert("spacing", mSpacing);
 
     object.insert("alignEnabled", mAlignEnabled);
@@ -737,6 +737,9 @@ Object* ObjectGroup::createObject(const QVariantMap & data)
 
 void ObjectGroup::updateSpacing()
 {
+    if (!mAlignEnabled)
+        return;
+
     mSpacing = calcSpacing();
     notify("spacing", mSpacing);
 }
