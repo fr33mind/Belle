@@ -67,6 +67,9 @@ public:
     bool objectsSynced() const;
     void setObjectsSynced(bool);
 
+    bool resizeToContentsEnabled() const;
+    void setResizeToContentsEnabled(bool);
+
 signals:
     void objectEventActionInserted(int, Interaction::InputEvent, int, Action*, ActionPool* actionPool=0);
     void objectEventActionRemoved(int, Interaction::InputEvent,Action*,bool);
@@ -108,6 +111,7 @@ private:
     bool mObjectsSynced;
     QList<Action*> mObjectsEventActions;
     QList<ActionPool*> mObjectsActionPools;
+    bool mResizeToContentsEnabled;
     void init();
     int indexOf(Object*);
     void alignObjects();

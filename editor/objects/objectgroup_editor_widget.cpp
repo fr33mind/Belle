@@ -22,15 +22,20 @@ ObjectGroupEditorWidget::ObjectGroupEditorWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {
     mAlignCheckBox = new QCheckBox(this);
+    mResizeToContentsCheckBox = new QCheckBox(this);
     mObjectsSyncedCheckBox = new QCheckBox(this);
 
     beginGroup(tr("Object Group"), "ObjectGroup");
     appendRow(tr("Align"), mAlignCheckBox);
+    appendRow(tr("Resize to Contents"), mResizeToContentsCheckBox);
     appendRow(tr("Sync Objects"), mObjectsSyncedCheckBox);
     endGroup();
 
     connect(mAlignCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAlignToggled(bool)));
+    connect(mResizeToContentsCheckBox, SIGNAL(toggled(bool)), this, SLOT(onResizeToContentsToggled(bool)));
     connect(mObjectsSyncedCheckBox, SIGNAL(toggled(bool)), this, SLOT(onObjectsSyncedToggled(bool)));
+
+    resizeColumnToContents(0);
 }
 
 void ObjectGroupEditorWidget::updateData(GameObject* object)
@@ -41,6 +46,7 @@ void ObjectGroupEditorWidget::updateData(GameObject* object)
         return;
 
     mAlignCheckBox->setChecked(obj->isAlignEnabled());
+    mResizeToContentsCheckBox->setChecked(obj->resizeToContentsEnabled());
     mObjectsSyncedCheckBox->setChecked(obj->objectsSynced());
 }
 
@@ -51,6 +57,15 @@ void ObjectGroupEditorWidget::onAlignToggled(bool checked)
         return;
 
     obj->setAlignEnabled(checked);
+}
+
+void ObjectGroupEditorWidget::onResizeToContentsToggled(bool checked)
+{
+    ObjectGroup* obj = qobject_cast<ObjectGroup*>(mGameObject);
+    if (! obj)
+        return;
+
+    obj->setResizeToContentsEnabled(checked);
 }
 
 void ObjectGroupEditorWidget::onObjectsSyncedToggled(bool checked)

@@ -41,6 +41,10 @@ void ObjectGroup::loadData(const QVariantMap& data, bool internal)
         setObjectsSynced(data.value("objectsSynced").toBool());
     }
 
+    if (data.value("resizeToContentsEnabled").type() == QVariant::Bool) {
+        setResizeToContentsEnabled(data.value("resizeToContentsEnabled").toBool());
+    }
+
     if (data.contains("objects") && data.value("objects").type() == QVariant::List) {
         this->removeAllObjects(true);
         QVariantList objects = data.value("objects").toList();
@@ -145,6 +149,7 @@ void ObjectGroup::init()
     mAlignEnabled = true;
     mSpacing = 0;
     mObjectsSynced = false;
+    mResizeToContentsEnabled = true;
 }
 
 void ObjectGroup::_append(Object* obj)
@@ -365,10 +370,26 @@ void ObjectGroup::adaptSize()
         return;
 
     QRect rect = childrenRect();
-    Object::setX(rect.left());
-    Object::setY(rect.top());
-    Object::setWidth(rect.width());
-    Object::setHeight(rect.height());
+
+    if (mResizeToContentsEnabled) {
+        Object::setX(rect.left());
+        Object::setY(rect.top());
+        Object::setWidth(rect.width());
+        Object::setHeight(rect.height());
+    }
+    else {
+        if (rect.left() < mSceneRect.left())
+            mSceneRect.setLeft(rect.left());
+
+        if (rect.top() < mSceneRect.top())
+            mSceneRect.setTop(rect.top());
+
+        if (rect.right() > mSceneRect.right())
+            mSceneRect.setRight(rect.right());
+
+        if (rect.bottom() > mSceneRect.bottom())
+            mSceneRect.setBottom(rect.bottom());
+    }
 
     checkStickyObjects();
 }
@@ -684,6 +705,7 @@ QVariantMap ObjectGroup::toJsonObject(bool internal) const
         object.insert("spacing", mSpacing);
 
     object.insert("alignEnabled", mAlignEnabled);
+    object.insert("resizeToContentsEnabled", mResizeToContentsEnabled);
     object.insert("objectsSynced", mObjectsSynced);
 
     return object;
@@ -1259,4 +1281,14 @@ void ObjectGroup::moveObjectsEventActionsFromPool(Interaction::InputEvent event,
             obj->blockSignals(blocked);
         }
     }
+}
+
+bool ObjectGroup::resizeToContentsEnabled() const
+{
+    return mResizeToContentsEnabled;
+}
+
+void ObjectGroup::setResizeToContentsEnabled(bool enabled)
+{
+    mResizeToContentsEnabled = enabled;
 }
