@@ -29,6 +29,8 @@ SlotButtonEditorWidget::SlotButtonEditorWidget(QWidget *parent) :
     appendRow(tr("Thumbnail"), thumbnailWidget);
     appendRow(tr("Slot Type"), mSlotTypeComboBox);
     endGroup();
+    //Fixes height issue that happens when button is not visible
+    thumbnailWidget->setFixedHeight(thumbnailWidget->height());
 
     connect(mThumbnailCheckBox, SIGNAL(toggled(bool)), mEmptyThumbnailButton, SLOT(setVisible(bool)));
     connect(mSlotSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSlotChanged(int)));
