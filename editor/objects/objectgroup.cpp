@@ -246,7 +246,14 @@ void ObjectGroup::resizeSceneRect(int x, int y)
         }
     }
 
-    this->alignObjects();
+    if (mAlignEnabled) {
+        this->alignObjects();
+    }
+    else {
+        QVariantMap data;
+        data.insert("rects", objectsRelativeRectsData());
+        notify("editingModeData", data);
+    }
 }
 
 int ObjectGroup::calcSpacing() const
