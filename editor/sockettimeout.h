@@ -17,6 +17,7 @@ signals:
 
 private slots:
     void _timeout();
+    void onSocketDestroyed();
 
 private:
     QAbstractSocket* mSocket;
