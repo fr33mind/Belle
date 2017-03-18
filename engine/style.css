@@ -123,6 +123,7 @@ body, html
     padding: 0 0;
     margin: 0 0;
     white-space: nowrap;
+    line-height: normal;
 }
 
 #noscript {

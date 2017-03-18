@@ -61,13 +61,13 @@ utils.textSize = function(text, font)
 {
     var size = [];
     if (! dummy)
-        dummy = document.getElementById("dummy");
+      dummy = $('#dummy');
 
-    dummy.style.font = font;
-    dummy.innerHTML = text;
+    dummy.css('font', font);
+    dummy.html(text);
     
-    size.push(dummy.offsetWidth);
-    size.push(dummy.offsetHeight);
+    size.push(dummy.width());
+    size.push(dummy.height());
 
     return size;
 }
