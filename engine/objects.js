@@ -620,7 +620,7 @@ TextBox.prototype.paint = function(context)
     if (this.font)
        context.font = this.font;
 
-    context.textBaseline = "top";
+    context.textBaseline = "bottom";
 
     var text = game ? game.replaceVariables(this.text) : this.text;
     if (text != this.displayedText)
@@ -644,7 +644,6 @@ TextBox.prototype.alignText = function()
     this.textLeftPadding.length = 0;
     this.textTopPadding.length = 0;
     var sumHeight = 0;
-    var fontLeading = this.font ? this.font.leading : 0;
 
     for (var i=0; i < this.textParts.length; i++) {
         //empty text means it's just a new line, so we use <br/> to get the height
@@ -653,9 +652,7 @@ TextBox.prototype.alignText = function()
         var width = size[0];
         var height = size[1];
         var leftPadding = this.padding.left;
-        //height should already contain the font leading.
-        //the leading is to center text vertically in the line.
-        this.textTopPadding.push(sumHeight+fontLeading);
+        this.textTopPadding.push(sumHeight+height);
         sumHeight += height;
 
         if (this.textAlignment) {

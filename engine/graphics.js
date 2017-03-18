@@ -226,8 +226,7 @@
     this.family = "";
     this.size = "";
     this.height = null;
-    this.lineHeight = 1;
-    this.naturalLeading = 0;
+    this.lineHeight = "normal";
     this.leading = 0;
     this.library = library ? library : null;
     this.weight = "normal";
@@ -237,7 +236,7 @@
       this.setFamily(data.family);
       this.setSize(data.size);
       if (data.leading)
-        this.naturalLeading = data.leading;
+        this.leading = data.leading;
       this.setHeight(data.height);
       if (data.weight)
         this.setWeight(data.weight);
@@ -262,14 +261,15 @@
 
   Font.prototype.setSize = function(size) {
     this.size = size;
-    this.calcLeading();
   }
 
   Font.prototype.setHeight = function(height) {
-    if (belle.isNumber(height)) {
+    if (belle.isNumber(height) || height === null) {
       this.height = height;
-      this.lineHeight = parseInt(this.height) + parseInt(this.naturalLeading) + "px";
-      this.calcLeading();
+      if (height !== null)
+        this.lineHeight = parseInt(this.height) + parseInt(this.leading) + "px";
+      else
+        this.lineHeight = "normal";
     }
   }
 
@@ -281,20 +281,12 @@
     this.style = style;
   }
 
-  Font.prototype.calcLeading = function() {
-    if (belle.isNumber(this.size) && belle.isNumber(this.height)) {
-      var fontSize = parseInt(this.size);
-      var fontHeight = parseInt(this.height);
-      this.leading = Math.round((fontHeight-fontSize) / 2) + this.naturalLeading;
-    }
-  }
-
   Font.prototype.serialize = function() {
     var data = {};
     var families = this.getFamilies();
     data.family = families[0];
     data.size = this.size;
-    data.leading = this.naturalLeading;
+    data.leading = this.leading;
     data.height = this.height;
     data.weight = this.weight;
     data.style = this.style;
