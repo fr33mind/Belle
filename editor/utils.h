@@ -270,11 +270,13 @@ namespace FileDialogUtils {
     extern const QString SoundFilter;
     extern const QString ImageFilter;
     extern const QString FontFilter;
+    extern const QString AllFilesFilter;
 
-    QString getOpenImageFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString());
-    QString getOpenSoundFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString());
-    QString getOpenFontFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString());
+    QString getOpenImageFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString(), bool allFilesFilter=true);
+    QString getOpenSoundFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString(), bool allFilesFilter=true);
+    QString getOpenFontFileName(QWidget *parent = Q_NULLPTR, const QString &dir = QString(), bool allFilesFilter=true);
     QString toFilter(const QString& name, const QStringList& ext);
+    QString buildFilters(const QString&, bool allFilesFilter=true);
 }
 
 #endif // UTILS_H

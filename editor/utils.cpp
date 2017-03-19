@@ -10,20 +10,24 @@ const QString FileDialogUtils::SoundFilter = FileDialogUtils::toFilter(QObject::
                                                                        SoundAsset::supportedFormats());
 const QString FileDialogUtils::FontFilter = FileDialogUtils::toFilter(QObject::tr("Fonts"),
                                                                        FontAsset::supportedFormats());
+const QString FileDialogUtils::AllFilesFilter = "All Files (*)";
 
-QString FileDialogUtils::getOpenImageFileName(QWidget* parent, const QString& dir)
+QString FileDialogUtils::getOpenImageFileName(QWidget* parent, const QString& dir, bool allFilesFilter)
 {
-   return QFileDialog::getOpenFileName(parent, QObject::tr("Choose Image"), dir, FileDialogUtils::ImageFilter);
+   QString filters = FileDialogUtils::buildFilters(FileDialogUtils::ImageFilter, allFilesFilter);
+   return QFileDialog::getOpenFileName(parent, QObject::tr("Choose Image"), dir, filters);
 }
 
-QString FileDialogUtils::getOpenSoundFileName(QWidget* parent, const QString& dir)
+QString FileDialogUtils::getOpenSoundFileName(QWidget* parent, const QString& dir, bool allFilesFilter)
 {
-   return QFileDialog::getOpenFileName(parent, QObject::tr("Choose Sound"), dir, FileDialogUtils::SoundFilter);
+   QString filters = FileDialogUtils::buildFilters(FileDialogUtils::SoundFilter, allFilesFilter);
+   return QFileDialog::getOpenFileName(parent, QObject::tr("Choose Sound"), dir, filters);
 }
 
-QString FileDialogUtils::getOpenFontFileName(QWidget* parent, const QString& dir)
+QString FileDialogUtils::getOpenFontFileName(QWidget* parent, const QString& dir, bool allFilesFilter)
 {
-   return QFileDialog::getOpenFileName(parent, QObject::tr("Choose Font"), dir, FileDialogUtils::FontFilter);
+   QString filters = FileDialogUtils::buildFilters(FileDialogUtils::FontFilter, allFilesFilter);
+   return QFileDialog::getOpenFileName(parent, QObject::tr("Choose Font"), dir, filters);
 }
 
 QString FileDialogUtils::toFilter(const QString &name, const QStringList &ext)
@@ -34,4 +38,13 @@ QString FileDialogUtils::toFilter(const QString &name, const QStringList &ext)
     }
 
     return QString("%1 (%2)").arg(name).arg(formats.join(" "));
+}
+
+QString FileDialogUtils::buildFilters(const QString& filter, bool allFilesFilter)
+{
+    QStringList filters;
+    filters << filter;
+    if (allFilesFilter)
+        filters << FileDialogUtils::AllFilesFilter;
+    return filters.join(";;");
 }
