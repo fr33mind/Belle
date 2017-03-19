@@ -16,6 +16,7 @@
 
 #include "choosefilebutton.h"
 #include "assetmanager.h"
+#include "utils.h"
 
 #include <QFileDialog>
 #include <QFileInfo>
@@ -78,9 +79,17 @@ void ChooseFileButton::onClick()
             return;
     }
 
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Choose File"),
-                                       mPreviousPath,
-                                       mFilters);
+    QString filePath;
+
+    if (mActiveFilter == ImageFilter) {
+        filePath = FileDialogUtils::getOpenImageFileName(this, mPreviousPath);
+    }
+    else if (mActiveFilter == SoundFilter) {
+        filePath = FileDialogUtils::getOpenSoundFileName(this, mPreviousPath);
+    }
+    else {
+        filePath = QFileDialog::getOpenFileName(this, QString(), mPreviousPath);
+    }
 
     if (! filePath.isEmpty()) {
         QFileInfo info(filePath);
@@ -145,24 +154,6 @@ bool ChooseFileButton::hasValidFile()
 
 void ChooseFileButton::setFilter(FilterType filter)
 {
-    QString filters("");
-    QString extensions("");
-
-    switch(filter) {
-        case ImageFilter:
-        foreach(const QString ext, mImageExtensions)
-            extensions += QString("*.%1 ").arg(ext);
-        filters += QString("Images(%1);;").arg(extensions);
-        break;
-        case SoundFilter:
-        foreach(const QString ext, mSoundExtensions)
-            extensions += "*." + ext + " ";
-        filters += QString("Sounds(%1);;").arg(extensions);
-        break;
-    }
-
-    filters += "Any(*.*)";
-    mFilters = filters;
     mActiveFilter = filter;
 }
 

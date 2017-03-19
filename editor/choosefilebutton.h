@@ -54,7 +54,6 @@ public slots:
 private:
     QString mFilePath;
     QString mPreviousPath;
-    QString mFilters;
     QStringList mImageExtensions;
     QStringList mSoundExtensions;
     FilterType mActiveFilter;
