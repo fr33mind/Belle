@@ -250,6 +250,7 @@ function GameView(container, parent)
     this.context = this.canvas[0].getContext('2d');
     this.pressedObject = this.hoveredObject = null;
     this._cleared = false;
+    this._actionToSkip = null;
 }
 
 belle.extend(GameView, AbstractView);
@@ -409,14 +410,30 @@ GameView.prototype.mouseUp = function(ev) {
     }
 }
 
+GameView.prototype.keyDown = function (ev)
+{
+    if (!this.model)
+      return;
+
+    switch(ev.keyCode) {
+        case 13: //ENTER
+        case 32: //SPACE
+            this._actionToSkip = this.model.getAction();
+    }
+}
+
 GameView.prototype.keyUp = function (ev)
 {
+    if (!this.model)
+      return;
+
     switch(ev.keyCode) {
         case 13: //ENTER
         case 32: //SPACE
             var a = this.model.getAction();
-            if (a)
+            if (a && a == this._actionToSkip)
                 a.skip();
+            this._actionToSkip = null;
     }
 }
 
