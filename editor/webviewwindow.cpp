@@ -90,6 +90,8 @@ void WebViewWindow::open(const QUrl& url)
 void WebViewWindow::closeEvent(QCloseEvent *event)
 {
     mWebView->setUrl(QUrl());
+    QWebSettings::clearIconDatabase();
+    QWebSettings::clearMemoryCaches();
     mWebView->hide();
     if (mWebInspector) {
         mWebInspector->deleteLater();
