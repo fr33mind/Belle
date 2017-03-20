@@ -20,9 +20,10 @@
 #include <QDir>
 #include <QObject>
 #include <QMessageBox>
+#include <QCoreApplication>
 
-static QString mPath = ENGINE_DEFAULT_PATH;
 static QString mDefaultPath = ENGINE_DEFAULT_PATH;
+static QString mPath = mDefaultPath;
 static QString mBrowserPath = "";
 static bool mUseBuiltinBrowser = false;
 static bool mPathChanged = false;
@@ -82,6 +83,16 @@ QString Engine::defaultPath()
 
 void Engine::loadDefaultPath()
 {
+    #if defined(Q_OS_MAC)
+        if (mDefaultPath == ENGINE_DEFAULT_PATH) {
+            mDefaultPath = QCoreApplication::applicationDirPath() +
+                           QDir::separator() + ENGINE_DEFAULT_PATH;
+
+            if (mPath == ENGINE_DEFAULT_PATH)
+                mPath = mDefaultPath;
+        }
+    #endif
+
     if (isValidPath(mDefaultPath))
         return;
 
