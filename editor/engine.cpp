@@ -71,6 +71,21 @@ QString Engine::path()
     return mPath;
 }
 
+bool Engine::loadPath()
+{
+    bool defaultLoaded = loadDefaultPath();
+
+    if (isValidPath(mPath))
+        return true;
+
+    if (defaultLoaded) {
+        mPath = mDefaultPath;
+        return isValidPath(mPath);
+    }
+
+    return false;
+}
+
 bool Engine::isValid()
 {
     return isValidPath(mPath);
@@ -81,20 +96,17 @@ QString Engine::defaultPath()
     return mDefaultPath;
 }
 
-void Engine::loadDefaultPath()
+bool Engine::loadDefaultPath()
 {
     #if defined(Q_OS_MAC)
         if (mDefaultPath == ENGINE_DEFAULT_PATH) {
             mDefaultPath = QCoreApplication::applicationDirPath() +
                            QDir::separator() + ENGINE_DEFAULT_PATH;
-
-            if (mPath == ENGINE_DEFAULT_PATH)
-                mPath = mDefaultPath;
         }
     #endif
 
     if (isValidPath(mDefaultPath))
-        return;
+        return true;
 
     QStringList paths;
     paths << "engine";
@@ -102,9 +114,11 @@ void Engine::loadDefaultPath()
     foreach(const QString& path, paths) {
         if (isValidPath(path)) {
             mDefaultPath = path;
-            break;
+            return true;
         }
     }
+
+    return false;
 }
 
 QString Engine::browserPath()

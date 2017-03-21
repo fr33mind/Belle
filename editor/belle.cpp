@@ -249,11 +249,25 @@ Belle::Belle(QWidget *widget)
     connect(mUi.scenesTabWidget, SIGNAL(currentChanged(int)), this, SLOT(scenesTabWidgetPageChanged(int)));
 
     restoreSettings();
-    Engine::loadDefaultPath();
+    Engine::loadPath();
 }
 
 void Belle::afterShow()
 {
+    if (mSettings->contains("Project/enginePath")) {
+        //if its a new version and Engine didn't already correct its path, ask user.
+        if (mSettings->value("version", "").toString() != VERSION_STR &&
+            Engine::defaultPath() != Engine::path() &&
+            Engine::isValidPath(Engine::defaultPath())) {
+            QMessageBox::StandardButton btn = QMessageBox::question(this, tr("Update engine path?"),
+                                                                          tr("Some settings of a previous version of Belle were found.\n"
+                                                                             " Currently the engine path is set to:\n\"%1\".\n\n"
+                                                                   "Do you wish to update it to:\n\"%2\"?").arg(Engine::path()).arg(Engine::defaultPath()));
+            if (btn == QMessageBox::Yes)
+                Engine::setPath(Engine::defaultPath());
+        }
+    }
+
     loadEmptyProject();
 
     if (!Engine::isValid()) {
@@ -267,6 +281,7 @@ void Belle::afterShow()
 void Belle::saveSettings()
 {
     //save settings
+    mSettings->setValue("version", VERSION_STR);
     mSettings->setValue("showBuiltinBrowserMessage", mShowBuiltinBrowserMessage);
     mSettings->setValue("showWebSafeFontsMessage", ChooseFontWidget::showWebSafeFontsMessage());
     mSettings->beginGroup("Window");

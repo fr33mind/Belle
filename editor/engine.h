@@ -34,8 +34,9 @@ public:
     static bool isValidPath(const QString&);
     static bool isValid();
     static QString path();
+    static bool loadPath();
     static QString defaultPath();
-    static void loadDefaultPath();
+    static bool loadDefaultPath();
     static void setPath(const QString&);
     static bool pathChanged();
     static QString browserPath();
