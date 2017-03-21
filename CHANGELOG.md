@@ -1,3 +1,98 @@
+## Belle 0.7b | 21/03/2017
+
+### [General]
+- Added SlotButton resource.
+- Added Font resource.
+- Implemented effectively padding for objects (currently only usable in TextBox).
+- Fixed and improved broken behaviour of ChangeColor (now called ChangeObjectBackground).
+- Added support for images in ChangeObjectBackground.
+- Added Sound resource.
+- Renamed ChangeGameVariable to SetGameVariable.
+
+#### [Editor]
+- Improved loading process of engine's path at startup.
+- Fixed crash when removing image from ChangeBackground action.
+- Fixed possible crash when removing ShowMenu action.
+- Added synchronization for events' actions.
+- Improved ObjectGroup management.
+- Added option to align Menu in ShowMenu action.
+- Fixed application closing when user clicked cancel on Save Project dialog.
+- Added dialog for managing event actions.
+- Added support for moving event actions.
+- Fixed no height limit in actions' items.
+- Added 4 different colors for each group of actions.
+- Removed border and corner radius from actions' items.
+- Fixed possible crash after closing the main window.
+- Limited display text to 3 lines for any action.
+- Added font style and font weight properties to TextBox.
+- Added some shortcuts to easily and quickly write dialogues.
+- Fixed "Paste" option not showing when clicking on an action.
+- Fixed selection when pasting and moving actions.
+- Fixed action items not being dropped in correct order.
+- Corrected copy/cut behaviour for objects and actions.
+- Fixed selection border width and color.
+- Speeded up the opening of projects.
+- Added a tooltip to sliders to show their value.
+- Fixed display text in ChangeBackground.
+- Fixed GoToScene not setting scene object when loaded from file.
+- Fixed some issues when copying or cutting actions.
+- Fixed "New Project" option not initializing project properly.
+- Added Menu resource.
+- Updated ShowMenu to work with Menu resources.
+- Fixed image assets not being released in some cases when used in event actions.
+- Added a preview of the changes when selecting a ChangeObjectBackground action.
+- Fixed crash when removing current image in ChangeBackground.
+- Renamed "Novel" menu to "Project".
+- Set objects' background opaque but without color by default.
+- Fixed sync property not loading correctly.
+- Added delete shortcut in resources view.
+- Changed resources to open up for editing right after creating them.
+- Fixed and improved condition dialog.
+- Fixed some issues with aspect ratio option.
+- Improved GoToScene action management.
+- Set resources view to show resource type icon.
+- Limited possible characters to use when specifying a variable name.
+- Fixed issue when removing multiple actions.
+- Set Ctrl+R shortcut to run the project.
+- Added a checkup of engine directory at startup.
+- Fixed badly generated names for assets.
+- Fixed assets not being removed from disk when removed from project.
+- Improved management of GoToLabel.
+- Fixed view not scrolling to action after creating it.
+- Automatically select an action after creating it.
+- Changed ShowMenu's display text.
+- Changed Branch's display text.
+- Fixed and improved actions' drag and drop.
+- Set ellipsis by line in actions' text.
+- Added proper keyboard navigation in actions' view.
+- Allowed enabling/disabling visibility transitions.
+- Set first scene selected after project import.
+- Created tab widget with main and pause scenes.
+- Improved HTTP server.
+- Improved built-in browser.
+- Fixed actions' view scrolling to top after removing an action.
+- Set red background in name's input if name is not valid.
+- Set run directory to be removed on close.
+- Upgraded Qt framework from Qt4 to Qt5.
+- Other minor fixes.
+
+#### [Engine]
+- Improved management of game state in mouse move event.
+- Fixed fade out not working when stopping a sound.
+- Fixed loop issue when playing a sound.
+- Fixed ChangeBackground not removing background image.
+- Fixed TextBox not updating with empty text.
+- Improved loading accuracy of fonts.
+- Corrected vertical alignment of text in TextBox.
+- Added confirmation when overwriting a saved game.
+- Added confirmation when loading a saved game.
+- Fixed engine not loading when using more than one gif.
+- Fixed slide not working when duration was zero.
+- Run show/hide transitions regardless if object is visible/hidden.
+- Fixed sounds not playing after loading a saved game.
+- Removed DOM support.
+- Other minor fixes.
+
 ## Belle 0.6.1a | 01/07/2015
 
 #### [Engine]
