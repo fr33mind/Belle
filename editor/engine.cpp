@@ -98,7 +98,7 @@ QString Engine::defaultPath()
 
 bool Engine::loadDefaultPath()
 {
-    #if defined(Q_OS_MAC)
+    #if defined(Q_OS_UNIX)
         if (mDefaultPath == ENGINE_DEFAULT_PATH) {
             mDefaultPath = QCoreApplication::applicationDirPath() +
                            QDir::separator() + ENGINE_DEFAULT_PATH;

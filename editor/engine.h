@@ -21,8 +21,6 @@
 
 #if defined(Q_OS_MAC)
     #define ENGINE_DEFAULT_PATH "../Resources/engine"
-#elif defined(Q_OS_UNIX)
-    #define ENGINE_DEFAULT_PATH "/usr/share/belle/engine"
 #else
     #define ENGINE_DEFAULT_PATH  "engine"
 #endif
