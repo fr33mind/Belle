@@ -65,21 +65,31 @@ footer > p {
   padding-top: 10px;
 }
 
+.download-item-wrapper {
+  padding-top: 20px;
+}
+
 a.downloadItem {
    text-align: center;
    display: inline-block;
    margin: 0 auto;
    width: 200px;
+   font-weight: 700;
+}
+
+a.downloadItem.disabled {
+  color: grey;
+  text-decoration: none;
+  cursor: default;
 }
 
 a.downloadItem > img {
   margin: 0 auto;
-  padding-top: 10px;
 }
 
-a.downloadItem > label {
-  cursor: pointer;
+a.downloadItem > span {
   padding-top: 12px;
+  display: block;
 }
 
 hr {
