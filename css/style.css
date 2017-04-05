@@ -92,6 +92,23 @@ a.downloadItem > span {
   display: block;
 }
 
+.download .notes {
+  padding-left: 12%;
+  padding-right: 12%;
+  padding-top: 5%;
+}
+
+.download .notes h3 {
+  text-align: left;
+}
+
+.download .notes ul {
+}
+
+.download .notes ul > li {
+  padding-bottom: 10px;
+}
+
 hr {
   margin-top: 10px;
   margin-bottom: 10px;
