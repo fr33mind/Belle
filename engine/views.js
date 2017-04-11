@@ -43,6 +43,7 @@ AbstractView.prototype.clear = function()
 AbstractView.prototype.show = function()
 {
   this.element.show();
+  this.resize();
   this.render();
 }
 
