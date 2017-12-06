@@ -47,6 +47,7 @@ public slots:
     void onEnginePathChangeRequest();
     void updateTextSpeedSliderTooltip(int);
     void onBrowserSelect();
+    void onTextSpeedChanged(int);
 
 private:
     Ui::NovelPropertiesDialog mUi;
