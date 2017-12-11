@@ -151,6 +151,11 @@
         controller.view.keyUp(ev);
     });
 
+    $(document).keydown(function(ev) {
+      if (controller.view)
+        controller.view.keyDown(ev);
+    });
+
     $(window).resize(function(ev){
       controller.view.resize(ev);
     });
