@@ -345,6 +345,7 @@ ActionsView::ActionsView(QWidget *parent) :
     setItemDelegate(delegate);
     setContextMenuPolicy(Qt::CustomContextMenu);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setResizeMode(QListView::Adjust);
 
     //actions
     mCopyAction = new QAction(QIcon(":/media/editcopy.png"), tr("Copy"), this);
