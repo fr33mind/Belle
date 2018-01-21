@@ -150,7 +150,8 @@ HEADERS      += belle.h\
     actions/actionmetatype.h \
     dialogs/actionmanagerdialog.h \
     widgets/actionmanagerbutton.h \
-    actionpool.h
+    actionpool.h \
+    widgets/numbervalidator.h
                 
 
 SOURCES      += main.cpp\
@@ -283,6 +284,7 @@ SOURCES      += main.cpp\
     actions/actionmetatype.cpp \
     dialogs/actionmanagerdialog.cpp \
     widgets/actionmanagerbutton.cpp \
-    actionpool.cpp
+    actionpool.cpp \
+    widgets/numbervalidator.cpp
 
 RESOURCES += media.qrc
