@@ -21,6 +21,7 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
     ActionEditorWidget(parent)
 {
     mVariableValidator = new VariableValidator(this);
+    mNumberValidator = new NumberValidator(this);
 
     mVariableEdit = new QLineEdit(this);
     mVariableEdit->setValidator(new VariableValidator(this));
@@ -79,6 +80,8 @@ void SetGameVariableEditorWidget::onOperatorChanged(int index)
     SetGameVariable* setGameVariable = qobject_cast<SetGameVariable*>(mGameObject);
     if (setGameVariable)
         setGameVariable->setOperatorIndex(index);
+
+    updateValueEditType(setGameVariable);
 }
 
 void SetGameVariableEditorWidget::onValueTypeChanged(int index)
@@ -87,24 +90,7 @@ void SetGameVariableEditorWidget::onValueTypeChanged(int index)
     if (setGameVariable)
         setGameVariable->setValueType(static_cast<SetGameVariable::ValueType>(index));
 
-    QString label = tr("Value");
-
-    if (index == 1) {
-        mValueEdit->setValidator(mVariableValidator);
-        if (mVariableValidator->validate(mValueEdit->text()) != QValidator::Acceptable) {
-            mValueEdit->clear();
-        }
-
-        label = tr("Variable");
-    }
-    else {
-        mValueEdit->setValidator(0);
-    }
-
-    QStandardItem* item = findItemData("ValueEdit");
-    if (item) {
-        item->setText(label);
-    }
+    updateValueEditType(setGameVariable);
 }
 
 void SetGameVariableEditorWidget::onValueChanged(const QString & text)
@@ -121,4 +107,52 @@ QStringList SetGameVariableEditorWidget::operatorsText()
         operators << mOperatorChooser->itemText(i);
 
     return operators;
+}
+
+void SetGameVariableEditorWidget::updateValueEditType(SetGameVariable * setGameVariable)
+{
+    if (!setGameVariable)
+        return;
+
+    int index = setGameVariable->operatorIndex();
+    SetGameVariable::ValueType type = setGameVariable->valueType();
+    QString label;
+
+    if (type == SetGameVariable::Value && index >= 1 && index <= 4) {
+        if (mValueEdit->validator() == mNumberValidator) {
+            return;
+        }
+
+        mValueEdit->setValidator(mNumberValidator);
+        if (mNumberValidator->validate(mValueEdit->text()) != QValidator::Acceptable) {
+            mValueEdit->clear();
+        }
+
+        label = tr("Number");
+    }
+    else if (type == SetGameVariable::Variable) {
+        if (mValueEdit->validator() == mVariableValidator) {
+            return;
+        }
+
+        mValueEdit->setValidator(mVariableValidator);
+        if (mVariableValidator->validate(mValueEdit->text()) != QValidator::Acceptable) {
+            mValueEdit->clear();
+        }
+
+        label = tr("Variable");
+    }
+    else {
+        if (!mValueEdit->validator()) {
+            return;
+        }
+
+        mValueEdit->setValidator(0);
+        label = tr("Value");
+    }
+
+    QStandardItem* item = findItemData("ValueEdit");
+    if (item) {
+        item->setText(label);
+    }
 }

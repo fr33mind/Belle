@@ -22,6 +22,7 @@
 #include "action_editor_widget.h"
 #include "set_game_variable.h"
 #include "variablevalidator.h"
+#include "numbervalidator.h"
 
 class SetGameVariable;
 
@@ -34,6 +35,7 @@ class SetGameVariableEditorWidget : public ActionEditorWidget
     QComboBox* mValueTypeChooser;
     QLineEdit* mValueEdit;
     VariableValidator* mVariableValidator;
+    NumberValidator* mNumberValidator;
 
 public:
     explicit SetGameVariableEditorWidget(ActionEditorWidget *parent = 0);
@@ -43,6 +45,9 @@ signals:
     
 protected:
     virtual void updateData(GameObject*);
+
+private:
+    void updateValueEditType(SetGameVariable*);
 
 private slots:
     void onVariableEdited(const QString&);
