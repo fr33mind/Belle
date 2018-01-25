@@ -29,6 +29,11 @@ class SetGameVariable : public Action
     QStringList mOperators;
 
 public:
+    enum ValueType {
+        Value=0,
+        Variable
+    };
+
     explicit SetGameVariable(QObject *parent = 0);
     SetGameVariable(const QVariantMap& data, QObject *parent = 0);
 
@@ -40,6 +45,9 @@ public:
 
     QString variable();
     void setVariable(const QString&);
+
+    ValueType valueType() const;
+    void setValueType(ValueType);
 
     QString displayText() const;
 
@@ -55,7 +63,7 @@ protected:
 private:
     void init();
 
-    
+    ValueType mValueType;
 };
 
 #endif // SET_GAME_VARIABLE_H

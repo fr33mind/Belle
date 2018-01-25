@@ -20,6 +20,8 @@
 SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *parent) :
     ActionEditorWidget(parent)
 {
+    mVariableValidator = new VariableValidator(this);
+
     mVariableEdit = new QLineEdit(this);
     mVariableEdit->setValidator(new VariableValidator(this));
 
@@ -31,16 +33,22 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
     mOperatorChooser->addItem(tr("Divide"));
     mOperatorChooser->addItem(tr("Append"));
 
+    mValueTypeChooser = new QComboBox(this);
+    mValueTypeChooser->addItem(tr("Value"));
+    mValueTypeChooser->addItem(tr("Variable"));
+
     mValueEdit = new QLineEdit(this);
 
     connect(mVariableEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onVariableEdited(const QString&)));
     connect(mOperatorChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onOperatorChanged(int)));
+    connect(mValueTypeChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onValueTypeChanged(int)));
     connect(mValueEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onValueEdited(const QString&)));
 
     beginGroup(tr("Game Variable"));
     appendRow(tr("Variable"), mVariableEdit);
     appendRow(tr("Operator"), mOperatorChooser);
-    appendRow(tr("Value"), mValueEdit);
+    appendRow(tr("Value Type"), mValueTypeChooser);
+    appendRow(tr("Value"), mValueEdit, "ValueEdit");
     endGroup();
 
     resizeColumnToContents(0);
@@ -55,6 +63,7 @@ void  SetGameVariableEditorWidget::updateData(GameObject* action)
 
     mVariableEdit->setText(setGameVariable->variable());
     mOperatorChooser->setCurrentIndex(setGameVariable->operatorIndex());
+    mValueTypeChooser->setCurrentIndex(static_cast<int>(setGameVariable->valueType()));
     mValueEdit->setText(setGameVariable->value());
 }
 
@@ -70,6 +79,32 @@ void SetGameVariableEditorWidget::onOperatorChanged(int index)
     SetGameVariable* setGameVariable = qobject_cast<SetGameVariable*>(mGameObject);
     if (setGameVariable)
         setGameVariable->setOperatorIndex(index);
+}
+
+void SetGameVariableEditorWidget::onValueTypeChanged(int index)
+{
+    SetGameVariable* setGameVariable = qobject_cast<SetGameVariable*>(mGameObject);
+    if (setGameVariable)
+        setGameVariable->setValueType(static_cast<SetGameVariable::ValueType>(index));
+
+    QString label = tr("Value");
+
+    if (index == 1) {
+        mValueEdit->setValidator(mVariableValidator);
+        if (mVariableValidator->validate(mValueEdit->text()) != QValidator::Acceptable) {
+            mValueEdit->clear();
+        }
+
+        label = tr("Variable");
+    }
+    else {
+        mValueEdit->setValidator(0);
+    }
+
+    QStandardItem* item = findItemData("ValueEdit");
+    if (item) {
+        item->setText(label);
+    }
 }
 
 void SetGameVariableEditorWidget::onValueEdited(const QString & text)

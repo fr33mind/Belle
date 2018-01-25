@@ -42,6 +42,7 @@ void SetGameVariable::init()
     mOperators.append("append");
 
     mOperatorIndex = 0;
+    mValueType = SetGameVariable::Value;
 }
 
 void SetGameVariable::loadData(const QVariantMap & data, bool internal)
@@ -59,6 +60,10 @@ void SetGameVariable::loadData(const QVariantMap & data, bool internal)
 
     if (data.contains("operator") && data.value("operator").type() == QVariant::String) {
         setOperatorIndex(mOperators.indexOf(data.value("operator").toString()));
+    }
+
+    if (data.contains("valueType") && data.value("valueType").canConvert(QVariant::Int)) {
+        setValueType(static_cast<SetGameVariable::ValueType>(data.value("valueType").toInt()));
     }
 }
 
@@ -104,6 +109,17 @@ void SetGameVariable::setValue(const QString & val)
     notify("value", mValue);
 }
 
+SetGameVariable::ValueType SetGameVariable::valueType() const
+{
+    return mValueType;
+}
+
+void SetGameVariable::setValueType(ValueType type)
+{
+    mValueType = type;
+    notify("valueType", static_cast<int>(type));
+}
+
 QString SetGameVariable::displayText() const
 {
     QString variable = tr("Nothing");
@@ -113,9 +129,14 @@ QString SetGameVariable::displayText() const
     if (! mVariable.isEmpty())
         variable = "$" + mVariable;
     if (! mValue.isEmpty()) {
-        value = mValue;
-        if (! Utils::isNumber(value))
-            value = QString("\"%1\"").arg(value);
+        if (mValueType == SetGameVariable::Variable) {
+            value = "$" + mValue;
+        }
+        else {
+            value = mValue;
+            if (! Utils::isNumber(value))
+                value = QString("\"%1\"").arg(value);
+        }
     }
 
     return QString("%1 %2 %3 %4").arg(op)
@@ -131,6 +152,7 @@ QVariantMap SetGameVariable::toJsonObject(bool internal) const
     data.insert("variable", mVariable);
     data.insert("operator", mOperators[mOperatorIndex]);
     data.insert("value", mValue);
+    data.insert("valueType", static_cast<int>(mValueType));
 
     return data;
 }

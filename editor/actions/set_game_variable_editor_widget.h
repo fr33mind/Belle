@@ -21,6 +21,7 @@
 
 #include "action_editor_widget.h"
 #include "set_game_variable.h"
+#include "variablevalidator.h"
 
 class SetGameVariable;
 
@@ -30,7 +31,9 @@ class SetGameVariableEditorWidget : public ActionEditorWidget
 
     QLineEdit* mVariableEdit;
     QComboBox* mOperatorChooser;
+    QComboBox* mValueTypeChooser;
     QLineEdit* mValueEdit;
+    VariableValidator* mVariableValidator;
 
 public:
     explicit SetGameVariableEditorWidget(ActionEditorWidget *parent = 0);
@@ -44,6 +47,7 @@ protected:
 private slots:
     void onVariableEdited(const QString&);
     void onOperatorChanged(int);
+    void onValueTypeChanged(int);
     void onValueEdited(const QString&);
 };
 

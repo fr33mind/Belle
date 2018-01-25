@@ -1357,12 +1357,20 @@ function SetGameVariable(data, parent)
     
     if ("value" in data)
         this.value = data["value"];
+
+    if ("valueType" in data)
+        this.valueType = data["valueType"];
     
     if (! this.validOperators.contains(this.operator))
         error("PropertyError: Invalid operator '" + this.operator  + "'");
     
 
 }
+
+SetGameVariable.ValueTypes = {
+    Value: 0,
+    Variable: 1
+};
 
 belle.extend(SetGameVariable, Action);
 
@@ -1387,6 +1395,10 @@ SetGameVariable.prototype.onExecute = function()
       });
     }
     
+    if (this.valueType == SetGameVariable.ValueTypes.Variable) {
+        newValue = game.getVariableValue(newValue);
+    }
+
     //if arithmetic operation
     if (this.validOperators.slice(1,5).contains(this.operator)) {
         if (typeof currValue == "string") {
