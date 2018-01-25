@@ -48,7 +48,7 @@ private slots:
     void onVariableEdited(const QString&);
     void onOperatorChanged(int);
     void onValueTypeChanged(int);
-    void onValueEdited(const QString&);
+    void onValueChanged(const QString&);
 };
 
 #endif // SET_GAME_VARIABLE_EDITOR_WIDGET_H

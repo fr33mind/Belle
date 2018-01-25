@@ -42,7 +42,7 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
     connect(mVariableEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onVariableEdited(const QString&)));
     connect(mOperatorChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onOperatorChanged(int)));
     connect(mValueTypeChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onValueTypeChanged(int)));
-    connect(mValueEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onValueEdited(const QString&)));
+    connect(mValueEdit, SIGNAL(textChanged(const QString&)), this, SLOT(onValueChanged(const QString&)));
 
     beginGroup(tr("Game Variable"));
     appendRow(tr("Variable"), mVariableEdit);
@@ -107,7 +107,7 @@ void SetGameVariableEditorWidget::onValueTypeChanged(int index)
     }
 }
 
-void SetGameVariableEditorWidget::onValueEdited(const QString & text)
+void SetGameVariableEditorWidget::onValueChanged(const QString & text)
 {
     SetGameVariable* setGameVariable = qobject_cast<SetGameVariable*>(mGameObject);
     if (setGameVariable)
