@@ -52,6 +52,8 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
     appendRow(tr("Value"), mValueEdit, "ValueEdit");
     endGroup();
 
+    mValueEditLabelItem = findItemData("ValueEdit");
+
     resizeColumnToContents(0);
 }
 
@@ -65,6 +67,7 @@ void  SetGameVariableEditorWidget::updateData(GameObject* action)
     mVariableEdit->setText(setGameVariable->variable());
     mOperatorChooser->setCurrentIndex(setGameVariable->operatorIndex());
     mValueTypeChooser->setCurrentIndex(static_cast<int>(setGameVariable->valueType()));
+    updateValueEditType(setGameVariable);
     mValueEdit->setText(setGameVariable->value());
 }
 
@@ -119,10 +122,6 @@ void SetGameVariableEditorWidget::updateValueEditType(SetGameVariable * setGameV
     QString label;
 
     if (type == SetGameVariable::Value && index >= 1 && index <= 4) {
-        if (mValueEdit->validator() == mNumberValidator) {
-            return;
-        }
-
         mValueEdit->setValidator(mNumberValidator);
         if (mNumberValidator->validate(mValueEdit->text()) != QValidator::Acceptable) {
             mValueEdit->clear();
@@ -131,10 +130,6 @@ void SetGameVariableEditorWidget::updateValueEditType(SetGameVariable * setGameV
         label = tr("Number");
     }
     else if (type == SetGameVariable::Variable) {
-        if (mValueEdit->validator() == mVariableValidator) {
-            return;
-        }
-
         mValueEdit->setValidator(mVariableValidator);
         if (mVariableValidator->validate(mValueEdit->text()) != QValidator::Acceptable) {
             mValueEdit->clear();
@@ -143,16 +138,9 @@ void SetGameVariableEditorWidget::updateValueEditType(SetGameVariable * setGameV
         label = tr("Variable");
     }
     else {
-        if (!mValueEdit->validator()) {
-            return;
-        }
-
         mValueEdit->setValidator(0);
         label = tr("Value");
     }
 
-    QStandardItem* item = findItemData("ValueEdit");
-    if (item) {
-        item->setText(label);
-    }
+    mValueEditLabelItem->setText(label);
 }

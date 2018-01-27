@@ -36,6 +36,7 @@ class SetGameVariableEditorWidget : public ActionEditorWidget
     QLineEdit* mValueEdit;
     VariableValidator* mVariableValidator;
     NumberValidator* mNumberValidator;
+    QStandardItem* mValueEditLabelItem;
 
 public:
     explicit SetGameVariableEditorWidget(ActionEditorWidget *parent = 0);
