@@ -125,6 +125,9 @@ QString SetGameVariable::displayText() const
     QString variable = tr("Nothing");
     QString value = variable;
     QString op = mOperators[mOperatorIndex];
+    QString text, word;
+
+    op[0] = op[0].toUpper();
 
     if (! mVariable.isEmpty())
         variable = "$" + mVariable;
@@ -134,15 +137,35 @@ QString SetGameVariable::displayText() const
         }
         else {
             value = mValue;
-            if (! Utils::isNumber(value))
+            //Always show append operation as string
+            if (mOperatorIndex == 5 || ! Utils::isNumber(value))
                 value = QString("\"%1\"").arg(value);
         }
     }
 
-    return QString("%1 %2 %3 %4").arg(op)
-                                 .arg(value)
-                                 .arg(tr("to"))
-                                 .arg(variable);
+    if (mOperatorIndex == 3 || mOperatorIndex == 4) {
+        //: This "by" refers to multiplication/division, i.e.: multiply 10 by 20.
+        word = tr("by");
+        text = QString("%1 %2 %3 %4").arg(op)
+                                     .arg(variable)
+                                     .arg(word)
+                                     .arg(value);
+    }
+    else {
+        //: This "to" refers to addition, i.e.: add 10 to 20.
+        word = tr("to");
+        if (mOperatorIndex == 2) {
+            //: This "from" refers to subtraction, i.e.: subtract 10 from 20.
+            word = tr("from");
+        }
+
+        text = QString("%1 %2 %3 %4").arg(op)
+                                     .arg(value)
+                                     .arg(word)
+                                     .arg(variable);
+    }
+
+    return text;
 }
 
 QVariantMap SetGameVariable::toJsonObject(bool internal) const
