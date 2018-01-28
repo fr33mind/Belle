@@ -1379,7 +1379,8 @@ SetGameVariable.prototype.onExecute = function()
     var currValue = "";
     var newValue = this.value;
     var game = this.getGame(),
-        hasVariable = game.hasVariable(this.variable);
+        hasVariable = game.hasVariable(this.variable),
+        utils = belle.utils;
 
     if (hasVariable)
         currValue = this._game.getVariableValue(this.variable);
@@ -1416,19 +1417,19 @@ SetGameVariable.prototype.onExecute = function()
             currValue = newValue;
             break;
         case "add": 
-            if (currValue != NaN && newValue != NaN)
+            if (!utils.isNaN(currValue) && !utils.isNaN(newValue))
                 currValue += newValue;
             break;    
         case "subtract": 
-            if (currValue != NaN && newValue != NaN)
+            if (!utils.isNaN(currValue) && !utils.isNaN(newValue))
                 currValue -= newValue;
             break;
         case "multiply": 
-            if (currValue != NaN && newValue != NaN)
+            if (!utils.isNaN(currValue) && !utils.isNaN(newValue))
                 currValue *= newValue;
             break;
         case "divide":
-            if (currValue != NaN && newValue != NaN && newValue != 0)
+            if (!utils.isNaN(currValue) && !utils.isNaN(newValue) && newValue != 0)
                 currValue /= newValue;
             break;
         case "append":
