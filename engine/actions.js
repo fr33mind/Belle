@@ -1437,7 +1437,8 @@ SetGameVariable.prototype.onExecute = function()
             break;
     }
     
-    this._game.addVariable(this.variable, currValue);
+    if (!utils.isNaN(currValue))
+        this._game.addVariable(this.variable, currValue);
 
     this.setFinished(true);
 }
