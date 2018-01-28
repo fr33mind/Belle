@@ -219,15 +219,27 @@
     if (variable[0] == "$")
       variable = variable.slice(1);
 
-    return this.variables[variable] || "";
+    return this.variables[variable];
+  }
+
+  Game.prototype.getVariableValueAsString = function(variable) {
+    var value = this.getVariableValue(variable);
+
+    if (value === undefined || value === null) {
+        return "";
+    }
+
+    return value + "";
   }
 
   Game.prototype.hasVariable = function(variable) {
-    return !! (this.getVariableValue(variable));
+    if (this.variables[variable] !== undefined)
+        return true;
+    return false;
   }
 
   Game.prototype.addVariable = function (variable, value) {
-    if (this.variables[variable] != value) {
+    if (this.variables[variable] !== value) {
       this.variables[variable] = value;
       this.trigger("variableChanged");
     }
@@ -277,7 +289,7 @@
 
     //replace variables with the respective values and append them to the values list
     for(var i=0; i != variables.length; i++) {
-      values.push(this.getVariableValue(variables[i]));
+      values.push(this.getVariableValueAsString(variables[i]));
     }
 
     //replace variables with the values previously extracted
