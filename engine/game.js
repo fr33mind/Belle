@@ -34,6 +34,8 @@
     this.controller = null;
     this.actionsDataStack = [];
     this.watchedObjects = [];
+    this.variableRegExp = /[a-zA-Z_][a-zA-Z0-9_]*/;
+    this.variableInTextRegExp = /\{\$[a-zA-Z_][a-zA-Z0-9_]*\}/g;
 
     if (data.data)
       this.load(data.data);
@@ -216,8 +218,11 @@
     if (! variable)
       return "";
 
-    if (variable[0] == "$")
-      variable = variable.slice(1);
+    if (this.variableInTextRegExp.test(variable)) {
+      var matches = variable.match(this.variableRegExp);
+      if (matches)
+        variable = matches[0];
+    }
 
     return this.variables[variable];
   }
@@ -257,35 +262,12 @@
     if (! text)
       return text;
 
-    if (! text.contains("$"))
-      return text;
-
-    var validChar = /^[a-zA-Z_0-9]$/;
-    var variable = "";
-    var variables = [];
     var values = [];
-    var appendToVariable = false;
+    var variables = text.match(this.variableInTextRegExp);
 
-    //Parse text to determine variables
-    //Variables start from "$" until the end of string or
-    //until any other character that is not a letter nor a digit.
-    for(var i=0; i !== text.length; i++) {
-
-      if (text.charAt(i).search(validChar) == -1) {
-            appendToVariable = false;
-            if (variable)
-              variables.push(variable);
-            variable = "";
-            if(text.charAt(i) == "$")
-              appendToVariable = true;
-      }
-
-      if (appendToVariable)
-            variable += text.charAt(i);
+    if (!variables) {
+      return text;
     }
-
-    if (variable)
-      variables.push(variable);
 
     //replace variables with the respective values and append them to the values list
     for(var i=0; i != variables.length; i++) {
