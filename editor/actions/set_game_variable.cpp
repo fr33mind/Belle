@@ -35,6 +35,7 @@ void SetGameVariable::init()
     setType(GameObjectMetaType::SetGameVariable);
 
     mOperators.append("assign");
+    mOperators.append("assign random number");
     mOperators.append("add");
     mOperators.append("subtract");
     mOperators.append("multiply");
@@ -64,6 +65,14 @@ void SetGameVariable::loadData(const QVariantMap & data, bool internal)
 
     if (data.contains("valueType") && data.value("valueType").canConvert(QVariant::Int)) {
         setValueType(static_cast<SetGameVariable::ValueType>(data.value("valueType").toInt()));
+    }
+
+    if (data.contains("randNumMin") && data.value("randNumMin").type() == QVariant::String) {
+        setRandomNumberMinimum(data.value("randNumMin").toString());
+    }
+
+    if (data.contains("randNumMax") && data.value("randNumMax").type() == QVariant::String) {
+        setRandomNumberMaximum(data.value("randNumMax").toString());
     }
 }
 
@@ -120,6 +129,28 @@ void SetGameVariable::setValueType(ValueType type)
     notify("valueType", static_cast<int>(type));
 }
 
+QString SetGameVariable::randomNumberMinimum() const
+{
+    return mRandomNumberMinimum;
+}
+
+void SetGameVariable::setRandomNumberMinimum(const QString& number)
+{
+    mRandomNumberMinimum = number;
+    notify("randNumMin", number);
+}
+
+QString SetGameVariable::randomNumberMaximum() const
+{
+    return mRandomNumberMaximum;
+}
+
+void SetGameVariable::setRandomNumberMaximum(const QString& number)
+{
+    mRandomNumberMaximum = number;
+    notify("randNumMax", number);
+}
+
 QString SetGameVariable::displayText() const
 {
     QString variable = tr("Nothing");
@@ -138,12 +169,21 @@ QString SetGameVariable::displayText() const
         else {
             value = mValue;
             //Always show append operation as string
-            if (mOperatorIndex == 5 || ! Utils::isNumber(value))
+            if (mOperatorIndex == SetGameVariable::Append || ! Utils::isNumber(value))
                 value = QString("\"%1\"").arg(value);
         }
     }
 
-    if (mOperatorIndex == 3 || mOperatorIndex == 4) {
+    if (mOperatorIndex == SetGameVariable::AssignRandomNumber) {
+        //: This "to" refers to "Assign random number".
+        word = tr("to", "assignment");
+        text = QString("%1 [%2, %3] %4 %5").arg(op)
+                                          .arg(mRandomNumberMinimum)
+                                          .arg(mRandomNumberMaximum)
+                                          .arg(word)
+                                          .arg(variable);
+    }
+    else if (mOperatorIndex == SetGameVariable::Multiply || mOperatorIndex == SetGameVariable::Divide) {
         //: This "by" refers to multiplication/division, i.e.: multiply 10 by 20.
         word = tr("by");
         text = QString("%1 %2 %3 %4").arg(op)
@@ -153,8 +193,8 @@ QString SetGameVariable::displayText() const
     }
     else {
         //: This "to" refers to addition, i.e.: add 10 to 20.
-        word = tr("to");
-        if (mOperatorIndex == 2) {
+        word = tr("to", "addition");
+        if (mOperatorIndex == SetGameVariable::Subtract) {
             //: This "from" refers to subtraction, i.e.: subtract 10 from 20.
             word = tr("from");
         }
@@ -176,6 +216,11 @@ QVariantMap SetGameVariable::toJsonObject(bool internal) const
     data.insert("operator", mOperators[mOperatorIndex]);
     data.insert("value", mValue);
     data.insert("valueType", static_cast<int>(mValueType));
+
+    if (mOperatorIndex == SetGameVariable::AssignRandomNumber) {
+        data.insert("randNumMin", mRandomNumberMinimum);
+        data.insert("randNumMax", mRandomNumberMaximum);
+    }
 
     return data;
 }

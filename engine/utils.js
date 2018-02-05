@@ -278,4 +278,83 @@ utils.distance = function(x1, y1, x2, y2)
   return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
 }
 
+utils.getRandomNumberString = function(min, max)
+{
+  var minf = parseFloat(min);
+  var maxf = parseFloat(max);
+
+  if (utils.isNaN(minf) || utils.isNaN(maxf)) {
+    return NaN;
+  }
+
+  if (Math.floor(minf) == minf && Math.floor(maxf) == maxf) {
+    return utils.getRandomInt(minf, maxf);
+  }
+
+  var max_str = max + '';
+  var min_str = min + '';
+  var float_regex = /^\-?\d+\.\d+$/;
+  var rand_num;
+
+  if (Math.floor(minf) == minf) {
+    min_str = minf + '.0';
+  }
+
+  if (Math.floor(maxf) == maxf) {
+    max_str = maxf + '.0';
+  }
+
+  if (float_regex.test(min_str) && float_regex.test(max_str)) {
+    var min_decimals = min_str.split(".")[1].length;
+    var max_decimals = max_str.split(".")[1].length;
+    var decimal_count = max_decimals;
+
+    if (min_decimals != max_decimals) {
+      var fill_min = true;
+      var fill = '';
+      var decimal_diff = max_decimals - min_decimals;
+      if (min_decimals > max_decimals) {
+        decimal_count = min_decimals;
+        decimal_diff = min_decimals - max_decimals;
+        fill_min = false;
+      }
+
+      for(var i=0; i < decimal_diff; i++) {
+        fill += '0';
+      }
+
+      if (fill_min)
+        min_str += fill;
+      else
+        max_str += fill;
+    }
+
+    var div = 1;
+    for(var i=0; i < decimal_count; i++) {
+      div *= 10;
+    }
+
+    min_str = min_str.replace('.', '');
+    max_str = max_str.replace('.', '');
+    rand_num = utils.getRandomInt(parseInt(min_str), parseInt(max_str));
+    rand_num /= div;
+    return rand_num.toFixed(decimal_count);
+  }
+
+  rand_num = Math.random() * (maxf - minf) + minf;
+  return rand_num + '';
+}
+
+utils.getRandomNumber = function(min, max)
+{
+  return parseFloat(utils.getRandomNumberString(min, max));
+}
+
+utils.getRandomInt = function(min, max)
+{
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 }(belle.utils));

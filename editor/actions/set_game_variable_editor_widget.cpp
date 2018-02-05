@@ -17,6 +17,8 @@
 #include "set_game_variable_editor_widget.h"
 #include "variablevalidator.h"
 
+#include <QHBoxLayout>
+
 SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *parent) :
     ActionEditorWidget(parent)
 {
@@ -28,6 +30,7 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
 
     mOperatorChooser = new QComboBox(this);
     mOperatorChooser->addItem(tr("Assign"));
+    mOperatorChooser->addItem(tr("Assign random number"));
     mOperatorChooser->addItem(tr("Add"));
     mOperatorChooser->addItem(tr("Subtract"));
     mOperatorChooser->addItem(tr("Multiply"));
@@ -40,19 +43,40 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
 
     mValueEdit = new QLineEdit(this);
 
+    NumberValidator* numberValidator = new NumberValidator(this);
+
+    mRandomNumberMinEdit = new QLineEdit(this);
+    mRandomNumberMinEdit->setPlaceholderText("Minimum");
+    mRandomNumberMinEdit->setValidator(numberValidator);
+
+    mRandomNumberMaxEdit = new QLineEdit(this);
+    mRandomNumberMaxEdit->setPlaceholderText("Maximum");
+    mRandomNumberMaxEdit->setValidator(numberValidator);
+
+    QWidget* randomNumberWidget = new QWidget(this);
+    QHBoxLayout* layout = new QHBoxLayout(randomNumberWidget);
+    layout->setContentsMargins(QMargins());
+    layout->addWidget(mRandomNumberMinEdit);
+    layout->addWidget(mRandomNumberMaxEdit);
+
     connect(mVariableEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onVariableEdited(const QString&)));
     connect(mOperatorChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onOperatorChanged(int)));
     connect(mValueTypeChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onValueTypeChanged(int)));
     connect(mValueEdit, SIGNAL(textChanged(const QString&)), this, SLOT(onValueChanged(const QString&)));
+    connect(mRandomNumberMinEdit, SIGNAL(textChanged(const QString&)), this, SLOT(onRandomNumberMinChanged(const QString&)));
+    connect(mRandomNumberMaxEdit, SIGNAL(textChanged(const QString&)), this, SLOT(onRandomNumberMaxChanged(const QString&)));
 
     beginGroup(tr("Game Variable"));
     appendRow(tr("Variable"), mVariableEdit);
     appendRow(tr("Operator"), mOperatorChooser);
-    appendRow(tr("Value Type"), mValueTypeChooser);
+    appendRow(tr("Value Type"), mValueTypeChooser, "ValueType");
     appendRow(tr("Value"), mValueEdit, "ValueEdit");
+    appendRow(tr("Random Number"), randomNumberWidget, "RandomNumberWidget");
     endGroup();
 
     mValueEditLabelItem = findItemData("ValueEdit");
+
+    setFilters(QVariantList() << "RandomNumberWidget");
 
     resizeColumnToContents(0);
 }
@@ -69,6 +93,8 @@ void  SetGameVariableEditorWidget::updateData(GameObject* action)
     mValueTypeChooser->setCurrentIndex(static_cast<int>(setGameVariable->valueType()));
     updateValueEditType(setGameVariable);
     mValueEdit->setText(setGameVariable->value());
+    mRandomNumberMinEdit->setText(setGameVariable->randomNumberMinimum());
+    mRandomNumberMaxEdit->setText(setGameVariable->randomNumberMaximum());
 }
 
 void SetGameVariableEditorWidget::onVariableEdited(const QString & text)
@@ -84,7 +110,13 @@ void SetGameVariableEditorWidget::onOperatorChanged(int index)
     if (setGameVariable)
         setGameVariable->setOperatorIndex(index);
 
-    updateValueEditType(setGameVariable);
+    if (index == SetGameVariable::AssignRandomNumber) {
+        setFilters(QVariantList() << "ValueEdit" << "ValueType");
+    }
+    else {
+        setFilters(QVariantList() << "RandomNumberWidget");
+        updateValueEditType(setGameVariable);
+    }
 }
 
 void SetGameVariableEditorWidget::onValueTypeChanged(int index)
@@ -121,7 +153,7 @@ void SetGameVariableEditorWidget::updateValueEditType(SetGameVariable * setGameV
     SetGameVariable::ValueType type = setGameVariable->valueType();
     QString label;
 
-    if (type == SetGameVariable::Value && index >= 1 && index <= 4) {
+    if (type == SetGameVariable::Value && index >= SetGameVariable::Add && index <= SetGameVariable::Divide) {
         mValueEdit->setValidator(mNumberValidator);
         if (mNumberValidator->validate(mValueEdit->text()) != QValidator::Acceptable) {
             mValueEdit->clear();
@@ -143,4 +175,18 @@ void SetGameVariableEditorWidget::updateValueEditType(SetGameVariable * setGameV
     }
 
     mValueEditLabelItem->setText(label);
+}
+
+void SetGameVariableEditorWidget::onRandomNumberMinChanged(const QString& number)
+{
+    SetGameVariable* setGameVariable = qobject_cast<SetGameVariable*>(mGameObject);
+    if (setGameVariable)
+        setGameVariable->setRandomNumberMinimum(number);
+}
+
+void SetGameVariableEditorWidget::onRandomNumberMaxChanged(const QString& number)
+{
+    SetGameVariable* setGameVariable = qobject_cast<SetGameVariable*>(mGameObject);
+    if (setGameVariable)
+        setGameVariable->setRandomNumberMaximum(number);
 }

@@ -37,6 +37,8 @@ class SetGameVariableEditorWidget : public ActionEditorWidget
     VariableValidator* mVariableValidator;
     NumberValidator* mNumberValidator;
     QStandardItem* mValueEditLabelItem;
+    QLineEdit* mRandomNumberMinEdit;
+    QLineEdit* mRandomNumberMaxEdit;
 
 public:
     explicit SetGameVariableEditorWidget(ActionEditorWidget *parent = 0);
@@ -55,6 +57,8 @@ private slots:
     void onOperatorChanged(int);
     void onValueTypeChanged(int);
     void onValueChanged(const QString&);
+    void onRandomNumberMinChanged(const QString&);
+    void onRandomNumberMaxChanged(const QString&);
 };
 
 #endif // SET_GAME_VARIABLE_EDITOR_WIDGET_H

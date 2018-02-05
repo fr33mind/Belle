@@ -34,6 +34,16 @@ public:
         Variable
     };
 
+    enum Operators{
+        Assign=0,
+        AssignRandomNumber,
+        Add,
+        Subtract,
+        Multiply,
+        Divide,
+        Append
+    };
+
     explicit SetGameVariable(QObject *parent = 0);
     SetGameVariable(const QVariantMap& data, QObject *parent = 0);
 
@@ -48,6 +58,12 @@ public:
 
     ValueType valueType() const;
     void setValueType(ValueType);
+
+    QString randomNumberMinimum() const;
+    void setRandomNumberMinimum(const QString&);
+
+    QString randomNumberMaximum() const;
+    void setRandomNumberMaximum(const QString&);
 
     QString displayText() const;
 
@@ -64,6 +80,8 @@ private:
     void init();
 
     ValueType mValueType;
+    QString mRandomNumberMinimum;
+    QString mRandomNumberMaximum;
 };
 
 #endif // SET_GAME_VARIABLE_H

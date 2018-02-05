@@ -1347,7 +1347,9 @@ function SetGameVariable(data, parent)
     this.variable = "";
     this.operation = "";
     this.value = "";
-    this.validOperators = ["assign", "add", "subtract", "multiply", "divide", "append"];
+    this.randomNumberMinimum = "";
+    this.randomNumberMaximum = "";
+    this.validOperators = ["assign", "assign random number", "add", "subtract", "multiply", "divide", "append"];
     
     if ("variable" in data)
         this.variable = data["variable"];
@@ -1361,6 +1363,12 @@ function SetGameVariable(data, parent)
     if ("valueType" in data)
         this.valueType = data["valueType"];
     
+    if ("randNumMin" in data)
+        this.randomNumberMinimum = data["randNumMin"];
+
+    if ("randNumMax" in data)
+        this.randomNumberMaximum = data["randNumMax"];
+
     if (! this.validOperators.contains(this.operator))
         error("PropertyError: Invalid operator '" + this.operator  + "'");
     
@@ -1378,6 +1386,8 @@ SetGameVariable.prototype.onExecute = function()
 {   
     var currValue = "";
     var newValue = this.value;
+    var randNumMin = this.randomNumberMinimum;
+    var randNumMax = this.randomNumberMaximum;
     var game = this.getGame(),
         hasVariable = game.hasVariable(this.variable),
         utils = belle.utils;
@@ -1401,7 +1411,7 @@ SetGameVariable.prototype.onExecute = function()
     }
 
     //if arithmetic operation
-    if (this.validOperators.slice(1,5).contains(this.operator)) {
+    if (this.validOperators.slice(2,6).contains(this.operator)) {
         if (typeof currValue == "string") {
           if (currValue == "")
             currValue = "0";
@@ -1415,6 +1425,9 @@ SetGameVariable.prototype.onExecute = function()
     switch(this.operator) {
         case "assign": 
             currValue = newValue;
+            break;
+        case "assign random number":
+            currValue = utils.getRandomNumberString(randNumMin, randNumMax);
             break;
         case "add": 
             if (!utils.isNaN(currValue) && !utils.isNaN(newValue))
