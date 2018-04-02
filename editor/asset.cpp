@@ -59,8 +59,12 @@ bool Asset::save(const QDir& dir, bool updatePath)
 
 bool Asset::doSave(const QDir & dir)
 {
-    if (isValid())
-        return QFile::copy(mPath, dir.absoluteFilePath(mName));
+    if (isValid()) {
+        QString filepath = dir.absoluteFilePath(mName);
+        QFile::remove(filepath);
+        return QFile::copy(mPath, filepath);
+    }
+
     return false;
 }
 
