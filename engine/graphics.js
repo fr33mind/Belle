@@ -48,6 +48,10 @@
     return this._image;
   }
 
+  Image.prototype.update = function()
+  {
+  }
+
   /*** AnimatedImage ***/
 
   function AnimatedImage(path, frames, loadCallback)
@@ -55,9 +59,11 @@
     Asset.call(this, path);
 
     this.frames = [];
-    this._interval = null;
+    this.playing = false;
     this.currentFrame = null;
     this.currentFrameNumber = 0;
+    this._painted = false;
+    this._updateFrameOnPaint = false;
 
     for(var i=0; i < frames.length; i++) {
       var img = new window.Image();
@@ -80,29 +86,45 @@
 
   AnimatedImage.prototype.play = function()
   {
-    if (! this.frames || this.frames.length < 2 || this._interval !== null)
+    if (! this.frames || this.frames.length < 2)
       return;
 
     if (! this.currentFrame)
       this.currentFrame = this.frames[0];
-    var self = this;
-    this._interval = setInterval(function(){ self.nextFrame(); }, this.currentFrame.delay);
+
+    this.playing = true;
+    this.nextFrame();
   }
 
   AnimatedImage.prototype.stop = function()
   {
-    if (this._interval !== null)
-      clearInterval(this._interval);
-    this._interval = null;
+    this.playing = false;
   }
 
   AnimatedImage.prototype.nextFrame = function()
   {
+    if (!this.playing)
+      return;
+
+    if (!this._painted) {
+      this._updateFrameOnPaint = true;
+      this.trigger("frameChanged"); //force a repaint
+      return;
+    }
+
     this.currentFrameNumber++;
     if (this.currentFrameNumber >= this.frames.length)
       this.currentFrameNumber = 0;
     this.currentFrame = this.frames[this.currentFrameNumber];
+    this._painted = false;
+    var currentFrameNumber = this.currentFrameNumber;
+    var currentFrameDelay = this.currentFrame.delay;
     this.trigger("frameChanged");
+
+    var self = this;
+    setTimeout(function(){
+      self.nextFrame();
+    }, this.currentFrame.delay);
   }
 
   AnimatedImage.prototype.isAnimated = function()
@@ -113,6 +135,19 @@
   AnimatedImage.prototype.getElement = function()
   {
     return this.currentFrame["img"];
+  }
+
+  AnimatedImage.prototype.update = function()
+  {
+    this._painted = true;
+
+    if (this._updateFrameOnPaint) {
+      this._updateFrameOnPaint = false;
+      var self = this;
+      setTimeout(function(){
+        self.nextFrame();
+      }, 0);
+    }
   }
 
   /*** Color ***/

@@ -340,6 +340,7 @@
 
     if (this.background.image) {
       ctx.drawImage(this.background.image.getElement(), x, y, this.width, this.height);
+      this.background.image.update();
     }
 
     this.paintX = x;

@@ -472,6 +472,7 @@ Image.prototype.paint = function(context)
 
     if (this.image) {
       context.drawImage(this.image.getElement(), this.globalX(), this.globalY(), this.width, this.height);
+      this.image.update();
     }
 }
 
