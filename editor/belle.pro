@@ -153,7 +153,8 @@ HEADERS      += belle.h\
     actionpool.h \
     widgets/numbervalidator.h \
     gui/actionpainter.h \
-    gui/dialoguepainter.h
+    gui/dialoguepainter.h \
+    gui/actionpainterfactory.h
                 
 
 SOURCES      += main.cpp\
@@ -289,6 +290,7 @@ SOURCES      += main.cpp\
     actionpool.cpp \
     widgets/numbervalidator.cpp \
     gui/actionpainter.cpp \
-    gui/dialoguepainter.cpp
+    gui/dialoguepainter.cpp \
+    gui/actionpainterfactory.cpp
 
 RESOURCES += media.qrc
