@@ -46,6 +46,8 @@ void Dialogue::init()
     setTextEditable(true);
     mSound = 0;
     mSoundVolume = 100;
+    mTextSpeedEnabled = false;
+    mTextSpeed = 50;
 }
 
 void Dialogue::loadData(const QVariantMap & data, bool internal)
@@ -79,6 +81,11 @@ void Dialogue::loadData(const QVariantMap & data, bool internal)
 
     if (data.contains("soundVolume") && data.value("soundVolume").canConvert(QVariant::Int)) {
         setSoundVolume(data.value("soundVolume").toInt());
+    }
+
+    if (data.contains("textSpeed") && data.value("textSpeed").canConvert(QVariant::Int)) {
+        setTextSpeedEnabled(true);
+        setTextSpeed(data.value("textSpeed").toInt());
     }
 }
 
@@ -185,6 +192,10 @@ QVariantMap Dialogue::toJsonObject(bool internal) const
     if (mSound) {
         object.insert("sound", mSound->name());
         object.insert("soundVolume", mSoundVolume);
+    }
+
+    if (mTextSpeedEnabled) {
+        object.insert("textSpeed", mTextSpeed);
     }
 
     object.insert("text", mText);
@@ -373,4 +384,24 @@ int Dialogue::soundVolume() const
 void Dialogue::setSoundVolume(int volume)
 {
     mSoundVolume = volume;
+}
+
+bool Dialogue::textSpeedEnabled() const
+{
+    return mTextSpeedEnabled;
+}
+
+void Dialogue::setTextSpeedEnabled(bool enabled)
+{
+    mTextSpeedEnabled = enabled;
+}
+
+int Dialogue::textSpeed() const
+{
+    return mTextSpeed;
+}
+
+void Dialogue::setTextSpeed(int value)
+{
+    mTextSpeed = value;
 }

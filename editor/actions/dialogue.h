@@ -37,6 +37,8 @@ class Dialogue : public Action
     bool mAppend;
     Sound* mSound;
     int mSoundVolume;
+    bool mTextSpeedEnabled;
+    int mTextSpeed;
 
 public:
     explicit Dialogue(QObject *parent = 0);
@@ -74,6 +76,12 @@ public:
 
     int soundVolume() const;
     void setSoundVolume(int);
+
+    bool textSpeedEnabled() const;
+    void setTextSpeedEnabled(bool);
+
+    int textSpeed() const;
+    void setTextSpeed(int);
 
 signals:
 

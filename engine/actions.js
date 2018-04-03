@@ -477,6 +477,7 @@ function Dialogue(data, parent)
     this.append = false;
     this.sound = null;
     this.soundVolume = 100;
+    this.textSpeed = null;
     
     if (data) {
         if ("character" in data) {
@@ -498,6 +499,10 @@ function Dialogue(data, parent)
 
         if ("soundVolume" in data) {
           this.soundVolume = data["soundVolume"];
+        }
+
+        if ("textSpeed" in data) {
+          this.textSpeed = data["textSpeed"];
         }
     }
 
@@ -539,8 +544,16 @@ Dialogue.prototype.onExecute = function () {
     if (! this.append)
       object.setText("");
 
+    var textDelay = 0;
+    var textSpeed = this.textSpeed;
+    if (textSpeed === null)
+      textSpeed = game.getProperty("textSpeed");
+
+    if (belle.isNumber(textSpeed) && textSpeed > 0)
+      textDelay = 1000 / textSpeed;
+
     this.text = game.replaceVariables(this.rawText);
-    this.startTimer(this.updateText.bind(this), game.getProperty("textDelay"), true);
+    this.startTimer(this.updateText.bind(this), textDelay, true);
 
     if (this.sound && this.sound.asset) {
       game.playSound(this.sound.asset, {

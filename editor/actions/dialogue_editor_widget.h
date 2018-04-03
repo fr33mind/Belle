@@ -46,6 +46,8 @@ class DialogueEditorWidget : public ActionEditorWidget
     QCheckBox* mPlaySoundCheckBox;
     SoundResourceComboBox* mSoundComboBox;
     QSlider* mSoundVolumeSlider;
+    QCheckBox* mTextSpeedCheckBox;
+    QSlider* mTextSpeedSlider;
 
 public:
     explicit DialogueEditorWidget(QWidget *parent = 0);
@@ -69,6 +71,8 @@ private slots:
     void onPlaySoundCheckBoxToggled(bool);
     void onSoundChanged(GameObject*);
     void onSoundVolumeChanged(int);
+    void onTextSpeedToggled(bool);
+    void onTextSpeedChanged(int);
 
 private:
     void  setTextInOutputBox();

@@ -22,6 +22,7 @@
 #include "slider.h"
 
 #include <QCompleter>
+#include <QHBoxLayout>
 
 DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
@@ -44,12 +45,24 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     mSoundVolumeSlider->setMinimum(0);
     mSoundVolumeSlider->setMaximum(100);
 
+    QWidget* textSpeedWidget = new QWidget(this);
+    mTextSpeedCheckBox = new QCheckBox(textSpeedWidget);
+    mTextSpeedSlider = new Slider(Qt::Horizontal, textSpeedWidget);
+    mTextSpeedSlider->setMinimum(0);
+    mTextSpeedSlider->setMaximum(100);
+
+    QHBoxLayout* layout = new QHBoxLayout(textSpeedWidget);
+    layout->setContentsMargins(0, 1, 0, 1);
+    layout->addWidget(mTextSpeedCheckBox, 0, Qt::AlignLeft);
+    layout->addWidget(mTextSpeedSlider);
+
     beginGroup("Dialogue Action");
     appendRow(tr("Character"), mChooseCharacterWidget);
     appendRow(tr("Text Box/Dialogue Box"), mChooseTextBoxWidget);
     appendRow(tr("Phrase"), mTextEdit);
     appendRow(tr("Wait on Finished"), mWaitCheckBox);
     appendRow(tr("Append"), mAppendCheckbox);
+    appendRow(tr("Text Speed"), textSpeedWidget);
     appendRow(tr("Play Sound"), mPlaySoundCheckBox);
     appendRow(tr("Sound"), mSoundComboBox, "Sound");
     appendRow(tr("Sound Volume"), mSoundVolumeSlider, "SoundVolume");
@@ -68,6 +81,9 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     connect(mPlaySoundCheckBox, SIGNAL(toggled(bool)), this, SLOT(onPlaySoundCheckBoxToggled(bool)));
     connect(mSoundComboBox, SIGNAL(objectChanged(GameObject*)), this, SLOT(onSoundChanged(GameObject*)));
     connect(mSoundVolumeSlider, SIGNAL(valueChanged(int)), this, SLOT(onSoundVolumeChanged(int)));
+    connect(mTextSpeedCheckBox, SIGNAL(toggled(bool)), mTextSpeedSlider, SLOT(setVisible(bool)));
+    connect(mTextSpeedCheckBox, SIGNAL(toggled(bool)), this, SLOT(onTextSpeedToggled(bool)));
+    connect(mTextSpeedSlider, SIGNAL(valueChanged(int)), this, SLOT(onTextSpeedChanged(int)));
 
     if (mChooseTextBoxWidget->view())
         mChooseTextBoxWidget->view()->installEventFilter(this);
@@ -76,6 +92,7 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
 
     this->resizeColumnToContents(0);
     setSoundEnabled(false);
+    mTextSpeedSlider->hide();
 }
 
 
@@ -100,6 +117,8 @@ void DialogueEditorWidget::updateData(GameObject* action)
     mTextEdit->setText(dialogue->text());
     mWaitCheckBox->setChecked(dialogue->mouseClickOnFinish());
     mAppendCheckbox->setChecked(dialogue->append());
+    mTextSpeedCheckBox->setChecked(dialogue->textSpeedEnabled());
+    mTextSpeedSlider->setValue(dialogue->textSpeed());
 
     if (dialogue->sound()) {
         mPlaySoundCheckBox->setChecked(true);
@@ -271,4 +290,18 @@ void DialogueEditorWidget::onSoundVolumeChanged(int vol)
     Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
     if (dialogue)
         dialogue->setSoundVolume(vol);
+}
+
+void DialogueEditorWidget::onTextSpeedToggled(bool checked)
+{
+    Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
+    if (dialogue)
+        dialogue->setTextSpeedEnabled(checked);
+}
+
+void DialogueEditorWidget::onTextSpeedChanged(int value)
+{
+    Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
+    if (dialogue)
+        dialogue->setTextSpeed(value);
 }
