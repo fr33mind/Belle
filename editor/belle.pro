@@ -4,8 +4,8 @@ TEMPLATE = app
 isEmpty(PREFIX) {
  PREFIX = /usr
 }
-INCLUDEPATH += actions objects widgets conditions assets dialogs
-DEPENDPATH += actions objects widgets conditions assets dialogs
+INCLUDEPATH += actions objects widgets conditions assets dialogs gui
+DEPENDPATH += actions objects widgets conditions assets dialogs gui
 
 TARGET = belle
 TARGET.path = $$PREFIX/
@@ -151,7 +151,8 @@ HEADERS      += belle.h\
     dialogs/actionmanagerdialog.h \
     widgets/actionmanagerbutton.h \
     actionpool.h \
-    widgets/numbervalidator.h
+    widgets/numbervalidator.h \
+    gui/actionpainter.h
                 
 
 SOURCES      += main.cpp\
@@ -285,6 +286,7 @@ SOURCES      += main.cpp\
     dialogs/actionmanagerdialog.cpp \
     widgets/actionmanagerbutton.cpp \
     actionpool.cpp \
-    widgets/numbervalidator.cpp
+    widgets/numbervalidator.cpp \
+    gui/actionpainter.cpp
 
 RESOURCES += media.qrc
