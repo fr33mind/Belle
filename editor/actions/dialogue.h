@@ -20,10 +20,12 @@
 #include "action.h"
 #include "dialoguebox.h"
 #include "character.h"
+#include "sound.h"
 
 class Action;
 class DialogueBox;
 class Character;
+class Sound;
 
 class Dialogue : public Action
 {
@@ -33,6 +35,8 @@ class Dialogue : public Action
     QString mCharacterName;
     QString mText;
     bool mAppend;
+    Sound* mSound;
+    int mSoundVolume;
 
 public:
     explicit Dialogue(QObject *parent = 0);
@@ -64,6 +68,13 @@ public:
 
     Character* findCharacter(const QString&);
 
+    Sound* sound() const;
+    void setSound(Sound*);
+    void setSound(const QString&);
+
+    int soundVolume() const;
+    void setSoundVolume(int);
+
 signals:
 
 protected:
@@ -74,6 +85,7 @@ protected:
 private slots:
     void onCharacterDestroyed();
     void onCharacterNameChanged(const QString&);
+    void onSoundDestroyed(GameObject*);
 
 private:
     void init();

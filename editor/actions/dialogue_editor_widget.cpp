@@ -18,6 +18,8 @@
 
 #include "character.h"
 #include "dialoguebox.h"
+#include "sound.h"
+#include "slider.h"
 
 #include <QCompleter>
 
@@ -35,6 +37,12 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     mTextEdit = new QTextEdit(this);
     mWaitCheckBox = new QCheckBox(this);
     mAppendCheckbox = new QCheckBox(this);
+    mPlaySoundCheckBox = new QCheckBox(this);
+    mSoundComboBox = new SoundResourceComboBox(this);
+    mSoundComboBox->setIconsEnabled(true);
+    mSoundVolumeSlider = new Slider(Qt::Horizontal);
+    mSoundVolumeSlider->setMinimum(0);
+    mSoundVolumeSlider->setMaximum(100);
 
     beginGroup("Dialogue Action");
     appendRow(tr("Character"), mChooseCharacterWidget);
@@ -42,6 +50,9 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     appendRow(tr("Phrase"), mTextEdit);
     appendRow(tr("Wait on Finished"), mWaitCheckBox);
     appendRow(tr("Append"), mAppendCheckbox);
+    appendRow(tr("Play Sound"), mPlaySoundCheckBox);
+    appendRow(tr("Sound"), mSoundComboBox, "Sound");
+    appendRow(tr("Sound Volume"), mSoundVolumeSlider, "SoundVolume");
     endGroup();
 
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
@@ -54,6 +65,9 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     connect(mChooseCharacterWidget, SIGNAL(objectChanged(const QString&)), this, SLOT(onCharacterChanged(const QString&)));
     connect(mWaitCheckBox, SIGNAL(clicked(bool)), this, SLOT(onWaitOnFinishedChanged(bool)));
     connect(mAppendCheckbox, SIGNAL(toggled(bool)), this, SLOT(appendToggled(bool)));
+    connect(mPlaySoundCheckBox, SIGNAL(toggled(bool)), this, SLOT(onPlaySoundCheckBoxToggled(bool)));
+    connect(mSoundComboBox, SIGNAL(objectChanged(GameObject*)), this, SLOT(onSoundChanged(GameObject*)));
+    connect(mSoundVolumeSlider, SIGNAL(valueChanged(int)), this, SLOT(onSoundVolumeChanged(int)));
 
     if (mChooseTextBoxWidget->view())
         mChooseTextBoxWidget->view()->installEventFilter(this);
@@ -61,6 +75,7 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
         mChooseCharacterWidget->view()->installEventFilter(this);
 
     this->resizeColumnToContents(0);
+    setSoundEnabled(false);
 }
 
 
@@ -85,6 +100,14 @@ void DialogueEditorWidget::updateData(GameObject* action)
     mTextEdit->setText(dialogue->text());
     mWaitCheckBox->setChecked(dialogue->mouseClickOnFinish());
     mAppendCheckbox->setChecked(dialogue->append());
+
+    if (dialogue->sound()) {
+        mPlaySoundCheckBox->setChecked(true);
+        initSoundWidgets(dialogue);
+    }
+    else {
+        mPlaySoundCheckBox->setChecked(false);
+    }
 }
 
 void DialogueEditorWidget::setGameObject(GameObject* action)
@@ -202,4 +225,50 @@ void DialogueEditorWidget::appendToggled(bool append)
     Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
     if (dialogue)
         dialogue->setAppend(append);
+}
+
+void DialogueEditorWidget::setSoundEnabled(bool enabled)
+{
+    Dialogue* dialogue = qobject_cast<Dialogue*>(mGameObject);
+    if (!enabled) {
+        addFilters(QVariantList() << "Sound" << "SoundVolume");
+
+        if (dialogue)
+            dialogue->setSound(0);
+    }
+    else {
+        removeFilters(QVariantList() << "Sound" << "SoundVolume");
+
+        if (dialogue)
+            initSoundWidgets(dialogue);
+    }
+}
+
+void DialogueEditorWidget::initSoundWidgets(Dialogue * dialogue)
+{
+    if (!dialogue)
+        return;
+
+    QList<GameObject*> sounds = ResourceManager::instance()->objects(GameObjectMetaType::Sound);
+    mSoundComboBox->setObjects(sounds, dialogue->sound());
+    mSoundVolumeSlider->setValue(dialogue->soundVolume());
+}
+
+void DialogueEditorWidget::onPlaySoundCheckBoxToggled(bool checked)
+{
+    setSoundEnabled(checked);
+}
+
+void DialogueEditorWidget::onSoundChanged(GameObject* sound)
+{
+    Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
+    if (dialogue)
+        dialogue->setSound(qobject_cast<Sound*>(sound));
+}
+
+void DialogueEditorWidget::onSoundVolumeChanged(int vol)
+{
+    Dialogue* dialogue = qobject_cast<Dialogue*> (mGameObject);
+    if (dialogue)
+        dialogue->setSoundVolume(vol);
 }

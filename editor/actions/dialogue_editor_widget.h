@@ -20,6 +20,7 @@
 #include <QComboBox>
 #include <QTextEdit>
 #include <QCheckBox>
+#include <QSlider>
 
 #include "action_editor_widget.h"
 #include "dialogue.h"
@@ -27,9 +28,11 @@
 #include "textbox.h"
 #include "character.h"
 #include "object_combobox.h"
+#include "soundresourcecombobox.h"
 
 class Dialogue;
 class TextBox;
+class SoundResourceComboBox;
 
 class DialogueEditorWidget : public ActionEditorWidget
 {
@@ -40,6 +43,9 @@ class DialogueEditorWidget : public ActionEditorWidget
     QCheckBox* mAppendCheckbox;
     QTextEdit* mTextEdit;
     QCheckBox* mWaitCheckBox;
+    QCheckBox* mPlaySoundCheckBox;
+    SoundResourceComboBox* mSoundComboBox;
+    QSlider* mSoundVolumeSlider;
 
 public:
     explicit DialogueEditorWidget(QWidget *parent = 0);
@@ -60,9 +66,14 @@ private slots:
     void onCharacterHighlighted(Object*);
     void onWaitOnFinishedChanged(bool);
     void appendToggled(bool);
+    void onPlaySoundCheckBoxToggled(bool);
+    void onSoundChanged(GameObject*);
+    void onSoundVolumeChanged(int);
 
 private:
     void  setTextInOutputBox();
+    void setSoundEnabled(bool);
+    void initSoundWidgets(Dialogue*);
 
 };
 

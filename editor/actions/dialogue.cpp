@@ -44,6 +44,8 @@ void Dialogue::init()
     mAppend = false;
     setMouseClickOnFinish(true);
     setTextEditable(true);
+    mSound = 0;
+    mSoundVolume = 100;
 }
 
 void Dialogue::loadData(const QVariantMap & data, bool internal)
@@ -69,6 +71,14 @@ void Dialogue::loadData(const QVariantMap & data, bool internal)
 
     if (data.contains("append") && data.value("append").type() == QVariant::Bool) {
         setAppend(data.value("append").toBool());
+    }
+
+    if (data.contains("sound") && data.value("sound").type() == QVariant::String) {
+        setSound(data.value("sound").toString());
+    }
+
+    if (data.contains("soundVolume") && data.value("soundVolume").canConvert(QVariant::Int)) {
+        setSoundVolume(data.value("soundVolume").toInt());
     }
 }
 
@@ -171,6 +181,11 @@ QVariantMap Dialogue::toJsonObject(bool internal) const
 
     if (mAppend)
         object.insert("append", mAppend);
+
+    if (mSound) {
+        object.insert("sound", mSound->name());
+        object.insert("soundVolume", mSoundVolume);
+    }
 
     object.insert("text", mText);
     return object;
@@ -312,4 +327,50 @@ Character* Dialogue::findCharacter(const QString & name)
     }
 
     return 0;
+}
+
+Sound* Dialogue::sound() const
+{
+    return mSound;
+}
+
+void Dialogue::setSound(Sound * sound)
+{
+    if (mSound == sound)
+        return;
+
+    if (mSound)
+        mSound->disconnect(this);
+
+    mSound = sound;
+    QString soundName;
+
+    if (mSound) {
+        connect(mSound, SIGNAL(destroyed(GameObject*)), this, SLOT(onSoundDestroyed(GameObject*)));
+        soundName = mSound->name();
+    }
+
+    notify("sound", soundName);
+}
+
+void Dialogue::setSound(const QString& soundName)
+{
+    GameObject* obj = ResourceManager::instance()->object(soundName);
+    Sound* sound = qobject_cast<Sound*>(obj);
+    setSound(sound);
+}
+
+void Dialogue::onSoundDestroyed(GameObject* sound)
+{
+    mSound = 0;
+}
+
+int Dialogue::soundVolume() const
+{
+    return mSoundVolume;
+}
+
+void Dialogue::setSoundVolume(int volume)
+{
+    mSoundVolume = volume;
 }

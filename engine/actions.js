@@ -475,6 +475,8 @@ function Dialogue(data, parent)
     this.lines = [];
     this.rawText = "";
     this.append = false;
+    this.sound = null;
+    this.soundVolume = 100;
     
     if (data) {
         if ("character" in data) {
@@ -488,6 +490,14 @@ function Dialogue(data, parent)
 
         if ("append" in data) {
             this.append = data["append"];
+        }
+
+        if ("sound" in data) {
+          this.sound = this.getGame().getResource(data["sound"]);
+        }
+
+        if ("soundVolume" in data) {
+          this.soundVolume = data["soundVolume"];
         }
     }
 
@@ -531,6 +541,12 @@ Dialogue.prototype.onExecute = function () {
 
     this.text = game.replaceVariables(this.rawText);
     this.startTimer(this.updateText.bind(this), game.getProperty("textDelay"), true);
+
+    if (this.sound && this.sound.asset) {
+      game.playSound(this.sound.asset, {
+        volume: this.soundVolume
+      });
+    }
 }
 
 Dialogue.prototype.updateText = function(timer) {
