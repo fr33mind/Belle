@@ -422,6 +422,26 @@ void PropertiesWidget::setFilters(const QVariantList& filters)
     mFilters = filters;
 }
 
+void PropertiesWidget::addFilters(const QVariantList& filters)
+{
+    QVariantList currFilters = this->filters();
+    currFilters.append(filters);
+    setFilters(currFilters);
+}
+
+int PropertiesWidget::removeFilters(const QVariantList& filters)
+{
+    QVariantList currFilters = this->filters();
+    int removeCount = 0;
+
+    foreach(const QVariant& filter, filters) {
+        removeCount += currFilters.removeAll(filter);
+    }
+
+    setFilters(currFilters);
+    return removeCount;
+}
+
 QVariantList PropertiesWidget::filters() const
 {
     return mFilters;

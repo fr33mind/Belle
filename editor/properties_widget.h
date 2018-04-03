@@ -56,6 +56,8 @@ public:
     void append(PropertiesWidget*, int startAt=0, const QStringList& filters=QStringList());
     void clear(int from=0);
     void setFilters(const QVariantList&);
+    void addFilters(const QVariantList&);
+    int removeFilters(const QVariantList&);
     QVariantList filters() const;
     void removeItem(QStandardItem*);
     PropertiesWidget* copy();
