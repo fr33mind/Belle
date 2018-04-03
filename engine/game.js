@@ -63,7 +63,11 @@
     else if (this.properties["textSpeed"] > 100)
         this.properties["textSpeed"] = 100;
 
-    this.properties["textDelay"] = 1000 / this.properties["textSpeed"];
+    if (this.properties["textSpeed"] > 0)
+      this.properties["textDelay"] = 1000 / this.properties["textSpeed"];
+    else
+      this.properties["textDelay"] = 0;
+
     document.title = "Belle - " + this.properties["title"];
 
     //init resources
