@@ -553,7 +553,11 @@ Dialogue.prototype.onExecute = function () {
       textDelay = 1000 / textSpeed;
 
     this.text = game.replaceVariables(this.rawText);
-    this.startTimer(this.updateText.bind(this), textDelay, true);
+
+    if (textDelay > 0)
+      this.startTimer(this.updateText.bind(this), textDelay, true);
+    else
+      object.setText(this.text);
 
     if (this.sound && this.sound.asset) {
       game.playSound(this.sound.asset, {
