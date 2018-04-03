@@ -23,10 +23,6 @@
 #include "action.h"
 #include "actions_model.h"
 
-#define BORDER 2
-#define ITEM_SELECTED_LINE_WIDTH 4
-#define MAX_ACTION_DISPLAY_LINES 3
-
 class ActionsModel;
 
 class ActionsViewDelegate : public QStyledItemDelegate
@@ -47,7 +43,6 @@ private:
     int mTextEditCursorBlockPos;
 
     bool editorFlag(QWidget*, const char*) const;
-    QString actionStatusText(const Action*) const;
 };
 
 class ActionsView : public QListView

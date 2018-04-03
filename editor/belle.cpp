@@ -64,6 +64,7 @@
 #include "slotbutton.h"
 #include "font.h"
 #include "fontlibrary.h"
+#include "actionpainterfactory.h"
 
 static Belle* mInstance = 0;
 
@@ -109,6 +110,7 @@ Belle::Belle(QWidget *widget)
     GameObjectFactory::init();
     EditorWidgetFactory::init();
     FontLibrary::init();
+    ActionPainterFactory::init();
 
     mActionsView = new ActionsView(this);
     ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
@@ -333,6 +335,8 @@ Belle::~Belle()
     ResourceManager::destroy();
     EditorWidgetFactory::destroy();
     AssetManager::destroy();
+    ActionPainterFactory::destroy();
+
     if (! mCurrentRunDirectory.isEmpty()) {
         QDir tmpdir(mCurrentRunDirectory);
         if (tmpdir.exists())
