@@ -323,6 +323,9 @@ void AssetManager::save(const QDir & dir, bool toProject)
     if (! file.open(QFile::WriteOnly | QFile::Text))
         return;
 
+    if (toProject)
+        cleanup();
+
     QVariantMap subdirs;
     subdirs.insert("images", mTypeToPath.value(Asset::Image));
     subdirs.insert("sounds", mTypeToPath.value(Asset::Audio));
@@ -365,9 +368,6 @@ void AssetManager::save(const QDir & dir, bool toProject)
     file.close();
 
     saveFontFaces(fonts, dir);
-
-    if (toProject)
-        cleanup();
 }
 
 void AssetManager::saveFontFaces(const QList<Asset*>& fonts, const QDir& dir)
