@@ -58,8 +58,6 @@ signals:
     void removeItem(int);
 
 private:
-    QStyleOptionMenuItem getStyleOption(const QStyleOptionViewItem &option,
-                                        const QModelIndex &index) const;
     QComboBox *mCombo;
 };
 

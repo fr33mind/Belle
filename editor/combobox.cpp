@@ -36,11 +36,10 @@ ComboBoxItemDelegate::ComboBoxItemDelegate(QObject *parent, QComboBox* cmb):
 
 void ComboBoxItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    QStyleOptionMenuItem opt = getStyleOption(option, index);
-#ifndef Q_WS_S60
-    painter->fillRect(option.rect, opt.palette.background());
-#endif
-    mCombo->style()->drawControl(QStyle::CE_MenuItem, &opt, painter, mCombo);
+    QStyledItemDelegate::paint(painter, option, index);
+
+    if (isSeparator(index))
+        return;
 
     if (index.data(Qt::UserRole).toString() != INVALID_DATA) {
         int height = option.fontMetrics.height();
@@ -59,7 +58,7 @@ void ComboBoxItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 bool ComboBoxItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
     //FIXME: Figure out why MouseButtonRelease doesn't show up here.
-    if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove) {
+    if (event->type() == QEvent::MouseButtonPress) {
         mLastStyleOption = option;
         mLastIndex = index;
     }
@@ -69,81 +68,7 @@ bool ComboBoxItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 
 QSize ComboBoxItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    QStyleOptionMenuItem opt = getStyleOption(option, index);
-    QSize size = mCombo->style()->sizeFromContents(
-           QStyle::CT_MenuItem, &opt, option.rect.size(), mCombo);
-    //Fix width for some reason
-    size.setWidth(opt.rect.width());
-    return size;
-}
-
-//Taken from Qt's QComboMenuDelegate::getStyleOption
-QStyleOptionMenuItem ComboBoxItemDelegate::getStyleOption(const QStyleOptionViewItem &option,
-                                                        const QModelIndex &index) const
-{
-    QStyleOptionMenuItem menuOption;
-
-    QPalette resolvedpalette = option.palette.resolve(QApplication::palette("QMenu"));
-    QVariant value = index.data(Qt::ForegroundRole);
-    if (value.canConvert<QBrush>()) {
-        resolvedpalette.setBrush(QPalette::WindowText, qvariant_cast<QBrush>(value));
-        resolvedpalette.setBrush(QPalette::ButtonText, qvariant_cast<QBrush>(value));
-        resolvedpalette.setBrush(QPalette::Text, qvariant_cast<QBrush>(value));
-    }
-    menuOption.palette = resolvedpalette;
-    menuOption.state = QStyle::State_None;
-    if (mCombo->window()->isActiveWindow())
-        menuOption.state = QStyle::State_Active;
-    if ((option.state & QStyle::State_Enabled) && (index.model()->flags(index) & Qt::ItemIsEnabled))
-        menuOption.state |= QStyle::State_Enabled;
-    else
-        menuOption.palette.setCurrentColorGroup(QPalette::Disabled);
-    if (option.state & QStyle::State_Selected)
-        menuOption.state |= QStyle::State_Selected;
-    menuOption.checkType = QStyleOptionMenuItem::NonExclusive;
-    menuOption.checked = mCombo->currentIndex() == index.row();
-    if (isSeparator(index))
-        menuOption.menuItemType = QStyleOptionMenuItem::Separator;
-    else
-        menuOption.menuItemType = QStyleOptionMenuItem::Normal;
-
-    QVariant variant = index.model()->data(index, Qt::DecorationRole);
-    switch (variant.type()) {
-    case QVariant::Icon:
-        menuOption.icon = qvariant_cast<QIcon>(variant);
-        break;
-    case QVariant::Color: {
-        static QPixmap pixmap(option.decorationSize);
-        pixmap.fill(qvariant_cast<QColor>(variant));
-        menuOption.icon = pixmap;
-        break; }
-    default:
-        menuOption.icon = qvariant_cast<QPixmap>(variant);
-        break;
-    }
-    if (index.data(Qt::BackgroundRole).canConvert<QBrush>()) {
-        menuOption.palette.setBrush(QPalette::All, QPalette::Background,
-                                    qvariant_cast<QBrush>(index.data(Qt::BackgroundRole)));
-    }
-    menuOption.text = index.model()->data(index, Qt::DisplayRole).toString()
-                           .replace(QLatin1Char('&'), QLatin1String("&&"));
-    menuOption.tabWidth = 0;
-    menuOption.maxIconWidth =  option.decorationSize.width() + 4;
-    menuOption.menuRect = option.rect;
-    menuOption.rect = option.rect;
-
-    // Make sure fonts set on the combo box also overrides the font for the popup menu.
-    if (mCombo->testAttribute(Qt::WA_SetFont)
-            || mCombo->testAttribute(Qt::WA_MacSmallSize)
-            || mCombo->testAttribute(Qt::WA_MacMiniSize)
-            || mCombo->font() != QApplication::font("QComboBox"))
-        menuOption.font = mCombo->font();
-    else
-        menuOption.font = QApplication::font("QComboMenuItem");
-
-    menuOption.fontMetrics = QFontMetrics(menuOption.font);
-
-    return menuOption;
+    return QStyledItemDelegate::sizeHint(option, index);
 }
 
 bool ComboBoxItemDelegate::mouseReleased(QEvent * event)
@@ -160,7 +85,7 @@ bool ComboBoxItemDelegate::mouseReleased(QEvent * event)
         remove = removable.toBool();
 
     if (remove && mLastIndex == index && model && index.data(Qt::UserRole).toString() != INVALID_DATA) {
-        QStyleOptionMenuItem opt = getStyleOption(mLastStyleOption, index);
+        QStyleOptionViewItem opt = mLastStyleOption;
         int height = opt.rect.height();
         if (ev->x() >= opt.rect.width()-height) {
             emit removeItem(index.row());
@@ -245,7 +170,6 @@ void ComboBox::onRemoveItem(int index)
     if (currentIndex() == count()-1)
         setCurrentIndex(count()-2);
 
-    hidePopup();
     showPopup();
 }
 
