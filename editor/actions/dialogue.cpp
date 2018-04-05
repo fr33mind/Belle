@@ -83,6 +83,11 @@ void Dialogue::loadData(const QVariantMap & data, bool internal)
         setSoundVolume(data.value("soundVolume").toInt());
     }
 
+    //Used when exchanging data between resource and clones
+    if (data.contains("textSpeedEnabled") && data.value("textSpeedEnabled").type() == QVariant::Bool) {
+        setTextSpeedEnabled(data.value("textSpeedEnabled").toBool());
+    }
+
     if (data.contains("textSpeed") && data.value("textSpeed").canConvert(QVariant::Int)) {
         setTextSpeedEnabled(true);
         setTextSpeed(data.value("textSpeed").toInt());
@@ -383,7 +388,11 @@ int Dialogue::soundVolume() const
 
 void Dialogue::setSoundVolume(int volume)
 {
+    if (mSoundVolume == volume)
+        return;
+
     mSoundVolume = volume;
+    notify("soundVolume", mSoundVolume);
 }
 
 bool Dialogue::textSpeedEnabled() const
@@ -393,7 +402,11 @@ bool Dialogue::textSpeedEnabled() const
 
 void Dialogue::setTextSpeedEnabled(bool enabled)
 {
+    if (mTextSpeedEnabled == enabled)
+        return;
+
     mTextSpeedEnabled = enabled;
+    notify("textSpeedEnabled", mTextSpeedEnabled);
 }
 
 int Dialogue::textSpeed() const
@@ -403,5 +416,9 @@ int Dialogue::textSpeed() const
 
 void Dialogue::setTextSpeed(int value)
 {
+    if (mTextSpeed == value)
+        return;
+
     mTextSpeed = value;
+    notify("textSpeed", mTextSpeed);
 }
