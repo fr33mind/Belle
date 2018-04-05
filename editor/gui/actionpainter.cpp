@@ -30,7 +30,9 @@ void ActionPainter::paint( QPainter * painter, const QStyleOptionViewItem & opti
     textRect.setX(BORDER);
     textRect.setY(textRect.y()+BORDER);
     QColor textColor(83, 83, 83);
+    QFont font = option.font;
 
+    painter->setFont(font);
     painter->fillRect(rect, ActionMetaType::color(action));
 
     if (option.state.testFlag(QStyle::State_Selected)) {
@@ -53,7 +55,9 @@ void ActionPainter::paint( QPainter * painter, const QStyleOptionViewItem & opti
     const QIcon typeIcon = metatype ? metatype->icon() : QIcon();
     QString title = action->title();
     QString actionStatusText = this->actionStatusText(action);
-    QSize textSize = option.fontMetrics.size(0, title);
+    font.setBold(true);
+    QFontMetrics fontMetrics(font);
+    QSize textSize = fontMetrics.size(0, title);
     int textHeight = textSize.height();
     typeIcon.paint(painter, textRect.x(), textRect.y(), textHeight, textHeight);
 
@@ -61,8 +65,6 @@ void ActionPainter::paint( QPainter * painter, const QStyleOptionViewItem & opti
     pen = painter->pen();
     pen.setColor(textColor);
     painter->setPen(pen);
-    QFont font = painter->font();
-    font.setBold(true);
     painter->setFont(font);
     painter->drawText(textRect, title);
     font.setBold(false);
