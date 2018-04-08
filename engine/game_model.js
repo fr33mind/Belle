@@ -445,7 +445,7 @@
   GameModel.prototype.loadState = function(state) {
     var scene = this.getScene(state.scene.name);
     if (scene) {
-      var data = $.extend({}, scene.data, state.scene);
+      var data = $.extend(true, {}, scene.data, state.scene);
       scene.load(data);
       this.setScene(scene, state.index, false);
       return true;
