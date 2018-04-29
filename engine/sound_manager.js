@@ -40,6 +40,17 @@ function _getSounds(channel) {
       sounds = buzz.all();
   return sounds;
 }
+
+function addSoundToChannel(sound, channel) {
+  if (!sound || !channel)
+    return;
+
+  var channel_sounds = channels[channel] || [];
+  if (channel_sounds.indexOf(sound) == -1) {
+    channel_sounds.push(sound);
+    channels[channel] = channel_sounds;
+  }
+}
   
 function _addSound(sound, channel, options) {
   options = options || {};
@@ -50,11 +61,10 @@ function _addSound(sound, channel, options) {
     sound = new buzz.sound(src);
     sounds[src] = sound;
     sound.src = src;
-    if (channel)
-      channels[channel] = sound;
   }
   
   if (sound instanceof buzz.sound) {
+    addSoundToChannel(sound, channel);
     sound.fadingOut = false;
 
     if (options.loop)
