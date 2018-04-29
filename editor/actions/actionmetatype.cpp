@@ -40,6 +40,7 @@ QColor ActionMetaType::color(GameObjectMetaType::Type type)
         return mTransformColor;
     case GameObjectMetaType::PlaySound:
     case GameObjectMetaType::StopSound:
+    case GameObjectMetaType::StopAllSounds:
         return mAudioColor;
     case GameObjectMetaType::GetUserInput:
     case GameObjectMetaType::SetGameVariable:

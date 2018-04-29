@@ -69,6 +69,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     beginGroup(tr("Audio"));
     _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::PlaySound));
     _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::StopSound));
+    _appendRow(GameObjectMetaType::metaType(GameObjectMetaType::StopAllSounds));
     endGroup();
 
     beginGroup(tr("Scripting"));

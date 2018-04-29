@@ -30,6 +30,7 @@
 #include "sound.h"
 #include "slotbutton.h"
 #include "font.h"
+#include "stopallsounds.h"
 
 void GameObjectFactory::init()
 {
@@ -135,6 +136,9 @@ Action* GameObjectFactory::createAction(GameObjectMetaType::Type type, const QVa
             break;
         case GameObjectMetaType::RunScript:
             action = validData ? new RunScript(data, parent) : new RunScript(parent);
+            break;
+        case GameObjectMetaType::StopAllSounds:
+            action = validData ? new StopAllSounds(data, parent) : new StopAllSounds(parent);
             break;
         default: break;
     }

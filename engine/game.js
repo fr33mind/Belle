@@ -449,6 +449,10 @@
       this.soundManager.stop(sound, "sound", fade);
   }
 
+  Game.prototype.stopAllSounds = function(fade) {
+      this.soundManager.stopAll("sound", fade);
+  }
+
   Game.prototype.getFontLibrary = function() {
     return this.fontLibrary;
   }

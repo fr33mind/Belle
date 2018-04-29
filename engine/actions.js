@@ -1238,6 +1238,54 @@ StopSound.prototype.onExecute = function()
     this.setFinished(true);
 }
 
+/************* Stop All Sounds *****************/
+
+function StopAllSounds(data, parent)
+{
+    Action.call(this, data, parent);
+
+    this.fadeTime = 0;
+
+    if ("fadeTime" in data && belle.isNumber(data["fadeTime"]))
+        this.fadeTime = data["fadeTime"] * 1000;
+}
+
+belle.extend(StopAllSounds, Action);
+
+StopAllSounds.prototype.onExecute = function()
+{
+    var game = this.getGame();
+
+    if (game && game.shouldUndoAction(this)) {
+      var playingSounds = game.getSoundManager().getPlayingSounds(),
+          restoreSounds = [];
+
+      for(var i=0; i < playingSounds.length; i++) {
+        var snd = playingSounds[i];
+        if (snd.sound.loop) {
+          restoreSounds.push({
+            sound: snd,
+            volume: snd.getVolume(),
+            loop: snd.sound.loop
+          });
+        }
+      }
+
+      game.saveUndoAction(this, function() {
+        for(var i=0; i < restoreSounds.length; i++) {
+          var snd = restoreSounds[i];
+          game.playSound(snd.sound, {
+            volume: snd.volume,
+            loop: snd.loop
+          });
+        }
+      });
+    }
+
+    game.stopAllSounds(this.fadeTime);
+    this.setFinished(true);
+}
+
 /************* Show Menu *****************/
 
 function ShowMenu(data, parent)
@@ -1615,6 +1663,7 @@ actions.End = End;
 actions.ChangeObjectBackground = ChangeObjectBackground;
 actions.PlaySound = PlaySound;
 actions.StopSound = StopSound;
+actions.StopAllSounds = StopAllSounds;
 actions.ShowMenu = ShowMenu;
 actions.GetUserInput = GetUserInput;
 actions.SetGameVariable = SetGameVariable;

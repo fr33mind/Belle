@@ -154,7 +154,9 @@ HEADERS      += belle.h\
     widgets/numbervalidator.h \
     gui/actionpainter.h \
     gui/dialoguepainter.h \
-    gui/actionpainterfactory.h
+    gui/actionpainterfactory.h \
+    actions/stopallsounds.h \
+    actions/stopallsoundseditorwidget.h
                 
 
 SOURCES      += main.cpp\
@@ -291,6 +293,8 @@ SOURCES      += main.cpp\
     widgets/numbervalidator.cpp \
     gui/actionpainter.cpp \
     gui/dialoguepainter.cpp \
-    gui/actionpainterfactory.cpp
+    gui/actionpainterfactory.cpp \
+    actions/stopallsounds.cpp \
+    actions/stopallsoundseditorwidget.cpp
 
 RESOURCES += media.qrc

@@ -49,10 +49,11 @@ public:
         RunScript,
         ChangeState,
         End,
+        StopAllSounds,
         firstObjectType = Object,
         lastObjectType = SlotButton,
         firstActionType = Action,
-        lastActionType = End
+        lastActionType = StopAllSounds
     };
 
     GameObjectMetaType(Type, const QString&, const QString&, const QIcon& icon=QIcon(), QObject *parent = 0);

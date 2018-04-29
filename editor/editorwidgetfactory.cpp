@@ -31,6 +31,7 @@
 #include "menueditorwidget.h"
 #include "slotbuttoneditorwidget.h"
 #include "fonteditorwidget.h"
+#include "stopallsoundseditorwidget.h"
 
 static QHash<GameObjectMetaType::Type, GameObjectEditorWidget*> mEditorWidgets;
 
@@ -85,6 +86,8 @@ GameObjectEditorWidget* EditorWidgetFactory::createEditorWidget(GameObjectMetaTy
         return new ChangeStateEditorWidget;
     else if (type == GameObjectMetaType::End)
         return new GameObjectEditorWidget;
+    else if (type == GameObjectMetaType::StopAllSounds)
+        return new StopAllSoundsEditorWidget;
     //objects
     else if (type == GameObjectMetaType::Object)
         return new ObjectEditorWidget;
