@@ -110,8 +110,12 @@ SoundManager.prototype.stop = function(sound, channel, fade) {
 SoundManager.prototype.stopAll = function(channel, fade) {
   var sounds = _getSounds(channel);
 
-  if (sounds)
-      sounds.stop();
+  if (sounds) {
+    var _sounds = sounds.getSounds();
+    for (var i=0; i < _sounds.length; i++) {
+      this.stop(_sounds[i], channel, fade);
+    }
+  }
 }
 
 SoundManager.prototype.pause = function(sound, channel, fade) {
