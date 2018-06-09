@@ -20,7 +20,6 @@
 #include <QMainWindow>
 #include <QVariant>
 #include <QSettings>
-#include <QWebView>
 
 #include "scene_manager.h"
 #include "ui_mainwindow.h"

@@ -10,7 +10,7 @@ DEPENDPATH += actions objects widgets conditions assets dialogs gui
 TARGET = belle
 TARGET.path = $$PREFIX/
 CONFIG+=debug
-QT += core network webkitwidgets
+QT += core network webenginewidgets
 
 FORMS += mainwindow.ui\
     novel_properties_dialog.ui \

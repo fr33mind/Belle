@@ -2,8 +2,7 @@
 #define WEBVIEWWINDOW_H
 
 #include <QMainWindow>
-#include <QWebView>
-#include <QWebInspector>
+#include <QWebEngineView>
 #include <QToolBar>
 #include <QLineEdit>
 
@@ -32,8 +31,7 @@ signals:
 public slots:
 
 private:
-   QWebView* mWebView;
-   QWebInspector* mWebInspector;
+   QWebEngineView* mWebView;
    QLineEdit* mAddressBar;
    QToolBar* mToolBar;
    void centerOnScreen();

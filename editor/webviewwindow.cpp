@@ -5,10 +5,10 @@
 #include <QStyle>
 #include <QApplication>
 #include <QDebug>
-#include <QWebInspector>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QEvent>
+#include <QWebEngineSettings>
 
 WebViewWindow::WebViewWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -34,15 +34,13 @@ WebViewWindow::WebViewWindow(QWidget *parent) :
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
     QMenu* viewMenu = menuBar->addMenu(tr("&View"));
     viewMenu->addAction(toolBar->toggleViewAction());
-    QMenu* debugMenu = menuBar->addMenu(tr("&Debug"));
-    QAction* inspectAction = debugMenu->addAction(tr("Inspect"));
-    connect(inspectAction, SIGNAL(triggered()), this, SLOT(showWebInspector()));
 
-    mWebView = new QWebView(this);
-    mWebInspector = 0;
-    QWebSettings* webSettings = mWebView->settings();
-    webSettings->setAttribute(QWebSettings::LocalStorageEnabled, true);
-    webSettings->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+    mWebView = new QWebEngineView(this);
+    QWebEngineSettings* webSettings = mWebView->settings();
+    webSettings->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+    #if QT_VERSION >= 0x050700
+        webSettings->setAttribute(QWebEngineSettings::Accelerated2dCanvasEnabled, false);
+    #endif
 
     QWidget* centralWidget = new QWidget(this);
     QVBoxLayout* layout = new QVBoxLayout(centralWidget);
@@ -90,29 +88,15 @@ void WebViewWindow::open(const QUrl& url)
 void WebViewWindow::closeEvent(QCloseEvent *event)
 {
     mWebView->setUrl(QUrl());
-    QWebSettings::clearIconDatabase();
-    QWebSettings::clearMemoryCaches();
     mWebView->hide();
-    if (mWebInspector) {
-        mWebInspector->deleteLater();
-        mWebInspector = 0;
-    }
 }
 
 void WebViewWindow::loadWebInspector()
 {
-    if (! mWebInspector) {
-        mWebInspector = new QWebInspector(this);
-        mWebInspector->setPage(mWebView->page());
-        mWebInspector->setWindowFlags(mWebInspector->windowFlags() | Qt::Window);
-        mWebInspector->setWindowModality(Qt::NonModal);
-    }
 }
 
 void WebViewWindow::showWebInspector()
 {
-    if (mWebInspector)
-        mWebInspector->show();
 }
 
 void WebViewWindow::centerOnScreen()
